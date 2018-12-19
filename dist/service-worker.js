@@ -14,10 +14,10 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/precache-manifest.7605aac9118974287b4708935c940c77.js"
+  "/precache-manifest.2c8099d512fc8c37ca00602731c527d1.js"
 );
 
-workbox.core.setCacheNameDetails({prefix: "caleb-roseland-com"});
+workbox.core.setCacheNameDetails({prefix: "calebroseland-com"});
 
 /**
  * The workboxSW.precacheAndRoute() method efficiently caches and responds to
