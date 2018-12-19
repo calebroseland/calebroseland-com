@@ -1,4 +1,4 @@
-# caleb-roseland-com
+# calebroseland-com
 
 ## Project setup
 ```
