@@ -60,5 +60,5 @@ typings/
 # next.js build output
 .next
 
-# local vue config overrides
-vue.config.local.js
+# bundle output
+dist/

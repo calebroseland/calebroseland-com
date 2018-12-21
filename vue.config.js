@@ -1,10 +1,11 @@
-const localOverrides = require('./vue.config.local')
-
 module.exports = {
   pwa: {
     name: 'CalebRoseland.com'
   },
 
+  devServer: {
+    allowedHosts: ['.local']
+  },
   baseUrl: undefined,
   outputDir: undefined,
   assetsDir: undefined,
@@ -13,6 +14,5 @@ module.exports = {
   parallel: undefined,
   css: {
     sourceMap: true
-  },
-  ...(localOverrides || {})
+  }
 }
