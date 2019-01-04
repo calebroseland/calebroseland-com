@@ -1,11 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dark-mode="dark-mode">
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+    />
     <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
     <title>Caleb Roseland</title>
+    <link rel="preload" href="https://use.typekit.net/mgx3xhc.css" as="style" />
+    <style>
+      html {
+        transition: background-color 1s ease-in-out, color 1s ease-in-out;
+      }
+      html[dark-mode='dark-mode'] {
+        background: black;
+      }
+    </style>
   </head>
   <body>
     <noscript>

@@ -1,6 +1,7 @@
 module.exports = {
   pwa: {
-    name: 'CalebRoseland.com'
+    name: 'CalebRoseland.com',
+    themeColor: '#ADB5BD'
   },
 
   devServer: {
@@ -14,5 +15,8 @@ module.exports = {
   parallel: undefined,
   css: {
     sourceMap: true
-  }
+  },
+  transpileDependencies: [
+    /\bvue-awesome\b/
+  ]
 }
