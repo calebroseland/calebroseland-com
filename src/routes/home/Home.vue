@@ -37,14 +37,14 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     href="https://github.com/calebroseland/calebroseland-com"
-                  ><code>this</code>
+                  ><span class="icon"><v-icon name="code" scale="1"/></span> <code>this</code>
                   </a>
                 </li>
                 <li>
                   <a target="_blank"
                     rel="noopener noreferrer"
                     href="https://github.com/calebroseland/vue-dom-portal"
-                  >vue-dom-portal</a>
+                  ><span class="icon"><v-icon name="code" scale="1"/></span> vue-dom-portal</a>
                 </li>
               </ul>
               <ul>
@@ -72,7 +72,7 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     href="https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81"
-                  >State Management in Vue</a>
+                  ><span class="icon"><v-icon name="brands/vuejs" scale="1"/></span> State Management in Vue</a>
                 </li>
               </ul>
               <ul>
@@ -97,7 +97,6 @@
         <ul class="menu-list column">
           <li>
             <a
-              class="is-text"
               href="https://linkedin.com/in/calebroseland"
               target="_blank"
               rel="noopener noreferrer"
@@ -105,11 +104,17 @@
           </li>
           <li v-if="isBoxExpanded">
             <a
-              class="is-text"
               href="https://npmjs.com/~calebroseland"
               target="_blank"
               rel="noopener noreferrer"
             ><span class="icon"><v-icon name="brands/npm" scale="2"/></span> npm</a>
+          </li>
+          <li v-if="isBoxExpanded">
+            <a
+              href="https://stackoverflow.com/users/1352410"
+              target="_blank"
+              rel="noopener noreferrer"
+            ><span class="icon"><v-icon name="brands/stack-overflow" scale="2"/></span> Stack Overflow</a>
           </li>
         </ul>
       </div>
@@ -132,6 +137,11 @@ import 'vue-awesome/icons/address-book'
 import 'vue-awesome/icons/exchange-alt'
 import 'vue-awesome/icons/chevron-left'
 import 'vue-awesome/icons/chevron-right'
+import 'vue-awesome/icons/brands/vuejs'
+import 'vue-awesome/icons/brands/stack-overflow'
+import 'vue-awesome/icons/code'
+
+// other deps
 import { mapState, mapActions } from 'vuex'
 
 export default {
