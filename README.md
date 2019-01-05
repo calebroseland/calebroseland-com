@@ -1,6 +1,6 @@
 # calebroseland-com
 
-Repo of calebroseland.com
+Repo of https://calebroseland.com
 
 Stack
 - Vue
