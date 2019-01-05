@@ -1,0 +1,13 @@
+.is-scrollable {
+  overflow: auto;
+}
+
+.is-scrollable-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.is-scrollable-y {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
