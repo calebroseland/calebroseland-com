@@ -2,4 +2,14 @@
 
 Repo of calebroseland.com
 
-Use `vue ui` from `@vue/cli` to run, or `npm run serve` directly.
+Stack
+- Vue
+- Vuex
+- Vue-router
+- Lodash
+- Element UI
+- Bulma CSS
+- Open-color
+- Animate.css
+- Vue-cli@3
+- Netlify

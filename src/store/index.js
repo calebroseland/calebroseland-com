@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import modules from './modules'
+import createPersistedState from 'vuex-persistedstate'
+
 Vue.use(Vuex)
 
 const INIT_LOADING = 'initLoading'
@@ -8,6 +10,11 @@ const DARK_MODE = 'darkMode'
 const TRANSITIONS_ENABLED = 'transitionsEnabled'
 
 export default new Vuex.Store({
+  plugins: [
+    createPersistedState({
+      paths: ['transitionsEnabled']
+    })
+  ],
   modules,
   state: {
     initLoading: true,
