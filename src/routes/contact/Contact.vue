@@ -12,7 +12,7 @@
             <a href="mailto:caleb@calebroseland.com"><i class="el-icon-message"></i> caleb@calebroseland.com</a>
           </p>
           <p>
-            <a href="https://maps.google.com/?q=minnesota+usa"><i class="el-icon-location"></i> Minnesota, USA</a>
+            <a href="https://maps.google.com/?q=Minnesota,+USA"><i class="el-icon-location"></i> Minnesota, USA</a>
           </p>
         </div>
       </div>

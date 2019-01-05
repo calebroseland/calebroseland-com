@@ -1,9 +1,28 @@
 <template>
   <div class="route-home">
     <div class="box" :class="{'is-expanded': isBoxExpanded}">
+
+      <!-- corner buttons -->
+      <el-tooltip :content="`Page transitions: ${transitionsEnabled ? 'ON' : 'OFF'}`" placement="top">
+        <a class="top-link left button is-text" :class="{'has-text-light': !transitionsEnabled}" @click="toggleTransitionsEnabled()">
+            <span class="icon">
+              <v-icon name="exchange-alt" scale="2"/>
+            </span>
+        </a>
+      </el-tooltip>
+      <el-tooltip content="Contact information" placement="top">
+        <router-link to="/contact" class="top-link right button is-text">
+          <span class="icon">
+            <v-icon name="address-book" scale="2"/>
+          </span>
+          <v-icon name="chevron-right" scale="1"/>
+        </router-link>
+      </el-tooltip>
+      <!-- end corner buttons -->
+
       <span class="name is-brand-font">Caleb Roseland</span>
       <span class="sub">Web App Developer</span>
-      <div class="menu columns links" :class="{'is-flex-mobile': !isBoxExpanded}">
+      <div class="menu columns links" :class="{'is-flex-mobile has-text-centered-mobile': !isBoxExpanded}">
         <ul class="menu-list column">
           <li>
             <a
@@ -11,28 +30,32 @@
               target="_blank"
               rel="noopener noreferrer"
             ><span class="icon"><v-icon name="brands/github" scale="2"/></span><span :class="{'is-hidden-mobile': !isBoxExpanded}"> Github</span></a>
-            <ul v-if="isBoxExpanded">
-              <li>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://github.com/calebroseland/calebroseland-com"
-                ><code>this</code>
-                </a>
-              </li>
-              <li>
-                <a target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://github.com/calebroseland/vue-dom-portal"
-                >vue-dom-portal</a>
-              </li>
-              <li>
-                <a target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://gist.github.com/calebroseland"
-                >Gists</a>
-              </li>
-            </ul>
+            <template v-if="isBoxExpanded">
+              <ul>
+                <li>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/calebroseland/calebroseland-com"
+                  ><code>this</code>
+                  </a>
+                </li>
+                <li>
+                  <a target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/calebroseland/vue-dom-portal"
+                  >vue-dom-portal</a>
+                </li>
+              </ul>
+              <ul>
+                <li>
+                  <a target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://gist.github.com/calebroseland"
+                  >Gists</a>
+                </li>
+              </ul>
+            </template>
           </li>
         </ul>
         <ul class="menu-list column">
@@ -42,25 +65,33 @@
               target="_blank"
               rel="noopener noreferrer"
             ><span class="icon"><v-icon name="brands/medium" scale="2"/></span><span :class="{'is-hidden-mobile': !isBoxExpanded}"> Medium</span></a>
-            <ul v-if="isBoxExpanded">
-              <li>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://medium.com/@calebroseland/latest"
-                >Articles I've written</a>
-              </li>
-              <li>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://medium.com/@calebroseland/has-recommended"
-                >Writings I like</a>
-              </li>
-              <li>
-                <a href="https://medium.com/@calebroseland/highlights">Highlights</a>
-              </li>
-            </ul>
+            <template v-if="isBoxExpanded">
+              <ul>
+                <li>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81"
+                  >State Management in Vue</a>
+                </li>
+              </ul>
+              <ul>
+                <li>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://medium.com/@calebroseland/has-recommended"
+                  >Claps</a>
+                </li>
+                <li>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://medium.com/@calebroseland/highlights"
+                  >Highlights</a>
+                </li>
+              </ul>
+            </template>
           </li>
         </ul>
         <ul class="menu-list column">
@@ -87,22 +118,6 @@
         :icon="isBoxExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"
         @click="isBoxExpanded = !isBoxExpanded"
       ></el-button>
-
-      <!-- corner buttons -->
-      <el-tooltip :content="`Transitions: ${transitionsEnabled ? 'ON' : 'OFF'}`" placement="top">
-        <a class="top-link left button is-text" :class="{'has-text-light': !transitionsEnabled}" @click="toggleTransitionsEnabled()">
-            <span class="icon">
-              <v-icon name="exchange-alt" scale="2"/>
-            </span>
-        </a>
-      </el-tooltip>
-      <router-link to="/contact" class="top-link right button is-text">
-        <span class="icon">
-          <v-icon name="address-book" scale="2"/>
-        </span>
-        <v-icon name="chevron-right" scale="1"/>
-      </router-link>
-      <!-- end corner buttons -->
     </div>
   </div>
 </template>
