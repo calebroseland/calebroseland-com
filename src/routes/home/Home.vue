@@ -29,7 +29,7 @@
               href="https://github.com/calebroseland"
               target="_blank"
               rel="noopener noreferrer"
-            ><span class="icon"><v-icon name="brands/github" scale="2"/></span><span :class="{'is-hidden-mobile': !isBoxExpanded}"> Github</span></a>
+            ><span class="icon"><v-icon name="brands/github" scale="2"/></span><span :class="{'is-hidden-mobile': !isBoxExpanded}"> GitHub</span></a>
             <template v-if="isBoxExpanded">
               <ul>
                 <li>
