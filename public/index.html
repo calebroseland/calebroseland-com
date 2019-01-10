@@ -10,6 +10,13 @@
     <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
     <title>Caleb Roseland | Web App Developer</title>
     <link rel="preload" href="https://use.typekit.net/mgx3xhc.css" as="style" />
+    <script>
+      // prevent pwa prompt, not ready yet
+      window.addEventListener('beforeinstallprompt', function (event) {
+        event.preventDefault()
+        return false
+      })
+    </script>
     <style>
       body[is-loading] {
         transition: none;

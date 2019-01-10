@@ -31,9 +31,3 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount('#app')
-
-// prevent pwa prompt, not ready yet
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault()
-  return false
-})
