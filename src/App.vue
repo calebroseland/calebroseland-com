@@ -31,10 +31,13 @@ export default {
     'transitionsEnabled',
     'darkMode'
   ]),
-  methods: {},
-  mounted () {
-    document.body.removeAttribute('is-loading')
-    document.body.removeAttribute('style')
+  watch: {
+    'initLoading' (isLoading) {
+      if (!isLoading) {
+        document.body.removeAttribute('is-loading')
+        document.body.removeAttribute('style')
+      }
+    }
   }
 
 }

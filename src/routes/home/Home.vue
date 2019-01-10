@@ -99,7 +99,6 @@
 </template>
 
 <script>
-// import icons used
 import 'vue-awesome/icons/brands/medium'
 import 'vue-awesome/icons/brands/github'
 import 'vue-awesome/icons/brands/linkedin'
@@ -118,7 +117,6 @@ import 'vue-awesome/icons/fill-drip'
 
 import { Popover } from 'element-ui'
 
-// other deps
 import { mapState, mapActions } from 'vuex'
 
 export default {
@@ -204,4 +202,10 @@ span.sub
 .el-button
   font-size: 2rem
 
+</style>
+
+<style>
+.el-popover.settings-menu {
+  min-width: 100px;
+}
 </style>

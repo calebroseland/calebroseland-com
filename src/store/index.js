@@ -20,7 +20,7 @@ export default new Vuex.Store({
   ],
   state: {
     initLoading: true,
-    darkMode: null,
+    darkMode: true,
     transitionsEnabled: true
   },
   getters: {
