@@ -9,11 +9,14 @@
           icon(name='cog' scale='2')
 
         .buttons(style='margin-bottom: 0;')
-          el-tooltip(:content="`Page transitions: ${transitionsEnabled ? 'ON' : 'OFF'}`" placement='top')
+          el-tooltip(
+            :content="`Page transitions: ${transitionsEnabled ? 'ON' : 'OFF'}`"
+            placement='top'
+          )
             button.button.is-text(
-                :class="{'has-text-grey-lighter': !transitionsEnabled}"
-                @click="toggleTransitionsEnabled()"
-              )
+              :class="{'has-text-grey-lighter': !transitionsEnabled}"
+              @click="toggleTransitionsEnabled()"
+            )
               icon(name='exchange-alt' scale='2')
 
           el-tooltip(:content="`Lights: ${!darkMode ? 'ON' : 'OFF'}`" placement='top')
