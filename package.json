@@ -2,8 +2,8 @@
   "name": "calebroseland-com",
   "version": "0.2.0",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/calebroseland/calebroseland-com.git"
+    "type": "git",
+    "url": "https://github.com/calebroseland/calebroseland-com.git"
   },
   "private": false,
   "scripts": {
