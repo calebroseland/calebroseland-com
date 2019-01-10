@@ -9,7 +9,6 @@
 </template>
 
 <script>
-import { camelCase, isObject, pick } from 'lodash'
 
 /**
  * An object structure that describes Animate.css classes for use with Vue's `<transition>` component.
@@ -31,79 +30,7 @@ import { camelCase, isObject, pick } from 'lodash'
  * @example `{effect: 'fade', direction: '-down'}` translates to `{enter: 'fadeIn', leave: 'fadeOutDown'}`
  *
  */
-const defaultTransition = {
-  effect: null,
-  flow: 'in-out',
-  direction: null,
-  enter: null,
-  leave: null
-}
-
-/**
- * Segmented camelCase formatter.
- * @example `format('fade', 'in', 'upBig') // -> 'fadeInUpBig'`
- * @arg {string[]} strings
- * @returns {string}
- */
-function format (...strings) {
-  return camelCase(strings.join('-'))
-}
-
-/**
- * If prop is a function, apply the remaining args and return the resolved value.
- * @arg {(Function|String)} prop
- * @returns {string}
- */
-function resolve (prop, ...args) {
-  return typeof prop === 'function' ? prop.apply(null, args) : prop
-}
-
-/**
- * Returns an object from the parsed string, or returns the prop itself (when no splitting is required).
- * @arg {string} prop
- * @returns {(Object|string)}
- */
-function parse (prop, ...args) {
-  const value = resolve(prop, ...args)
-  if (value == null) return value
-
-  const [enter, leave] = value.split('-')
-  return enter != null && leave != null ? { enter, leave } : value
-}
-
-/**
- * Returns the animate.css class from a transition object
- */
-function toAnimateClass (
-  {
-    effect = defaultTransition.effect,
-    flow = defaultTransition.flow,
-    direction = defaultTransition.direction,
-    enter = defaultTransition.enter,
-    leave = defaultTransition.leave
-  } = {},
-  flowType = 'enter',
-  to,
-  from
-) {
-  if (flowType === 'enter') {
-    const resolvedEnterClass = resolve(enter, to, from)
-    if (resolvedEnterClass != null) return resolvedEnterClass
-  }
-
-  if (flowType === 'leave') {
-    const resolvedLeaveClass = resolve(leave, to, from)
-    if (resolvedLeaveClass != null) return resolvedLeaveClass
-  }
-
-  const props = [effect, flow, direction]
-    .map((prop) => {
-      const value = parse(prop, to, from)
-      return isObject(value) ? value[flowType] : value
-    })
-
-  return format(...props)
-}
+import TransitionDescriptor from '@/utilities/TransitionDescriptor'
 
 export default {
   props: {
@@ -139,16 +66,16 @@ export default {
   },
   computed: {
     resolvedClasses () {
-      const defaultProps = pick(this, Object.keys(defaultTransition))
+      const desc = TransitionDescriptor.from(this)
       return {
-        enter: this.enterClass || toAnimateClass(defaultProps, 'enter'),
-        leave: this.leaveClass || toAnimateClass(defaultProps, 'leave')
+        enter: this.enterClass || desc.toAnimateClass('enter'),
+        leave: this.leaveClass || desc.toAnimateClass('leave')
       }
     }
   },
   methods: {
     routeToAnimateClass (route, ...args) {
-      return toAnimateClass(route.meta[this.routeMetaKey], ...args)
+      return TransitionDescriptor.from(route.meta[this.routeMetaKey]).toAnimateClass(...args)
     },
     /**
      * Simplifies execution of routeToAnimateClass
