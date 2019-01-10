@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dark-mode="dark-mode">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -11,15 +11,15 @@
     <title>Caleb Roseland | Web App Developer</title>
     <link rel="preload" href="https://use.typekit.net/mgx3xhc.css" as="style" />
     <style>
-      html {
-        transition: background-color 1s ease-in-out, color 1s ease-in-out;
+      body[is-loading] {
+        transition: none;
       }
-      html[dark-mode='dark-mode'] {
-        background: black;
+      body {
+        transition: background-color 1s ease-in-out, color 1s ease-in-out;
       }
     </style>
   </head>
-  <body>
+  <body is-loading style="background-color: black !important;">
     <noscript>
       <strong>
         We're sorry but this site doesn't work properly without

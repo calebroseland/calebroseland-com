@@ -97,8 +97,10 @@ function toAnimateClass (
   }
 
   const props = [effect, flow, direction]
-    .map(prop => parse(prop, to, from))
-    .map(value => (isObject(value) ? value[flowType] : value))
+    .map((prop) => {
+      const value = parse(prop, to, from)
+      return isObject(value) ? value[flowType] : value
+    })
 
   return format(...props)
 }
@@ -168,7 +170,8 @@ export default {
         next()
       })
     }
-  }
+  },
+  inheritAttrs: false
 }
 </script>
 

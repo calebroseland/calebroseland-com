@@ -1,1 +1,8 @@
-@import "themes/dark-mode";
+@import "~bulma/sass/utilities/mixins";
+@import '~open-color/open-color.scss';
+
+body[dark-mode] {
+  background-color: $oc-gray-8;
+  color: white; 
+}
+  
