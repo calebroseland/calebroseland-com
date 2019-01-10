@@ -7,12 +7,9 @@ module.exports = {
   devServer: {
     allowedHosts: ['.local']
   },
-  baseUrl: undefined,
-  outputDir: undefined,
-  assetsDir: undefined,
-  runtimeCompiler: undefined,
-  productionSourceMap: undefined,
-  parallel: undefined,
+  publicPath: '/',
+  outputDir: 'dist',
+  assetsDir: '',
   css: {
     sourceMap: true
   },

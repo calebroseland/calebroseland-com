@@ -14,22 +14,37 @@ import { mapState } from 'vuex'
 export default {
   name: 'app',
   components: { AnimateCssTransition },
-  metaInfo: {
-    htmlAttrs: {
-      lang: 'en',
-      'dark-mode': 'dark-mode'
+  metaInfo () {
+    const themeAttrs = {}
+    if (this.darkMode === true) themeAttrs['dark-mode'] = null
+    return {
+      htmlAttrs: {
+        lang: 'en'
+      },
+      bodyAttrs: {
+        ...themeAttrs
+      }
     }
   },
   computed: mapState([
     'initLoading',
-    'transitionsEnabled'
+    'transitionsEnabled',
+    'darkMode'
   ]),
-  methods: {}
+  watch: {
+    'initLoading' (isLoading) {
+      if (!isLoading) {
+        document.body.removeAttribute('is-loading')
+        document.body.removeAttribute('style')
+      }
+    }
+  }
 
 }
 </script>
 
 <style lang="scss">
+
 #app {
   width: 100%;
 }

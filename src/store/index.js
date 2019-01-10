@@ -10,12 +10,14 @@ const DARK_MODE = 'darkMode'
 const TRANSITIONS_ENABLED = 'transitionsEnabled'
 
 export default new Vuex.Store({
+  modules,
   plugins: [
     createPersistedState({
-      paths: ['transitionsEnabled']
+      paths: [
+        'transitionsEnabled',
+        'darkMode']
     })
   ],
-  modules,
   state: {
     initLoading: true,
     darkMode: true,
@@ -39,7 +41,7 @@ export default new Vuex.Store({
     setInitLoading ({ commit, state: { initLoading } }, isLoading) {
       if (initLoading) commit(INIT_LOADING, isLoading)
     },
-    setDarkMode ({ commit, state: { darkMode } }, isDark) {
+    toggleDarkMode ({ commit, state: { darkMode } }, isDark = !darkMode) {
       commit(DARK_MODE, isDark)
     },
     toggleTransitionsEnabled ({ commit, state: { transitionsEnabled } }, enabled = !transitionsEnabled) {
