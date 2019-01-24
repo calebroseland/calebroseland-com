@@ -1,10 +1,6 @@
 {
   "name": "calebroseland-com",
   "version": "0.2.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/calebroseland/calebroseland-com.git"
-  },
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -22,19 +18,26 @@
     "register-service-worker": "1.5.2",
     "vue": "2.5.21",
     "vue-awesome": "3.3.1",
+    "vue-class-component": "^6.0.0",
     "vue-meta": "1.5.8",
+    "vue-property-decorator": "^7.0.0",
     "vue-router": "3.0.2",
     "vuex": "3.0.1",
     "vuex-persistedstate": "2.5.4"
   },
   "devDependencies": {
+    "@types/jest": "^23.1.4",
+    "@types/webpack": "^4.4.24",
+    "@types/lodash": "^4.14.120",
     "@vue/cli-plugin-babel": "3.3.0",
     "@vue/cli-plugin-eslint": "3.3.0",
     "@vue/cli-plugin-pwa": "3.3.0",
+    "@vue/cli-plugin-typescript": "^3.3.0",
     "@vue/cli-plugin-unit-jest": "3.3.0",
     "@vue/cli-service": "3.3.0",
     "@vue/eslint-config-prettier": "4.0.1",
     "@vue/eslint-config-standard": "4.0.0",
+    "@vue/eslint-config-typescript": "^3.2.0",
     "@vue/test-utils": "1.0.0-beta.28",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.1",
@@ -50,6 +53,8 @@
     "sass-loader": "7.1.0",
     "stylus": "0.54.5",
     "stylus-loader": "3.0.2",
+    "ts-jest": "^23.0.0",
+    "typescript": "~3.1.1",
     "vue-template-compiler": "2.5.21"
   },
   "eslintConfig": {
@@ -59,11 +64,12 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "@vue/standard"
+      "@vue/standard",
+      "@vue/typescript"
     ],
     "rules": {},
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "typescript-eslint-parser"
     }
   },
   "postcss": {
@@ -77,16 +83,24 @@
     "not ie <= 8"
   ],
   "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.{js,vue,ts}",
+      "!src/main.js"
+    ],
     "moduleFileExtensions": [
       "js",
       "jsx",
       "json",
-      "vue"
+      "vue",
+      "ts",
+      "tsx"
     ],
     "transform": {
       "^.+\\.vue$": "vue-jest",
       ".+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$": "jest-transform-stub",
-      "^.+\\.jsx?$": "babel-jest"
+      "^.+\\.jsx?$": "babel-jest",
+      "^.+\\.tsx?$": "ts-jest"
     },
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
@@ -97,6 +111,15 @@
     "testMatch": [
       "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)"
     ],
-    "testURL": "http://localhost/"
+    "testURL": "http://localhost/",
+    "globals": {
+      "ts-jest": {
+        "babelConfig": true
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/calebroseland/calebroseland-com.git"
   }
 }

@@ -7,6 +7,7 @@ import '@/configurators/element'
 
 // styles
 import './styles/index.scss'
+import 'animate.css'
 
 // local
 import Vue from 'vue'
@@ -15,10 +16,9 @@ import router from './router'
 import store from './store'
 
 // components
-import Icon from '@/components/Icon'
-import VIcon from 'vue-awesome/components/Icon'
-
-import ExternalLink from '@/components/ExternalLink'
+import Icon from '@/components/Icon.vue'
+import VIcon from 'vue-awesome/components/Icon.vue'
+import ExternalLink from '@/components/ExternalLink.vue'
 Vue.component('icon', Icon)
 Vue.component('v-icon', VIcon)
 Vue.component('external-link', ExternalLink)

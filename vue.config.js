@@ -15,5 +15,10 @@ module.exports = {
   },
   transpileDependencies: [
     /\bvue-awesome\b/
-  ]
+  ],
+  configureWebpack: {
+    resolve: {
+      extensions: ['.scss'] // for import of .scss indices
+    }
+  }
 }
