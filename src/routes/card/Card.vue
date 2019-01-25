@@ -50,12 +50,7 @@
         span.name.is-brand-font Caleb Roseland
         span.sub Web App Developer
 
-        css-transition(
-          effect="fade"
-          timing="1s-8s"
-          auto-height
-          :disabled="!transitionsEnabled || !contentTransitions"
-        )
+        css-transition(effect="fade" auto-height :disabled="!transitionsEnabled || !contentTransitions")
           div.sub-experience(v-if="isBoxExpanded")
             div
               .field.is-grouped.is-grouped-multiline
@@ -68,25 +63,18 @@
         .menu.columns.links(:class="{'is-flex-mobile has-text-centered-mobile': !isBoxExpanded}")
           //- github
           ul.menu-list.column
-            css-transition(
-              effect="fade"
-              auto-height
-              auto-width
-              :disabled="!transitionsEnabled || !contentTransitions"
-            )
+            css-transition(v-bind="contentTransitionProps")
               li(v-if="isBoxExpanded")
-                p.menu-label Projects/Repos
+                p.menu-label
+                  span Projects/Repos
+                  icon(name="external-link-square-alt" scale=.75)
+
             li
               external-link(to='https://github.com/calebroseland')
                 icon(name='brands/github' scale='2')
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  GitHub
 
-            css-transition(
-              effect="fade"
-              auto-height
-              auto-width
-              :disabled="!transitionsEnabled || !contentTransitions"
-            )
+            css-transition(v-bind="contentTransitionProps")
               li(v-if='isBoxExpanded')
                 ul
                   li
@@ -104,24 +92,16 @@
 
           //- medium
           ul.menu-list.column
-            css-transition(
-              effect="fade"
-              auto-height
-              auto-width
-              :disabled="!transitionsEnabled || !contentTransitions"
-            )
+            css-transition(v-bind="contentTransitionProps")
               li(v-if="isBoxExpanded")
-                p.menu-label Writings
+                p.menu-label
+                  span Writings
+                  icon(name="external-link-square-alt" scale=.75)
             li
               external-link(to='https://medium.com/@calebroseland')
                 icon(name='brands/medium' scale='2')
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  Medium
-            css-transition(
-              effect="fade"
-              auto-height
-              auto-width
-              :disabled="!transitionsEnabled || !contentTransitions"
-            )
+            css-transition(v-bind="contentTransitionProps")
               li(v-if='isBoxExpanded')
                 ul
                   li
@@ -137,34 +117,21 @@
 
           //- social/other links
           ul.menu-list.column
-            css-transition(
-              effect="fade"
-              auto-height
-              auto-width
-              :disabled="!transitionsEnabled || !contentTransitions"
-            )
+            css-transition(v-bind="contentTransitionProps")
               li(v-if="isBoxExpanded")
-                p.menu-label Social
+                p.menu-label
+                  span Social
+                  icon(name="external-link-square-alt" scale=.75)
             li
               external-link(to='https://linkedin.com/in/calebroseland')
                 icon(name='brands/linkedin' scale='2')
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  LinkedIn
-            css-transition(
-              effect="fade"
-              auto-height
-              auto-width
-              :disabled="!transitionsEnabled || !contentTransitions"
-            )
+            css-transition(v-bind="contentTransitionProps")
               li(v-if='isBoxExpanded')
                 external-link(to='https://npmjs.com/~calebroseland')
                   icon(name='brands/npm' scale='2')
                   span  npm
-            css-transition(
-              effect="fade"
-              auto-height
-              auto-width
-              :disabled="!transitionsEnabled || !contentTransitions"
-            )
+            css-transition(v-bind="contentTransitionProps")
               li(v-if='isBoxExpanded')
                 external-link(to='https://stackoverflow.com/users/1352410')
                   icon(name='brands/stack-overflow' scale='2')
@@ -199,30 +166,7 @@
 </template>
 
 <script>
-import 'vue-awesome/icons/brands/medium'
-import 'vue-awesome/icons/brands/github'
-import 'vue-awesome/icons/brands/linkedin'
-import 'vue-awesome/icons/brands/npm'
-import 'vue-awesome/icons/address-card'
-import 'vue-awesome/icons/exchange-alt'
-import 'vue-awesome/icons/chevron-left'
-import 'vue-awesome/icons/chevron-up'
-import 'vue-awesome/icons/circle'
-import 'vue-awesome/icons/chevron-right'
-import 'vue-awesome/icons/chevron-down'
-import 'vue-awesome/icons/chevron-circle-up'
-import 'vue-awesome/icons/chevron-circle-down'
-import 'vue-awesome/icons/brands/vuejs'
-import 'vue-awesome/icons/brands/stack-overflow'
-import 'vue-awesome/icons/code'
-import 'vue-awesome/icons/cog'
-import 'vue-awesome/icons/times'
-import 'vue-awesome/icons/regular/lightbulb'
-import 'vue-awesome/icons/lightbulb'
-import 'vue-awesome/icons/fill-drip'
-import 'vue-awesome/icons/brands/js'
-import 'vue-awesome/icons/map-marker-alt'
-
+import './icons.ts'
 import { Popover } from 'element-ui'
 import { CssTransition } from '@/components/transitions'
 import { mapState, mapActions } from 'vuex'
@@ -254,23 +198,33 @@ export default {
       ]
     }
   },
-  computed: mapState([
-    'transitionsEnabled',
-    'darkMode',
-    'initLoaded'
-  ]),
+  computed: {
+    ...mapState([
+      'transitionsEnabled',
+      'darkMode',
+      'initLoaded'
+    ]),
+    contentTransitionProps () {
+      return {
+        effect: 'fade',
+        autoHeight: true,
+        autoWidth: true,
+        disabled: !this.transitionsEnabled || !this.contentTransitions
+      }
+    }
+  },
   methods: {
+    ...mapActions([
+      'toggleTransitionsEnabled',
+      'toggleDarkMode'
+    ]),
     toCard () {
       this.contentTransitions = false
       this.isFlipped = false
       setTimeout(() => {
         this.contentTransitions = true
       }, 1000)
-    },
-    ...mapActions([
-      'toggleTransitionsEnabled',
-      'toggleDarkMode'
-    ])
+    }
   }
 }
 </script>
@@ -364,6 +318,9 @@ span.sub
   .menu-label
     padding-left: .95rem
     margin-bottom: .5rem
+    line-height: 2
+    .icon
+      color: #b9b9b9
 
   .menu-list
     ul
