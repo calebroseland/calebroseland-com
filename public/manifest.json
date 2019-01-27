@@ -1,6 +1,7 @@
 {
-  "name": "calebroseland-com",
-  "short_name": "calebroseland-com",
+  "name": "Caleb Roseland",
+  "short_name": "CR-COM",
+  
   "icons": [
     {
       "src": "./img/icons/android-chrome-192x192.png",

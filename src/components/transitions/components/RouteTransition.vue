@@ -14,9 +14,11 @@ import CssTransition from './CssTransition'
 export default {
   components: { CssTransition },
   props: {
-    routeMetaKey: {
-      type: String,
-      default: 'transition'
+    metaRetriever: {
+      type: Function,
+      default (route) {
+        return route && route.meta && route.meta.transition
+      }
     },
     router: {
       type: Object,
@@ -43,7 +45,7 @@ export default {
      * Get transition descriptor props from a route and convert a {@see Descriptor}
      */
     routeToAnimateClass (route, ...args) {
-      return TransitionDescriptor.from(route.meta[this.routeMetaKey]).toAnimateClass(...args)
+      return TransitionDescriptor.from(this.metaRetriever(route)).toAnimateClass(...args)
     },
     initRouteHandler () {
       // handle intial page load of default route

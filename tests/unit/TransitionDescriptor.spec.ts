@@ -110,5 +110,4 @@ describe('TransitionDescriptor', () => {
     expect(enterClass).toBe('slideInUp')
     expect(leaveClass).toBe('slideOutLeft')
   })
-
 })
