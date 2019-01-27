@@ -46,7 +46,6 @@ export default {
         // show invisibly
         applyStyles(element, {
           width: this.autoWidth ? null : width,
-          position: 'absolute',
           visibility: 'hidden',
           height: this.autoHeight ? null : height
         })
@@ -57,11 +56,10 @@ export default {
       // make visible, starting at 0x0
       applyStyles(element, {
         width: this.autoWidth ? 0 : null,
-        position: null,
         visibility: null,
         height: this.autoHeight ? 0 : null
       })
-      // force repaint to ensure animation is triggered
+      // repaint
       // eslint-disable-next-line no-unused-expressions
       getComputedStyle(element).height
 
@@ -75,8 +73,8 @@ export default {
 
       if (this.autoWidth) element.style.width = width
       if (this.autoHeight) element.style.height = height
-      // Force repaint to make sure the
-      // animation is triggered correctly.
+      // repaint
+
       // eslint-disable-next-line no-unused-expressions
       getComputedStyle(element).height
 

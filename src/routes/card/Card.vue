@@ -172,6 +172,10 @@ import { CssTransition } from '@/components/transitions'
 import { mapState, mapActions } from 'vuex'
 
 export default {
+  transition: {
+    effect: 'tada',
+    flow: null
+  },
   name: 'home',
   components: {
     'el-popover': Popover,

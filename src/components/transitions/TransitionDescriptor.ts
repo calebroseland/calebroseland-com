@@ -4,7 +4,7 @@ type Prop = string | Function | null
 
 export enum FlowType { enter = 1, leave = 2 }
 
-export interface ITransitionDescriptorProps {
+export interface ITransitionMeta {
   [index: string] : any
   effect: Prop
   flow : Prop
@@ -19,19 +19,19 @@ export interface ITransitionDescriptorProps {
  * @example `{effect: 'slide', direction: 'downBig-up'}` translates to `{enter: 'slideInDownBig', leave: 'slideOutUp'}`
  * @example `{effect: 'fade', direction: '-down'}` translates to `{enter: 'fadeIn', leave: 'fadeOutDown'}`
 */
-export default class TransitionDescriptor implements ITransitionDescriptorProps {
+export default class TransitionDescriptor implements ITransitionMeta {
   effect = null
   flow = 'in-out'
   direction = null
   enterClass = null
   leaveClass = null
 
-  constructor (props : Partial<ITransitionDescriptorProps>) {
+  constructor (props : Partial<ITransitionMeta>) {
     // shallow-assign values from props to this that are not null or undefined
-    return Object.assign(this, pick(props, Object.keys(this).filter(key => props[key] != null)))
+    return Object.assign(this, pick(props, Object.keys(this).filter(key => typeof props[key] !== 'undefined')))
   }
 
-  static from (props : Partial<ITransitionDescriptorProps>): TransitionDescriptor {
+  static from (props : Partial<ITransitionMeta>): TransitionDescriptor {
     return new TransitionDescriptor(props)
   }
 
@@ -66,7 +66,7 @@ function animateClassFrom (
     direction,
     enterClass,
     leaveClass
-  } : ITransitionDescriptorProps,
+  } : ITransitionMeta,
   flowType : FlowType = FlowType.enter,
   ...args : Array<Function>
 ) {

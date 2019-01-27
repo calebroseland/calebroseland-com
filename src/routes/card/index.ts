@@ -9,5 +9,4 @@ export const route = {
       effect: 'fade'
     }
   }
-
 }
