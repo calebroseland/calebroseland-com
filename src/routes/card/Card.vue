@@ -56,8 +56,7 @@
               .field.is-grouped.is-grouped-multiline
                 .control(v-for="{label, since} in tags")
                   .tags.has-addons
-                    span.tag(:class="`${darkMode ? 'is-dark' : 'is-info'}`") {{label}}
-                    // span.tag(:class="`${darkMode ? 'is-black' : ''}`") {{since}}
+                    span.tag(:class="`${darkMode ? 'is-black' : 'is-info'}`") {{label}}
 
         //- menu system
         .menu.columns.links(:class="{'is-flex-mobile has-text-centered-mobile': !isBoxExpanded}")
@@ -262,7 +261,34 @@ export default {
     animation-duration: .75s
     transition-duration: .75s
     animation-timing-function: ease
+    transition: background-color .3s ease, color .3s ease, height .75s ease
+
   overflow: hidden
+
+  body[dark-mode] &
+    background: $oc-gray-8
+    color: whitesmoke
+
+    a
+      color: whitesmoke
+      &:hover,
+      &:focus
+        color: white
+
+    .is-text,
+    .menu-list a
+      color: whitesmoke
+      &:hover:not(:active),
+      &:focus:not(:active)
+        background-color: $oc-gray-7
+        color: white
+
+      &:active
+        background-color: $oc-gray-6
+
+      &:focus:not(:active),
+      &.is-focused:not(:active)
+        box-shadow: 0 0 0 0.125em transparentize($oc-gray-6, 0.25)
 
 span.name
   font-size: 3rem
@@ -293,7 +319,6 @@ span.sub
     vertical-align: middle
 
 .links
-  border-bottom: 1px solid white
   padding: 1rem 0 0
   margin: 0
   white-space: nowrap
@@ -323,8 +348,6 @@ span.sub
     padding-left: .95rem
     margin-bottom: .5rem
     line-height: 2
-    .icon
-      color: #b9b9b9
 
   .menu-list
     ul
