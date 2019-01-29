@@ -1,7 +1,6 @@
 // main dependencies
 import '@/configurators/vue'
 import '@/configurators/registerServiceWorker'
-import '@/configurators/vue-router'
 import '@/configurators/vue-meta'
 import '@/configurators/element'
 
