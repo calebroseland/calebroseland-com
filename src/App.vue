@@ -10,7 +10,7 @@
 
 <script>
 import { RouteTransition } from './components/transitions'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 export default {
   name: 'app',
   components: { RouteTransition },
@@ -18,6 +18,7 @@ export default {
     const themeAttrs = {}
     if (this.darkMode) themeAttrs['dark-mode'] = null
     if (this.transitionsEnabled) themeAttrs['has-transitions'] = null
+
     return {
       htmlAttrs: {
         lang: 'en'
@@ -27,11 +28,15 @@ export default {
       }
     }
   },
-  computed: mapState([
-    'initLoading',
-    'transitionsEnabled',
-    'darkMode'
-  ]),
+  computed: {
+    ...mapState([
+      'initLoading',
+      'transitionsEnabled'
+    ]),
+    ...mapGetters([
+      'darkMode'
+    ])
+  },
   watch: {
     'initLoading' (isLoading) {
       if (!isLoading) {

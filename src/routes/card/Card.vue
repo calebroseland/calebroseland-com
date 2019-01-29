@@ -26,7 +26,7 @@
                 icon(name='exchange-alt' scale='2')
 
             el-tooltip(
-              :content="`Lights: ${!darkMode ? 'ON' : 'OFF'}`"
+              :content="`Lights: ${darkModePreference === null ? 'Auto' : !darkMode ? 'ON' : 'OFF'}`"
               placement='top'
             )
               button.button.is-text(
@@ -166,9 +166,9 @@
 
 <script>
 import './icons.ts'
-import { Popover } from 'element-ui'
+import { Popover, Checkbox, CheckboxGroup } from 'element-ui'
 import { CssTransition } from '@/components/transitions'
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   transition: {
@@ -177,7 +177,8 @@ export default {
   },
   name: 'home',
   components: {
-    'el-popover': Popover,
+    [Popover.name]: Popover,
+    [Checkbox.name]: Checkbox,
     CssTransition
   },
   data () {
@@ -204,8 +205,11 @@ export default {
   computed: {
     ...mapState([
       'transitionsEnabled',
-      'darkMode',
+      'darkModePreference',
       'initLoaded'
+    ]),
+    ...mapGetters([
+      'darkMode'
     ]),
     contentTransitionProps () {
       return {
@@ -247,7 +251,7 @@ export default {
     background-color: $page-bg
 
   body[dark-mode] &
-    background-color: darken($oc-blue-9, 20%)
+    background-color: darken($oc-blue-9, 30%)
 
 .box
   display: flex
@@ -262,11 +266,14 @@ export default {
     transition-duration: .75s
     animation-timing-function: ease
     transition: background-color .3s ease, color .3s ease, height .75s ease
+    .is-text,
+    .menu-list a
+      transition: color .3s ease
 
   overflow: hidden
 
   body[dark-mode] &
-    background: $oc-gray-8
+    background: $oc-gray-9
     color: whitesmoke
 
     a
@@ -280,15 +287,18 @@ export default {
       color: whitesmoke
       &:hover:not(:active),
       &:focus:not(:active)
-        background-color: $oc-gray-7
+        background-color: $oc-gray-8
         color: white
 
       &:active
-        background-color: $oc-gray-6
+        background-color: $oc-gray-7
 
       &:focus:not(:active),
       &.is-focused:not(:active)
         box-shadow: 0 0 0 0.125em transparentize($oc-gray-6, 0.25)
+
+      body[has-transitions] &
+         transition: background-color .3s ease, color .3s ease
 
 span.name
   font-size: 3rem
