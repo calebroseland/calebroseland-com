@@ -17,13 +17,17 @@ steps:
 
 - script: |
     npm install
-    npm run build
-  displayName: 'npm install and build'
+  displayName: 'Npm install'
 
 - script: |
     npm install
-    npm run test:unit --ci --reporters=default --reporters=jest-junit
-  displayName: 'npm install and test'
+    npm run build
+  displayName: 'Vue cli build'
+
+- script: |
+    npm install
+    npm run vue-cli-service test:unit --reporters=default --reporters=jest-junit
+  displayName: 'Run unit tests'
 
 # Publish Test Results
 - task: PublishTestResults@2
