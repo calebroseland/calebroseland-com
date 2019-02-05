@@ -24,7 +24,7 @@ steps:
   displayName: 'Vue cli build'
 
 - script: |
-    npm run vue-cli-service test:unit --reporters=default --reporters=jest-junit
+    vue-cli-service test:unit --reporters=default --reporters=jest-junit
   displayName: 'Run unit tests'
 
 # Publish Test Results
