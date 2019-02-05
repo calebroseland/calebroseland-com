@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-- master
+- develop
 
 pool:
   vmImage: 'Ubuntu-16.04'
@@ -18,5 +18,9 @@ steps:
 - script: |
     npm install
     npm run build
-    npm run test:unit
   displayName: 'npm install and build'
+
+- script: |
+    npm install
+    npm run test:unit
+  displayName: 'npm install and test'
