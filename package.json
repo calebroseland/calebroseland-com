@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test:unit": "vue-cli-service test:unit"
+    "test:unit": "vue-cli-service test:unit",
+    "test:unit-ci": "vue-cli-service test:unit --ci --reporters=default --reporters=jest-junit"
   },
   "dependencies": {
     "animate.css": "3.7.0",
