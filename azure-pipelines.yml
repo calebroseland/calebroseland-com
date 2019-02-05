@@ -17,12 +17,14 @@ steps:
 
 - script: |
     npm install
-    npm run build
-  displayName: 'Vue cli build'
+  displayName: 'Install dependencies'
 
 - script: |
-    npm install
-    vue-cli-service test:unit --reporters=default --reporters=jest-junit
+    npm run build
+  displayName: 'Vue cli production build'
+
+- script: |
+    npm run test:unit-ui
   displayName: 'Run unit tests'
 
 # Publish Test Results
