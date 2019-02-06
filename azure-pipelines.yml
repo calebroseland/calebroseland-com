@@ -8,7 +8,9 @@ trigger:
   branches:
     - develop
 pr:
-- master
+  batch: true
+  branches:
+    - master
 
 
 pool:
