@@ -20,10 +20,12 @@ steps:
     versionSpec: '8.x'
   displayName: 'Install Node.js'
 
-- script: npm install
+- script: |
+    npm install
   displayName: 'Install dependencies'
 
-- script: npm run build
+- script: |
+    npm run build
   displayName: 'Vue cli production build'
 
 - script: |
