@@ -27,7 +27,7 @@ steps:
   displayName: 'Vue cli production build'
 
 - script: |
-    npm run test:unit-ci
+    npm run test:unit
   displayName: 'Run unit tests'
 
 # Publish Test Results
