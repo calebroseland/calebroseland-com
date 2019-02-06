@@ -70,7 +70,6 @@ function animateClassFrom (
   flowType : FlowType = FlowType.enter,
   ...args : Array<Function>
 ) {
-
   if (flowType === FlowType.enter) {
     const resolvedEnterClass = resolve(enterClass, ...args)
     if (resolvedEnterClass != null) return resolvedEnterClass

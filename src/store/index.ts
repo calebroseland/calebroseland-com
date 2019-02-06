@@ -1,7 +1,6 @@
 import Vuex, { StoreOptions } from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-import {inRange} from 'lodash'
-
+import { inRange } from 'lodash'
 
 const INIT_LOADING = 'initLoading'
 const DARK_MODE_PREFERENCE = 'darkModePreference'
@@ -21,10 +20,10 @@ const store = new Vuex.Store({
     [INIT_LOADING]: true,
     [DARK_MODE_PREFERENCE]: null,
     [TRANSITIONS_ENABLED]: true,
-    [NOW]: new Date
+    [NOW]: new Date()
   },
   getters: {
-    darkMode: ({darkModePreference, now}) => 
+    darkMode: ({ darkModePreference, now }) =>
       darkModePreference === null ? !inRange(now.getHours(), 7, 19) : darkModePreference
   },
   mutations: {
@@ -56,10 +55,7 @@ const store = new Vuex.Store({
 
 // update time
 setInterval(() => {
-  store.commit(NOW, new Date)
+  store.commit(NOW, new Date())
 }, 1000 * 60)
 
 export default store
-
-
-
