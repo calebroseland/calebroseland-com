@@ -4,7 +4,12 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-- develop
+  batch: true
+  branches:
+    - develop
+pr:
+- master
+
 
 pool:
   vmImage: 'Ubuntu-16.04'
@@ -15,12 +20,10 @@ steps:
     versionSpec: '8.x'
   displayName: 'Install Node.js'
 
-- script: |
-    npm install
+- script: npm install
   displayName: 'Install dependencies'
 
-- script: |
-    npm run build
+- script: npm run build
   displayName: 'Vue cli production build'
 
 - script: |
@@ -32,3 +35,4 @@ steps:
   inputs:
     testResultsFormat: 'JUnit'
     testResultsFiles: './junit.xml'
+  displayName: 'Publish test results'
