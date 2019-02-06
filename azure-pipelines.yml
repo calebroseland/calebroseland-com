@@ -4,9 +4,10 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 pr:
-  batch: true
   branches:
+    include:
     - master
+    - releases/*
 
 
 pool:
