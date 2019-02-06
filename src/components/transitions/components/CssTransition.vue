@@ -59,6 +59,7 @@ export default {
         visibility: null,
         height: this.autoHeight ? 0 : null
       })
+
       // repaint
       // eslint-disable-next-line no-unused-expressions
       getComputedStyle(element).height
@@ -73,8 +74,8 @@ export default {
 
       if (this.autoWidth) element.style.width = width
       if (this.autoHeight) element.style.height = height
-      // repaint
 
+      // repaint
       // eslint-disable-next-line no-unused-expressions
       getComputedStyle(element).height
 

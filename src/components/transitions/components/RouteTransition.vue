@@ -34,23 +34,19 @@ export default {
     }
   },
   methods: {
-    /**
-     * Simplifies execution of routeToAnimateClass
-     */
+
     setTransitions (enterRoute, leaveRoute = enterRoute, ...args) {
       this.enterClass = this.routeToAnimateClass(enterRoute, FlowType.enter, ...args)
       this.leaveClass = this.routeToAnimateClass(leaveRoute, FlowType.leave, ...args)
     },
-    /**
-     * Get transition descriptor props from a route and convert a {@see Descriptor}
-     */
+
     routeToAnimateClass (route, ...args) {
       return TransitionDescriptor.from(this.metaRetriever(route)).toAnimateClass(...args)
     },
+
     initRouteHandler () {
       // handle intial page load of default route
       this.setTransitions(this.router.currentRoute)
-
       // hook into router to resolve transition props from route meta
       // handle normal route-to-route transitions and initial page load of non-default route
       this.router.beforeResolve((to, from, next) => {
