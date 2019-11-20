@@ -2,7 +2,7 @@
   <div id="app">
     <route-transition effect="fade" appear mode="out-in" :disabled="!transitionsEnabled">
       <keep-alive>
-        <router-view v-if="!isLoading" class="route"/>
+        <router-view v-if="!isLoading" class="route" />
       </keep-alive>
     </route-transition>
   </div>
@@ -15,7 +15,7 @@ import { DARK_MODE } from '@/store/modules/preferences/types'
 export default {
   name: 'app',
   components: { RouteTransition },
-  metaInfo () {
+  metaInfo() {
     const themeAttrs = {}
     if (this.darkMode) themeAttrs['dark-mode'] = null
     if (this.transitionsEnabled) themeAttrs['has-transitions'] = null
@@ -33,15 +33,11 @@ export default {
     ...mapState('preferences', {
       transitionsEnabled: state => state.transitionsEnabled
     }),
-    ...mapState([
-      'isLoading'
-    ]),
-    ...mapGetters('preferences', [
-      [DARK_MODE]
-    ])
+    ...mapState(['isLoading']),
+    ...mapGetters('preferences', [[DARK_MODE]])
   },
   watch: {
-    'isLoading' (isLoading) {
+    isLoading(isLoading) {
       if (!isLoading) {
         document.body.removeAttribute('is-loading')
         document.body.removeAttribute('style')
@@ -53,7 +49,6 @@ export default {
 
 <!-- global styles-->
 <style lang="scss">
-
 // @import "~animate.css";
 
 #app {
@@ -61,7 +56,7 @@ export default {
 }
 
 .animated {
-  animation-duration: .75s;
+  animation-duration: 0.75s;
   animation-timing-function: ease-in-out;
 }
 
@@ -72,8 +67,7 @@ export default {
 .route,
 .tag {
   body[has-transitions] & {
-    transition: background-color .3s ease, color .3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
-
 </style>

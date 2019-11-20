@@ -4,7 +4,7 @@ import createPersistedState from 'vuex-persistedstate'
 import preferences from './modules/preferences'
 import { TRANSITIONS_ENABLED, DARK_MODE_PREFERENCE } from './modules/preferences/types'
 
-import {IRootState, NOW, IS_LOADING} from './types'
+import { IRootState, NOW, IS_LOADING } from './types'
 
 const store = new Vuex.Store<IRootState>({
   plugins: [

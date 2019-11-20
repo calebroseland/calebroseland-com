@@ -165,21 +165,21 @@
 </template>
 
 <script>
-import "./icons.ts";
-import { Popover, Checkbox, CheckboxGroup } from "element-ui";
-import { CssTransition } from "@/components/transitions";
-import { mapState, mapGetters, mapActions } from "vuex";
+import './icons.ts'
+import { Popover, Checkbox, CheckboxGroup } from 'element-ui'
+import { CssTransition } from '@/components/transitions'
+import { mapState, mapGetters, mapActions } from 'vuex'
 import {
   DarkModePreference,
   DARK_MODE
-} from "@/store/modules/preferences/types";
+} from '@/store/modules/preferences/types'
 
 export default {
   transition: {
-    effect: "tada",
+    effect: 'tada',
     flow: null
   },
-  name: "card",
+  name: 'card',
   components: {
     [Popover.name]: Popover,
     [Checkbox.name]: Checkbox,
@@ -192,49 +192,49 @@ export default {
       contentTransitions: true,
       tags: [
         {
-          label: "JavaScript",
-          since: "2012"
+          label: 'JavaScript',
+          since: '2012'
         },
         {
-          label: "Vue.js",
-          since: "2015"
+          label: 'Vue.js',
+          since: '2015'
         },
         {
-          label: "ASP.NET",
-          since: "2014"
+          label: 'ASP.NET',
+          since: '2014'
         }
       ]
-    };
+    }
   },
   computed: {
-    ...mapState("preferences", {
+    ...mapState('preferences', {
       prefs: state => state
     }),
-    ...mapGetters("preferences", [DARK_MODE]),
+    ...mapGetters('preferences', [DARK_MODE]),
     contentTransitionProps() {
       return {
-        effect: "fade",
+        effect: 'fade',
         autoHeight: true,
         autoWidth: true,
         disabled: !this.prefs.transitionsEnabled || !this.contentTransitions
-      };
+      }
     }
   },
   methods: {
-    ...mapActions("preferences", ["toggleTransitionsEnabled", "cycleDarkMode"]),
+    ...mapActions('preferences', ['toggleTransitionsEnabled', 'cycleDarkMode']),
     toCard() {
-      this.contentTransitions = false;
-      this.isFlipped = false;
+      this.contentTransitions = false
+      this.isFlipped = false
       setTimeout(() => {
-        this.contentTransitions = true;
-      }, 1000);
+        this.contentTransitions = true
+      }, 1000)
     }
   }
-};
+}
 </script>
 
 <style lang="scss">
-@import "@/components/transitions/animations/simpleFlip";
+@import '@/components/transitions/animations/simpleFlip';
 </style>
 
 <style lang="sass" scoped>
