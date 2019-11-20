@@ -90,8 +90,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../animations";
-@import "~animate.css";
 
 .animated {
   transition-property: width, height;
