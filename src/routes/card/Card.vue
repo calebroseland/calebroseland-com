@@ -12,7 +12,7 @@
       .top.left
         el-popover(placement="top" trigger="hover" popper-class='settings-menu')
           button.button.is-text(slot='reference' aria-label='settings')
-            icon(name='cog' scale=3)
+            icon(name='cog' scale=1.5)
 
           .buttons(style='margin-bottom: 0;')
             el-tooltip(
@@ -23,7 +23,7 @@
                 :class="{'has-text-grey-lighter': !prefs.transitionsEnabled}"
                 @click="toggleTransitionsEnabled()"
               )
-                icon(name='exchange-alt' scale='2')
+                icon(name='exchange-alt' scale=1.5)
 
             el-tooltip(
               :content="`Lights: ${prefs.darkModePreference === 0 ? 'Auto' : !darkMode ? 'ON' : 'OFF'}`"
@@ -33,7 +33,7 @@
                 :class="{'has-text-grey-lighter': darkMode}"
                 @click='cycleDarkMode()'
               )
-                icon(:name="prefs.darkModePreference === 0 ? 'regular/clock' : 'regular/lightbulb'" scale="2")
+                icon(:name="prefs.darkModePreference === 0 ? 'regular/clock' : 'regular/lightbulb'" scale=1.5)
 
             //- el-tooltip(content='Theme: ' placement='top')
             //-   button.button.is-text(@click='changeTheme()')
@@ -41,8 +41,8 @@
 
       .top.right
         button.button.is-text(@click="isFlipped = true" aria-label="Contact information")
-          icon(name='address-card' scale='2')
-          icon(name='chevron-right' scale='1' style='width: .75rem;')
+          icon(name='address-card' scale=1.5)
+          icon(name='chevron-right' scale=1 style='width: .75rem;')
 
       div.has-text-centered
 
@@ -78,7 +78,7 @@
                 ul
                   li
                     //- https://http://calebroseland.com/card#andwereback
-                    external-link(to='https://github.com/calebroseland/calebroseland-com/blob/master/src/routes/card/Card.vue#L81')
+                    external-link(to='https://github.com/calebroseland/calebroseland-com/blob/master/src/routes/card/Card.vue#L83')
                       span
                         code this
                   li
