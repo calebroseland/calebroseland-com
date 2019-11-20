@@ -51,7 +51,7 @@
         span.sub Web App Developer
 
         css-transition(effect="fade" auto-height :disabled="!prefs.transitionsEnabled || !contentTransitions")
-          div.sub-experience(v-if="isBoxExpanded")
+          div.sub-experience(v-show="isBoxExpanded")
             div
               .field.is-grouped.is-grouped-multiline
                 .control(v-for="{label, since} in tags")
@@ -63,7 +63,7 @@
           //- github
           ul.menu-list.column
             css-transition(v-bind="contentTransitionProps")
-              li(v-if="isBoxExpanded")
+              li(v-show="isBoxExpanded")
                 p.menu-label
                   span Projects/Repos
                   icon(name="external-link-square-alt" scale=.75)
@@ -74,7 +74,7 @@
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  GitHub
 
             css-transition(v-bind="contentTransitionProps")
-              li(v-if='isBoxExpanded')
+              li(v-show='isBoxExpanded')
                 ul
                   li
                     //- https://http://calebroseland.com/card#andwereback
@@ -92,7 +92,7 @@
           //- medium
           ul.menu-list.column
             css-transition(v-bind="contentTransitionProps")
-              li(v-if="isBoxExpanded")
+              li(v-show="isBoxExpanded")
                 p.menu-label
                   span Writings
                   icon(name="external-link-square-alt" scale=.75)
@@ -101,7 +101,7 @@
                 icon(name='brands/medium' scale=1.75)
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  Medium
             css-transition(v-bind="contentTransitionProps")
-              li(v-if='isBoxExpanded')
+              li(v-show='isBoxExpanded')
                 ul
                   li
                     external-link(to='https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81')
@@ -117,7 +117,7 @@
           //- social/other links
           ul.menu-list.column
             css-transition(v-bind="contentTransitionProps")
-              li(v-if="isBoxExpanded")
+              li(v-show="isBoxExpanded")
                 p.menu-label
                   span Social
                   icon(name="external-link-square-alt" scale=.75)
@@ -126,12 +126,12 @@
                 icon(name='brands/linkedin' scale=1.75)
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  LinkedIn
             css-transition(v-bind="contentTransitionProps")
-              li(v-if='isBoxExpanded')
+              li(v-show='isBoxExpanded')
                 external-link(to='https://npmjs.com/~calebroseland')
                   icon(name='brands/npm' scale=1.75)
                   span  npm
             css-transition(v-bind="contentTransitionProps")
-              li(v-if='isBoxExpanded')
+              li(v-show='isBoxExpanded')
                 external-link(to='https://stackoverflow.com/users/1352410')
                   icon(name='brands/stack-overflow' scale=1.75)
                   span  Stack Overflow
@@ -142,25 +142,25 @@
           // icon(:name="isBoxExpanded ? 'chevron-circle-up' : 'chevron-circle-down'" scale='2')
     //- reverse side
     .box.flipped(v-else key=2)
-        .left.has-text-left
-          p.name.is-brand-font Caleb Roseland
-          p.sub Web App Developer
-          .details
-            p
-              a(href='tel:+1 507 476 1225')
-                i.el-icon-phone
-                span  +1 507 476 1225
-            p
-              a(href='mailto:caleb@calebroseland.com')
-                i.el-icon-message
-                span  caleb@calebroseland.com
-            p
-              external-link(to='https://maps.google.com/?q=Minnesota,+USA')
-                i.el-icon-location
-                span  Minnesota, USA
-        .right.has-text-right
-          button.button.is-text(@click="toCard()")
-            icon(name="times" scale=1.5)
+      .left.has-text-left
+        p.name.is-brand-font Caleb Roseland
+        p.sub Web App Developer
+        .details
+          p
+            a(href='tel:+1 507 476 1225')
+              i.el-icon-phone
+              span  +1 507 476 1225
+          p
+            a(href='mailto:caleb@calebroseland.com')
+              i.el-icon-message
+              span  caleb@calebroseland.com
+          p
+            external-link(to='https://maps.google.com/?q=Minnesota,+USA')
+              i.el-icon-location
+              span  Minnesota, USA
+      .right.has-text-right
+        button.button.is-text(@click="toCard()")
+          icon(name="times" scale=1.5)
 
 </template>
 
