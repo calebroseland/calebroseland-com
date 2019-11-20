@@ -2,7 +2,7 @@
   <div id="app">
     <route-transition effect="fade" appear mode="out-in" :disabled="!transitionsEnabled">
       <keep-alive>
-        <router-view v-if="!initLoading" class="route"/>
+        <router-view v-if="!isLoading" class="route"/>
       </keep-alive>
     </route-transition>
   </div>
@@ -11,6 +11,7 @@
 <script>
 import { RouteTransition } from './components/transitions'
 import { mapState, mapGetters } from 'vuex'
+import { DARK_MODE } from '@/store/modules/preferences/types'
 export default {
   name: 'app',
   components: { RouteTransition },
@@ -29,16 +30,18 @@ export default {
     }
   },
   computed: {
+    ...mapState('preferences', {
+      transitionsEnabled: state => state.transitionsEnabled
+    }),
     ...mapState([
-      'initLoading',
-      'transitionsEnabled'
+      'isLoading'
     ]),
-    ...mapGetters([
-      'darkMode'
+    ...mapGetters('preferences', [
+      [DARK_MODE]
     ])
   },
   watch: {
-    'initLoading' (isLoading) {
+    'isLoading' (isLoading) {
       if (!isLoading) {
         document.body.removeAttribute('is-loading')
         document.body.removeAttribute('style')
@@ -48,7 +51,10 @@ export default {
 }
 </script>
 
+<!-- global styles-->
 <style lang="scss">
+
+// @import "~animate.css";
 
 #app {
   width: 100%;

@@ -1,55 +1,34 @@
-import Vuex, { StoreOptions } from 'vuex'
+import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-import { inRange } from 'lodash'
 
-const INIT_LOADING = 'initLoading'
-const DARK_MODE_PREFERENCE = 'darkModePreference'
-const TRANSITIONS_ENABLED = 'transitionsEnabled'
-const NOW = 'now'
+import preferences from './modules/preferences'
+import { TRANSITIONS_ENABLED, DARK_MODE_PREFERENCE } from './modules/preferences/types'
 
-const store = new Vuex.Store({
+import {IRootState, NOW, IS_LOADING} from './types'
+
+const store = new Vuex.Store<IRootState>({
   plugins: [
     createPersistedState({
       paths: [
-        TRANSITIONS_ENABLED,
-        DARK_MODE_PREFERENCE
+        `preferences/${TRANSITIONS_ENABLED}`,
+        `preferences/${DARK_MODE_PREFERENCE}`
       ]
     })
   ],
   state: {
-    [INIT_LOADING]: true,
-    [DARK_MODE_PREFERENCE]: null,
-    [TRANSITIONS_ENABLED]: true,
+    [IS_LOADING]: true,
     [NOW]: new Date()
   },
-  getters: {
-    darkMode: ({ darkModePreference, now }) =>
-      darkModePreference === null ? !inRange(now.getHours(), 7, 19) : darkModePreference
-  },
   mutations: {
-    [INIT_LOADING] (state, isLoading) {
-      state.initLoading = isLoading
+    [NOW] (state, time: Date) {
+      state[NOW] = time
     },
-    [DARK_MODE_PREFERENCE] (state, isDark) {
-      state[DARK_MODE_PREFERENCE] = isDark
-    },
-    [TRANSITIONS_ENABLED] (state, value) {
-      state.transitionsEnabled = value
-    },
-    [NOW] (state, now: Date) {
-      state[NOW] = now
+    [IS_LOADING] (state, isLoading: Boolean) {
+      state[IS_LOADING] = isLoading
     }
   },
-  actions: {
-    setInitLoading ({ commit, state: { initLoading } }, isLoading : Boolean) {
-      if (initLoading) commit(INIT_LOADING, isLoading)
-    },
-    toggleDarkMode ({ commit, getters: { darkMode } }, isDark : Boolean | null = !darkMode) {
-      commit(DARK_MODE_PREFERENCE, isDark)
-    },
-    toggleTransitionsEnabled ({ commit, state: { transitionsEnabled } }, enabled : Boolean = !transitionsEnabled) {
-      commit(TRANSITIONS_ENABLED, enabled)
-    }
+  modules: {
+    preferences
   }
 })
 

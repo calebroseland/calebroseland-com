@@ -13,6 +13,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import { IS_LOADING } from './store/types'
 
 // components
 import Icon from '@/components/Icon.vue'
@@ -22,7 +23,7 @@ Vue.component('icon', Icon)
 Vue.component('v-icon', VIcon)
 Vue.component('external-link', ExternalLink)
 
-window.addEventListener('load', () => store.dispatch('setInitLoading', false))
+window.addEventListener('load', () => store.commit(IS_LOADING, false))
 
 // instantiate root component
 new Vue({

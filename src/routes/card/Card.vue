@@ -5,35 +5,35 @@
     direction="xInvert"
     mode="out-in"
     auto-height
-    :disabled="!transitionsEnabled"
+    :disabled="!prefs.transitionsEnabled"
   )
-    .box(:class="{'is-expanded': isBoxExpanded}" v-if="!isFlipped" key=1)
+    .box(:class="{'is-expanded': isBoxExpanded}" v-if="!isFlipped" key="1")
       //- corner menus/buttons
       .top.left
-        el-popover(placement='top' trigger='hover' popper-class='settings-menu')
+        el-popover(placement="top" trigger="hover" popper-class='settings-menu')
           button.button.is-text(slot='reference' aria-label='settings')
             icon(name='cog' scale=3)
 
           .buttons(style='margin-bottom: 0;')
             el-tooltip(
-              :content="`Transitions: ${transitionsEnabled ? 'ON' : 'OFF'}`"
+              :content="`Transitions: ${prefs.transitionsEnabled ? 'ON' : 'OFF'}`"
               placement='top'
             )
               button.button.is-text(
-                :class="{'has-text-grey-lighter': !transitionsEnabled}"
+                :class="{'has-text-grey-lighter': !prefs.transitionsEnabled}"
                 @click="toggleTransitionsEnabled()"
               )
                 icon(name='exchange-alt' scale='2')
 
             el-tooltip(
-              :content="`Lights: ${darkModePreference === null ? 'Auto' : !darkMode ? 'ON' : 'OFF'}`"
-              placement='top'
+              :content="`Lights: ${prefs.darkModePreference === 0 ? 'Auto' : !darkMode ? 'ON' : 'OFF'}`"
+              placement="top"
             )
               button.button.is-text(
                 :class="{'has-text-grey-lighter': darkMode}"
-                @click='toggleDarkMode()'
+                @click='cycleDarkMode()'
               )
-                icon(name='regular/lightbulb' scale='2')
+                icon(:name="prefs.darkModePreference === 0 ? 'regular/clock' : 'regular/lightbulb'" scale="2")
 
             //- el-tooltip(content='Theme: ' placement='top')
             //-   button.button.is-text(@click='changeTheme()')
@@ -50,7 +50,7 @@
         span.name.is-brand-font Caleb Roseland
         span.sub Web App Developer
 
-        css-transition(effect="fade" auto-height :disabled="!transitionsEnabled || !contentTransitions")
+        css-transition(effect="fade" auto-height :disabled="!prefs.transitionsEnabled || !contentTransitions")
           div.sub-experience(v-if="isBoxExpanded")
             div
               .field.is-grouped.is-grouped-multiline
@@ -77,13 +77,13 @@
               li(v-if='isBoxExpanded')
                 ul
                   li
-                    external-link(to='https://github.com/calebroseland/calebroseland-com')
+                    //- https://http://calebroseland.com/card#andwereback
+                    external-link(to='https://github.com/calebroseland/calebroseland-com/blob/master/src/routes/card/Card.vue#L81')
                       span
                         code this
                   li
                     a(target='_blank' rel='noopener noreferrer' href='https://github.com/calebroseland/vue-dom-portal')
                       span vue-dom-portal
-
                 ul
                   li
                     a(target='_blank' rel='noopener noreferrer' href='https://gist.github.com/calebroseland')
@@ -165,76 +165,77 @@
 </template>
 
 <script>
-import './icons.ts'
-import { Popover, Checkbox, CheckboxGroup } from 'element-ui'
-import { CssTransition } from '@/components/transitions'
-import { mapState, mapGetters, mapActions } from 'vuex'
+import "./icons.ts";
+import { Popover, Checkbox, CheckboxGroup } from "element-ui";
+import { CssTransition } from "@/components/transitions";
+import { mapState, mapGetters, mapActions } from "vuex";
+import {
+  DarkModePreference,
+  DARK_MODE
+} from "@/store/modules/preferences/types";
 
 export default {
   transition: {
-    effect: 'tada',
+    effect: "tada",
     flow: null
   },
-  name: 'home',
+  name: "card",
   components: {
     [Popover.name]: Popover,
     [Checkbox.name]: Checkbox,
     CssTransition
   },
-  data () {
+  data() {
     return {
       isBoxExpanded: false,
       isFlipped: false,
       contentTransitions: true,
       tags: [
         {
-          label: 'JavaScript',
-          since: '2012'
+          label: "JavaScript",
+          since: "2012"
         },
         {
-          label: 'Vue.js',
-          since: '2015'
+          label: "Vue.js",
+          since: "2015"
         },
         {
-          label: 'ASP.NET',
-          since: '2014'
+          label: "ASP.NET",
+          since: "2014"
         }
       ]
-    }
+    };
   },
   computed: {
-    ...mapState([
-      'transitionsEnabled',
-      'darkModePreference',
-      'initLoaded'
-    ]),
-    ...mapGetters([
-      'darkMode'
-    ]),
-    contentTransitionProps () {
+    ...mapState("preferences", {
+      prefs: state => state
+    }),
+    ...mapGetters("preferences", [DARK_MODE]),
+    contentTransitionProps() {
       return {
-        effect: 'fade',
+        effect: "fade",
         autoHeight: true,
         autoWidth: true,
-        disabled: !this.transitionsEnabled || !this.contentTransitions
-      }
+        disabled: !this.prefs.transitionsEnabled || !this.contentTransitions
+      };
     }
   },
   methods: {
-    ...mapActions([
-      'toggleTransitionsEnabled',
-      'toggleDarkMode'
-    ]),
-    toCard () {
-      this.contentTransitions = false
-      this.isFlipped = false
+    ...mapActions("preferences", ["toggleTransitionsEnabled", "cycleDarkMode"]),
+    toCard() {
+      this.contentTransitions = false;
+      this.isFlipped = false;
       setTimeout(() => {
-        this.contentTransitions = true
-      }, 1000)
+        this.contentTransitions = true;
+      }, 1000);
     }
   }
-}
+};
 </script>
+
+<style lang="scss">
+@import "@/components/transitions/animations/simpleFlip";
+</style>
 
 <style lang="sass" scoped>
 @import '~open-color/open-color.scss'
