@@ -70,7 +70,7 @@
 
             li
               external-link(to='https://github.com/calebroseland')
-                icon(name='brands/github' scale='2')
+                icon(name='brands/github' scale=1.75)
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  GitHub
 
             css-transition(v-bind="contentTransitionProps")
@@ -98,7 +98,7 @@
                   icon(name="external-link-square-alt" scale=.75)
             li
               external-link(to='https://medium.com/@calebroseland')
-                icon(name='brands/medium' scale='2')
+                icon(name='brands/medium' scale=1.75)
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  Medium
             css-transition(v-bind="contentTransitionProps")
               li(v-if='isBoxExpanded')
@@ -123,17 +123,17 @@
                   icon(name="external-link-square-alt" scale=.75)
             li
               external-link(to='https://linkedin.com/in/calebroseland')
-                icon(name='brands/linkedin' scale='2')
+                icon(name='brands/linkedin' scale=1.75)
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  LinkedIn
             css-transition(v-bind="contentTransitionProps")
               li(v-if='isBoxExpanded')
                 external-link(to='https://npmjs.com/~calebroseland')
-                  icon(name='brands/npm' scale='2')
+                  icon(name='brands/npm' scale=1.75)
                   span  npm
             css-transition(v-bind="contentTransitionProps")
               li(v-if='isBoxExpanded')
                 external-link(to='https://stackoverflow.com/users/1352410')
-                  icon(name='brands/stack-overflow' scale='2')
+                  icon(name='brands/stack-overflow' scale=1.75)
                   span  Stack Overflow
 
         //- expand button
@@ -333,6 +333,8 @@ span.sub
   padding: 1rem 0 0
   margin: 0
   white-space: nowrap
+  .icon + span
+    padding-left: .25rem
 
 .top
   position: absolute
