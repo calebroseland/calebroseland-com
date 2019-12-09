@@ -4,6 +4,11 @@ type Prop = string | Function | null
 
 export enum FlowType { enter = 1, leave = 2 }
 
+interface FlowDescriptor {
+  [FlowType.enter]: string,
+  [FlowType.leave]: string
+}
+
 export interface ITransitionMeta {
   [index: string] : any
   effect: Prop
@@ -51,12 +56,15 @@ function resolve (prop : Prop, ...args : any) {
   return typeof prop === 'function' ? prop.apply(null, args) : prop
 }
 
-function parse (prop : Prop, ...args : any) {
+function parse (prop : Prop, ...args : any) : string | FlowDescriptor | null {
   const value = resolve(prop, ...args)
   if (value == null) return value
 
   const [enter, leave] = value.split('-')
-  return enter != null && leave != null ? { [FlowType.enter]: enter, [FlowType.leave]: leave } : value
+
+  if (enter == null || leave == null) return value
+
+  return { [FlowType.enter]: enter, [FlowType.leave]: leave }
 }
 
 function animateClassFrom (

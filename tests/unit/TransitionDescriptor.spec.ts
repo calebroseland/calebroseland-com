@@ -95,7 +95,7 @@ describe('TransitionDescriptor', () => {
       direction: '-left',
       enterClass: ({ dependentInfo } : any) => dependentInfo[2] ? 'slideInUp' : 'slideInRight'
     })
-      .toAnimateClasses({ dependentInfo: [ false, false, true, false ] })
+      .toAnimateClasses({ dependentInfo: [false, false, true, false] })
 
     expect(enterClass).toBe('slideInUp')
     expect(leaveClass).toBe('slideOutLeft')

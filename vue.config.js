@@ -29,6 +29,11 @@ module.exports = {
   css: {
     sourceMap: true
   },
+  pluginOptions: {
+    webpackBundleAnalyzer: {
+      openAnalyzer: false
+    }
+  },
   transpileDependencies: [
     /\bvue-awesome\b/
   ],

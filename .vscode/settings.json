@@ -1,5 +1,4 @@
 {
-  "prettier.eslintIntegration": true,
   "prettier.semi": false,
   "eslint.enable": true,
   "eslint.run": "onType",
@@ -24,5 +23,19 @@
   "eslint.alwaysShowStatus": true,
   "eslint.autoFixOnSave": true,
   "vetur.format.defaultFormatter.js": "prettier-eslint",
-  "vetur.format.defaultFormatter.css": "prettier"
+  "vetur.format.defaultFormatter.css": "prettier",
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#093430",
+    "titleBar.activeBackground": "#0D4844",
+    "titleBar.activeForeground": "#F0FCFB"
+  },
+  "spellright.language": [
+    "en"
+  ],
+  "spellright.documentTypes": [
+    "markdown",
+    "latex",
+    "plaintext",
+    "json"
+  ]
 }

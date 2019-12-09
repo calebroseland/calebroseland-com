@@ -51,7 +51,7 @@
         span.sub Web App Developer
 
         css-transition(effect="fade" auto-height :disabled="!prefs.transitionsEnabled || !contentTransitions")
-          div.sub-experience(v-if="isBoxExpanded")
+          div.sub-experience(v-show="isBoxExpanded")
             div
               .field.is-grouped.is-grouped-multiline
                 .control(v-for="{label, since} in tags")
@@ -63,7 +63,7 @@
           //- github
           ul.menu-list.column
             css-transition(v-bind="contentTransitionProps")
-              li(v-if="isBoxExpanded")
+              li(v-show="isBoxExpanded")
                 p.menu-label
                   span Projects/Repos
                   icon(name="external-link-square-alt" scale=.75)
@@ -74,10 +74,10 @@
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  GitHub
 
             css-transition(v-bind="contentTransitionProps")
-              li(v-if='isBoxExpanded')
+              li(v-show='isBoxExpanded')
                 ul
                   li
-                    //- https://http://calebroseland.com/card#andwereback
+                    //- http://calebroseland.com/card#andwereback
                     external-link(to='https://github.com/calebroseland/calebroseland-com/blob/master/src/routes/card/Card.vue#L83')
                       span
                         code this
@@ -92,7 +92,7 @@
           //- medium
           ul.menu-list.column
             css-transition(v-bind="contentTransitionProps")
-              li(v-if="isBoxExpanded")
+              li(v-show="isBoxExpanded")
                 p.menu-label
                   span Writings
                   icon(name="external-link-square-alt" scale=.75)
@@ -101,7 +101,7 @@
                 icon(name='brands/medium' scale=1.75)
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  Medium
             css-transition(v-bind="contentTransitionProps")
-              li(v-if='isBoxExpanded')
+              li(v-show='isBoxExpanded')
                 ul
                   li
                     external-link(to='https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81')
@@ -117,7 +117,7 @@
           //- social/other links
           ul.menu-list.column
             css-transition(v-bind="contentTransitionProps")
-              li(v-if="isBoxExpanded")
+              li(v-show="isBoxExpanded")
                 p.menu-label
                   span Social
                   icon(name="external-link-square-alt" scale=.75)
@@ -126,12 +126,12 @@
                 icon(name='brands/linkedin' scale=1.75)
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  LinkedIn
             css-transition(v-bind="contentTransitionProps")
-              li(v-if='isBoxExpanded')
+              li(v-show='isBoxExpanded')
                 external-link(to='https://npmjs.com/~calebroseland')
                   icon(name='brands/npm' scale=1.75)
                   span  npm
             css-transition(v-bind="contentTransitionProps")
-              li(v-if='isBoxExpanded')
+              li(v-show='isBoxExpanded')
                 external-link(to='https://stackoverflow.com/users/1352410')
                   icon(name='brands/stack-overflow' scale=1.75)
                   span  Stack Overflow
@@ -139,40 +139,37 @@
         //- expand button
         button.button.is-text.is-fullwidth(@click='isBoxExpanded = !isBoxExpanded' aria-label='Expand')
           span show {{isBoxExpanded ? 'less' : 'more'}}
-          // icon(:name="isBoxExpanded ? 'chevron-circle-up' : 'chevron-circle-down'" scale='2')
+          //icon(:name="isBoxExpanded ? 'chevron-circle-up' : 'chevron-circle-down'" scale=2)
     //- reverse side
     .box.flipped(v-else key=2)
-        .left.has-text-left
-          p.name.is-brand-font Caleb Roseland
-          p.sub Web App Developer
-          .details
-            p
-              a(href='tel:+1 507 476 1225')
-                i.el-icon-phone
-                span  +1 507 476 1225
-            p
-              a(href='mailto:caleb@calebroseland.com')
-                i.el-icon-message
-                span  caleb@calebroseland.com
-            p
-              external-link(to='https://maps.google.com/?q=Minnesota,+USA')
-                i.el-icon-location
-                span  Minnesota, USA
-        .right.has-text-right
-          button.button.is-text(@click="toCard()")
-            icon(name="times" scale=1.5)
+      .left.has-text-left
+        p.name.is-brand-font Caleb Roseland
+        p.sub Web App Developer
+        .details
+          p
+            a(href='tel:+1 507 476 1225')
+              i.el-icon-phone
+              span  +1 507 476 1225
+          p
+            a(href='mailto:caleb@calebroseland.com')
+              i.el-icon-message
+              span  caleb@calebroseland.com
+          p
+            external-link(to='https://maps.google.com/?q=Minnesota,+USA')
+              i.el-icon-location
+              span  Minnesota, USA
+      .right.has-text-right
+        button.button.is-text(@click="toCard()")
+          icon(name="times" scale=1.5)
 
 </template>
 
 <script>
 import './icons.ts'
-import { Popover, Checkbox, CheckboxGroup } from 'element-ui'
+import { Popover, Checkbox } from 'element-ui'
 import { CssTransition } from '@/components/transitions'
 import { mapState, mapGetters, mapActions } from 'vuex'
-import {
-  DarkModePreference,
-  DARK_MODE
-} from '@/store/modules/preferences/types'
+import { DARK_MODE } from '@/store/modules/preferences/types'
 
 export default {
   transition: {
@@ -239,7 +236,7 @@ export default {
 
 <style lang="sass" scoped>
 @import '~open-color/open-color.scss'
-@import "~bulma/sass/utilities/mixins"
+@import '~bulma/sass/utilities/_all.sass'
 
 .route-card
   $page-bg: $oc-blue-6
@@ -263,10 +260,10 @@ export default {
   font-size: 1.5rem
   max-width: 100vw
   body[has-transitions] &
-    animation-duration: .75s
-    transition-duration: .75s
+    animation-duration: .9s
+    transition-duration: .9s
     animation-timing-function: ease
-    transition: background-color .3s ease, color .3s ease, height .75s ease
+    transition: background-color .3s ease-in-out, color .3s ease, height .75s ease
     .is-text,
     .menu-list a
       transition: color .3s ease
@@ -315,7 +312,7 @@ span.name
     padding: .5rem
   body[has-transitions] &
     overflow: visible
-    animation-duration: .3s
+    animation-duration: .5s
   .field
     justify-content: center
   .tag

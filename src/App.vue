@@ -17,8 +17,8 @@ export default {
   components: { RouteTransition },
   metaInfo() {
     const themeAttrs = {}
-    if (this.darkMode) themeAttrs['dark-mode'] = null
-    if (this.transitionsEnabled) themeAttrs['has-transitions'] = null
+    if (this.darkMode) themeAttrs['dark-mode'] = 'dark-mode'
+    if (this.transitionsEnabled) themeAttrs['has-transitions'] = 'has-transitions'
 
     return {
       htmlAttrs: {
@@ -57,7 +57,7 @@ export default {
 
 .animated {
   animation-duration: 0.75s;
-  animation-timing-function: ease-in-out;
+  animation-timing-function: ease;
 }
 
 .route {
