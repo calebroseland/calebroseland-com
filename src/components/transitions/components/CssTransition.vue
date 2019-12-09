@@ -10,7 +10,7 @@
 
 <script>
 
-import TransitionDescriptor, { FlowType } from '../TransitionDescriptor'
+import TransitionDescriptor from '../TransitionDescriptor'
 import { applyStyles } from '@/utilities/dom'
 
 export default {
@@ -93,7 +93,7 @@ export default {
 
 .animated {
   transition-property: width, height;
-  transition: .5s ease;
+  transition: .75s ease;
   overflow: hidden;
 }
 

@@ -11,42 +11,44 @@ $directions: map-keys($rotations);
 $perspective-distance: 400px;
 
 @mixin transformed ($direction) {
-  transform: 
-    perspective($perspective-distance) 
+  transform:
+    perspective($perspective-distance)
     rotate3d(map-get($rotations, $direction));
   opacity: 0;
 }
 
 @mixin natural {
-  transform: 
-    perspective($perspective-distance); 
+  transform:
+    perspective($perspective-distance);
 }
 
 @each $flow in $flows {
   @each $direction in $directions {
-    
+
     $name: #{$effect + $flow + $direction};
-    
+
     @if map-has-key($rotations, $direction) {
       // define animation
       @keyframes #{$name} {
         @if $flow == "In" {
-          from {@include transformed($direction);} 
+          from {@include transformed($direction);}
           to { @include natural(); }
         }
 
         @if $flow == "Out" {
           from { @include natural(); }
-          to {@include transformed($direction);} 
+          to {@include transformed($direction);}
         }
       }
       // define class
       .#{$name} {
         animation-name: #{$name};
         backface-visibility: visible !important;
-        transition-duration: .75s;
+        transition-duration: .7s;
+        animation-duration: .7s;
         @if ($flow == "Out") {
-          transition-duration: .75s;
+          transition-duration: .5s;
+          animation-duration: .5s;
         }
       }
     }

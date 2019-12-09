@@ -166,13 +166,10 @@
 
 <script>
 import './icons.ts'
-import { Popover, Checkbox, CheckboxGroup } from 'element-ui'
+import { Popover, Checkbox } from 'element-ui'
 import { CssTransition } from '@/components/transitions'
 import { mapState, mapGetters, mapActions } from 'vuex'
-import {
-  DarkModePreference,
-  DARK_MODE
-} from '@/store/modules/preferences/types'
+import { DARK_MODE } from '@/store/modules/preferences/types'
 
 export default {
   transition: {
@@ -239,7 +236,7 @@ export default {
 
 <style lang="sass" scoped>
 @import '~open-color/open-color.scss'
-@import "~bulma/sass/utilities/mixins"
+@import '~bulma/sass/utilities/_all.sass'
 
 .route-card
   $page-bg: $oc-blue-6
@@ -263,10 +260,10 @@ export default {
   font-size: 1.5rem
   max-width: 100vw
   body[has-transitions] &
-    animation-duration: .75s
-    transition-duration: .75s
+    animation-duration: .9s
+    transition-duration: .9s
     animation-timing-function: ease
-    transition: background-color .3s ease, color .3s ease, height .75s ease
+    transition: background-color .3s ease-in-out, color .3s ease, height .75s ease
     .is-text,
     .menu-list a
       transition: color .3s ease
@@ -315,7 +312,7 @@ span.name
     padding: .5rem
   body[has-transitions] &
     overflow: visible
-    animation-duration: .3s
+    animation-duration: .5s
   .field
     justify-content: center
   .tag

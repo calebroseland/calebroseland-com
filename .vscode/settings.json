@@ -28,5 +28,14 @@
     "activityBar.background": "#093430",
     "titleBar.activeBackground": "#0D4844",
     "titleBar.activeForeground": "#F0FCFB"
-  }
+  },
+  "spellright.language": [
+    "en"
+  ],
+  "spellright.documentTypes": [
+    "markdown",
+    "latex",
+    "plaintext",
+    "json"
+  ]
 }
