@@ -77,7 +77,7 @@
               li(v-show='isBoxExpanded')
                 ul
                   li
-                    //- https://http://calebroseland.com/card#andwereback
+                    //- http://calebroseland.com/card#andwereback
                     external-link(to='https://github.com/calebroseland/calebroseland-com/blob/master/src/routes/card/Card.vue#L83')
                       span
                         code this
@@ -139,7 +139,7 @@
         //- expand button
         button.button.is-text.is-fullwidth(@click='isBoxExpanded = !isBoxExpanded' aria-label='Expand')
           span show {{isBoxExpanded ? 'less' : 'more'}}
-          // icon(:name="isBoxExpanded ? 'chevron-circle-up' : 'chevron-circle-down'" scale='2')
+          //icon(:name="isBoxExpanded ? 'chevron-circle-up' : 'chevron-circle-down'" scale=2)
     //- reverse side
     .box.flipped(v-else key=2)
       .left.has-text-left
