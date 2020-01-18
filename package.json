@@ -27,6 +27,8 @@
     "vuex-persistedstate": "2.7.0"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.7.4",
+    "@babel/plugin-proposal-optional-chaining": "^7.7.5",
     "@types/jest": "^24.0.23",
     "@types/lodash": "^4.14.149",
     "@types/webpack": "^4.41.0",
@@ -42,7 +44,7 @@
     "@vue/eslint-config-standard": "5.0.1",
     "@vue/eslint-config-typescript": "5.0.1",
     "@vue/test-utils": "1.0.0-beta.30",
-    "babel-core": "7.0.0-bridge.0",
+    "@babel/core": "7.7.5",
     "babel-eslint": "10.0.3",
     "babel-jest": "24.9.0",
     "babel-plugin-component": "1.1.1",
@@ -64,7 +66,7 @@
     "stylus": "0.54.7",
     "stylus-loader": "3.0.2",
     "ts-jest": "^24.2.0",
-    "typescript": "3.7.3",
+    "typescript": "3.7.5",
     "vue-template-compiler": "2.6.10"
   },
   "eslintConfig": {
