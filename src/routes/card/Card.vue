@@ -82,11 +82,11 @@
                       span
                         code this
                   li
-                    a(target='_blank' rel='noopener noreferrer' href='https://github.com/calebroseland/vue-dom-portal')
+                    external-link(to='https://github.com/calebroseland/vue-dom-portal')
                       span vue-dom-portal
                 ul
                   li
-                    a(target='_blank' rel='noopener noreferrer' href='https://gist.github.com/calebroseland')
+                    external-link(to='https://gist.github.com/calebroseland')
                       span Gists
 
           //- medium
@@ -111,30 +111,45 @@
                     external-link(to='https://medium.com/@calebroseland/has-recommended')
                       span Claps
                   li
-                    a(target='_blank' rel='noopener noreferrer' href='https://medium.com/@calebroseland/highlights')
+                    external-link(to='https://medium.com/@calebroseland/highlights')
                       span Highlights
 
-          //- social/other links
+          //- social links
           ul.menu-list.column
             css-transition(v-bind="contentTransitionProps")
               li(v-show="isBoxExpanded")
                 p.menu-label
                   span Social
                   icon(name="external-link-square-alt" scale=.75)
+
             li
               external-link(to='https://linkedin.com/in/calebroseland')
                 icon(name='brands/linkedin' scale=1.75)
                 span(:class="{'is-hidden-mobile': !isBoxExpanded}")  LinkedIn
+
             css-transition(v-bind="contentTransitionProps")
-              li(v-show='isBoxExpanded')
+              li(v-show="isBoxExpanded")
+                external-link(to='https://twitter.com/calebroseland')
+                  icon(name='brands/twitter' scale=1.75)
+                  span  Twitter
+
+            css-transition(v-bind="contentTransitionProps")
+              li(v-show="isBoxExpanded")
                 external-link(to='https://npmjs.com/~calebroseland')
                   icon(name='brands/npm' scale=1.75)
                   span  npm
+
             css-transition(v-bind="contentTransitionProps")
-              li(v-show='isBoxExpanded')
+              li(v-show="isBoxExpanded")
                 external-link(to='https://stackoverflow.com/users/1352410')
                   icon(name='brands/stack-overflow' scale=1.75)
                   span  Stack Overflow
+
+            css-transition(v-bind="contentTransitionProps")
+              li(v-show="isBoxExpanded")
+                external-link(to='https://pluralsight.com/profile/caleb-roseland')
+                  icon(name='pluralsight' scale=1.75)
+                  span  Pluralsight
 
         //- expand button
         button.button.is-text.is-fullwidth(@click='isBoxExpanded = !isBoxExpanded' aria-label='Expand')
