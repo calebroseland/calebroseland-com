@@ -8,6 +8,8 @@ pr:
     include:
     - master
 
+trigger: none
+
 pool:
   vmImage: 'Ubuntu-16.04'
 
