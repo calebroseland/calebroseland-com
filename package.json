@@ -58,7 +58,7 @@
     "eslint-plugin-vue": "6.0.1",
     "fibers": "^4.0.2",
     "jest-junit": "^10.0.0",
-    "node-sass": "4.13.0",
+    "node-sass": "4.13.1",
     "pug": "2.0.4",
     "pug-plain-loader": "1.0.0",
     "sass": "1.23.7",
