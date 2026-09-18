@@ -1,10 +1,23 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/content-schema" },
-    { "path": "packages/ui" },
-    { "path": "apps/web" },
-    { "path": "apps/web/tsconfig.worker.json" },
-    { "path": "apps/web/tsconfig.node.json" }
+    {
+      "path": "packages/content-schema"
+    },
+    {
+      "path": "packages/markdown"
+    },
+    {
+      "path": "packages/ui"
+    },
+    {
+      "path": "apps/web"
+    },
+    {
+      "path": "apps/web/tsconfig.worker.json"
+    },
+    {
+      "path": "apps/web/tsconfig.node.json"
+    }
   ]
 }
