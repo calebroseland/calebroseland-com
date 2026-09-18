@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist/tsc-node",
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"],
+    "jsx": "preserve",
+    "module": "ESNext"
+  },
+  "include": ["vite.config.ts", "vite", "playwright.config.ts", "playwright.smoke.config.ts", "e2e"]
+}

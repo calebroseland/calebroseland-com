@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist/tsc",
+    "rootDir": "src",
+    "types": ["vite/client"],
+    "paths": { "~/*": ["./src/*"] }
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
+  "references": [{ "path": "../../packages/ui" }, { "path": "../../packages/content-schema" }]
+}

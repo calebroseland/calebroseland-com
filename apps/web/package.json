@@ -1,0 +1,37 @@
+{
+  "name": "@crc/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:pages": "VITE_BASE=/calebroseland-com/ VITE_TARGET=pages vite build --outDir dist-pages && cp dist-pages/index.html dist-pages/404.html && touch dist-pages/.nojekyll",
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "smoke": "playwright test --config playwright.smoke.config.ts",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@crc/content-schema": "*",
+    "@crc/ui": "*",
+    "@tanstack/react-router": "^1.170.38",
+    "@tanstack/react-store": "^0.11.1",
+    "@tanstack/store": "^0.11.1",
+    "motion": "^13.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@cloudflare/vite-plugin": "^1.56.0",
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@playwright/test": "^1.63.0",
+    "@tanstack/router-plugin": "^1.168.40",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.3.0",
+    "wrangler": "^4.135.0"
+  }
+}

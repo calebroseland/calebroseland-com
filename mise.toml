@@ -1,0 +1,57 @@
+[tools]
+node = "24"
+
+[env]
+_.path = ["./node_modules/.bin"]
+
+[tasks.setup]
+description = "Install toolchain, dependencies, git hooks, and Playwright browsers"
+run = """
+npm ci
+git config core.hooksPath .githooks
+npx playwright install chromium webkit
+"""
+
+[tasks.dev]
+description = "Run the web app (SPA + Worker in workerd) with HMR"
+run = "npm run dev -w apps/web --"
+
+[tasks.build]
+description = "Production build of the web app"
+run = "npm run build -w apps/web"
+
+[tasks."build:pages"]
+description = "Build the GitHub Pages backup variant"
+run = "npm run build:pages -w apps/web"
+
+[tasks.typecheck]
+run = "tsc -b"
+
+[tasks.lint]
+run = "biome check ."
+
+[tasks.format]
+run = "biome check --write ."
+
+[tasks.test]
+run = "vitest run"
+
+[tasks."test:watch"]
+run = "vitest"
+
+[tasks."test:e2e"]
+run = "npm run test:e2e -w apps/web"
+
+[tasks.smoke]
+description = "Post-deploy smoke tests; BASE_URL required"
+run = "npm run smoke -w apps/web"
+
+[tasks.knip]
+run = "knip"
+
+[tasks.size]
+run = "size-limit"
+
+[tasks.check]
+description = "The gate: lint, typecheck, unit tests"
+depends = ["lint", "typecheck", "test"]
