@@ -1,13 +1,23 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+import { content } from "./apps/web/vite/content.ts";
+
+const root = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
+  // Makes virtual:content/* resolvable in unit and dom tests; individual tests vi.mock them for fixtures.
+  plugins: [content({ root, includeDrafts: true })],
   test: {
     projects: [
       {
         extends: true,
         test: {
           name: "unit",
-          include: ["packages/**/*.test.ts", "apps/web/src/**/*.test.ts"],
+          include: [
+            "packages/**/*.test.ts",
+            "apps/web/src/**/*.test.ts",
+            "apps/web/vite/**/*.test.ts",
+          ],
           environment: "node",
         },
       },

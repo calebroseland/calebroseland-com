@@ -1,41 +1,259 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { parseYaml, profile } from "@crc/content-schema";
+import { createHash } from "node:crypto";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { basename, dirname, extname, join, relative, resolve } from "node:path";
+import { type Entry, type EntryMeta, parseYaml, profile } from "@crc/content-schema";
+import { parseEntry, renderMarkdown } from "@crc/markdown";
 import type { Plugin } from "vite";
 
-/* Parses and validates content at build time and exposes it as JSON modules.
-   Keeps yaml and zod out of the client bundle and turns an invalid file into a build error
-   that names the file and field. Grows in Phase 2 to cover posts and pages. */
+/* Parses, validates, and renders everything under content/ at build time.
+   Exposes:
+     virtual:content/profile          → validated profile object
+     virtual:content/index            → EntryMeta[] (drafts excluded in production)
+     virtual:content/entry/<id>       → { meta, html, headings } for one entry (lazy per route)
+   Bundle assets referenced by markdown are emitted as hashed files. Invalid content fails the build with the path. */
 
-const VIRTUAL = "virtual:content/profile";
-const RESOLVED = `\0${VIRTUAL}`;
+const PROFILE = "virtual:content/profile";
+const INDEX = "virtual:content/index";
+const ENTRY = "virtual:content/entry/";
+const NULL = "\0";
 
-export function content(opts: { root: string }): Plugin {
-  const profilePath = resolve(opts.root, "content/profile.yaml");
-  return {
-    name: "crc:content",
-    resolveId(id) {
-      return id === VIRTUAL ? RESOLVED : null;
-    },
-    load(id) {
-      if (id !== RESOLVED) return null;
-      this.addWatchFile(profilePath);
-      let data: unknown;
+export type { EntryMeta };
+
+type Loaded = { id: string; dir: string; meta: Entry; body: string };
+
+function walk(dir: string, out: string[] = []): string[] {
+  if (!existsSync(dir)) return out;
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name);
+    if (statSync(p).isDirectory()) walk(p, out);
+    else if (name === "index.md") out.push(p);
+  }
+  return out;
+}
+
+export function content(opts: {
+  root: string;
+  includeDrafts?: boolean;
+  siteOrigin?: string;
+}): Plugin {
+  const contentDir = resolve(opts.root, "content");
+  const profilePath = join(contentDir, "profile.yaml");
+  let includeDrafts = opts.includeDrafts ?? false;
+  let isBuild = false;
+  const emitted = new Map<string, string>(); // absolute asset path → public url
+
+  function loadEntries(): Loaded[] {
+    const files = [...walk(join(contentDir, "posts")), ...walk(join(contentDir, "pages"))];
+    const entries = files.map((file) => {
+      let parsed: ReturnType<typeof parseEntry>;
       try {
-        data = parseYaml(profile, readFileSync(profilePath, "utf8"));
+        parsed = parseEntry(readFileSync(file, "utf8"));
       } catch (err) {
         throw new Error(
-          `content/profile.yaml is invalid:\n${err instanceof Error ? err.message : String(err)}`,
+          `${relative(opts.root, file)} is invalid:\n${err instanceof Error ? err.message : String(err)}`,
         );
       }
-      return `export default ${JSON.stringify(data)};`;
+      const dir = dirname(file);
+      return { id: relative(contentDir, dir).replaceAll("\\", "/"), dir, ...parsed };
+    });
+    const slugs = new Map<string, string>();
+    for (const e of entries) {
+      const key = `${e.meta.kind}:${e.meta.slug}`;
+      const prev = slugs.get(key);
+      if (prev)
+        throw new Error(`duplicate ${e.meta.kind} slug "${e.meta.slug}" in ${prev} and ${e.id}`);
+      slugs.set(key, e.id);
+    }
+    return entries
+      .filter((e) => includeDrafts || !e.meta.draft)
+      .sort((a, b) => +b.meta.date - +a.meta.date);
+  }
+
+  const toMeta = (e: Loaded): EntryMeta => {
+    const heroMatch = e.body.match(/!\[[^\]]*\]\(([^)\s]+)\)/);
+    const hero =
+      heroMatch?.[1] && !/^(https?:)?\/\//.test(heroMatch[1])
+        ? assetUrl(e.dir, heroMatch[1])
+        : undefined;
+    return {
+      ...e.meta,
+      id: e.id,
+      date: e.meta.date.toISOString(),
+      dir: e.id,
+      ...(hero ? { hero } : {}),
+    };
+  };
+
+  function assetUrl(dir: string, src: string): string {
+    const abs = resolve(dir, src);
+    if (!abs.startsWith(contentDir) || !existsSync(abs))
+      throw new Error(`missing asset ${src} referenced from ${relative(opts.root, dir)}`);
+    if (!isBuild) return `/@content/${relative(contentDir, abs).replaceAll("\\", "/")}`;
+    const cached = emitted.get(abs);
+    if (cached) return cached;
+    const buf = readFileSync(abs);
+    const hash = createHash("sha256").update(buf).digest("hex").slice(0, 8);
+    const name = `content/${basename(abs, extname(abs))}-${hash}${extname(abs)}`;
+    emitted.set(abs, `/${name}`);
+    pendingAssets.push({ fileName: name, source: buf });
+    return `/${name}`;
+  }
+  const pendingAssets: Array<{ fileName: string; source: Buffer }> = [];
+
+  return {
+    name: "crc:content",
+    configResolved(config) {
+      isBuild = config.command === "build";
+      includeDrafts = opts.includeDrafts ?? config.mode !== "production";
+    },
+    configureServer(server) {
+      // Serve bundle assets straight from content/ in dev.
+      server.middlewares.use((req, res, next) => {
+        const path = req.url?.split("?")[0];
+        if (path === "/feed.xml" || path === "/sitemap.xml") {
+          const origin = opts.siteOrigin ?? "https://calebroseland.com";
+          const entries = loadEntries().map(toMeta);
+          res.setHeader("content-type", "application/xml; charset=utf-8");
+          res.end(
+            path === "/feed.xml"
+              ? feedXml(
+                  origin,
+                  entries.filter((e) => e.kind === "post"),
+                )
+              : sitemapXml(origin, entries),
+          );
+          return;
+        }
+        if (!req.url?.startsWith("/@content/")) return next();
+        const rel = decodeURIComponent(req.url.slice("/@content/".length).split("?")[0] ?? "");
+        const abs = resolve(contentDir, rel);
+        if (!abs.startsWith(contentDir) || !existsSync(abs)) return next();
+        const type = {
+          ".png": "image/png",
+          ".jpg": "image/jpeg",
+          ".jpeg": "image/jpeg",
+          ".webp": "image/webp",
+          ".avif": "image/avif",
+          ".svg": "image/svg+xml",
+          ".gif": "image/gif",
+        }[extname(abs).toLowerCase()];
+        if (type) res.setHeader("content-type", type);
+        res.end(readFileSync(abs));
+      });
+      server.watcher.add(contentDir);
+    },
+    resolveId(id) {
+      if (id === PROFILE || id === INDEX || id.startsWith(ENTRY)) return NULL + id;
+      return null;
+    },
+    async load(id) {
+      if (!id.startsWith(NULL)) return null;
+      const bare = id.slice(1);
+      if (bare === PROFILE) {
+        this.addWatchFile(profilePath);
+        try {
+          return `export default ${JSON.stringify(parseYaml(profile, readFileSync(profilePath, "utf8")))};`;
+        } catch (err) {
+          throw new Error(
+            `content/profile.yaml is invalid:\n${err instanceof Error ? err.message : String(err)}`,
+          );
+        }
+      }
+      if (bare === INDEX) {
+        const entries = loadEntries();
+        for (const e of entries) this.addWatchFile(join(e.dir, "index.md"));
+        // Static import() literals so Vite can resolve and code-split one chunk per entry.
+        const loaders = entries
+          .map(
+            (e) =>
+              `  ${JSON.stringify(e.id)}: () => import(${JSON.stringify(ENTRY + encodeURIComponent(e.id))}),`,
+          )
+          .join("\n");
+        return `export default ${JSON.stringify(entries.map(toMeta))};\nexport const loaders = {\n${loaders}\n};`;
+      }
+      if (bare.startsWith(ENTRY)) {
+        const wanted = decodeURIComponent(bare.slice(ENTRY.length));
+        const e = loadEntries().find((x) => x.id === wanted);
+        if (!e) throw new Error(`no content entry ${wanted}`);
+        this.addWatchFile(join(e.dir, "index.md"));
+        const { html, headings } = await renderMarkdown(e.body, {
+          resolveImage: (src) => assetUrl(e.dir, src),
+        });
+        return `export default ${JSON.stringify({ meta: toMeta(e), html, headings })};`;
+      }
+      return null;
+    },
+    generateBundle() {
+      for (const a of pendingAssets)
+        this.emitFile({ type: "asset", fileName: a.fileName, source: a.source });
+      pendingAssets.length = 0;
     },
     handleHotUpdate({ file, server }) {
-      if (file === profilePath) {
-        const mod = server.moduleGraph.getModuleById(RESOLVED);
-        if (mod) server.moduleGraph.invalidateModule(mod);
-        server.ws.send({ type: "full-reload" });
+      if (!file.startsWith(contentDir)) return;
+      for (const mod of server.moduleGraph.idToModuleMap.values()) {
+        if (mod.id?.includes("virtual:content/")) server.moduleGraph.invalidateModule(mod);
       }
+      server.ws.send({ type: "full-reload" });
+      return [];
+    },
+    // Feed and sitemap are emitted at build so the Worker serves them as static assets.
+    async buildStart() {
+      if (!isBuild) return;
+      const origin = opts.siteOrigin ?? "https://calebroseland.com";
+      const entries = loadEntries().map(toMeta);
+      const postsOnly = entries.filter((e) => e.kind === "post");
+      this.emitFile({ type: "asset", fileName: "feed.xml", source: feedXml(origin, postsOnly) });
+      this.emitFile({
+        type: "asset",
+        fileName: "sitemap.xml",
+        source: sitemapXml(origin, entries),
+      });
     },
   };
+}
+
+const esc = (s: string) =>
+  s.replace(
+    /[<>&"']/g,
+    (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#39;" })[c] ?? c,
+  );
+
+export function entryUrl(origin: string, e: EntryMeta): string {
+  return e.kind === "post" ? `${origin}/posts/${e.slug}` : `${origin}/${e.slug}`;
+}
+
+export function feedXml(origin: string, posts: EntryMeta[]): string {
+  const items = posts
+    .map(
+      (p) => `  <item>
+    <title>${esc(p.title)}</title>
+    <link>${entryUrl(origin, p)}</link>
+    <guid isPermaLink="true">${entryUrl(origin, p)}</guid>
+    <pubDate>${new Date(p.date).toUTCString()}</pubDate>${p.summary ? `\n    <description>${esc(p.summary)}</description>` : ""}
+  </item>`,
+    )
+    .join("\n");
+  const updated = posts[0] ? new Date(posts[0].date).toUTCString() : new Date(0).toUTCString();
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>Caleb Roseland</title>
+  <link>${origin}/</link>
+  <description>Posts</description>
+  <language>en</language>
+  <lastBuildDate>${updated}</lastBuildDate>
+  <atom:link href="${origin}/feed.xml" rel="self" type="application/rss+xml"/>
+${items}
+</channel>
+</rss>
+`;
+}
+
+export function sitemapXml(origin: string, entries: EntryMeta[]): string {
+  const urls = [`${origin}/`, `${origin}/posts`, ...entries.map((e) => entryUrl(origin, e))];
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}
+</urlset>
+`;
 }

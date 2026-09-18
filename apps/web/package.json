@@ -14,13 +14,15 @@
   },
   "dependencies": {
     "@crc/content-schema": "*",
+    "@crc/markdown": "*",
     "@crc/ui": "*",
     "@tanstack/react-router": "^1.170.38",
     "@tanstack/react-store": "^0.11.1",
     "@tanstack/store": "^0.11.1",
     "motion": "^13.4.0",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

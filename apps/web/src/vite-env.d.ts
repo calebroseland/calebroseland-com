@@ -9,3 +9,11 @@ declare module "virtual:content/profile" {
   const data: import("@crc/content-schema").Profile;
   export default data;
 }
+declare module "virtual:content/index" {
+  const data: import("@crc/content-schema").EntryMeta[];
+  export default data;
+  export const loaders: Record<
+    string,
+    () => Promise<{ default: import("./content/entries.ts").LoadedEntry }>
+  >;
+}

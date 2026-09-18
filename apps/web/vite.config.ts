@@ -19,7 +19,7 @@ export default defineConfig({
     __API_ORIGIN__: JSON.stringify(process.env.VITE_API_ORIGIN ?? ""),
   },
   plugins: [
-    content({ root: repoRoot }),
+    content({ root: repoRoot, siteOrigin: process.env.SITE_ORIGIN ?? "https://calebroseland.com" }),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
