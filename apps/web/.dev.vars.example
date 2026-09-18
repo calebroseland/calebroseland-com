@@ -1,4 +1,6 @@
-# Copy to .dev.vars (git-ignored). Values are placeholders until Phase 3 (auth).
+# Copy to .dev.vars (git-ignored). Without GITHUB_CLIENT_ID/SECRET the studio offers the local fake GitHub
+# and token entry instead of OAuth. GITHUB_OAUTH_ORIGIN is only for tests that stub GitHub.
 SITE_ORIGIN=http://localhost:5173
-# GITHUB_CLIENT_ID=
-# GITHUB_CLIENT_SECRET=
+ALLOWED_ORIGINS=http://localhost:5173
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=

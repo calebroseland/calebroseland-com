@@ -12,7 +12,9 @@
   "vars": {
     "ENVIRONMENT": "production",
     "SITE_ORIGIN": "https://calebroseland.com",
-    "ALLOWED_ORIGINS": "https://calebroseland.com,https://calebroseland.github.io"
+    "ALLOWED_ORIGINS": "https://calebroseland.com,https://calebroseland.github.io",
+    // Public. Set per environment once the GitHub App exists; the secret is set with `wrangler secret put`.
+    "GITHUB_CLIENT_ID": ""
   },
   // The apex custom domain is added here at cutover (spec §10.3). Until then production is workers.dev only.
   "env": {
@@ -22,7 +24,8 @@
       "vars": {
         "ENVIRONMENT": "staging",
         "SITE_ORIGIN": "https://next.calebroseland.com",
-        "ALLOWED_ORIGINS": "https://next.calebroseland.com,https://calebroseland.github.io"
+        "ALLOWED_ORIGINS": "https://next.calebroseland.com,https://calebroseland.github.io",
+        "GITHUB_CLIENT_ID": ""
       }
     }
   }
