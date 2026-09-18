@@ -10,33 +10,123 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SlugRouteImport } from './routes/$slug'
+import { Route as StudioRouteImport } from './routes/studio'
+import { Route as PostsIndexRouteImport } from './routes/posts.index'
+import { Route as PostsSlugRouteImport } from './routes/posts.$slug'
+import { Route as StudioIndexRouteImport } from './routes/studio.index'
+import { Route as StudioCallbackRouteImport } from './routes/studio.callback'
+import { Route as StudioLoginRouteImport } from './routes/studio.login'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SlugRoute = SlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsIndexRoute = PostsIndexRouteImport.update({
+  id: '/posts/',
+  path: '/posts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsSlugRoute = PostsSlugRouteImport.update({
+  id: '/posts/$slug',
+  path: '/posts/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioIndexRoute = StudioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioCallbackRoute = StudioCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioLoginRoute = StudioLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => StudioRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/studio': typeof StudioRouteWithChildren
+  '/posts/$slug': typeof PostsSlugRoute
+  '/studio/callback': typeof StudioCallbackRoute
+  '/studio/login': typeof StudioLoginRoute
+  '/posts/': typeof PostsIndexRoute
+  '/studio/': typeof StudioIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/posts/$slug': typeof PostsSlugRoute
+  '/studio/callback': typeof StudioCallbackRoute
+  '/studio/login': typeof StudioLoginRoute
+  '/posts': typeof PostsIndexRoute
+  '/studio': typeof StudioIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/studio': typeof StudioRouteWithChildren
+  '/posts/$slug': typeof PostsSlugRoute
+  '/studio/callback': typeof StudioCallbackRoute
+  '/studio/login': typeof StudioLoginRoute
+  '/posts/': typeof PostsIndexRoute
+  '/studio/': typeof StudioIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/$slug'
+    | '/studio'
+    | '/posts/$slug'
+    | '/studio/callback'
+    | '/studio/login'
+    | '/posts/'
+    | '/studio/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/$slug'
+    | '/posts/$slug'
+    | '/studio/callback'
+    | '/studio/login'
+    | '/posts'
+    | '/studio'
+  id:
+    | '__root__'
+    | '/'
+    | '/$slug'
+    | '/studio'
+    | '/posts/$slug'
+    | '/studio/callback'
+    | '/studio/login'
+    | '/posts/'
+    | '/studio/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SlugRoute: typeof SlugRoute
+  StudioRoute: typeof StudioRouteWithChildren
+  PostsSlugRoute: typeof PostsSlugRoute
+  PostsIndexRoute: typeof PostsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +138,79 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$slug': {
+      id: '/$slug'
+      path: '/$slug'
+      fullPath: '/$slug'
+      preLoaderRoute: typeof SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/': {
+      id: '/posts/'
+      path: '/posts'
+      fullPath: '/posts/'
+      preLoaderRoute: typeof PostsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/$slug': {
+      id: '/posts/$slug'
+      path: '/posts/$slug'
+      fullPath: '/posts/$slug'
+      preLoaderRoute: typeof PostsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio/': {
+      id: '/studio/'
+      path: '/'
+      fullPath: '/studio/'
+      preLoaderRoute: typeof StudioIndexRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/callback': {
+      id: '/studio/callback'
+      path: '/callback'
+      fullPath: '/studio/callback'
+      preLoaderRoute: typeof StudioCallbackRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/login': {
+      id: '/studio/login'
+      path: '/login'
+      fullPath: '/studio/login'
+      preLoaderRoute: typeof StudioLoginRouteImport
+      parentRoute: typeof StudioRoute
+    }
   }
 }
 
+interface StudioRouteChildren {
+  StudioCallbackRoute: typeof StudioCallbackRoute
+  StudioLoginRoute: typeof StudioLoginRoute
+  StudioIndexRoute: typeof StudioIndexRoute
+}
+
+const StudioRouteChildren: StudioRouteChildren = {
+  StudioCallbackRoute: StudioCallbackRoute,
+  StudioLoginRoute: StudioLoginRoute,
+  StudioIndexRoute: StudioIndexRoute,
+}
+
+const StudioRouteWithChildren =
+  StudioRoute._addFileChildren(StudioRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SlugRoute: SlugRoute,
+  StudioRoute: StudioRouteWithChildren,
+  PostsSlugRoute: PostsSlugRoute,
+  PostsIndexRoute: PostsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
