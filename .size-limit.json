@@ -16,5 +16,11 @@
     "path": ["apps/web/dist/client/assets/*.css"],
     "limit": "30 kB",
     "gzip": true
+  },
+  {
+    "name": "studio editor chunk (gzip)",
+    "path": ["apps/web/dist/client/assets/studio._draft-*.js"],
+    "limit": "600 kB",
+    "gzip": true
   }
 ]

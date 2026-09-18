@@ -25,6 +25,8 @@ test.describe("studio auth", () => {
     await expect(page.getByText("fake-user")).toBeVisible();
     await page.getByRole("button", { name: "Sign out" }).click();
     await expect(page).toHaveURL(/\/studio\/login/);
+    // Let the login route finish loading before navigating again (WebKit cancels in-flight imports otherwise).
+    await expect(page.getByRole("button", { name: "Sign in with GitHub" })).toBeVisible();
     await page.goto("/studio");
     await expect(page).toHaveURL(/\/studio\/login/);
   });
