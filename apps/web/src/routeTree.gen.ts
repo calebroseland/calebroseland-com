@@ -15,8 +15,11 @@ import { Route as StudioRouteImport } from './routes/studio'
 import { Route as PostsIndexRouteImport } from './routes/posts.index'
 import { Route as PostsSlugRouteImport } from './routes/posts.$slug'
 import { Route as StudioIndexRouteImport } from './routes/studio.index'
+import { Route as StudioDraftRouteImport } from './routes/studio.$draft'
 import { Route as StudioCallbackRouteImport } from './routes/studio.callback'
 import { Route as StudioLoginRouteImport } from './routes/studio.login'
+import { Route as StudioNewRouteImport } from './routes/studio.new'
+import { Route as StudioProfileRouteImport } from './routes/studio.profile'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -48,6 +51,11 @@ const StudioIndexRoute = StudioIndexRouteImport.update({
   path: '/',
   getParentRoute: () => StudioRoute,
 } as any)
+const StudioDraftRoute = StudioDraftRouteImport.update({
+  id: '/$draft',
+  path: '/$draft',
+  getParentRoute: () => StudioRoute,
+} as any)
 const StudioCallbackRoute = StudioCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
@@ -58,14 +66,27 @@ const StudioLoginRoute = StudioLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => StudioRoute,
 } as any)
+const StudioNewRoute = StudioNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioProfileRoute = StudioProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => StudioRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/studio': typeof StudioRouteWithChildren
   '/posts/$slug': typeof PostsSlugRoute
+  '/studio/$draft': typeof StudioDraftRoute
   '/studio/callback': typeof StudioCallbackRoute
   '/studio/login': typeof StudioLoginRoute
+  '/studio/new': typeof StudioNewRoute
+  '/studio/profile': typeof StudioProfileRoute
   '/posts/': typeof PostsIndexRoute
   '/studio/': typeof StudioIndexRoute
 }
@@ -73,8 +94,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/studio/$draft': typeof StudioDraftRoute
   '/studio/callback': typeof StudioCallbackRoute
   '/studio/login': typeof StudioLoginRoute
+  '/studio/new': typeof StudioNewRoute
+  '/studio/profile': typeof StudioProfileRoute
   '/posts': typeof PostsIndexRoute
   '/studio': typeof StudioIndexRoute
 }
@@ -84,8 +108,11 @@ export interface FileRoutesById {
   '/$slug': typeof SlugRoute
   '/studio': typeof StudioRouteWithChildren
   '/posts/$slug': typeof PostsSlugRoute
+  '/studio/$draft': typeof StudioDraftRoute
   '/studio/callback': typeof StudioCallbackRoute
   '/studio/login': typeof StudioLoginRoute
+  '/studio/new': typeof StudioNewRoute
+  '/studio/profile': typeof StudioProfileRoute
   '/posts/': typeof PostsIndexRoute
   '/studio/': typeof StudioIndexRoute
 }
@@ -96,8 +123,11 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/studio'
     | '/posts/$slug'
+    | '/studio/$draft'
     | '/studio/callback'
     | '/studio/login'
+    | '/studio/new'
+    | '/studio/profile'
     | '/posts/'
     | '/studio/'
   fileRoutesByTo: FileRoutesByTo
@@ -105,8 +135,11 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/posts/$slug'
+    | '/studio/$draft'
     | '/studio/callback'
     | '/studio/login'
+    | '/studio/new'
+    | '/studio/profile'
     | '/posts'
     | '/studio'
   id:
@@ -115,8 +148,11 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/studio'
     | '/posts/$slug'
+    | '/studio/$draft'
     | '/studio/callback'
     | '/studio/login'
+    | '/studio/new'
+    | '/studio/profile'
     | '/posts/'
     | '/studio/'
   fileRoutesById: FileRoutesById
@@ -173,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioIndexRouteImport
       parentRoute: typeof StudioRoute
     }
+    '/studio/$draft': {
+      id: '/studio/$draft'
+      path: '/$draft'
+      fullPath: '/studio/$draft'
+      preLoaderRoute: typeof StudioDraftRouteImport
+      parentRoute: typeof StudioRoute
+    }
     '/studio/callback': {
       id: '/studio/callback'
       path: '/callback'
@@ -187,18 +230,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioLoginRouteImport
       parentRoute: typeof StudioRoute
     }
+    '/studio/new': {
+      id: '/studio/new'
+      path: '/new'
+      fullPath: '/studio/new'
+      preLoaderRoute: typeof StudioNewRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/studio/profile': {
+      id: '/studio/profile'
+      path: '/profile'
+      fullPath: '/studio/profile'
+      preLoaderRoute: typeof StudioProfileRouteImport
+      parentRoute: typeof StudioRoute
+    }
   }
 }
 
 interface StudioRouteChildren {
+  StudioDraftRoute: typeof StudioDraftRoute
   StudioCallbackRoute: typeof StudioCallbackRoute
   StudioLoginRoute: typeof StudioLoginRoute
+  StudioNewRoute: typeof StudioNewRoute
+  StudioProfileRoute: typeof StudioProfileRoute
   StudioIndexRoute: typeof StudioIndexRoute
 }
 
 const StudioRouteChildren: StudioRouteChildren = {
+  StudioDraftRoute: StudioDraftRoute,
   StudioCallbackRoute: StudioCallbackRoute,
   StudioLoginRoute: StudioLoginRoute,
+  StudioNewRoute: StudioNewRoute,
+  StudioProfileRoute: StudioProfileRoute,
   StudioIndexRoute: StudioIndexRoute,
 }
 

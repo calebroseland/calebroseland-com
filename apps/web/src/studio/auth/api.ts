@@ -2,7 +2,7 @@ import * as z from "zod/mini";
 
 /* Client for the Worker's /api/auth routes. Same-origin in production; the Pages backup points at the production Worker. */
 
-export const apiOrigin = (): string => (typeof __API_ORIGIN__ === "string" && __API_ORIGIN__) || "";
+const apiOrigin = (): string => (typeof __API_ORIGIN__ === "string" && __API_ORIGIN__) || "";
 
 const configSchema = z.object({ enabled: z.boolean(), clientId: z.nullable(z.string()) });
 const tokenSchema = z.object({

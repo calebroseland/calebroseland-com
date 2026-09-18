@@ -7,7 +7,7 @@ import {
 } from "@crc/github-client";
 import type { Session } from "../auth/store.ts";
 
-export const repo: RepoRef = {
+const repo: RepoRef = {
   owner: "calebroseland",
   repo: "calebroseland-com",
   defaultBranch: "master",
@@ -36,12 +36,9 @@ function fakeStorage() {
 }
 
 let fakeSingleton: ReturnType<typeof createFakeClient> | undefined;
-export function fakeClient() {
+function fakeClient() {
   fakeSingleton ??= createFakeClient({ storage: fakeStorage(), latencyMs: 120 });
   return fakeSingleton;
-}
-export function resetFake() {
-  fakeClient().reset();
 }
 
 /** One client per session; the fake persists to localStorage so a dev session survives reloads. */

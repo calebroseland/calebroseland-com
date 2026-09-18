@@ -29,7 +29,35 @@ export default defineConfig({
     react(),
     ...(isPages ? [] : [cloudflare()]),
   ],
-  server: { port: 5173, strictPort: true },
+  server: {
+    port: 5173,
+    strictPort: true,
+    // Transform every route and studio module at startup so dependency discovery finishes before the first request.
+    warmup: { clientFiles: ["./src/main.tsx", "./src/routes/**/*.tsx", "./src/studio/**/*.tsx"] },
+  },
+  // Studio routes are lazy; pre-bundle their deps so the first visit in dev does not trigger a re-optimize reload.
+  optimizeDeps: {
+    include: [
+      "@tiptap/react",
+      "@tiptap/starter-kit",
+      "@tiptap/markdown",
+      "@tiptap/extension-image",
+      "@tiptap/extension-link",
+      "@tiptap/extension-placeholder",
+      "@base-ui/react/alert-dialog",
+      "@base-ui/react/menu",
+      "@tanstack/react-form",
+      "@tanstack/react-query",
+      "@atlaskit/pragmatic-drag-and-drop/element/adapter",
+      "@atlaskit/pragmatic-drag-and-drop/combine",
+      "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge",
+      "@octokit/core",
+      "@octokit/plugin-rest-endpoint-methods",
+      "yaml",
+      "zod",
+      "zod/mini",
+    ],
+  },
   build: {
     sourcemap: true,
   },
