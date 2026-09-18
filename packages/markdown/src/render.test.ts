@@ -67,3 +67,24 @@ describe("renderMarkdown", () => {
     expect(html).not.toMatch(/href="\/local"[^>]*target/);
   });
 });
+
+describe("serializeEntry output", () => {
+  it("writes a fenced YAML block GitHub renders, with the date as YYYY-MM-DD", () => {
+    const out = serializeEntry({
+      meta: {
+        kind: "post",
+        title: "T",
+        slug: "t",
+        date: new Date("2026-09-18T00:00:00Z"),
+        draft: true,
+        tags: ["a"],
+        placeholder: false,
+      },
+      body: "\n\n# Body",
+    });
+    expect(out).toBe(
+      "---\nkind: post\ntitle: T\nslug: t\ndate: 2026-09-18\ndraft: true\ntags:\n  - a\n---\n\n# Body\n",
+    );
+    expect(parseEntry(out).body.trim()).toBe("# Body");
+  });
+});
