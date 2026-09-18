@@ -1,0 +1,18 @@
+@layer components {
+  .indicator {
+    position: absolute;
+    inset-inline: 0;
+    block-size: var(--border-width-thick);
+    background: var(--color-accent);
+    pointer-events: none;
+    z-index: var(--z-drag);
+
+    &[data-edge="top"] {
+      inset-block-start: calc(-1 * var(--border-width));
+    }
+
+    &[data-edge="bottom"] {
+      inset-block-end: calc(-1 * var(--border-width));
+    }
+  }
+}

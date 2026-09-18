@@ -11,6 +11,9 @@
       "path": "packages/github-client"
     },
     {
+      "path": "packages/interaction"
+    },
+    {
       "path": "packages/ui"
     },
     {

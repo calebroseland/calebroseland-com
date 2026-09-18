@@ -19,3 +19,4 @@ blob-report/
 .tanstack/
 routeTree.gen.ts.tmp
 dist-pages/
+*.tsbuildinfo
