@@ -1,5 +1,0 @@
-# SPA redirect to index
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
