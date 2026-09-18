@@ -1,0 +1,9 @@
+/* Single entry. Layer order is the override order; nothing else declares layers. */
+@layer reset, tokens, base, layout, components, utilities;
+
+@import "./tokens/primitives.css";
+@import "./tokens/themes/light.css";
+@import "./tokens/themes/dark.css";
+@import "./base/reset.css";
+@import "./base/elements.css";
+@import "./base/prose.css";

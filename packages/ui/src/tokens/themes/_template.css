@@ -1,0 +1,8 @@
+/* Copy to <name>.css, rename the selector, and reassign only semantic tokens.
+   The cheap path is a hue shift; leave everything else inherited. */
+@layer tokens {
+  [data-theme="template"] {
+    --hue-accent: 205;
+    --hue-neutral: 250;
+  }
+}
