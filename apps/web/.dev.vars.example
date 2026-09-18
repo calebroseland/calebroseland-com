@@ -1,0 +1,4 @@
+# Copy to .dev.vars (git-ignored). Values are placeholders until Phase 3 (auth).
+SITE_ORIGIN=http://localhost:5173
+# GITHUB_CLIENT_ID=
+# GITHUB_CLIENT_SECRET=
