@@ -26,5 +26,13 @@ export const page = base.extend({ kind: z.literal("page") });
 export const entry = z.discriminatedUnion("kind", [post, page]);
 
 export type Entry = z.infer<typeof entry>;
+
+/** Build-time index record for one entry: frontmatter with the date serialized, plus its identity and optional hero url. */
+export type EntryMeta = Omit<Entry, "date"> & {
+  id: string;
+  dir: string;
+  date: string;
+  hero?: string;
+};
 export type Post = z.infer<typeof post>;
 export type Page = z.infer<typeof page>;
