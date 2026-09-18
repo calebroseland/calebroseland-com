@@ -1,0 +1,22 @@
+# Placeholder copy carried over from the 2019 Vue card. Links are real; prose is not final.
+placeholder: true
+name: Caleb Roseland
+tagline: Software Engineer
+tags: [TypeScript, React, Web Platform]
+groups:
+  - title: Projects
+    links:
+      - { label: GitHub, url: https://github.com/calebroseland, icon: mdiGithub }
+      - { label: Gists, url: https://gist.github.com/calebroseland, icon: mdiCodeBraces }
+      - { label: vue-dom-portal, url: https://github.com/calebroseland/vue-dom-portal, icon: mdiSourceBranch }
+  - title: Writing
+    links:
+      - { label: Medium, url: https://medium.com/@calebroseland, icon: mdiPencil }
+      - { label: State Management in Vue, url: https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81, icon: mdiFileDocumentOutline }
+  - title: Social
+    links:
+      - { label: LinkedIn, url: https://linkedin.com/in/calebroseland, icon: mdiLinkedin }
+      - { label: Twitter, url: https://twitter.com/calebroseland, icon: mdiTwitter }
+      - { label: npm, url: https://npmjs.com/~calebroseland, icon: mdiNpm }
+      - { label: Stack Overflow, url: https://stackoverflow.com/users/1352410, icon: mdiStackOverflow }
+      - { label: Pluralsight, url: https://pluralsight.com/profile/caleb-roseland, icon: mdiSchoolOutline }
