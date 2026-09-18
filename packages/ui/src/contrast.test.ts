@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { converter, wcagContrast } from "culori";
+import { clampChroma, converter, wcagContrast } from "culori";
 import { describe, expect, it } from "vitest";
 
 /* Resolves the semantic token graph per theme and asserts WCAG AA on every text/background pairing.
@@ -27,7 +27,8 @@ function resolve(vars: Map<string, string>, value: string, depth = 0): string {
   });
 }
 
-const toRgb = converter("rgb");
+// Browsers gamut-map OKLCH to sRGB before painting, so measure the clipped colour, as axe does.
+const toRgb = (c: string) => clampChroma(converter("rgb")(c), "rgb");
 function contrast(vars: Map<string, string>, fg: string, bg: string): number {
   const f = toRgb(resolve(vars, `var(${fg})`));
   const b = toRgb(resolve(vars, `var(${bg})`));
