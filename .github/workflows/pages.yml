@@ -1,0 +1,47 @@
+name: pages
+
+# Reusable: builds the path-prefixed static variant and publishes it to GitHub Pages.
+# Fully independent of Cloudflare; the site works here even if Workers or Cloudflare DNS are down.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad4ec120d5209a95 # v4.3.1
+      - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
+        with: { cache: true }
+      - run: npm ci
+      - run: mise run build:pages
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          VITE_API_ORIGIN: https://calebroseland.com
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with: { path: apps/web/dist-pages }
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+      - uses: actions/checkout@34e114876b0b11c390a56381ad4ec120d5209a95 # v4.3.1
+      - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
+        with: { cache: true }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: mise run smoke
+        env:
+          BASE_URL: ${{ steps.deployment.outputs.page_url }}
+          SMOKE_STATIC: "1"

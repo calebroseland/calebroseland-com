@@ -1,0 +1,47 @@
+name: staging
+
+on:
+  push:
+    branches: [next]
+  workflow_dispatch:
+
+concurrency:
+  group: staging
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  worker:
+    name: deploy staging worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: staging
+      url: https://next.calebroseland.com
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad4ec120d5209a95 # v4.3.1
+      - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
+        with: { cache: true }
+      - run: npm ci
+      - run: mise run build
+        env: { GITHUB_SHA: "${{ github.sha }}" }
+      - run: npx wrangler deploy --env staging
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - run: npx playwright install --with-deps chromium
+      - run: mise run smoke
+        env:
+          BASE_URL: https://next.calebroseland.com
+          EXPECTED_SHA: ${{ github.sha }}
+
+  pages:
+    # Pre-cutover the backup tracks `next` so it can be verified early; deploy.yml takes over on master.
+    name: deploy pages backup
+    uses: ./.github/workflows/pages.yml
+    secrets: inherit
