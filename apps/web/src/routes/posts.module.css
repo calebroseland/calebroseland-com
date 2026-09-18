@@ -1,0 +1,45 @@
+@layer components {
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    margin-block: calc(-1 * var(--space-6)) var(--space-8);
+  }
+
+  .clear {
+    font-size: var(--font-size-sm);
+  }
+
+  .list {
+    max-inline-size: var(--measure);
+  }
+
+  .item {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .itemTitle {
+    font-size: var(--font-size-xl);
+
+    & a {
+      color: var(--color-text);
+      text-decoration: none;
+
+      &:hover {
+        color: var(--color-link);
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .itemDate {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  .summary {
+    color: var(--color-text-muted);
+  }
+}

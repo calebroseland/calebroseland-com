@@ -2,6 +2,7 @@ import type { Profile } from "@crc/content-schema";
 import { Center, Cluster, durations, eases, Grid, Icon, Stack } from "@crc/ui";
 import * as icons from "@crc/ui/icons";
 import { mdiOpenInNew } from "@crc/ui/icons";
+import { Link } from "@tanstack/react-router";
 import { m, useReducedMotion } from "motion/react";
 import styles from "./Landing.module.css";
 import { ThemeToggle } from "./ThemeToggle.tsx";
@@ -21,6 +22,9 @@ export function Landing({ profile }: { profile: Profile }) {
   return (
     <div className={styles.page}>
       <header className={styles.bar}>
+        <Link to="/posts" className={styles.postsLink}>
+          Posts
+        </Link>
         <ThemeToggle />
       </header>
       <Center as="main" id="main" max="48rem" className={styles.main}>
