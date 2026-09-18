@@ -8,6 +8,9 @@
       "path": "packages/markdown"
     },
     {
+      "path": "packages/github-client"
+    },
+    {
       "path": "packages/ui"
     },
     {
