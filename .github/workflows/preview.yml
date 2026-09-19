@@ -1,0 +1,53 @@
+name: preview
+
+# Draft branches get a preview URL via `wrangler versions upload`; the URL is posted once per PR and kept current.
+on:
+  push:
+    branches: ["drafts/**"]
+
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad4ec120d5209a95 # v4.3.1
+      - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
+        with: { cache: true }
+      - run: npm ci
+      - run: mise run build
+        env: { GITHUB_SHA: "${{ github.sha }}" }
+      - id: upload
+        run: |
+          out=$(npx wrangler versions upload --message "${GITHUB_REF_NAME}" 2>&1)
+          echo "$out"
+          url=$(echo "$out" | grep -Eo 'https://[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev' | head -1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Comment preview URL on the PR (idempotent)
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          PREVIEW_URL: ${{ steps.upload.outputs.url }}
+        with:
+          script: |
+            const marker = "<!-- crc-preview -->";
+            const url = process.env.PREVIEW_URL;
+            if (!url) { core.warning("no preview url"); return; }
+            const { data: prs } = await github.rest.pulls.list({ ...context.repo, state: "open", head: `${context.repo.owner}:${context.ref.replace("refs/heads/", "")}` });
+            for (const pr of prs) {
+              const body = `${marker}\nPreview: ${url}\n\nBuilt from ${context.sha.slice(0, 7)}.`;
+              const { data: comments } = await github.rest.issues.listComments({ ...context.repo, issue_number: pr.number });
+              const mine = comments.find((c) => c.body?.startsWith(marker));
+              if (mine) await github.rest.issues.updateComment({ ...context.repo, comment_id: mine.id, body });
+              else await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body });
+            }
