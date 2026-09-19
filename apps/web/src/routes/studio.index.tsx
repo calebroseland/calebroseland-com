@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ConfirmDialog } from "../studio/Dialogs.tsx";
 import { RowMenu, RowMenuItem } from "../studio/drafts/RowMenu.tsx";
 import { mergeEntries, publishedQuery, type StudioEntry } from "../studio/entries.ts";
+import { deleteLocalEntry } from "../studio/github/local.ts";
 import { beginEditing } from "../studio/github/mutations.ts";
 import { draftsQuery, studioKeys } from "../studio/github/queries.ts";
 import { useGitHub } from "../studio/StudioProvider.tsx";
@@ -21,17 +22,24 @@ function Board() {
   const gh = useGitHub();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const drafts = useQuery(draftsQuery(gh));
-  const published = useQuery(publishedQuery(gh, gh.defaultBranch));
-  const [discarding, setDiscarding] = useState<{ ref: string; slug: string } | null>(null);
+  const local = gh.kind === "local";
+  const drafts = useQuery({ ...draftsQuery(gh), enabled: !local });
+  const published = useQuery(
+    publishedQuery(gh, gh.defaultBranch, local ? "working-tree" : "published"),
+  );
+  const [discarding, setDiscarding] = useState<{ ref: string; slug: string; dir: string } | null>(
+    null,
+  );
 
+  // In working-tree mode there is no branch to throw away: discarding deletes the entry's files.
   const discard = useMutation({
-    mutationFn: (ref: string) => gh.deleteDraft(ref),
-    onSuccess: async (_, ref) => {
+    mutationFn: (row: { ref: string; dir: string }) =>
+      local ? deleteLocalEntry(row.dir) : gh.deleteDraft(row.ref),
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: studioKeys.all });
-      notify(`Discarded ${ref}`);
+      notify(local ? "Deleted from your working tree" : "Discarded the draft branch");
     },
-    onError: () => notify("Couldn't discard the draft.", { kind: "alert" }),
+    onError: () => notify("Couldn't discard that.", { kind: "alert" }),
   });
 
   const edit = useMutation({
@@ -43,10 +51,13 @@ function Board() {
     onError: () => notify("Couldn't start editing that entry.", { kind: "alert" }),
   });
 
-  const rows = mergeEntries(published.data ?? [], drafts.data ?? []);
+  // Working-tree rows are already the entries themselves; there are no branches to merge over them.
+  const rows = local
+    ? (published.data ?? [])
+    : mergeEntries(published.data ?? [], drafts.data ?? []);
   const inProgress = rows.filter((r) => r.status === "draft" || r.status === "pull-request");
   const live = rows.filter((r) => r.status === "published" || r.status === "working-tree");
-  const pending = drafts.isPending || published.isPending;
+  const pending = (!local && drafts.isPending) || published.isPending;
 
   return (
     <StudioShell
@@ -87,21 +98,30 @@ function Board() {
                 key={row.ref}
                 entry={row}
                 action="Open"
-                onDiscard={() => setDiscarding({ ref: row.ref, slug: row.slug })}
+                onDiscard={() => setDiscarding({ ref: row.ref, slug: row.slug, dir: row.dir })}
               />
             ))}
           </Group>
         )}
 
         {live.length > 0 && (
-          <Group title={`Published (${live.length})`}>
+          <Group
+            title={local ? `Files on this branch (${live.length})` : `Published (${live.length})`}
+          >
             {live.map((row) => (
               <Row
                 key={`${row.kind}:${row.slug}`}
                 entry={row}
                 action="Edit"
-                busy={edit.isPending && edit.variables === row.slug}
-                onAction={() => edit.mutate(row.slug)}
+                {...(local
+                  ? {
+                      onDiscard: () =>
+                        setDiscarding({ ref: row.ref, slug: row.slug, dir: row.dir }),
+                    }
+                  : {
+                      busy: edit.isPending && edit.variables === row.slug,
+                      onAction: () => edit.mutate(row.slug),
+                    })}
               />
             ))}
           </Group>
@@ -111,8 +131,12 @@ function Board() {
       <ConfirmDialog
         open={discarding !== null}
         onOpenChange={(o) => !o && setDiscarding(null)}
-        title={`Discard ‘${discarding?.slug}’?`}
-        description={`This deletes the branch ${discarding?.ref} and closes its pull request. Local unsaved changes are kept.`}
+        title={local ? `Delete ‘${discarding?.slug}’?` : `Discard ‘${discarding?.slug}’?`}
+        description={
+          local
+            ? `This deletes ${discarding?.dir} from your working tree. It is an ordinary file deletion you can undo with git.`
+            : `This deletes the branch ${discarding?.ref} and closes its pull request. Local unsaved changes are kept.`
+        }
         actions={
           <>
             <button type="button" className={styles.secondary} onClick={() => setDiscarding(null)}>
@@ -122,11 +146,11 @@ function Board() {
               type="button"
               className={`${styles.primary} ${styles.danger}`}
               onClick={() => {
-                if (discarding) discard.mutate(discarding.ref);
+                if (discarding) discard.mutate(discarding);
                 setDiscarding(null);
               }}
             >
-              Discard
+              {local ? "Delete" : "Discard"}
             </button>
           </>
         }
@@ -199,7 +223,7 @@ function Row({
       {onDiscard && (
         <RowMenu label={`Actions for ${entry.slug}`}>
           <RowMenuItem onClick={onDiscard} danger>
-            Discard draft
+            {entry.status === "working-tree" ? "Delete entry" : "Discard draft"}
           </RowMenuItem>
         </RowMenu>
       )}

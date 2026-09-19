@@ -133,11 +133,9 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   const [controller] = useState<BufferController>(() => {
     const initial = bufferFromBundle(bundle, slug);
     const local = readLocalBuffer(initial.ref, storage);
-    // A local copy is only trusted when it was taken from the same head; otherwise the remote wins and the copy is dropped.
-    const start =
-      local && local.baseHeadSha === initial.baseHeadSha
-        ? { ...local, existingAssets: initial.existingAssets }
-        : initial;
+    // Unsaved work always wins on load, even when the source moved underneath it: it keeps its own
+    // base, so saving is refused with the conflict dialog rather than the edit being thrown away here.
+    const start = local ? { ...local, existingAssets: initial.existingAssets } : initial;
     return createBufferStore(start);
   });
   const buffer = useStore(controller.store);
@@ -155,11 +153,14 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   useEffect(() => {
     if (!buffer.dirty) return;
     const guard = (e: BeforeUnloadEvent) => {
+      // Flush synchronously: a reload inside the autosave debounce would otherwise lose the edit, and
+      // the dev server reloads the page whenever content changes on disk.
+      writeLocalBuffer(controller.store.state, storage);
       e.preventDefault();
     };
     window.addEventListener("beforeunload", guard);
     return () => window.removeEventListener("beforeunload", guard);
-  }, [buffer.dirty]);
+  }, [buffer.dirty, controller, storage]);
 
   const save = useMutation({
     mutationFn: async (mode: "save" | "overwrite") => {
@@ -176,12 +177,16 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
       // Refetch from the backend rather than patching the cache, so the cached bundle always matches
       // what was actually committed.
       await invalidateDraft(queryClient, buffer.ref);
-      notify(`Committed to ${buffer.ref}`, {
-        action: {
-          label: "View commit",
-          onClick: () => window.open(commitUrl, "_blank", "noopener"),
-        },
-      });
+      if (gh.kind === "local") {
+        notify(`Saved ${buffer.dir} to your working tree`);
+      } else {
+        notify(`Committed to ${buffer.ref}`, {
+          action: {
+            label: "View commit",
+            onClick: () => window.open(commitUrl, "_blank", "noopener"),
+          },
+        });
+      }
     },
     onError: (err) => {
       if (err instanceof StaleRefError) setConflict(err);
@@ -265,7 +270,8 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
           >
             {save.isPending ? "Saving…" : "Save"}
           </button>
-          <PublishDialog buffer={buffer} disabled={save.isPending} />
+          {/* Nothing to publish in working-tree mode: the file is already on your branch. */}
+          {gh.kind !== "local" && <PublishDialog buffer={buffer} disabled={save.isPending} />}
         </div>
       }
     >
@@ -278,7 +284,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
         </p>
       )}
       <p className={styles.muted}>
-        <Link to="/studio">← Drafts</Link>
+        <Link to="/studio">{gh.kind === "local" ? "← Entries" : "← Drafts"}</Link>
       </p>
       <div className={styles.editorContainer}>
         <div className={styles.editorLayout}>
@@ -321,15 +327,23 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
       <ConfirmDialog
         open={conflict !== null}
         onOpenChange={(o) => !o && setConflict(null)}
-        title="This post changed on GitHub since you opened it."
-        description="Reload to see the newer version (your local edits are discarded), or overwrite it with what you have here."
+        title={
+          gh.kind === "local"
+            ? "This file changed on disk since you opened it."
+            : "This post changed on GitHub since you opened it."
+        }
+        description={
+          gh.kind === "local"
+            ? "Reload to see what is on disk now (your unsaved edits are discarded), or overwrite the file with what you have here."
+            : "Reload to see the newer version (your local edits are discarded), or overwrite it with what you have here."
+        }
         actions={
           <>
             <button type="button" className={styles.secondary} onClick={() => setConflict(null)}>
               Cancel
             </button>
             <button type="button" className={styles.secondary} onClick={reloadFromGitHub}>
-              Reload from GitHub
+              {gh.kind === "local" ? "Reload from disk" : "Reload from GitHub"}
             </button>
             <button
               type="button"

@@ -1,5 +1,4 @@
 import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Markdown } from "@tiptap/markdown";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -34,9 +33,9 @@ export function Editor({
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
         codeBlock: { HTMLAttributes: { class: "code" } },
+        link: { openOnClick: false, autolink: true, defaultProtocol: "https" },
       }),
       Markdown,
-      Link.configure({ openOnClick: false, autolink: true, defaultProtocol: "https" }),
       Image.configure({ inline: false, allowBase64: true }),
       Placeholder.configure({ placeholder: "Write. Type / for commands, paste or drop an image." }),
     ],

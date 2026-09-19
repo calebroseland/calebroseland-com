@@ -63,9 +63,9 @@ test.describe("pages", () => {
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("button", { name: "Open pull request" }).click();
     await dialog.getByRole("button", { name: "Merge and publish" }).click();
-    // A page publishes to its own address, not under /posts.
-    await expect(page).toHaveURL(/\/colophon$/);
-    await expect(page.getByRole("heading", { level: 1, name: "Colophon" })).toBeVisible();
+    // A page publishes to its own address, not under /posts. The fake backend is in memory, so the
+    // site itself has nothing to render: the working-tree spec covers the file actually appearing.
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/colophon");
 
     await page.goto("/studio");
     const live = page.getByRole("region", { name: /^Published/ });
@@ -91,7 +91,7 @@ test.describe("editing a published entry", () => {
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("button", { name: "Open pull request" }).click();
     await dialog.getByRole("button", { name: "Merge and publish" }).click();
-    await expect(page).toHaveURL(/\/posts\/round-trip$/);
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/posts/round-trip");
 
     await page.goto("/studio");
     const live = page.getByRole("region", { name: /^Published/ });
@@ -126,7 +126,7 @@ test.describe("editing a published entry", () => {
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("button", { name: "Open pull request" }).click();
     await dialog.getByRole("button", { name: "Merge and publish" }).click();
-    await expect(page).toHaveURL(/\/posts\/deep-link$/);
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/posts/deep-link");
 
     await page.goto("/studio/deep-link");
     await expect(page.getByText(/This entry is published on/)).toBeVisible();

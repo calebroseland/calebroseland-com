@@ -41,6 +41,10 @@ function LoginRoute() {
     session.signIn({ status: "authenticated", backend: "fake", token: "fake" });
     void navigate({ to: target });
   };
+  const useWorkingTree = () => {
+    session.signIn({ status: "authenticated", backend: "local", token: "local" });
+    void navigate({ to: target });
+  };
   const useToken = (e: React.FormEvent) => {
     e.preventDefault();
     if (!token.trim()) return;
@@ -80,6 +84,9 @@ function LoginRoute() {
             <details className={styles.details}>
               <summary>Developer options</summary>
               <Stack gap="4">
+                <button type="button" className={styles.secondary} onClick={useWorkingTree}>
+                  Edit files on this branch
+                </button>
                 <button type="button" className={styles.secondary} onClick={useFake}>
                   Use local fake GitHub
                 </button>
@@ -98,7 +105,10 @@ function LoginRoute() {
                   </button>
                 </form>
                 <p className={styles.muted}>
-                  The token stays in this tab's session storage and is sent only to api.github.com.
+                  Editing this branch writes the real files in <code>content/</code>: the change is
+                  yours to commit, alongside any code change. The fake GitHub instead simulates
+                  branches and pull requests in memory. A token stays in this tab's session storage
+                  and is sent only to api.github.com.
                 </p>
               </Stack>
             </details>

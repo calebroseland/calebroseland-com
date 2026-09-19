@@ -25,7 +25,6 @@
     "@tanstack/react-store": "^0.11.1",
     "@tanstack/store": "^0.11.1",
     "@tiptap/extension-image": "^3.31.3",
-    "@tiptap/extension-link": "^3.31.3",
     "@tiptap/extension-placeholder": "^3.31.3",
     "@tiptap/markdown": "^3.31.3",
     "@tiptap/pm": "^3.31.3",

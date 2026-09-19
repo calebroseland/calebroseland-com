@@ -32,6 +32,9 @@ export function StudioShell({
             Studio
           </Link>
           {gh.kind === "fake" && <span className={styles.badge}>local fake GitHub</span>}
+          {gh.kind === "local" && (
+            <span className={styles.badge}>working tree · {viewer.data?.login ?? "…"}</span>
+          )}
         </div>
         <div className={styles.barGroup}>
           {actions}
