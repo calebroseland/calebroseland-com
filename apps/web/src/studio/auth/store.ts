@@ -3,7 +3,7 @@ import { Store } from "@tanstack/store";
 /* Who is signed in and how the studio talks to GitHub. Lives in memory, mirrored to sessionStorage
    so a reload keeps the session but closing the tab ends it. */
 
-type Backend = "octokit" | "fake";
+type Backend = "octokit" | "fake" | "local";
 
 export type Session =
   | { status: "anonymous" }
@@ -25,8 +25,7 @@ function read(storage: SessionEnv["storage"]): Session {
       parsed !== null &&
       (parsed as Session).status === "authenticated" &&
       typeof (parsed as { token?: unknown }).token === "string" &&
-      ((parsed as { backend?: unknown }).backend === "octokit" ||
-        (parsed as { backend?: unknown }).backend === "fake")
+      ["octokit", "fake", "local"].includes(String((parsed as { backend?: unknown }).backend))
     ) {
       return parsed as Session;
     }
