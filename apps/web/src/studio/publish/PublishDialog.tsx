@@ -45,7 +45,10 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
       if (deployed) {
         notify("Published.");
         setOpen(false);
-        await navigate({ to: "/posts/$slug", params: { slug: buffer.meta.slug } });
+        // A page lives at its own address; only posts sit under /posts.
+        await (buffer.meta.kind === "page"
+          ? navigate({ to: "/$slug", params: { slug: buffer.meta.slug } })
+          : navigate({ to: "/posts/$slug", params: { slug: buffer.meta.slug } }));
       } else {
         setPhase("slow");
       }

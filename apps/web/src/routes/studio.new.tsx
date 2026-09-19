@@ -2,22 +2,26 @@ import { Stack } from "@crc/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { slugify } from "../studio/drafts/paths.ts";
-import { createDraftWithBundle } from "../studio/github/mutations.ts";
+import * as z from "zod/mini";
+import { type EntryKind, slugify } from "../studio/drafts/paths.ts";
+import { createEntryDraft } from "../studio/github/mutations.ts";
 import { studioKeys } from "../studio/github/queries.ts";
 import { useGitHub } from "../studio/StudioProvider.tsx";
 import { StudioShell } from "../studio/StudioShell.tsx";
 import styles from "../studio/studio.module.css";
 
 export const Route = createFileRoute("/studio/new")({
-  head: () => ({ meta: [{ title: "New post · Studio" }] }),
-  component: NewPost,
+  validateSearch: z.object({ kind: z.optional(z.enum(["post", "page"])) }),
+  head: () => ({ meta: [{ title: "New entry · Studio" }] }),
+  component: NewEntry,
 });
 
-function NewPost() {
+function NewEntry() {
   const gh = useGitHub();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { kind: initialKind = "post" } = Route.useSearch();
+  const [kind, setKind] = useState<EntryKind>(initialKind);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -27,19 +31,20 @@ function NewPost() {
 
   const create = useMutation({
     mutationFn: () =>
-      createDraftWithBundle(gh, {
+      createEntryDraft(gh, {
+        kind,
         title: title.trim(),
         slug: effectiveSlug,
         date: new Date(`${date}T00:00:00Z`),
       }),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: studioKeys.drafts() });
+      await queryClient.invalidateQueries({ queryKey: studioKeys.all });
       await navigate({ to: "/studio/$draft", params: { draft: effectiveSlug } });
     },
   });
 
   return (
-    <StudioShell title="New post">
+    <StudioShell title="New entry">
       <form
         className={styles.panel}
         style={{ maxInlineSize: "32rem" }}
@@ -50,6 +55,25 @@ function NewPost() {
         aria-busy={create.isPending}
       >
         <Stack gap="4">
+          <fieldset className={styles.fieldset}>
+            <legend>Kind</legend>
+            {(["post", "page"] as const).map((k) => (
+              <label key={k} className={styles.check}>
+                <input
+                  type="radio"
+                  name="kind"
+                  value={k}
+                  checked={kind === k}
+                  onChange={() => setKind(k)}
+                />
+                <span>
+                  {k === "post"
+                    ? "Post — dated, listed under Posts"
+                    : "Page — standalone, at its own address"}
+                </span>
+              </label>
+            ))}
+          </fieldset>
           <div className={styles.field}>
             <label htmlFor="new-title">Title</label>
             <input
@@ -58,7 +82,6 @@ function NewPost() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              autoFocus
             />
           </div>
           <div className={styles.field}>
@@ -83,19 +106,21 @@ function NewPost() {
                 : "Fixed after the first save."}
             </small>
           </div>
-          <div className={styles.field}>
-            <label htmlFor="new-date">Date</label>
-            <input
-              id="new-date"
-              type="date"
-              className={styles.input}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
+          {kind === "post" && (
+            <div className={styles.field}>
+              <label htmlFor="new-date">Date</label>
+              <input
+                id="new-date"
+                type="date"
+                className={styles.input}
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </div>
+          )}
           {create.isError && (
             <p role="alert" className={styles.alert}>
-              Couldn't create the draft:{" "}
+              Couldn't create it:{" "}
               {create.error instanceof Error ? create.error.message : "unknown error"}
             </p>
           )}
@@ -105,7 +130,7 @@ function NewPost() {
               className={styles.primary}
               disabled={!title.trim() || !slugOk || create.isPending}
             >
-              {create.isPending ? "Creating…" : "Create draft"}
+              {create.isPending ? "Creating…" : `Create ${kind}`}
             </button>
           </div>
         </Stack>

@@ -1,4 +1,5 @@
-import { type Bundle, draftRef, StaleRefError } from "@crc/github-client";
+import { type Bundle, StaleRefError } from "@crc/github-client";
+import { Stack } from "@crc/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useStore } from "@tanstack/react-store";
@@ -17,7 +18,14 @@ import { AssetsPanel } from "../studio/editor/AssetsPanel.tsx";
 import { Editor, type EditorApi } from "../studio/editor/Editor.tsx";
 import { MetaPanel } from "../studio/editor/MetaPanel.tsx";
 import { ImageTooLargeError, resizeImage, UnsupportedImageError } from "../studio/editor/resize.ts";
-import { invalidateDraft, postsTreeQuery, saveDraft } from "../studio/github/mutations.ts";
+import {
+  beginEditing,
+  contentTreeQuery,
+  findEntryDir,
+  invalidateDraft,
+  saveDraft,
+} from "../studio/github/mutations.ts";
+import { draftsQuery, studioKeys } from "../studio/github/queries.ts";
 import { PublishDialog } from "../studio/publish/PublishDialog.tsx";
 import { useGitHub } from "../studio/StudioProvider.tsx";
 import { StudioShell } from "../studio/StudioShell.tsx";
@@ -33,27 +41,80 @@ export const Route = createFileRoute("/studio/$draft")({
 function DraftRoute() {
   const { draft: slug } = Route.useParams();
   const gh = useGitHub();
-  const ref = draftRef(slug);
-  const tree = useQuery(postsTreeQuery(gh, ref));
+  const queryClient = useQueryClient();
+  const drafts = useQuery(draftsQuery(gh));
+  // A slug with no branch of its own is already on the default branch; read it there so the entry can
+  // be previewed, and branch from it only when the author actually chooses to edit.
+  const draft = drafts.data?.find((d) => d.slug === slug);
+  const ref = draft?.ref ?? gh.defaultBranch;
+  const tree = useQuery({ ...contentTreeQuery(gh, ref), enabled: drafts.isSuccess });
 
-  if (tree.isPending) {
+  const beginEdit = useMutation({
+    mutationFn: () => beginEditing(gh, slug),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: studioKeys.all });
+    },
+    onError: () => notify("Couldn't start editing this entry.", { kind: "alert" }),
+  });
+
+  if (drafts.isPending || tree.isPending) {
     return (
       <StudioShell title={slug}>
         <p className={styles.muted} aria-busy="true">
-          Loading draft…
+          Loading…
         </p>
       </StudioShell>
     );
   }
-  if (tree.isError || !tree.data) {
+  if (drafts.isError || tree.isError || !tree.data) {
     return (
       <StudioShell title={slug}>
         <p role="alert" className={styles.alert}>
-          Couldn't load this draft from GitHub.{" "}
+          Couldn't load this entry from GitHub.{" "}
           <button type="button" className={styles.toastAction} onClick={() => tree.refetch()}>
             Retry
           </button>
         </p>
+      </StudioShell>
+    );
+  }
+  if (
+    !findEntryDir(
+      tree.data.files.map((f) => f.path),
+      slug,
+    )
+  ) {
+    return (
+      <StudioShell title={slug}>
+        <p role="alert" className={styles.alert}>
+          No entry with the slug “{slug}” exists on {ref}.
+        </p>
+        <p className={styles.muted}>
+          <Link to="/studio">← Back to the board</Link>
+        </p>
+      </StudioShell>
+    );
+  }
+  if (!draft) {
+    return (
+      <StudioShell title={slug}>
+        <Stack gap="4">
+          <p className={styles.muted}>
+            This entry is published on <code>{gh.defaultBranch}</code>. Editing it starts a draft
+            branch from there and reuses the existing bundle, so nothing is duplicated.
+          </p>
+          <div>
+            <button
+              type="button"
+              className={styles.primary}
+              onClick={() => beginEdit.mutate()}
+              disabled={beginEdit.isPending}
+              aria-busy={beginEdit.isPending}
+            >
+              {beginEdit.isPending ? "Starting…" : "Edit this entry"}
+            </button>
+          </div>
+        </Stack>
       </StudioShell>
     );
   }

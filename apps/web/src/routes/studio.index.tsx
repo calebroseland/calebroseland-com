@@ -1,9 +1,11 @@
 import { Stack } from "@crc/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ConfirmDialog } from "../studio/Dialogs.tsx";
 import { RowMenu, RowMenuItem } from "../studio/drafts/RowMenu.tsx";
+import { mergeEntries, publishedQuery, type StudioEntry } from "../studio/entries.ts";
+import { beginEditing } from "../studio/github/mutations.ts";
 import { draftsQuery, studioKeys } from "../studio/github/queries.ts";
 import { useGitHub } from "../studio/StudioProvider.tsx";
 import { StudioShell } from "../studio/StudioShell.tsx";
@@ -18,21 +20,33 @@ export const Route = createFileRoute("/studio/")({
 function Board() {
   const gh = useGitHub();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const drafts = useQuery(draftsQuery(gh));
+  const published = useQuery(publishedQuery(gh, gh.defaultBranch));
   const [discarding, setDiscarding] = useState<{ ref: string; slug: string } | null>(null);
+
   const discard = useMutation({
     mutationFn: (ref: string) => gh.deleteDraft(ref),
     onSuccess: async (_, ref) => {
-      await queryClient.invalidateQueries({ queryKey: studioKeys.drafts() });
+      await queryClient.invalidateQueries({ queryKey: studioKeys.all });
       notify(`Discarded ${ref}`);
     },
     onError: () => notify("Couldn't discard the draft.", { kind: "alert" }),
   });
 
-  const local =
-    drafts.data?.filter((d) => localStorage.getItem(`crc:buffer:${d.ref}`) !== null) ?? [];
-  const withPr = drafts.data?.filter((d) => d.pr) ?? [];
-  const branches = drafts.data?.filter((d) => !d.pr) ?? [];
+  const edit = useMutation({
+    mutationFn: (slug: string) => beginEditing(gh, slug),
+    onSuccess: async (_, slug) => {
+      await queryClient.invalidateQueries({ queryKey: studioKeys.all });
+      await navigate({ to: "/studio/$draft", params: { draft: slug } });
+    },
+    onError: () => notify("Couldn't start editing that entry.", { kind: "alert" }),
+  });
+
+  const rows = mergeEntries(published.data ?? [], drafts.data ?? []);
+  const inProgress = rows.filter((r) => r.status === "draft" || r.status === "pull-request");
+  const live = rows.filter((r) => r.status === "published" || r.status === "working-tree");
+  const pending = drafts.isPending || published.isPending;
 
   return (
     <StudioShell
@@ -42,56 +56,58 @@ function Board() {
             Profile links
           </Link>
           <Link to="/studio/new" className={styles.primary}>
-            New post
+            New entry
           </Link>
         </>
       }
     >
-      <div className={styles.board} aria-busy={drafts.isPending}>
-        {drafts.isPending && <p className={styles.muted}>Loading drafts…</p>}
-        {drafts.isError && (
+      <div className={styles.board} aria-busy={pending}>
+        {pending && <p className={styles.muted}>Loading…</p>}
+        {(drafts.isError || published.isError) && (
           <p role="alert" className={styles.alert}>
-            Couldn't load drafts from GitHub.{" "}
-            <button type="button" className={styles.toastAction} onClick={() => drafts.refetch()}>
+            Couldn't load entries from GitHub.{" "}
+            <button
+              type="button"
+              className={styles.toastAction}
+              onClick={() => {
+                void drafts.refetch();
+                void published.refetch();
+              }}
+            >
               Retry
             </button>
           </p>
         )}
-        {drafts.data && drafts.data.length === 0 && <p className={styles.muted}>No drafts yet.</p>}
-        {local.length > 0 && (
-          <Group title={`Unsaved on this device (${local.length})`}>
-            {local.map((d) => (
-              <Row key={d.ref} slug={d.slug} meta="has unsaved changes here" action="Resume" />
-            ))}
-          </Group>
-        )}
-        {branches.length > 0 && (
-          <Group title={`Draft branches (${branches.length})`}>
-            {branches.map((d) => (
+        {!pending && rows.length === 0 && <p className={styles.muted}>Nothing here yet.</p>}
+
+        {inProgress.length > 0 && (
+          <Group title={`In progress (${inProgress.length})`}>
+            {inProgress.map((row) => (
               <Row
-                key={d.ref}
-                slug={d.slug}
-                meta={d.ref}
+                key={row.ref}
+                entry={row}
                 action="Open"
-                onDiscard={() => setDiscarding(d)}
+                onDiscard={() => setDiscarding({ ref: row.ref, slug: row.slug })}
               />
             ))}
           </Group>
         )}
-        {withPr.length > 0 && (
-          <Group title={`Awaiting merge (${withPr.length})`}>
-            {withPr.map((d) => (
+
+        {live.length > 0 && (
+          <Group title={`Published (${live.length})`}>
+            {live.map((row) => (
               <Row
-                key={d.ref}
-                slug={d.slug}
-                meta={`Pull request #${d.pr?.number}`}
-                action="Open"
-                onDiscard={() => setDiscarding(d)}
+                key={`${row.kind}:${row.slug}`}
+                entry={row}
+                action="Edit"
+                busy={edit.isPending && edit.variables === row.slug}
+                onAction={() => edit.mutate(row.slug)}
               />
             ))}
           </Group>
         )}
       </div>
+
       <ConfirmDialog
         open={discarding !== null}
         onOpenChange={(o) => !o && setDiscarding(null)}
@@ -130,30 +146,58 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
+function describe(entry: StudioEntry): string {
+  switch (entry.status) {
+    case "pull-request":
+      return `Pull request #${entry.pr?.number}`;
+    case "draft":
+      return entry.ref;
+    case "working-tree":
+      return entry.dir;
+    default:
+      return entry.draft ? `${entry.dir} · marked draft` : entry.dir;
+  }
+}
+
 function Row({
-  slug,
-  meta,
+  entry,
   action,
+  busy,
+  onAction,
   onDiscard,
 }: {
-  slug: string;
-  meta: string;
+  entry: StudioEntry;
   action: string;
+  busy?: boolean;
+  onAction?: () => void;
   onDiscard?: () => void;
 }) {
   return (
     <li className={styles.row}>
       <div className={styles.rowMain}>
-        <Link to="/studio/$draft" params={{ draft: slug }} className={styles.rowTitle}>
-          {slug}
+        <Link to="/studio/$draft" params={{ draft: entry.slug }} className={styles.rowTitle}>
+          {entry.title}
         </Link>
-        <span className={styles.rowMeta}>{meta}</span>
+        <span className={styles.rowMeta}>{describe(entry)}</span>
       </div>
-      <Link to="/studio/$draft" params={{ draft: slug }} className={styles.secondary}>
-        {action}
-      </Link>
+      {entry.kind && <span className={styles.kindBadge}>{entry.kind}</span>}
+      {onAction ? (
+        <button
+          type="button"
+          className={styles.secondary}
+          onClick={onAction}
+          disabled={busy}
+          aria-busy={busy}
+        >
+          {busy ? "Starting…" : action}
+        </button>
+      ) : (
+        <Link to="/studio/$draft" params={{ draft: entry.slug }} className={styles.secondary}>
+          {action}
+        </Link>
+      )}
       {onDiscard && (
-        <RowMenu label={`Actions for ${slug}`}>
+        <RowMenu label={`Actions for ${entry.slug}`}>
           <RowMenuItem onClick={onDiscard} danger>
             Discard draft
           </RowMenuItem>

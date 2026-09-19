@@ -66,10 +66,8 @@ export async function mergeAndCleanUp(
   const merged = await gh.mergePullRequest(input.number);
   // GitHub's delete_branch_on_merge may already have removed it; ignore a missing ref.
   await gh.deleteDraft(input.ref).catch(() => undefined);
-  await Promise.all([
-    queryClient.invalidateQueries({ queryKey: studioKeys.drafts() }),
-    queryClient.invalidateQueries({ queryKey: studioKeys.pull(input.ref) }),
-  ]);
+  // studioKeys.all, not just the drafts: a merge changes what is published, which the board also shows.
+  await queryClient.invalidateQueries({ queryKey: studioKeys.all });
   return merged;
 }
 

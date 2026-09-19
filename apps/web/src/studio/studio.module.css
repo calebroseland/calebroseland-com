@@ -476,3 +476,27 @@
     color: var(--color-text-muted);
   }
 }
+
+@layer components {
+  .fieldset {
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    display: grid;
+    gap: var(--space-1);
+
+    & > legend {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      padding-inline: var(--space-2);
+    }
+  }
+
+  .kindBadge {
+    font-size: var(--font-size-xs);
+    padding: var(--space-px) var(--space-2);
+    border-radius: var(--radius-full);
+    border: var(--border-width) solid var(--color-border-strong);
+    color: var(--color-text-muted);
+  }
+}
