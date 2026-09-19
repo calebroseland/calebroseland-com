@@ -7,7 +7,6 @@ import { session } from "./auth/store.ts";
 import { viewerQuery } from "./github/queries.ts";
 import { useGitHub } from "./StudioProvider.tsx";
 import styles from "./studio.module.css";
-import { Toasts } from "./Toast.tsx";
 
 /* Chrome for authenticated studio routes: title, viewer, sign out. */
 export function StudioShell({
@@ -58,7 +57,6 @@ export function StudioShell({
         <h1 className={styles.title}>{title}</h1>
         {children}
       </Center>
-      <Toasts />
     </div>
   );
 }

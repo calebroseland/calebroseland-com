@@ -8,6 +8,7 @@ import {
 import { useEffect } from "react";
 import { MotionProvider } from "../components/MotionProvider.tsx";
 import { CenteredMessage, Page } from "../components/Page.tsx";
+import { Toasts } from "../studio/Toast.tsx";
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -26,6 +27,7 @@ function RootLayout() {
       <MotionProvider>
         <Outlet />
       </MotionProvider>
+      <Toasts />
     </>
   );
 }

@@ -86,6 +86,6 @@ describe("/posts", () => {
 
   it("shows the filtered-empty state", async () => {
     await renderAt("/posts?tag=nope");
-    expect(screen.getByRole("status")).toHaveTextContent("No posts tagged ‘nope’.");
+    expect(screen.getByText("No posts tagged ‘nope’.")).toHaveAttribute("role", "status");
   });
 });
