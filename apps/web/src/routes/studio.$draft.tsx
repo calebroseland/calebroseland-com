@@ -1,12 +1,11 @@
-import { draftRef, StaleRefError } from "@crc/github-client";
+import { type Bundle, draftRef, StaleRefError } from "@crc/github-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useStore } from "@tanstack/react-store";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as z from "zod/mini";
 import { ConfirmDialog } from "../studio/Dialogs.tsx";
 import {
-  type Buffer,
   type BufferController,
   createBufferStore,
   missingAlt,
@@ -58,22 +57,20 @@ function DraftRoute() {
       </StudioShell>
     );
   }
-  return (
-    <DraftEditor
-      key={`${ref}:${tree.data.headSha}`}
-      slug={slug}
-      initial={bufferFromBundle(tree.data, slug)}
-    />
-  );
+  // Keyed by ref only: a save advances the head, and remounting on that would rebuild the editor from
+  // the pre-save cache and blank the body. Wholesale replacements are handled inside the component.
+  return <DraftEditor key={ref} slug={slug} bundle={tree.data} />;
 }
 
-function DraftEditor({ slug, initial }: { slug: string; initial: Buffer }) {
+function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   const gh = useGitHub();
   const queryClient = useQueryClient();
   const { panel = "meta" } = Route.useSearch();
   const navigate = Route.useNavigate();
   const storage = typeof window === "undefined" ? undefined : window.localStorage;
-  const controller: BufferController = useMemo(() => {
+  // Built once per branch; later refetches update the cache, not the working copy.
+  const [controller] = useState<BufferController>(() => {
+    const initial = bufferFromBundle(bundle, slug);
     const local = readLocalBuffer(initial.ref, storage);
     // A local copy is only trusted when it was taken from the same head; otherwise the remote wins and the copy is dropped.
     const start =
@@ -81,7 +78,7 @@ function DraftEditor({ slug, initial }: { slug: string; initial: Buffer }) {
         ? { ...local, existingAssets: initial.existingAssets }
         : initial;
     return createBufferStore(start);
-  }, [initial, storage]);
+  });
   const buffer = useStore(controller.store);
   const api = useRef<EditorApi | null>(null);
   const [conflict, setConflict] = useState<StaleRefError | null>(null);
@@ -115,10 +112,9 @@ function DraftEditor({ slug, initial }: { slug: string; initial: Buffer }) {
     onSuccess: async ({ headSha, commitUrl }) => {
       controller.markSaved(headSha);
       writeLocalBuffer(controller.store.state, storage);
-      queryClient.setQueryData(postsTreeQuery(gh, buffer.ref).queryKey, (old) =>
-        old ? { ...old, headSha } : old,
-      );
-      await queryClient.invalidateQueries({ queryKey: ["studio", "drafts"] });
+      // Refetch from the backend rather than patching the cache, so the cached bundle always matches
+      // what was actually committed.
+      await invalidateDraft(queryClient, buffer.ref);
       notify(`Committed to ${buffer.ref}`, {
         action: {
           label: "View commit",
@@ -185,7 +181,7 @@ function DraftEditor({ slug, initial }: { slug: string; initial: Buffer }) {
     setConflict(null);
     // Clear the local copy first (a clean buffer removes its key), then take the remote version as the new base.
     writeLocalBuffer({ ...controller.store.state, dirty: false }, storage);
-    const fresh = await gh.readBundle(initial.ref, initial.dir);
+    const fresh = await gh.readBundle(buffer.ref, buffer.dir);
     controller.replace(bufferFromBundle(fresh, slug));
     setEditorGeneration((g) => g + 1);
     await invalidateDraft(queryClient, buffer.ref);

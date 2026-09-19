@@ -73,6 +73,10 @@ test.describe("studio drafts", () => {
       "Committed to drafts/hello-studio",
     );
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
+    // Saving must not rebuild the editor from the pre-save cache and blank the body.
+    await expect(page.getByRole("textbox", { name: "Post body" })).toContainText(
+      "First paragraph of the post.",
+    );
 
     await page.getByRole("link", { name: "← Drafts" }).click();
     await expect(page.getByRole("link", { name: "hello-studio" })).toBeVisible();
