@@ -88,3 +88,21 @@ describe("serializeEntry output", () => {
     expect(parseEntry(out).body.trim()).toBe("# Body");
   });
 });
+
+describe("frontmatter key order", () => {
+  it("is fixed, so editing a hand-written file does not reshuffle its frontmatter", () => {
+    const original =
+      "---\ntitle: T\nslug: t\ndate: 2026-09-18\ndraft: false\ntags: []\nkind: post\n---\n\nbody\n";
+    const round = serializeEntry(parseEntry(original));
+    expect(round.split("\n").slice(1, 7)).toEqual([
+      "kind: post",
+      "title: T",
+      "slug: t",
+      "date: 2026-09-18",
+      "draft: false",
+      "tags: []",
+    ]);
+    // Rewriting the result again changes nothing.
+    expect(serializeEntry(parseEntry(round))).toBe(round);
+  });
+});

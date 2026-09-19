@@ -21,8 +21,15 @@ export function parseEntry(text: string): ParsedEntry {
 }
 
 /** Inverse of parseEntry. Dates serialize as YYYY-MM-DD; defaults are written explicitly so the file is self-describing. */
+/* A fixed key order, so editing a hand-written file in the studio produces a minimal diff rather than
+   reshuffling its frontmatter. Unknown keys keep their original position at the end. */
+const KEY_ORDER = ["kind", "title", "slug", "date", "draft", "tags", "summary", "placeholder"];
+
 export function serializeEntry({ meta, body }: ParsedEntry): string {
-  const data: Record<string, unknown> = { ...meta, date: meta.date.toISOString().slice(0, 10) };
+  const source: Record<string, unknown> = { ...meta, date: meta.date.toISOString().slice(0, 10) };
+  const data: Record<string, unknown> = {};
+  for (const key of KEY_ORDER) if (key in source) data[key] = source[key];
+  for (const key of Object.keys(source)) if (!(key in data)) data[key] = source[key];
   if (!meta.placeholder) delete data.placeholder;
   if (meta.summary === undefined) delete data.summary;
   const yaml = stringify(data, { lineWidth: 0 }).trimEnd();
