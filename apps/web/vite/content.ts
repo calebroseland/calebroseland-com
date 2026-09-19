@@ -1,9 +1,11 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { type Entry, type EntryMeta, parseYaml, profile } from "@crc/content-schema";
 import { parseEntry, renderMarkdown } from "@crc/markdown";
 import type { Plugin } from "vite";
+import { contentDirFor, isStudioTree } from "./content-dir.ts";
+import { readTree } from "./local-store.ts";
 
 /* Parses, validates, and renders everything under content/ at build time.
    Exposes:
@@ -36,7 +38,7 @@ export function content(opts: {
   includeDrafts?: boolean;
   siteOrigin?: string;
 }): Plugin {
-  const contentDir = resolve(opts.root, "content");
+  const contentDir = contentDirFor(opts.root);
   const profilePath = join(contentDir, "profile.yaml");
   let includeDrafts = opts.includeDrafts ?? false;
   let isBuild = false;
@@ -108,42 +110,6 @@ export function content(opts: {
     },
     configureServer(server) {
       // Serve bundle assets straight from content/ in dev.
-      // Opt-in local publish target: with CRC_LOCAL_PUBLISH=1 the studio's fake GitHub writes merged
-      // files to content/ so the local loop reaches the real content pipeline. Dev only, and the path
-      // is confined to content/. Without the flag the route is absent and the studio ignores the 404.
-      if (process.env.CRC_LOCAL_PUBLISH === "1") {
-        server.middlewares.use((req, res, next) => {
-          if (req.method !== "POST" || req.url?.split("?")[0] !== "/@content/write") return next();
-          let body = "";
-          req.on("data", (chunk) => {
-            body += chunk;
-          });
-          req.on("end", () => {
-            try {
-              const parsed = JSON.parse(body) as {
-                files?: Array<{ path: string; content: string; encoding?: string }>;
-              };
-              const written: string[] = [];
-              for (const file of parsed.files ?? []) {
-                const abs = resolve(opts.root, file.path);
-                if (!abs.startsWith(contentDir)) continue;
-                mkdirSync(dirname(abs), { recursive: true });
-                writeFileSync(
-                  abs,
-                  file.encoding === "base64" ? Buffer.from(file.content, "base64") : file.content,
-                );
-                written.push(relative(opts.root, abs));
-              }
-              res.setHeader("content-type", "application/json");
-              res.end(JSON.stringify({ written }));
-            } catch (err) {
-              res.statusCode = 400;
-              res.end(String(err));
-            }
-          });
-        });
-      }
-
       server.middlewares.use((req, res, next) => {
         const path = req.url?.split("?")[0];
         if (path === "/feed.xml" || path === "/sitemap.xml") {
@@ -179,7 +145,7 @@ export function content(opts: {
       server.watcher.add(contentDir);
       for (const event of ["add", "unlink", "addDir", "unlinkDir"] as const) {
         server.watcher.on(event, (file: string) => {
-          if (file.startsWith(contentDir)) invalidateContent(server);
+          if (file.startsWith(contentDir)) invalidateContent(server, contentDir);
         });
       }
     },
@@ -231,7 +197,7 @@ export function content(opts: {
     },
     handleHotUpdate({ file, server }) {
       if (!file.startsWith(contentDir)) return;
-      invalidateContent(server);
+      invalidateContent(server, contentDir);
       return [];
     },
     // Feed and sitemap are emitted at build so the Worker serves them as static assets.
@@ -250,11 +216,14 @@ export function content(opts: {
   };
 }
 
-function invalidateContent(server: import("vite").ViteDevServer) {
+function invalidateContent(server: import("vite").ViteDevServer, contentDir: string) {
   for (const mod of server.moduleGraph.idToModuleMap.values()) {
     if (mod.id?.includes("virtual:content/")) server.moduleGraph.invalidateModule(mod);
   }
-  server.ws.send({ type: "full-reload" });
+  // Skip the reload when the tree on disk is exactly what the studio just wrote: it already shows
+  // that, and reloading would remount the editor. Any other change still reloads the open page.
+  if (!isStudioTree(readTree(contentDir, "content").headSha))
+    server.ws.send({ type: "full-reload" });
 }
 
 const esc = (s: string) =>

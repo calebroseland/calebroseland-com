@@ -4,6 +4,7 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { content } from "./vite/content.ts";
+import { localStore } from "./vite/local-store.ts";
 
 const isPages = process.env.VITE_TARGET === "pages";
 const base = process.env.VITE_BASE ?? "/";
@@ -17,10 +18,10 @@ export default defineConfig({
   define: {
     __BUILD_SHA__: JSON.stringify(process.env.GITHUB_SHA ?? "dev"),
     __API_ORIGIN__: JSON.stringify(process.env.VITE_API_ORIGIN ?? ""),
-    __LOCAL_PUBLISH__: JSON.stringify(process.env.CRC_LOCAL_PUBLISH === "1"),
   },
   plugins: [
     content({ root: repoRoot, siteOrigin: process.env.SITE_ORIGIN ?? "https://calebroseland.com" }),
+    localStore({ root: repoRoot }),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
@@ -43,7 +44,6 @@ export default defineConfig({
       "@tiptap/starter-kit",
       "@tiptap/markdown",
       "@tiptap/extension-image",
-      "@tiptap/extension-link",
       "@tiptap/extension-placeholder",
       "@base-ui/react/alert-dialog",
       "@base-ui/react/dialog",

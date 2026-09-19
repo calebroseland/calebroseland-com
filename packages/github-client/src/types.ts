@@ -53,7 +53,7 @@ export class AuthError extends Error {
 }
 
 export interface GitHubClient {
-  readonly kind: "octokit" | "fake";
+  readonly kind: "octokit" | "fake" | "local";
   /** Branch entries are published to; drafts are cut from it. */
   readonly defaultBranch: string;
   getViewer(): Promise<Viewer>;
