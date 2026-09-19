@@ -217,20 +217,22 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
     save.mutate("save");
   };
 
+  /* Alt text lives in two places by necessity: the buffer, which enforces it before a save, and the
+     document, which is what becomes markdown. */
+  const onAltChange = (name: string, alt: string) => {
+    controller.setAlt(name, alt);
+    api.current?.setImageAlt(name, alt);
+  };
+
   const onImageFiles = async (files: File[]) => {
     for (const file of files) {
       try {
         const img = await resizeImage(file);
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const r = new FileReader();
-          r.onload = () => resolve(String(r.result));
-          r.onerror = () => reject(r.error);
-          r.readAsDataURL(img.blob);
-        });
         controller.addAsset({
           name: img.name,
           type: img.type,
-          dataUrl,
+          blob: img.blob,
+          objectUrl: URL.createObjectURL(img.blob),
           alt: "",
           width: img.width,
           height: img.height,
@@ -280,6 +282,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
       {buffer.restoredFromLocal && (
         <p role="status" className={styles.banner}>
           Restored unsaved changes from this device.
+          {buffer.imagesDropped ? " Images added but not saved were not kept." : ""}
           <button type="button" className={styles.toastAction} onClick={reloadFromGitHub}>
             Discard local changes
           </button>
@@ -320,7 +323,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
               {panel === "meta" ? (
                 <MetaPanel buffer={buffer} controller={controller} />
               ) : (
-                <AssetsPanel buffer={buffer} controller={controller} />
+                <AssetsPanel buffer={buffer} controller={controller} onAltChange={onAltChange} />
               )}
             </div>
           </aside>

@@ -10,7 +10,12 @@ import { Toolbar } from "./Toolbar.tsx";
 /* TipTap owns the document and its own drag handles. Storage is markdown, produced by @tiptap/markdown;
    the allowed node set is what GitHub renders (spec §5.6). Images are inserted by the caller after resize. */
 
-export type EditorApi = { insertImage(src: string, alt: string): void; focus(): void };
+export type EditorApi = {
+  insertImage(src: string, alt: string): void;
+  /** Alt text is edited in the panel; the document is where it has to end up to reach the markdown. */
+  setImageAlt(src: string, alt: string): void;
+  focus(): void;
+};
 
 export function Editor({
   initialMarkdown,
@@ -74,6 +79,17 @@ export function Editor({
     if (!apiRef || !editor) return;
     apiRef.current = {
       insertImage: (src, alt) => editor.chain().focus().setImage({ src, alt }).run(),
+      setImageAlt: (src, alt) => {
+        const { tr } = editor.state;
+        let changed = false;
+        editor.state.doc.descendants((node, pos) => {
+          if (node.type.name === "image" && node.attrs.src === src) {
+            tr.setNodeMarkup(pos, undefined, { ...node.attrs, alt });
+            changed = true;
+          }
+        });
+        if (changed) editor.view.dispatch(tr);
+      },
       focus: () => editor.commands.focus(),
     };
     return () => {

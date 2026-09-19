@@ -24,6 +24,7 @@ export function bufferFromBundle(bundle: Bundle, slug: string): Buffer {
       .map((f) => f.path.slice(dir.length + 1)),
     dirty: false,
     restoredFromLocal: false,
+    imagesDropped: false,
     updatedAt: new Date().toISOString(),
   };
 }

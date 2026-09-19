@@ -2,7 +2,7 @@ import type { Entry } from "@crc/content-schema";
 import type { Draft, FileInput, GitHubClient } from "@crc/github-client";
 import { serializeEntry } from "@crc/markdown";
 import { type QueryClient, queryOptions } from "@tanstack/react-query";
-import { type Buffer, dataUrlToBytes } from "../drafts/buffer.ts";
+import type { Buffer } from "../drafts/buffer.ts";
 import { bundleDirFor, CONTENT_ROOT, type EntryKind, findEntryDir } from "../drafts/paths.ts";
 import { studioKeys } from "./queries.ts";
 
@@ -24,10 +24,9 @@ function bundleFiles(b: Buffer): FileInput[] {
     path: "index.md",
     content: serializeEntry({ meta: toFrontmatter(b.meta), body: b.markdown }),
   };
-  const assets: FileInput[] = b.assets.map((a) => ({
-    path: a.name,
-    content: dataUrlToBytes(a.dataUrl),
-  }));
+  // The file itself is handed over: the working-tree backend streams it to disk, and the GitHub
+  // backends read the bytes when they build the blob.
+  const assets: FileInput[] = b.assets.map((a) => ({ path: a.name, content: a.blob }));
   return [index, ...assets];
 }
 

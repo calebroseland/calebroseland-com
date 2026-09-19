@@ -6,9 +6,11 @@ import styles from "../studio.module.css";
 export function AssetsPanel({
   buffer,
   controller,
+  onAltChange,
 }: {
   buffer: Buffer;
   controller: BufferController;
+  onAltChange: (name: string, alt: string) => void;
 }) {
   return (
     <Stack gap="4" className={styles.panel} aria-label="Images">
@@ -17,14 +19,20 @@ export function AssetsPanel({
       )}
       {buffer.assets.map((a) => (
         <div key={a.name} className={styles.asset}>
-          <img src={a.dataUrl} alt={a.alt || ""} width={64} height={64} className={styles.thumb} />
+          <img
+            src={a.objectUrl}
+            alt={a.alt || ""}
+            width={64}
+            height={64}
+            className={styles.thumb}
+          />
           <div className={styles.field}>
             <label htmlFor={`alt-${a.name}`}>Alt text for {a.name}</label>
             <input
               id={`alt-${a.name}`}
               className={styles.input}
               value={a.alt}
-              onChange={(e) => controller.setAlt(a.name, e.target.value)}
+              onChange={(e) => onAltChange(a.name, e.target.value)}
               required
               aria-invalid={!a.alt.trim()}
             />

@@ -1,12 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
   type Buffer,
+  type BufferAsset,
   createBufferStore,
-  dataUrlToBytes,
   missingAlt,
   readLocalBuffer,
   writeLocalBuffer,
 } from "./buffer.ts";
+
+const asset = (name: string): BufferAsset => ({
+  name,
+  type: "image/jpeg",
+  blob: new Blob([new Uint8Array([1, 2, 3])], { type: "image/jpeg" }),
+  objectUrl: `blob:${name}`,
+  alt: "",
+  width: 1,
+  height: 1,
+});
 
 const base: Buffer = {
   ref: "drafts/x",
@@ -26,6 +36,7 @@ const base: Buffer = {
   existingAssets: [],
   dirty: false,
   restoredFromLocal: false,
+  imagesDropped: false,
   updatedAt: "2026-09-18T00:00:00.000Z",
 };
 
@@ -43,14 +54,7 @@ describe("buffer store", () => {
   it("marks dirty on edits and clean on save, moving new assets to existing", () => {
     const b = createBufferStore(base);
     b.setMarkdown("# y");
-    b.addAsset({
-      name: "a.jpg",
-      type: "image/jpeg",
-      dataUrl: "data:image/jpeg;base64,AA==",
-      alt: "",
-      width: 1,
-      height: 1,
-    });
+    b.addAsset(asset("a.jpg"));
     expect(b.store.state.dirty).toBe(true);
     expect(missingAlt(b.store.state).map((a) => a.name)).toEqual(["a.jpg"]);
     b.setAlt("a.jpg", "An image");
@@ -86,7 +90,20 @@ describe("buffer store", () => {
     expect(readLocalBuffer("drafts/x", storage)).toBeNull();
   });
 
-  it("decodes data urls", () => {
-    expect([...dataUrlToBytes("data:image/png;base64,AQID")]).toEqual([1, 2, 3]);
+  it("keeps only the text locally, and says so when a restored copy had images", () => {
+    const storage = mem();
+    const b = createBufferStore(base);
+    b.setMarkdown("# with an image");
+    b.addAsset(asset("a.jpg"));
+    writeLocalBuffer(b.store.state, storage);
+
+    // A Blob cannot go into local storage, and serialising it would cost the text its place there.
+    expect(storage.m.get("crc:buffer:drafts/x")).not.toContain("blob");
+    const restored = readLocalBuffer("drafts/x", storage);
+    expect(restored).toMatchObject({
+      markdown: "# with an image",
+      assets: [],
+      imagesDropped: true,
+    });
   });
 });
