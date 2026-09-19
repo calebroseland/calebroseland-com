@@ -1,4 +1,4 @@
-import { StaleRefError } from "@crc/github-client";
+import { fromBase64, StaleRefError } from "@crc/github-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createLocalClient, deleteLocalEntry } from "./local.ts";
 
@@ -91,6 +91,32 @@ describe("working-tree client", () => {
       "content/posts/2026/09-18-one/hero.png",
     ]);
     expect(sent?.files[1]?.encoding).toBe("base64");
+  });
+
+  it("writes an image larger than the argument-stack limit", async () => {
+    // A photo resized for the web is a few hundred kB; encoding it in one spread call used to throw.
+    const bytes = new Uint8Array(300_000);
+    for (let i = 0; i < bytes.length; i++) bytes[i] = i % 251;
+    let sent: { files: Array<{ path: string; content: string; encoding: string }> } | null = null;
+    mockFetch((url, init) => {
+      if (url === "/@local/write") {
+        sent = JSON.parse(String(init?.body));
+        return Response.json({ headSha: "def456" });
+      }
+      return Response.json(tree);
+    });
+
+    await createLocalClient().saveBundle({
+      ref: "working tree",
+      dir: "content/posts/2026/09-19-one",
+      files: [{ path: "hero.jpg", content: bytes }],
+      message: "m",
+      expectedHeadSha: "abc123",
+    });
+
+    const file = sent?.files[0];
+    expect(file?.encoding).toBe("base64");
+    expect(fromBase64(file?.content ?? "")).toEqual(bytes);
   });
 
   it("turns a changed-on-disk rejection into a stale-ref error", async () => {

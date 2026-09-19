@@ -1,5 +1,5 @@
 import type { Bundle, Draft, GitHubClient, PullRequest, Viewer } from "@crc/github-client";
-import { StaleRefError } from "@crc/github-client";
+import { StaleRefError, toBase64 } from "@crc/github-client";
 import { parseEntry } from "@crc/markdown";
 import { CONTENT_ROOT } from "../drafts/paths.ts";
 
@@ -92,9 +92,7 @@ export function createLocalClient(): GitHubClient {
         const binary = f.content instanceof Uint8Array;
         return {
           path: `${dir}/${f.path}`,
-          content: binary
-            ? btoa(String.fromCharCode(...(f.content as Uint8Array)))
-            : (f.content as string),
+          content: binary ? toBase64(f.content as Uint8Array) : (f.content as string),
           encoding: binary || f.encoding === "base64" ? ("base64" as const) : ("utf-8" as const),
         };
       });

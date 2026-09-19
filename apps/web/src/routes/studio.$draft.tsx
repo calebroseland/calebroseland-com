@@ -191,10 +191,12 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
     onError: (err) => {
       if (err instanceof StaleRefError) setConflict(err);
       else
-        notify("Couldn't save to GitHub. Your changes are still here.", {
-          kind: "alert",
-          action: { label: "Retry", onClick: () => save.mutate("save") },
-        });
+        notify(
+          gh.kind === "local"
+            ? "Couldn't write to your working tree. Your changes are still here."
+            : "Couldn't save to GitHub. Your changes are still here.",
+          { kind: "alert", action: { label: "Retry", onClick: () => save.mutate("save") } },
+        );
     },
   });
 

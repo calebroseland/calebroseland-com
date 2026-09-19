@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { fromBase64 } from "./base64.ts";
 import { createFakeClient } from "./fake.ts";
 import { StaleRefError } from "./types.ts";
 
@@ -102,5 +103,31 @@ describe("fake GitHub client", () => {
     await a.createDraft("persisted");
     const b = createFakeClient({ storage });
     expect((await b.listDrafts()).map((d) => d.slug)).toEqual(["persisted"]);
+  });
+});
+
+describe("binary content", () => {
+  it("round-trips an image larger than the argument-stack limit", async () => {
+    // A photo resized for the web is a few hundred kB; encoding it in one spread call used to throw.
+    const bytes = new Uint8Array(300_000);
+    for (let i = 0; i < bytes.length; i++) bytes[i] = i % 251;
+
+    const gh = createFakeClient();
+    const draft = await gh.createDraft("with-image");
+    await gh.saveBundle({
+      ref: draft.ref,
+      dir: "content/posts/2026/09-19-with-image",
+      files: [
+        { path: "index.md", content: "# hi" },
+        { path: "hero.jpg", content: bytes },
+      ],
+      message: "save",
+      expectedHeadSha: draft.headSha,
+    });
+
+    const bundle = await gh.readBundle(draft.ref, "content/posts/2026/09-19-with-image");
+    const hero = bundle.files.find((f) => f.path.endsWith("hero.jpg"));
+    expect(hero?.encoding).toBe("base64");
+    expect(fromBase64(hero?.content ?? "")).toEqual(bytes);
   });
 });

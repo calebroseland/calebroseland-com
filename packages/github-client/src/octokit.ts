@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/core";
 import { restEndpointMethods } from "@octokit/plugin-rest-endpoint-methods";
+import { toBase64 } from "./base64.ts";
 import {
   AuthError,
   type Bundle,
@@ -16,12 +17,6 @@ import {
 } from "./types.ts";
 
 const MyOctokit = Octokit.plugin(restEndpointMethods);
-
-function toBase64(bytes: Uint8Array): string {
-  let s = "";
-  for (const b of bytes) s += String.fromCharCode(b);
-  return btoa(s);
-}
 
 function toPr(pr: {
   number: number;

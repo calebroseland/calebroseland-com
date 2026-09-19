@@ -1,3 +1,4 @@
+import { toBase64 } from "./base64.ts";
 import {
   type Bundle,
   DRAFT_PREFIX,
@@ -155,9 +156,7 @@ export function createFakeClient(
       if (b.headSha !== expectedHeadSha) throw new StaleRefError(ref, expectedHeadSha, b.headSha);
       for (const f of files) {
         const isBinary = f.content instanceof Uint8Array;
-        const content = isBinary
-          ? btoa(String.fromCharCode(...(f.content as Uint8Array)))
-          : (f.content as string);
+        const content = isBinary ? toBase64(f.content as Uint8Array) : (f.content as string);
         b.files.set(`${dir}/${f.path}`, {
           content,
           encoding: isBinary || f.encoding === "base64" ? "base64" : "utf-8",
