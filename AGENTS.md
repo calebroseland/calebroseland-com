@@ -35,6 +35,10 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 - Studio backends: sign in with GitHub when the environment has a client id; otherwise (and always in dev) the login page offers an in-memory fake GitHub or a pasted token. The fake persists to `localStorage` and needs no vendor account.
 - Secrets: `apps/web/.dev.vars` (git-ignored) locally, `wrangler secret put` remotely. No `VITE_` variable may hold a credential.
 
+## Operations
+
+`docs/runbook.md` covers cutover, rollback, a bad deploy, and where errors surface.
+
 ## Environments
 
 | Env | URL | From |
