@@ -20,11 +20,6 @@ run = "npm run dev -w apps/web --"
 description = "Production build of the web app"
 run = "npm run build -w apps/web"
 
-[tasks."dev:publish"]
-description = "Dev server whose studio fake-GitHub writes merged posts into content/ (local publish loop)"
-env = { CRC_LOCAL_PUBLISH = "1" }
-run = "npm run dev -w apps/web --"
-
 [tasks."build:pages"]
 description = "Build the GitHub Pages backup variant"
 run = "npm run build:pages -w apps/web"

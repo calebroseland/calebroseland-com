@@ -20,3 +20,4 @@ blob-report/
 routeTree.gen.ts.tmp
 dist-pages/
 *.tsbuildinfo
+.tmp/
