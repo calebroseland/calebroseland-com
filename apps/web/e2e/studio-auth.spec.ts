@@ -34,7 +34,9 @@ test.describe("studio auth", () => {
   test("callback without a handshake fails closed", async ({ page }) => {
     await page.goto("/studio/callback?code=abc&state=xyz");
     await expect(page).toHaveURL(/\/studio\/login\?error=/);
-    await expect(page.getByRole("alert")).toContainText("Sign-in didn't complete");
+    await expect(page.getByRole("alert").filter({ hasText: "Sign-in" })).toContainText(
+      "Sign-in didn't complete",
+    );
   });
 
   test("login page is accessible", async ({ page }) => {

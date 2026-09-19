@@ -35,6 +35,13 @@ test.describe("studio drafts", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Hello Studio" })).toBeVisible();
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
 
+    // The editor column must not collapse: Center's auto margins once disabled grid stretch, which
+    // starved the size-container child and wrapped the toolbar into a tall vertical strip.
+    const editorBox = await page.getByRole("textbox", { name: "Post body" }).boundingBox();
+    expect(editorBox?.width ?? 0).toBeGreaterThan(300);
+    const toolbarBox = await page.getByRole("toolbar", { name: "Formatting" }).boundingBox();
+    expect(toolbarBox?.height ?? 999).toBeLessThan(120);
+
     const body = page.getByRole("textbox", { name: "Post body" });
     await body.click();
     await page.keyboard.type("First paragraph of the post.");
@@ -57,7 +64,9 @@ test.describe("studio drafts", () => {
 
     // Saving without alt text is blocked and focuses the media panel.
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page.getByRole("alert")).toContainText("Add alt text for 1 image.");
+    await expect(page.getByRole("alert").filter({ hasText: "alt text" })).toContainText(
+      "Add alt text for 1 image.",
+    );
     await page.getByLabel(/Alt text for photo\.png/).fill("A tiny test image");
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "Committed" })).toContainText(
