@@ -13,6 +13,7 @@ Personal site + git-backed studio. React 19 SPA on a Cloudflare Worker; GitHub i
 | `mise run build` / `build:pages` | Production build / GitHub Pages backup variant |
 | `mise run size` · `mise run knip` | Bundle budgets · dead code and deps |
 | `mise run smoke` | Post-deploy checks; needs `BASE_URL` |
+| `mise run dev:publish` | Dev server where the studio's local fake GitHub writes merged posts into `content/`, so publishing locally really renders the post |
 
 Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise task exists.
 
@@ -31,6 +32,7 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 - Motion: `m` inside `LazyMotion strict`; reduced motion is honoured twice (CSS tokens + `MotionConfig`).
 - Tests colocated as `*.test.ts(x)`; RTL queries by role; unexpected `console.error`/`warn` fails a test. Worker tests run in workerd.
 - Commits: Conventional Commits with workspace scope (`feat(web):`, `chore(ui):`, `ci:`). Squash-merge. Never push without the owner's go.
+- Studio backends: sign in with GitHub when the environment has a client id; otherwise (and always in dev) the login page offers an in-memory fake GitHub or a pasted token. The fake persists to `localStorage` and needs no vendor account.
 - Secrets: `apps/web/.dev.vars` (git-ignored) locally, `wrangler secret put` remotely. No `VITE_` variable may hold a credential.
 
 ## Environments

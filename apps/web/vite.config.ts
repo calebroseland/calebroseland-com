@@ -17,6 +17,7 @@ export default defineConfig({
   define: {
     __BUILD_SHA__: JSON.stringify(process.env.GITHUB_SHA ?? "dev"),
     __API_ORIGIN__: JSON.stringify(process.env.VITE_API_ORIGIN ?? ""),
+    __LOCAL_PUBLISH__: JSON.stringify(process.env.CRC_LOCAL_PUBLISH === "1"),
   },
   plugins: [
     content({ root: repoRoot, siteOrigin: process.env.SITE_ORIGIN ?? "https://calebroseland.com" }),
