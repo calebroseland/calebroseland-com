@@ -452,3 +452,27 @@
     color: var(--color-danger);
   }
 }
+
+@layer components {
+  .summaryList {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-1) var(--space-4);
+    margin: 0;
+
+    & dt {
+      color: var(--color-text-subtle);
+      font-size: var(--font-size-sm);
+    }
+
+    & dd {
+      margin: 0;
+    }
+  }
+
+  .prStatus {
+    min-block-size: 1.5rem;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+}

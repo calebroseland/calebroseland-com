@@ -19,6 +19,7 @@ import { Editor, type EditorApi } from "../studio/editor/Editor.tsx";
 import { MetaPanel } from "../studio/editor/MetaPanel.tsx";
 import { ImageTooLargeError, resizeImage, UnsupportedImageError } from "../studio/editor/resize.ts";
 import { invalidateDraft, postsTreeQuery, saveDraft } from "../studio/github/mutations.ts";
+import { PublishDialog } from "../studio/publish/PublishDialog.tsx";
 import { useGitHub } from "../studio/StudioProvider.tsx";
 import { StudioShell } from "../studio/StudioShell.tsx";
 import styles from "../studio/studio.module.css";
@@ -207,6 +208,7 @@ function DraftEditor({ slug, initial }: { slug: string; initial: Buffer }) {
           >
             {save.isPending ? "Saving…" : "Save"}
           </button>
+          <PublishDialog buffer={buffer} disabled={save.isPending} />
         </div>
       }
     >

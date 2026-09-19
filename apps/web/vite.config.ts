@@ -45,6 +45,7 @@ export default defineConfig({
       "@tiptap/extension-link",
       "@tiptap/extension-placeholder",
       "@base-ui/react/alert-dialog",
+      "@base-ui/react/dialog",
       "@base-ui/react/menu",
       "@tanstack/react-form",
       "@tanstack/react-query",
