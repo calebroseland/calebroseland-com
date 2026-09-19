@@ -32,7 +32,7 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 - Tests colocated as `*.test.ts(x)`; RTL queries by role; unexpected `console.error`/`warn` fails a test. Worker tests run in workerd.
 - Commits: Conventional Commits with workspace scope (`feat(web):`, `chore(ui):`, `ci:`). Squash-merge. Never push without the owner's go.
 - Studio backends, offered by the login page in dev (and whenever OAuth is unconfigured):
-  - **Working tree** edits the real files in `content/` on the branch you have checked out, through dev-server routes under `/@local/`. There are no branches or pull requests: the edit is an unstaged change you commit yourself, beside any code change. A file changed outside the browser between load and save is detected and the save is refused.
+  - **Working tree** edits the real files in `content/` on the branch you have checked out, through dev-server routes under `/@local/`. There are no branches or pull requests: the edit is an unstaged change you commit yourself, beside any code change. Images and other binaries stream to disk as bytes (`POST /@local/upload`), never as base64. A file changed outside the browser between load and save is detected and the save is refused.
   - **Fake GitHub** simulates branches, pull requests and merges in memory (persisted to `localStorage`), and a merge writes the result into `content/` so the loop ends at a rendered page.
   - **Pasted token** uses real GitHub through Octokit.
 - `CRC_CONTENT_DIR` points the content pipeline and the local store at another directory; the E2E suite uses it so tests never write into the repository's own `content/`.
