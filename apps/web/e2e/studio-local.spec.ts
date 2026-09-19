@@ -141,7 +141,8 @@ test.describe("working-tree mode", () => {
     const image = statSync(join(scratchContentDir, dir, "photo.png"));
     // Well past the point where encoding the bytes in one call used to overflow the argument stack.
     expect(image.size).toBeGreaterThan(100_000);
-    expect(onDisk(`${dir}/index.md`)).toContain("![](photo.png)");
+    // Alt text typed in the panel has to reach the markdown, or the published image has none.
+    expect(onDisk(`${dir}/index.md`)).toContain("![Noise, for the size of it](photo.png)");
   });
 
   test("deleting an entry removes its directory from the working tree", async ({ page }) => {

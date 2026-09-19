@@ -11,6 +11,9 @@ export default defineConfig({
   globalSetup: "./e2e/global-setup.ts",
   testIgnore: ["**/smoke/**"],
   fullyParallel: true,
+  // Four projects share one dev server, and the emulated phone is the slowest of them. The default
+  // 30s is tight enough under that contention to fail a test that is only slow, not broken.
+  timeout: 60_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",

@@ -11,7 +11,7 @@ const crcTable = Array.from({ length: 256 }, (_, n) => {
 
 function crc32(buf: Buffer): number {
   let c = 0xffffffff;
-  for (const byte of buf) c = crcTable[(c ^ byte) & 0xff]! ^ (c >>> 8);
+  for (const byte of buf) c = (crcTable[(c ^ byte) & 0xff] ?? 0) ^ (c >>> 8);
   return (c ^ 0xffffffff) >>> 0;
 }
 
