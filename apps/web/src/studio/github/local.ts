@@ -1,5 +1,5 @@
 import type { Bundle, Draft, GitHubClient, PullRequest, Viewer } from "@crc/github-client";
-import { StaleRefError, toBase64 } from "@crc/github-client";
+import { isBinaryContent, StaleRefError } from "@crc/github-client";
 import { parseEntry } from "@crc/markdown";
 import { CONTENT_ROOT } from "../drafts/paths.ts";
 
@@ -87,19 +87,38 @@ export function createLocalClient(): GitHubClient {
       };
     },
 
+    /* Binary files are streamed to disk one at a time, then the text files go in a single write. Each
+       call checks the tree it was given and returns the tree it produced, so the chain keeps detecting
+       a change made elsewhere without an image ever being encoded as a string. */
     async saveBundle({ dir, files, expectedHeadSha }) {
-      const payload = files.map((f) => {
-        const binary = f.content instanceof Uint8Array;
-        return {
+      let head = expectedHeadSha;
+
+      for (const file of files) {
+        const raw = file.content;
+        if (!isBinaryContent(raw)) continue;
+        const body = raw instanceof Blob ? raw : new Blob([raw as BlobPart]);
+        const query = new URLSearchParams({ path: `${dir}/${file.path}`, expectedHeadSha: head });
+        const uploaded = await json<{ headSha: string }>(`/@local/upload?${query}`, {
+          method: "POST",
+          headers: { "content-type": "application/octet-stream" },
+          body,
+        });
+        head = uploaded.headSha;
+      }
+
+      const text = files
+        .filter((f) => !isBinaryContent(f.content))
+        .map((f) => ({
           path: `${dir}/${f.path}`,
-          content: binary ? toBase64(f.content as Uint8Array) : (f.content as string),
-          encoding: binary || f.encoding === "base64" ? ("base64" as const) : ("utf-8" as const),
-        };
-      });
+          content: f.content as string,
+          encoding: f.encoding === "base64" ? ("base64" as const) : ("utf-8" as const),
+        }));
+      if (text.length === 0) return { headSha: head, commitUrl: "" };
+
       const { headSha } = await json<{ headSha: string }>("/@local/write", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ files: payload, expectedHeadSha }),
+        body: JSON.stringify({ files: text, expectedHeadSha: head }),
       });
       return { headSha, commitUrl: "" };
     },

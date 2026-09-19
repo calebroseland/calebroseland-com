@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
+  createWriteStream,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -11,6 +12,7 @@ import {
 } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { dirname, extname, join, relative, resolve } from "node:path";
+import { pipeline } from "node:stream/promises";
 import type { Plugin } from "vite";
 import { contentDirFor, recordStudioTree } from "./content-dir.ts";
 
@@ -141,6 +143,26 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
               const afterWrite = readTree(contentDir, prefix).headSha;
               recordStudioTree(afterWrite);
               return json(res, 200, { headSha: afterWrite });
+            }
+            /* Binary upload. The bytes are streamed straight to the file: an image never becomes a
+               base64 string on the way in, which is both wasteful and what used to overflow the
+               argument stack. The tree hash is checked first, exactly as a JSON write is, and the new
+               hash is returned so a save can chain several uploads and end with the markdown. */
+            if (url === "/@local/upload" && req.method === "POST") {
+              const params = new URL(req.url ?? "", "http://localhost").searchParams;
+              const target = params.get("path");
+              const expected = params.get("expectedHeadSha");
+              const abs = target ? inside(target) : null;
+              if (!abs) return json(res, 400, { error: "path outside the content directory" });
+              const current = readTree(contentDir, prefix);
+              if (expected && expected !== current.headSha) {
+                return json(res, 409, { error: "stale", headSha: current.headSha });
+              }
+              mkdirSync(dirname(abs), { recursive: true });
+              await pipeline(req, createWriteStream(abs));
+              const afterUpload = readTree(contentDir, prefix).headSha;
+              recordStudioTree(afterUpload);
+              return json(res, 200, { headSha: afterUpload });
             }
             if (url === "/@local/delete" && req.method === "POST") {
               const payload = (await readBody(req)) as { dir?: string };

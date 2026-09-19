@@ -1,4 +1,4 @@
-import { fromBase64, StaleRefError } from "@crc/github-client";
+import { StaleRefError } from "@crc/github-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createLocalClient, deleteLocalEntry } from "./local.ts";
 
@@ -64,43 +64,51 @@ describe("working-tree client", () => {
     expect(bundle.headSha).toBe("abc123");
   });
 
-  it("writes files under the entry directory, encoding binaries", async () => {
-    let sent: { files: Array<{ path: string; encoding: string }>; expectedHeadSha: string } | null =
-      null;
+  it("streams a binary as bytes and chains the tree hash into the text write", async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
     mockFetch((url, init) => {
-      if (url === "/@local/write") {
-        sent = JSON.parse(String(init?.body));
-        return Response.json({ headSha: "def456" });
-      }
+      calls.push({ url, ...(init ? { init } : {}) });
+      if (url.startsWith("/@local/upload")) return Response.json({ headSha: "after-image" });
+      if (url === "/@local/write") return Response.json({ headSha: "after-text" });
       return Response.json(tree);
     });
+
     const result = await createLocalClient().saveBundle({
       ref: "working tree",
       dir: "content/posts/2026/09-18-one",
       files: [
         { path: "index.md", content: "# hi" },
-        { path: "hero.png", content: new Uint8Array([1, 2, 3]) },
+        { path: "hero.png", content: new Blob([new Uint8Array([1, 2, 3])]) },
       ],
       message: "ignored",
       expectedHeadSha: "abc123",
     });
-    expect(result.headSha).toBe("def456");
-    expect(sent).toMatchObject({ expectedHeadSha: "abc123" });
-    expect(sent?.files.map((f) => f.path)).toEqual([
-      "content/posts/2026/09-18-one/index.md",
-      "content/posts/2026/09-18-one/hero.png",
-    ]);
-    expect(sent?.files[1]?.encoding).toBe("base64");
+
+    const upload = calls.find((c) => c.url.startsWith("/@local/upload"));
+    const uploadUrl = new URL(upload?.url ?? "", "http://x");
+    expect(uploadUrl.searchParams.get("path")).toBe("content/posts/2026/09-18-one/hero.png");
+    expect(uploadUrl.searchParams.get("expectedHeadSha")).toBe("abc123");
+    // The bytes go up as a body, never as a string in a JSON document.
+    expect(upload?.init?.body).toBeInstanceOf(Blob);
+
+    const write = calls.find((c) => c.url === "/@local/write");
+    const body = JSON.parse(String(write?.init?.body)) as {
+      files: Array<{ path: string }>;
+      expectedHeadSha: string;
+    };
+    expect(body.files.map((f) => f.path)).toEqual(["content/posts/2026/09-18-one/index.md"]);
+    // Chained: the image moved the tree, so the text write carries the hash the upload returned.
+    expect(body.expectedHeadSha).toBe("after-image");
+    expect(result.headSha).toBe("after-text");
   });
 
-  it("writes an image larger than the argument-stack limit", async () => {
-    // A photo resized for the web is a few hundred kB; encoding it in one spread call used to throw.
+  it("sends a large image byte for byte, with no encoding step to overflow", async () => {
     const bytes = new Uint8Array(300_000);
     for (let i = 0; i < bytes.length; i++) bytes[i] = i % 251;
-    let sent: { files: Array<{ path: string; content: string; encoding: string }> } | null = null;
+    let uploaded: Blob | null = null;
     mockFetch((url, init) => {
-      if (url === "/@local/write") {
-        sent = JSON.parse(String(init?.body));
+      if (url.startsWith("/@local/upload")) {
+        uploaded = init?.body as Blob;
         return Response.json({ headSha: "def456" });
       }
       return Response.json(tree);
@@ -109,14 +117,13 @@ describe("working-tree client", () => {
     await createLocalClient().saveBundle({
       ref: "working tree",
       dir: "content/posts/2026/09-19-one",
-      files: [{ path: "hero.jpg", content: bytes }],
+      files: [{ path: "hero.jpg", content: new Blob([bytes]) }],
       message: "m",
       expectedHeadSha: "abc123",
     });
 
-    const file = sent?.files[0];
-    expect(file?.encoding).toBe("base64");
-    expect(fromBase64(file?.content ?? "")).toEqual(bytes);
+    expect(uploaded).toBeInstanceOf(Blob);
+    expect(new Uint8Array(await (uploaded as unknown as Blob).arrayBuffer())).toEqual(bytes);
   });
 
   it("turns a changed-on-disk rejection into a stale-ref error", async () => {
@@ -125,7 +132,7 @@ describe("working-tree client", () => {
       createLocalClient().saveBundle({
         ref: "working tree",
         dir: "d",
-        files: [],
+        files: [{ path: "index.md", content: "# hi" }],
         message: "m",
         expectedHeadSha: "abc123",
       }),
