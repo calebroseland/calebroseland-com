@@ -14,9 +14,9 @@ test.describe("studio publish", () => {
     page,
   }) => {
     await signInFake(page);
-    await page.getByRole("link", { name: "New post" }).click();
+    await page.getByRole("link", { name: "New entry" }).click();
     await page.getByLabel("Title").fill("Publish Me");
-    await page.getByRole("button", { name: "Create draft" }).click();
+    await page.getByRole("button", { name: "Create post" }).click();
     await expect(page).toHaveURL(/\/studio\/publish-me/);
 
     await page.getByRole("textbox", { name: "Post body" }).click();
@@ -38,14 +38,17 @@ test.describe("studio publish", () => {
     await expect(page.getByRole("status").filter({ hasText: "Published" })).toBeVisible();
 
     await page.goto("/studio");
-    await expect(page.getByText("No drafts yet.")).toBeVisible();
+    await expect(page.getByRole("region", { name: /^In progress/ })).toHaveCount(0);
+    const live = page.getByRole("region", { name: /^Published/ });
+    await expect(live.getByRole("link", { name: "Publish Me" })).toBeVisible();
+    await expect(live.getByRole("button", { name: "Edit" })).toBeVisible();
   });
 
   test("publishing with unsaved changes is blocked until saved", async ({ page }) => {
     await signInFake(page);
-    await page.getByRole("link", { name: "New post" }).click();
+    await page.getByRole("link", { name: "New entry" }).click();
     await page.getByLabel("Title").fill("Dirty");
-    await page.getByRole("button", { name: "Create draft" }).click();
+    await page.getByRole("button", { name: "Create post" }).click();
     await expect(page).toHaveURL(/\/studio\/dirty/);
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
     await page.getByRole("textbox", { name: "Post body" }).click();
@@ -58,9 +61,9 @@ test.describe("studio publish", () => {
 
   test("a non-mergeable pull request is explained and not force-merged", async ({ page }) => {
     await signInFake(page);
-    await page.getByRole("link", { name: "New post" }).click();
+    await page.getByRole("link", { name: "New entry" }).click();
     await page.getByLabel("Title").fill("Conflicted");
-    await page.getByRole("button", { name: "Create draft" }).click();
+    await page.getByRole("button", { name: "Create post" }).click();
     await expect(page).toHaveURL(/\/studio\/conflicted/);
     await page.getByRole("button", { name: "Publish" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Open pull request" }).click();

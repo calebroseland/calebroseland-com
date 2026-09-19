@@ -25,12 +25,12 @@ test.describe("studio drafts", () => {
     page,
   }) => {
     await signInFake(page);
-    await expect(page.getByText("No drafts yet.")).toBeVisible();
+    await expect(page.getByText("Nothing here yet.")).toBeVisible();
 
-    await page.getByRole("link", { name: "New post" }).click();
+    await page.getByRole("link", { name: "New entry" }).click();
     await page.getByLabel("Title").fill("Hello Studio");
-    await expect(page.getByLabel("Slug")).toHaveValue("hello-studio");
-    await page.getByRole("button", { name: "Create draft" }).click();
+    await expect(page.getByRole("textbox", { name: "Slug" })).toHaveValue("hello-studio");
+    await page.getByRole("button", { name: "Create post" }).click();
     await expect(page).toHaveURL(/\/studio\/hello-studio/);
     await expect(page.getByRole("heading", { level: 1, name: "Hello Studio" })).toBeVisible();
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
@@ -80,14 +80,14 @@ test.describe("studio drafts", () => {
 
     await page.getByRole("link", { name: "← Drafts" }).click();
     await expect(page.getByRole("link", { name: "hello-studio" })).toBeVisible();
-    await expect(page.getByText("Draft branches (1)")).toBeVisible();
+    await expect(page.getByText("In progress (1)")).toBeVisible();
   });
 
   test("unsaved edits survive a reload and can be discarded", async ({ page }) => {
     await signInFake(page);
-    await page.getByRole("link", { name: "New post" }).click();
+    await page.getByRole("link", { name: "New entry" }).click();
     await page.getByLabel("Title").fill("Persist Me");
-    await page.getByRole("button", { name: "Create draft" }).click();
+    await page.getByRole("button", { name: "Create post" }).click();
     await expect(page).toHaveURL(/\/studio\/persist-me/);
     await page.getByRole("textbox", { name: "Post body" }).click();
     await page.keyboard.type("Not yet saved");
@@ -109,9 +109,9 @@ test.describe("studio drafts", () => {
     page,
   }) => {
     await signInFake(page);
-    await page.getByRole("link", { name: "New post" }).click();
+    await page.getByRole("link", { name: "New entry" }).click();
     await page.getByLabel("Title").fill("Conflict");
-    await page.getByRole("button", { name: "Create draft" }).click();
+    await page.getByRole("button", { name: "Create post" }).click();
     await expect(page).toHaveURL(/\/studio\/conflict/);
     await page.getByRole("textbox", { name: "Post body" }).click();
     await page.keyboard.type("mine");
