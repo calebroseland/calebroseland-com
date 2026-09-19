@@ -8,6 +8,7 @@ export const studioKeys = {
   drafts: () => [...studioKeys.all, "drafts"] as const,
   bundle: (ref: string, dir: string) => [...studioKeys.all, "bundle", ref, dir] as const,
   pull: (ref: string) => [...studioKeys.all, "pull", ref] as const,
+  published: () => [...studioKeys.all, "published"] as const,
 };
 
 export const viewerQuery = (gh: GitHubClient) =>

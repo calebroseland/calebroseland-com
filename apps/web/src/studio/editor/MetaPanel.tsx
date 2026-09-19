@@ -1,4 +1,4 @@
-import { post } from "@crc/content-schema";
+import { entry } from "@crc/content-schema";
 import { Stack } from "@crc/ui";
 import { useForm } from "@tanstack/react-form";
 import type { Buffer, BufferController } from "../drafts/buffer.ts";
@@ -42,9 +42,11 @@ export function MetaPanel({
     },
   });
 
+  const isPost = buffer.meta.kind === "post";
+
   const check = (values: Values): string | undefined => {
-    const r = post.safeParse({
-      kind: "post",
+    const r = entry.safeParse({
+      kind: buffer.meta.kind,
       slug: buffer.meta.slug,
       ...values,
       tags: values.tags
@@ -59,7 +61,7 @@ export function MetaPanel({
   return (
     <form
       className={styles.panel}
-      aria-label="Post details"
+      aria-label={`${isPost ? "Post" : "Page"} details`}
       onSubmit={(e) => {
         e.preventDefault();
       }}
@@ -96,39 +98,43 @@ export function MetaPanel({
             aria-readonly="true"
           />
         </Field>
-        <form.Field
-          name="date"
-          validators={{
-            onBlur: ({ value }) =>
-              Number.isNaN(Date.parse(value)) ? "Enter a valid date" : undefined,
-          }}
-        >
-          {(f) => (
-            <Field label="Date" error={f.state.meta.errors[0]} id="meta-date">
-              <input
-                id="meta-date"
-                type="date"
-                className={styles.input}
-                value={f.state.value}
-                onChange={(e) => f.handleChange(e.target.value)}
-                onBlur={f.handleBlur}
-              />
-            </Field>
-          )}
-        </form.Field>
-        <form.Field name="tags">
-          {(f) => (
-            <Field label="Tags" id="meta-tags" hint="Comma separated.">
-              <input
-                id="meta-tags"
-                className={styles.input}
-                value={f.state.value}
-                onChange={(e) => f.handleChange(e.target.value)}
-                onBlur={f.handleBlur}
-              />
-            </Field>
-          )}
-        </form.Field>
+        {isPost && (
+          <>
+            <form.Field
+              name="date"
+              validators={{
+                onBlur: ({ value }) =>
+                  Number.isNaN(Date.parse(value)) ? "Enter a valid date" : undefined,
+              }}
+            >
+              {(f) => (
+                <Field label="Date" error={f.state.meta.errors[0]} id="meta-date">
+                  <input
+                    id="meta-date"
+                    type="date"
+                    className={styles.input}
+                    value={f.state.value}
+                    onChange={(e) => f.handleChange(e.target.value)}
+                    onBlur={f.handleBlur}
+                  />
+                </Field>
+              )}
+            </form.Field>
+            <form.Field name="tags">
+              {(f) => (
+                <Field label="Tags" id="meta-tags" hint="Comma separated.">
+                  <input
+                    id="meta-tags"
+                    className={styles.input}
+                    value={f.state.value}
+                    onChange={(e) => f.handleChange(e.target.value)}
+                    onBlur={f.handleBlur}
+                  />
+                </Field>
+              )}
+            </form.Field>
+          </>
+        )}
         <form.Field name="summary">
           {(f) => (
             <Field label="Summary" id="meta-summary">

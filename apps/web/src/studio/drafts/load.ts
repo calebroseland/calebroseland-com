@@ -1,19 +1,17 @@
 import type { Bundle } from "@crc/github-client";
 import { parseEntry } from "@crc/markdown";
 import type { Buffer } from "./buffer.ts";
-import { findBundleDir } from "./paths.ts";
+import { findEntryDir } from "./paths.ts";
 
-/** Turns a branch's content/posts tree into an editor buffer for one draft slug. */
+/** Turns a content tree into an editor buffer for one slug, whichever kind owns it. */
 export function bufferFromBundle(bundle: Bundle, slug: string): Buffer {
-  const dir = findBundleDir(
-    bundle.files.map((f) => f.path),
-    slug,
-  );
-  if (!dir) throw new Error(`No bundle for "${slug}" on ${bundle.ref}`);
+  const paths = bundle.files.map((f) => f.path);
+  const found = findEntryDir(paths, slug);
+  if (!found) throw new Error(`No bundle for "${slug}" on ${bundle.ref}`);
+  const { dir } = found;
   const index = bundle.files.find((f) => f.path === `${dir}/index.md`);
   if (!index) throw new Error(`Missing index.md in ${dir}`);
   const { meta, body } = parseEntry(index.content);
-  if (meta.kind !== "post") throw new Error(`Bundle ${dir} is a ${meta.kind}, not a post`);
   return {
     ref: bundle.ref,
     dir,

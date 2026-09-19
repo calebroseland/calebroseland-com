@@ -1,4 +1,4 @@
-import type { Post } from "@crc/content-schema";
+import type { Entry } from "@crc/content-schema";
 import { Store } from "@tanstack/store";
 
 /* The editor's working copy for one draft. Mirrored to localStorage (debounced by the caller) so a
@@ -13,13 +13,20 @@ export type BufferAsset = {
   height: number;
 };
 
+/** Entry frontmatter with the date as a string. Distributes over the union so `kind` stays a discriminant. */
+type EntryDraftMeta = Entry extends infer T
+  ? T extends { date: Date }
+    ? Omit<T, "date"> & { date: string }
+    : never
+  : never;
+
 export type Buffer = {
   ref: string;
   dir: string;
   /** Head sha the buffer was loaded from; saveBundle sends it as the optimistic lock. */
   baseHeadSha: string;
   markdown: string;
-  meta: Omit<Post, "date"> & { date: string };
+  meta: EntryDraftMeta;
   assets: BufferAsset[];
   /** Assets that exist on the branch already (not re-uploaded on save). */
   existingAssets: string[];

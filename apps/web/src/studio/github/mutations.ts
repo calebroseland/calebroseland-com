@@ -1,21 +1,22 @@
-import type { Post } from "@crc/content-schema";
+import type { Entry } from "@crc/content-schema";
 import type { Draft, FileInput, GitHubClient } from "@crc/github-client";
 import { serializeEntry } from "@crc/markdown";
 import { type QueryClient, queryOptions } from "@tanstack/react-query";
 import { type Buffer, dataUrlToBytes } from "../drafts/buffer.ts";
-import { bundleDirFor, POSTS_ROOT } from "../drafts/paths.ts";
+import { bundleDirFor, CONTENT_ROOT, type EntryKind, findEntryDir } from "../drafts/paths.ts";
 import { studioKeys } from "./queries.ts";
 
-/** Everything under content/posts on a branch: used to locate a draft's bundle and to read it. */
-export const postsTreeQuery = (gh: GitHubClient, ref: string) =>
+/** Everything under content/ on a branch: locates any entry's bundle, posts and pages alike. */
+export const contentTreeQuery = (gh: GitHubClient, ref: string) =>
   queryOptions({
-    queryKey: studioKeys.bundle(ref, POSTS_ROOT),
-    queryFn: () => gh.readBundle(ref, POSTS_ROOT),
+    queryKey: studioKeys.bundle(ref, CONTENT_ROOT),
+    queryFn: () => gh.readBundle(ref, CONTENT_ROOT),
     staleTime: 10_000,
   });
 
-function toFrontmatter(meta: Buffer["meta"]): Post {
-  return { ...meta, date: new Date(meta.date) };
+/** meta mirrors an Entry with the date as a string; the kind discriminant is carried through. */
+function toFrontmatter(meta: Buffer["meta"]): Entry {
+  return { ...meta, date: new Date(meta.date) } as Entry;
 }
 
 function bundleFiles(b: Buffer): FileInput[] {
@@ -30,29 +31,37 @@ function bundleFiles(b: Buffer): FileInput[] {
   return [index, ...assets];
 }
 
-export async function createDraftWithBundle(
+export async function createEntryDraft(
   gh: GitHubClient,
-  input: { title: string; slug: string; date: Date },
+  input: { kind: EntryKind; title: string; slug: string; date: Date },
 ): Promise<{ draft: Draft; dir: string; headSha: string }> {
   const draft = await gh.createDraft(input.slug);
-  const dir = bundleDirFor(input.date, input.slug);
-  const meta: Post = {
-    kind: "post",
+  const dir = bundleDirFor(input.kind, input.date, input.slug);
+  const meta = {
+    kind: input.kind,
     title: input.title,
     slug: input.slug,
     date: input.date,
     draft: true,
     tags: [],
     placeholder: false,
-  };
+  } as Entry;
   const { headSha } = await gh.saveBundle({
     ref: draft.ref,
     dir,
     files: [{ path: "index.md", content: serializeEntry({ meta, body: "" }) }],
-    message: `post: start "${input.title}"`,
+    message: `${input.kind}: start "${input.title}"`,
     expectedHeadSha: draft.headSha,
   });
   return { draft, dir, headSha };
+}
+
+/* Editing something already on the default branch: branch from it and leave the files alone, so the
+   existing bundle directory is reused rather than a second one minted under today's date. */
+export async function beginEditing(gh: GitHubClient, slug: string): Promise<Draft> {
+  const existing = (await gh.listDrafts()).find((d) => d.slug === slug);
+  if (existing) return existing;
+  return gh.createDraft(slug);
 }
 
 export async function saveDraft(
@@ -63,15 +72,16 @@ export async function saveDraft(
     ref: b.ref,
     dir: b.dir,
     files: bundleFiles(b),
-    message: `post: update "${b.meta.title}"`,
+    message: `${b.meta.kind}: update "${b.meta.title}"`,
     expectedHeadSha: b.baseHeadSha,
   });
 }
 
 export async function invalidateDraft(queryClient: QueryClient, ref: string) {
   await Promise.all([
-    queryClient.invalidateQueries({ queryKey: studioKeys.drafts() }),
-    queryClient.invalidateQueries({ queryKey: studioKeys.bundle(ref, POSTS_ROOT) }),
-    queryClient.invalidateQueries({ queryKey: studioKeys.pull(ref) }),
+    queryClient.invalidateQueries({ queryKey: studioKeys.all }),
+    queryClient.invalidateQueries({ queryKey: studioKeys.bundle(ref, CONTENT_ROOT) }),
   ]);
 }
+
+export { findEntryDir };
