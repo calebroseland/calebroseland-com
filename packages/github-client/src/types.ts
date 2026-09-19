@@ -54,6 +54,8 @@ export class AuthError extends Error {
 
 export interface GitHubClient {
   readonly kind: "octokit" | "fake";
+  /** Branch entries are published to; drafts are cut from it. */
+  readonly defaultBranch: string;
   getViewer(): Promise<Viewer>;
   listDrafts(): Promise<Draft[]>;
   createDraft(slug: string): Promise<Draft>;

@@ -58,6 +58,7 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
 
   return {
     kind: "octokit",
+    defaultBranch: repo.defaultBranch,
 
     getViewer: () =>
       wrap(async () => {

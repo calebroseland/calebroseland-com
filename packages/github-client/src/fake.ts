@@ -92,6 +92,9 @@ export function createFakeClient(
 
   return {
     kind: "fake",
+    get defaultBranch() {
+      return state.defaultBranch;
+    },
     get state() {
       return state;
     },
