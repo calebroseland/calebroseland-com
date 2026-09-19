@@ -5,9 +5,11 @@ import {
   type Draft,
   draftRef,
   type GitHubClient,
+  isBinaryContent,
   type PullRequest,
   StaleRefError,
   slugFromRef,
+  toBytes,
   type Viewer,
 } from "./types.ts";
 
@@ -155,11 +157,12 @@ export function createFakeClient(
       }
       if (b.headSha !== expectedHeadSha) throw new StaleRefError(ref, expectedHeadSha, b.headSha);
       for (const f of files) {
-        const isBinary = f.content instanceof Uint8Array;
-        const content = isBinary ? toBase64(f.content as Uint8Array) : (f.content as string);
+        const raw = f.content;
+        const binary = isBinaryContent(raw);
+        const content = binary ? toBase64(await toBytes(raw)) : raw;
         b.files.set(`${dir}/${f.path}`, {
           content,
-          encoding: isBinary || f.encoding === "base64" ? "base64" : "utf-8",
+          encoding: binary || f.encoding === "base64" ? "base64" : "utf-8",
           sha: sha(content),
         });
       }

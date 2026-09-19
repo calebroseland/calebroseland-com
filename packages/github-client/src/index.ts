@@ -9,9 +9,11 @@ export {
   draftRef,
   type FileInput,
   type GitHubClient,
+  isBinaryContent,
   type PullRequest,
   type RepoRef,
   StaleRefError,
   slugFromRef,
+  toBytes,
   type Viewer,
 } from "./types.ts";

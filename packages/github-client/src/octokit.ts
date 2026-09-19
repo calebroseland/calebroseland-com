@@ -9,10 +9,12 @@ import {
   draftRef,
   type FileInput,
   type GitHubClient,
+  isBinaryContent,
   type PullRequest,
   type RepoRef,
   StaleRefError,
   slugFromRef,
+  toBytes,
   type Viewer,
 } from "./types.ts";
 
@@ -137,11 +139,12 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
         });
         const blobs = await Promise.all(
           files.map(async (f: FileInput) => {
-            const isBinary = f.content instanceof Uint8Array;
+            const raw = f.content;
+            const binary = isBinaryContent(raw);
             const { data } = await octokit.rest.git.createBlob({
               ...base,
-              content: isBinary ? toBase64(f.content as Uint8Array) : (f.content as string),
-              encoding: isBinary || f.encoding === "base64" ? "base64" : "utf-8",
+              content: binary ? toBase64(await toBytes(raw)) : raw,
+              encoding: binary || f.encoding === "base64" ? "base64" : "utf-8",
             });
             return {
               path: `${dir}/${f.path}`,

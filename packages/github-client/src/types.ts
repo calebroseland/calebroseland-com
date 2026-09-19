@@ -5,11 +5,19 @@ export type Viewer = { login: string; name: string | null; avatarUrl: string };
 
 export type RepoRef = { owner: string; repo: string; defaultBranch: string };
 
+/** Binary content may be a Blob, which the working-tree backend streams to disk without encoding it. */
 export type FileInput = {
   path: string;
-  content: string | Uint8Array;
+  content: string | Uint8Array | Blob;
   encoding?: "utf-8" | "base64";
 };
+
+export const isBinaryContent = (content: FileInput["content"]): content is Uint8Array | Blob =>
+  content instanceof Uint8Array || content instanceof Blob;
+
+export async function toBytes(content: Uint8Array | Blob): Promise<Uint8Array> {
+  return content instanceof Uint8Array ? content : new Uint8Array(await content.arrayBuffer());
+}
 
 export type Bundle = {
   ref: string;
