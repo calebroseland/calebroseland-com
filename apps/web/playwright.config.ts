@@ -4,7 +4,9 @@ import { scratchContentDir } from "./e2e/global-setup.ts";
 /** Specs that mutate the shared content directory, and so cannot run beside anything else. */
 const WRITES_FILES = /studio-local\.spec\.ts/;
 
-const port = 5173;
+/* Not the dev server's port. Reusing a server someone already has running would point the specs that
+   write files at the repository's content/ instead of the scratch copy. */
+const port = 5199;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -22,11 +24,11 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "npm run dev",
+    command: `npm run dev -- --port ${port} --strictPort`,
     // Backends that write files do so here, never in the repository's content/.
     env: { CRC_CONTENT_DIR: scratchContentDir },
     url: `http://localhost:${port}/api/health`,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
   projects: [
