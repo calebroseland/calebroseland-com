@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { parseYaml } from "./load.ts";
-import { profile, profileLink } from "./profile.ts";
+import { profile, profileContact, profileLink } from "./profile.ts";
 
 const validLink = { label: "GitHub", url: "https://github.com/calebroseland", icon: "mdiGithub" };
 
@@ -51,5 +51,30 @@ describe("profile", () => {
   it("names the failing path when YAML is invalid", () => {
     const yaml = `name: Caleb\ntagline: x\ngroups:\n  - title: Code\n    links:\n      - label: GitHub\n        url: not-a-url\n        icon: mdiGithub\n`;
     expect(() => parseYaml(profile, yaml)).toThrowError(/groups.*0.*links.*0.*url/s);
+  });
+});
+
+describe("profileContact", () => {
+  it("accepts the 2019 card's fields", () => {
+    const contact = {
+      email: "caleb@calebroseland.com",
+      phone: "+1 507 476 1225",
+      location: { label: "Minnesota, USA", url: "https://maps.google.com/?q=Minnesota,+USA" },
+    };
+    expect(profileContact.parse(contact)).toEqual(contact);
+  });
+
+  it("accepts any subset, including none", () => {
+    expect(profileContact.parse({})).toEqual({});
+    expect(profileContact.parse({ email: "a@b.co" })).toEqual({ email: "a@b.co" });
+  });
+
+  it.each([
+    ["an email without a domain", { email: "caleb@" }],
+    ["a phone with letters", { phone: "call me maybe" }],
+    ["a phone too short to dial", { phone: "12" }],
+    ["a location with a relative url", { location: { label: "Home", url: "/home" } }],
+  ])("rejects %s", (_name, input) => {
+    expect(profileContact.safeParse(input).success).toBe(false);
   });
 });

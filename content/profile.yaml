@@ -20,3 +20,7 @@ groups:
       - { label: npm, url: https://npmjs.com/~calebroseland, icon: mdiNpm }
       - { label: Stack Overflow, url: https://stackoverflow.com/users/1352410, icon: mdiStackOverflow }
       - { label: Pluralsight, url: https://pluralsight.com/profile/caleb-roseland, icon: mdiSchoolOutline }
+contact:
+  email: caleb@calebroseland.com
+  phone: +1 507 476 1225
+  location: { label: "Minnesota, USA", url: "https://maps.google.com/?q=Minnesota,+USA" }
