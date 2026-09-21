@@ -13,10 +13,5 @@
     },
     "packages/*": { "entry": ["src/*.ts", "src/**/*.test.{ts,tsx}"] }
   },
-  "ignoreDependencies": [
-    "@fontsource-variable/ibm-plex-sans",
-    "@fontsource/ibm-plex-mono",
-    "@fontsource/ibm-plex-serif",
-    "cloudflare"
-  ]
+  "ignoreDependencies": ["@fontsource/ibm-plex-mono", "@fontsource/ibm-plex-serif", "cloudflare"]
 }

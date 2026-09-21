@@ -1,38 +1,39 @@
 /* Primitives: raw values. Never referenced by components; only by the semantic layer and theme files. */
 @layer tokens {
   :root {
-    /* Hue axes: the identity in five numbers */
-    --hue-neutral: 250;
-    --hue-accent: 205;
+    /* Status hues; neutral and accent are Open Color values below */
     --hue-danger: 27;
     --hue-warning: 75;
     --hue-success: 150;
 
-    /* Neutral: cool-shifted, Open-color lineage */
-    --gray-50: oklch(98.5% 0.002 var(--hue-neutral));
-    --gray-100: oklch(96.5% 0.004 var(--hue-neutral));
-    --gray-200: oklch(92.5% 0.006 var(--hue-neutral));
-    --gray-300: oklch(87% 0.008 var(--hue-neutral));
-    --gray-400: oklch(71% 0.012 var(--hue-neutral));
-    --gray-500: oklch(58% 0.013 var(--hue-neutral));
-    --gray-600: oklch(48% 0.013 var(--hue-neutral));
-    --gray-700: oklch(39% 0.012 var(--hue-neutral));
-    --gray-800: oklch(29% 0.01 var(--hue-neutral));
-    --gray-900: oklch(21% 0.008 var(--hue-neutral));
-    --gray-950: oklch(14% 0.006 var(--hue-neutral));
+    /* Neutral: Open Color gray, the palette of the 2019 card, expressed in OKLCH.
+       Open Color has ten steps; 950 extends it one step darker for the dark theme's page. */
+    --gray-50: oklch(98.2% 0.002 248); /* oc-gray-0 #f8f9fa */
+    --gray-100: oklch(96.3% 0.003 248); /* oc-gray-1 #f1f3f5 */
+    --gray-200: oklch(94.2% 0.005 248); /* oc-gray-2 #e9ecef */
+    --gray-300: oklch(91.1% 0.007 248); /* oc-gray-3 #dee2e6 */
+    --gray-400: oklch(86.7% 0.011 248); /* oc-gray-4 #ced4da */
+    --gray-500: oklch(76.9% 0.015 248); /* oc-gray-5 #adb5bd */
+    --gray-600: oklch(64.3% 0.015 248); /* oc-gray-6 #868e96 */
+    --gray-700: oklch(42.8% 0.015 248); /* oc-gray-7 #495057 */
+    --gray-800: oklch(34.5% 0.013 248); /* oc-gray-8 #343a40 */
+    --gray-900: oklch(26.2% 0.009 248); /* oc-gray-9 #212529 */
+    --gray-950: oklch(19% 0.007 248);
 
-    /* Accent */
-    --accent-50: oklch(97% 0.015 var(--hue-accent));
-    --accent-100: oklch(94% 0.032 var(--hue-accent));
-    --accent-200: oklch(88% 0.06 var(--hue-accent));
-    --accent-300: oklch(80% 0.095 var(--hue-accent));
-    --accent-400: oklch(70% 0.125 var(--hue-accent));
-    --accent-500: oklch(62% 0.14 var(--hue-accent));
-    --accent-600: oklch(51% 0.13 var(--hue-accent));
-    --accent-700: oklch(47% 0.115 var(--hue-accent));
-    --accent-800: oklch(38% 0.09 var(--hue-accent));
-    --accent-900: oklch(30% 0.07 var(--hue-accent));
-    --accent-950: oklch(21% 0.05 var(--hue-accent));
+    /* Accent: Open Color blue. The 2019 card's backdrop was oc-blue-6, which is --accent-600. */
+    --accent-50: oklch(96.3% 0.02 239); /* oc-blue-0 #e7f5ff */
+    --accent-100: oklch(92.7% 0.039 240); /* oc-blue-1 #d0ebff */
+    --accent-200: oklch(86% 0.076 242); /* oc-blue-2 #a5d8ff */
+    --accent-300: oklch(78.2% 0.115 244); /* oc-blue-3 #74c0fc */
+    --accent-400: oklch(71.8% 0.142 246); /* oc-blue-4 #4dabf7 */
+    --accent-500: oklch(66.9% 0.157 248); /* oc-blue-5 #339af0 */
+    --accent-600: oklch(62.6% 0.164 250); /* oc-blue-6 #228be6 */
+    --accent-700: oklch(58.6% 0.159 251); /* oc-blue-7 #1c7ed6 */
+    --accent-800: oklch(54.3% 0.149 252); /* oc-blue-8 #1971c2 */
+    --accent-900: oklch(49.7% 0.133 252); /* oc-blue-9 #1864ab */
+    --accent-950: oklch(30% 0.075 250);
+    /* The 2019 dark backdrop: oc-blue-9 darkened 30% in HSL (#051625). */
+    --accent-1000: oklch(19.4% 0.039 247);
 
     /* Status: five steps each */
     --danger-100: oklch(94% 0.035 var(--hue-danger));
@@ -74,7 +75,9 @@
     --space-32: 8rem;
 
     /* Typography */
-    --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    /* Proxima Nova and Cortado come from the owner's Adobe Fonts kit (fonts.css). */
+    --font-sans: "proxima-nova", "Helvetica Neue", Helvetica, ui-sans-serif, system-ui, sans-serif;
+    --font-brand: "cortado", "Brush Script MT", cursive;
     --font-serif: "IBM Plex Serif", ui-serif, Georgia, serif;
     --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 

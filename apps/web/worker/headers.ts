@@ -2,9 +2,10 @@
 const csp = [
   "default-src 'self'",
   "script-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
+  // Adobe Fonts: the kit stylesheet on use.typekit.net imports a licence-counting stylesheet from p.typekit.net.
+  "style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net",
   "img-src 'self' data:",
-  "font-src 'self'",
+  "font-src 'self' https://use.typekit.net",
   "connect-src 'self' https://api.github.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
