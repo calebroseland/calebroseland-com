@@ -1,4 +1,4 @@
-import { readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "./fixtures.ts";
 import { scratchContentDir } from "./global-setup.ts";
@@ -9,6 +9,16 @@ import { noisePng } from "./png.ts";
    scratch copy of content/ (see global-setup), so nothing here touches the repository. */
 
 const onDisk = (rel: string) => readFileSync(join(scratchContentDir, rel), "utf8");
+
+/** A new post's directory is named for the day it was created, so find it by slug. */
+function postDir(slug: string): string {
+  const posts = join(scratchContentDir, "posts");
+  for (const year of readdirSync(posts)) {
+    const match = readdirSync(join(posts, year)).find((d) => d.endsWith(`-${slug}`));
+    if (match) return `posts/${year}/${match}`;
+  }
+  throw new Error(`no post directory for ${slug}`);
+}
 
 async function signInLocal(page: import("@playwright/test").Page) {
   await page.goto("/studio/login");
@@ -137,7 +147,7 @@ test.describe("working-tree mode", () => {
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "working tree" })).toBeVisible();
 
-    const dir = "posts/2026/09-19-with-photo";
+    const dir = postDir("with-photo");
     const image = statSync(join(scratchContentDir, dir, "photo.png"));
     // Well past the point where encoding the bytes in one call used to overflow the argument stack.
     expect(image.size).toBeGreaterThan(100_000);
