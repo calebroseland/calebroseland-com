@@ -1,84 +1,254 @@
 @layer components {
   .page {
     min-block-size: 100dvh;
+    background: var(--color-backdrop);
+    transition: background-color var(--duration-slower) var(--ease-in-out);
+  }
+
+  .stage {
     display: grid;
-    grid-template-rows: auto 1fr;
+    place-items: center;
+    min-block-size: 100dvh;
+    padding: var(--space-12) var(--space-4);
   }
 
-  .bar {
+  /* The card. Its height is driven by Motion during a flip, so it clips; its width is a length per
+     state (not fit-content) so the change between them can transition in every engine. */
+  .card {
+    --card-width: 34rem;
+    position: relative;
+    overflow: hidden;
+    container-type: inline-size;
+    inline-size: min(100%, var(--card-width));
+    padding: var(--space-2) var(--space-4) var(--space-3);
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    transition:
+      inline-size 0.75s ease,
+      background-color var(--duration-slow) var(--ease-in-out);
+
+    &[data-expanded] {
+      --card-width: 54rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  .cardBack {
+    --card-width: 32rem;
+    text-align: start;
+  }
+
+  .corners {
+    position: absolute;
+    inset-block-start: var(--space-2);
+    inset-inline: var(--space-2);
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-3) var(--space-4);
   }
 
-  .postsLink {
-    color: var(--color-text-muted);
-    text-decoration: none;
-    padding: var(--space-2) var(--space-1);
-    min-block-size: 2.75rem;
+  .cornerStart {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .cornerButton,
+  .cornerLink {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    min-inline-size: 2.75rem;
+    min-block-size: 2.75rem;
+    padding-inline: var(--space-2);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
 
     &:hover {
+      background: var(--color-surface-hover);
       color: var(--color-text);
     }
   }
 
-  .main {
-    display: grid;
-    align-content: center;
-    gap: var(--space-12);
-    padding-block: var(--space-8) var(--space-16);
-  }
-
   .name {
-    font-size: var(--font-size-display-md);
-    font-weight: var(--font-weight-semibold);
+    margin-block-start: var(--space-12);
+    font-family: var(--font-brand);
+    font-size: clamp(2.5rem, 1.9rem + 3vw, 3.5rem);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-normal);
   }
 
   .tagline {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl);
     color: var(--color-text-muted);
   }
 
+  /* Rows only the expanded card shows. Clipped because Motion animates their height. */
+  .reveal {
+    overflow: hidden;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    padding-block: var(--space-3) var(--space-1);
+  }
+
   .tag {
-    font-size: var(--font-size-sm);
     padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-full);
-    background: var(--color-accent-subtle);
-    color: var(--color-accent-text);
-    border: var(--border-width) solid var(--color-accent-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+    font-size: var(--font-size-base);
+  }
+
+  .links {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    justify-items: center;
+    gap: var(--space-4);
+    padding-block: var(--space-6) var(--space-2);
+
+    &[data-expanded] {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+      justify-items: stretch;
+      text-align: start;
+    }
+  }
+
+  .group {
+    min-inline-size: 0;
   }
 
   .groupTitle {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: var(--tracking-wide);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3) var(--space-2);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-normal);
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--color-text-muted);
   }
 
-  .link {
+  .list {
+    display: grid;
+  }
+
+  /* Links sit inside clipping containers, so their focus ring is drawn inside the box. */
+  .link,
+  .detail {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
-    margin-inline: calc(-1 * var(--space-3));
+    gap: var(--space-2);
+    min-block-size: 2.75rem;
+    padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-md);
     color: var(--color-text);
+    font-size: var(--font-size-lg);
+    line-height: var(--leading-tight);
     text-decoration: none;
-    min-block-size: 2.75rem;
+
+    &:focus-visible {
+      outline-offset: calc(-1 * var(--focus-ring-width));
+    }
+  }
+
+  .link {
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
 
     &:hover {
       background: var(--color-surface-hover);
-      color: var(--color-link);
+      color: var(--color-text);
+    }
+  }
+
+  .primaryLabel {
+    font-size: var(--font-size-xl);
+    white-space: nowrap;
+  }
+
+  /* A collapsed card on a phone keeps the three faces as icons, as the 2019 card did; the label stays
+     in the accessibility tree. */
+  @container (inline-size < 30rem) {
+    .links:not([data-expanded]) .primaryLabel {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  .more {
+    display: block;
+    margin: var(--space-2) auto 0;
+    min-block-size: 2.75rem;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: var(--font-size-lg);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    transition: background-color var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-surface-hover);
     }
 
-    & .external {
-      margin-inline-start: auto;
-      color: var(--color-text-subtle);
+    [data-expanded] > & {
+      inline-size: 100%;
+      background: var(--color-surface-sunken);
+    }
+  }
+
+  .back {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-2) 0 var(--space-4) var(--space-2);
+  }
+
+  .backName {
+    font-family: var(--font-brand);
+    font-size: 2.5rem;
+    font-weight: var(--font-weight-normal);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .details {
+    display: grid;
+    gap: var(--space-1);
+    margin-block-start: var(--space-6);
+    margin-inline-start: calc(-1 * var(--space-3));
+  }
+
+  .detail {
+    display: inline-flex;
+
+    &:is(a):hover {
+      color: var(--color-link);
     }
   }
 }
