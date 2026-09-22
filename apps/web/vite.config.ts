@@ -27,6 +27,8 @@ export default defineConfig({
       autoCodeSplitting: true,
       routesDirectory: "src/routes",
       generatedRouteTree: "src/routeTree.gen.ts",
+      // Tests sit beside the routes they cover; they are not routes.
+      routeFileIgnorePattern: "\\.(test|spec)\\.[jt]sx?$",
     }),
     react(),
     ...(isPages ? [] : [cloudflare()]),
