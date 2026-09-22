@@ -1,9 +1,13 @@
 import { z } from "zod";
 
-/** Icon names are keys of the ui package's icon barrel; validated by name so content stays decoupled from React. */
+/** Icon names are keys of the ui package's icon barrel; validated by name so content stays decoupled from React.
+    A url is absolute, or a root-relative path to a page on this site. */
 export const profileLink = z.object({
   label: z.string().min(1).max(40),
-  url: z.url(),
+  url: z.union([
+    z.url(),
+    z.string().regex(/^\/(?![/\\])/, "url must be absolute or start with one /"),
+  ]),
   icon: z.string().regex(/^mdi[A-Z][A-Za-z0-9]+$/, "icon must be an @mdi/js export name"),
 });
 

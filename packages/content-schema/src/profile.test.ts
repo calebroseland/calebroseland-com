@@ -12,11 +12,16 @@ describe("profileLink", () => {
 
   it.each([
     ["empty label", { ...validLink, label: "" }],
-    ["relative url", { ...validLink, url: "/local" }],
+    ["path-relative url", { ...validLink, url: "local" }],
+    ["protocol-relative url", { ...validLink, url: "//example.com" }],
     ["icon not an mdi export name", { ...validLink, icon: "github" }],
     ["icon with spaces", { ...validLink, icon: "mdi Github" }],
   ])("rejects %s", (_name, input) => {
     expect(profileLink.safeParse(input).success).toBe(false);
+  });
+
+  it("accepts a root-relative path to a page on this site", () => {
+    expect(profileLink.parse({ ...validLink, url: "/posts" }).url).toBe("/posts");
   });
 
   it("accepts any https url with an mdi-style icon name", () => {
