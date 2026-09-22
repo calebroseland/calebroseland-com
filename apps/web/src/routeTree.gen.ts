@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SlugRouteImport } from './routes/$slug'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as PostsIndexRouteImport } from './routes/posts.index'
 import { Route as PostsSlugRouteImport } from './routes/posts.$slug'
@@ -29,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
 const SlugRoute = SlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudioRoute = StudioRouteImport.update({
@@ -80,6 +86,7 @@ const StudioProfileRoute = StudioProfileRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/home': typeof HomeRoute
   '/studio': typeof StudioRouteWithChildren
   '/posts/$slug': typeof PostsSlugRoute
   '/studio/$draft': typeof StudioDraftRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/home': typeof HomeRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/studio/$draft': typeof StudioDraftRoute
   '/studio/callback': typeof StudioCallbackRoute
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/home': typeof HomeRoute
   '/studio': typeof StudioRouteWithChildren
   '/posts/$slug': typeof PostsSlugRoute
   '/studio/$draft': typeof StudioDraftRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$slug'
+    | '/home'
     | '/studio'
     | '/posts/$slug'
     | '/studio/$draft'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$slug'
+    | '/home'
     | '/posts/$slug'
     | '/studio/$draft'
     | '/studio/callback'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$slug'
+    | '/home'
     | '/studio'
     | '/posts/$slug'
     | '/studio/$draft'
@@ -160,6 +172,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRoute: typeof SlugRoute
+  HomeRoute: typeof HomeRoute
   StudioRoute: typeof StudioRouteWithChildren
   PostsSlugRoute: typeof PostsSlugRoute
   PostsIndexRoute: typeof PostsIndexRoute
@@ -179,6 +192,13 @@ declare module '@tanstack/react-router' {
       path: '/$slug'
       fullPath: '/$slug'
       preLoaderRoute: typeof SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/studio': {
@@ -271,6 +291,7 @@ const StudioRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRoute: SlugRoute,
+  HomeRoute: HomeRoute,
   StudioRoute: StudioRouteWithChildren,
   PostsSlugRoute: PostsSlugRoute,
   PostsIndexRoute: PostsIndexRoute,

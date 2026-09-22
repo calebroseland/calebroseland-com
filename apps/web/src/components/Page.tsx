@@ -1,18 +1,16 @@
-import { Center, Icon } from "@crc/ui";
-import { mdiCardAccountDetails, mdiChevronLeft } from "@crc/ui/icons";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Center } from "@crc/ui";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useReducedMotion } from "motion/react";
 import type { MouseEvent, ReactNode } from "react";
 import { siteProfile } from "../content/profile.ts";
-import { backdrop, isBackdropClick } from "./backdrop.ts";
 import styles from "./Page.module.css";
 import { SiteFooter } from "./SiteFooter.tsx";
 import { ThemeMenu } from "./ThemeMenu.tsx";
 import { withViewTransition } from "./viewTransition.ts";
 
-/* Chrome for every page past the landing card: header with the brand + nav, main, footer. The brand and
-   the name inside it share view-transition names with the card, so entering from the card morphs one
-   into the other (Landing.module.css), and the card button beside the brand morphs back. */
+/* Chrome for every page past the landing card: header with the brand + nav, main, footer. The brand is
+   the way back: from any page it goes home, and from home it turns back into the card, which it shares
+   view-transition names with (Landing.module.css). */
 export function Page({
   children,
   width = "measure-wide",
@@ -22,50 +20,30 @@ export function Page({
 }) {
   const reduce = useReducedMotion() ?? false;
   const navigate = useNavigate();
+  const atHome = useRouterState({
+    select: (s) => s.location.pathname.replace(/\/$/, "") === "/home",
+  });
 
-  // Focus moves to the card's heading, as it does after "Enter", because the path may not change.
-  const toCard = async () => {
-    await withViewTransition(
-      "leave",
-      () => navigate({ to: "/", state: { entered: false } }),
-      reduce,
-    );
-    const h1 = document.querySelector<HTMLElement>("main h1");
-    if (h1) {
-      h1.tabIndex = -1;
-      h1.focus({ preventScroll: true });
-    }
-  };
+  const toCard = () => withViewTransition("leave", () => navigate({ to: "/" }), reduce);
 
-  // A plain click runs the reverse morph; modified clicks fall through to the link (new tab, etc.).
-  const onCardLinkClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  // A plain click on the brand at home runs the reverse morph; modified clicks open the card in a new
+  // tab, and everywhere else the brand is an ordinary link home.
+  const onBrandClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (!atHome || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     void toCard();
   };
 
   return (
-    <div
-      className={styles.page}
-      {...backdrop}
-      onClick={(e) => {
-        if (isBackdropClick(e)) void toCard();
-      }}
-    >
+    <div className={styles.page}>
       <header className={styles.bar}>
         <div className={styles.brand}>
           <Link
-            to="/"
-            state={{ entered: false }}
-            className={styles.cardLink}
-            aria-label="Back to business card"
-            title="Back to business card"
-            onClick={onCardLinkClick}
+            to={atHome ? "/" : "/home"}
+            className={styles.home}
+            aria-label={atHome ? `${siteProfile.name}. Back to the business card.` : undefined}
+            onClick={onBrandClick}
           >
-            <Icon path={mdiChevronLeft} size="md" />
-            <Icon path={mdiCardAccountDetails} size="md" />
-          </Link>
-          <Link to="/" state={{ entered: true }} className={styles.home}>
             <span className={styles.siteName}>{siteProfile.name}</span>
           </Link>
         </div>
@@ -79,7 +57,7 @@ export function Page({
           <ThemeMenu />
         </nav>
       </header>
-      <Center as="main" id="main" max={width} className={styles.main} {...backdrop}>
+      <Center as="main" id="main" max={width} className={styles.main}>
         {children}
       </Center>
       <SiteFooter profile={siteProfile} />

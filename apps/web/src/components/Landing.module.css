@@ -205,6 +205,12 @@
     }
   }
 
+  /* A fixed slot keeps every label on the same line down a column, whatever the icon's shape. */
+  .linkIcon {
+    flex: none;
+    inline-size: var(--icon-xl);
+  }
+
   .link {
     font-size: var(--font-size-xl);
     transition:

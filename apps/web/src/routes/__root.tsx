@@ -8,6 +8,7 @@ import {
 import { useEffect } from "react";
 import { MotionProvider } from "../components/MotionProvider.tsx";
 import { CenteredMessage, Page } from "../components/Page.tsx";
+import { TipProvider } from "../components/Tip.tsx";
 import { Toasts } from "../studio/Toast.tsx";
 
 export const Route = createRootRoute({
@@ -24,9 +25,11 @@ function RootLayout() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <MotionProvider>
-        <Outlet />
-      </MotionProvider>
+      <TipProvider>
+        <MotionProvider>
+          <Outlet />
+        </MotionProvider>
+      </TipProvider>
       <Toasts />
     </>
   );

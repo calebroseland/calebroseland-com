@@ -83,33 +83,46 @@ function LoginRoute() {
           {showAlternatives && (
             <details className={styles.details}>
               <summary>Developer options</summary>
-              <Stack gap="4">
-                <button type="button" className={styles.secondary} onClick={useWorkingTree}>
-                  Edit files on this branch
-                </button>
-                <button type="button" className={styles.secondary} onClick={useFake}>
-                  Use local fake GitHub
-                </button>
-                <form onSubmit={useToken} className={styles.tokenForm}>
-                  <label htmlFor="pat">Personal access token</label>
-                  <input
-                    id="pat"
-                    type="password"
-                    autoComplete="off"
-                    value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                    className={styles.input}
-                  />
-                  <button type="submit" className={styles.secondary} disabled={!token.trim()}>
-                    Use token
+              <Stack gap="5">
+                <div className={styles.option}>
+                  <button type="button" className={styles.secondary} onClick={useWorkingTree}>
+                    Edit files on this branch
                   </button>
-                </form>
-                <p className={styles.muted}>
-                  Editing this branch writes the real files in <code>content/</code>: the change is
-                  yours to commit, alongside any code change. The fake GitHub instead simulates
-                  branches and pull requests in memory. A token stays in this tab's session storage
-                  and is sent only to api.github.com.
-                </p>
+                  <p className={styles.muted}>
+                    Writes the real files in <code>content/</code> on the branch you have checked
+                    out. There are no branches or pull requests: the change is yours to commit,
+                    alongside any code change.
+                  </p>
+                </div>
+                <div className={styles.option}>
+                  <button type="button" className={styles.secondary} onClick={useFake}>
+                    Use local fake GitHub
+                  </button>
+                  <p className={styles.muted}>
+                    Simulates branches, pull requests and merges in this browser. A merge writes the
+                    result into <code>content/</code>, so the loop ends at a rendered page.
+                  </p>
+                </div>
+                <div className={styles.option}>
+                  <form onSubmit={useToken} className={styles.tokenForm}>
+                    <label htmlFor="pat">Personal access token</label>
+                    <input
+                      id="pat"
+                      type="password"
+                      autoComplete="off"
+                      value={token}
+                      onChange={(e) => setToken(e.target.value)}
+                      className={styles.input}
+                    />
+                    <button type="submit" className={styles.secondary} disabled={!token.trim()}>
+                      Use token
+                    </button>
+                  </form>
+                  <p className={styles.muted}>
+                    Real GitHub, without the OAuth round trip. The token stays in this tab's session
+                    storage and is sent only to api.github.com.
+                  </p>
+                </div>
               </Stack>
             </details>
           )}

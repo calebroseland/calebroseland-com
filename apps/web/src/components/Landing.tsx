@@ -82,10 +82,11 @@ function ExternalLink({ href, children }: { href: string; children: ReactNode })
 }
 
 /** A root-relative url is a page on this site, so it goes through the router (and its basepath). */
-function CardLink({ link, iconSize }: { link: ProfileLink; iconSize: "xl" | "lg" }) {
+/** Every link on the card wears the same icon, in the same slot, so labels line up down a column. */
+function CardLink({ link }: { link: ProfileLink }) {
   const body = (
     <>
-      <Icon path={iconPath(link.icon)} size={iconSize} />
+      <Icon path={iconPath(link.icon)} size="xl" className={styles.linkIcon} />
       <span className={styles.label}>{link.label}</span>
     </>
   );
@@ -221,7 +222,7 @@ function Front({
                   className={`${styles.linkItem} ${styles.vt} ${styles.toFooter}`}
                   style={{ ...vtName(`card-link-${g}-0`), ...footerLinkName(g, 0) }}
                 >
-                  <CardLink link={primary} iconSize="xl" />
+                  <CardLink link={primary} />
                 </li>
                 {expanded &&
                   rest.map((link, i) => (
@@ -233,7 +234,7 @@ function Front({
                         ...footerLinkName(g, i + 1),
                       }}
                     >
-                      <CardLink link={link} iconSize="lg" />
+                      <CardLink link={link} />
                     </li>
                   ))}
               </ul>
@@ -371,21 +372,10 @@ export function Landing({ profile: published }: { profile: Profile }) {
     setSide((s) => (s === "front" ? "back" : "front"));
   };
 
-  // The path does not change, so the root layout's focus-on-navigate does not fire; do it here. The
-  // router's own viewTransition option is not used because it renders the new state after its
-  // transition callback resolves, which can leave the card in the new snapshot.
-  const enter = async () => {
-    await withViewTransition(
-      "enter",
-      () => navigate({ to: "/", state: { entered: true } }),
-      reduce,
-    );
-    const h1 = document.querySelector<HTMLElement>("main h1");
-    if (h1) {
-      h1.tabIndex = -1;
-      h1.focus({ preventScroll: true });
-    }
-  };
+  /* The router's own viewTransition option is not used because it renders the new state after its
+     transition callback resolves, which can leave the card in the new snapshot. Focus follows the
+     path change through the root layout's focus-on-navigate. */
+  const enter = () => withViewTransition("enter", () => navigate({ to: "/home" }), reduce);
 
   return (
     <div

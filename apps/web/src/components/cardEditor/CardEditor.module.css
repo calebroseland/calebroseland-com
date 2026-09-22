@@ -101,10 +101,12 @@
     border: 0;
   }
 
+  /* --drop-gap: the drop line sits midway between items (see @crc/interaction's DropIndicator). */
   .chips {
+    --drop-gap: var(--space-2);
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
+    gap: var(--drop-gap);
     margin-block-end: var(--space-2);
   }
 
@@ -330,8 +332,9 @@
   }
 
   .linkList {
+    --drop-gap: var(--space-2);
     display: grid;
-    gap: var(--space-2);
+    gap: var(--drop-gap);
   }
 
   /* Handle, icon, label, remove on the first line; the address underneath. */

@@ -32,6 +32,7 @@ import { studioKeys } from "../../studio/github/queries.ts";
 import { loadProfile, PROFILE_REF, type ProfileSource, saveProfile } from "../../studio/profile.ts";
 import { StudioProvider, useGitHub } from "../../studio/StudioProvider.tsx";
 import { notify } from "../../studio/Toast.tsx";
+import { Tip } from "../Tip.tsx";
 import styles from "./CardEditor.module.css";
 import {
   type EditGroup,
@@ -502,9 +503,11 @@ function TagChip({
         {tag.icon && <Icon path={iconPathFor(tag.icon)} size={iconOnly ? "md" : "sm"} />}
         {!iconOnly && name}
         {tag.link && (
-          <span className={styles.linkMark} title="Links to its posts">
-            <Icon path={mdiLinkVariant} size="xs" />
-          </span>
+          <Tip label="Links to its posts">
+            <span className={styles.linkMark}>
+              <Icon path={mdiLinkVariant} size="xs" />
+            </span>
+          </Tip>
         )}
       </Handle>
       <TagSettings tag={tag} name={name} error={error} onChange={onChange} />

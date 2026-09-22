@@ -1,5 +1,8 @@
 @layer components {
+  /* Drawn in the middle of the gap between two items, so "after this one" and "before the next" put
+     the line in the same place. A list declares its gap as --drop-gap (0 when items touch). */
   .indicator {
+    --drop-offset: calc(-0.5 * (var(--drop-gap, 0px) + var(--border-width-thick)));
     position: absolute;
     background: var(--color-accent);
     pointer-events: none;
@@ -18,19 +21,19 @@
     }
 
     &[data-edge="top"] {
-      inset-block-start: calc(-1 * var(--border-width));
+      inset-block-start: var(--drop-offset);
     }
 
     &[data-edge="bottom"] {
-      inset-block-end: calc(-1 * var(--border-width));
+      inset-block-end: var(--drop-offset);
     }
 
     &[data-edge="left"] {
-      inset-inline-start: calc(-1 * var(--space-1));
+      inset-inline-start: var(--drop-offset);
     }
 
     &[data-edge="right"] {
-      inset-inline-end: calc(-1 * var(--space-1));
+      inset-inline-end: var(--drop-offset);
     }
   }
 }

@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { parse } from "yaml";
 import { expect, test } from "./fixtures.ts";
 import { scratchContentDir } from "./global-setup.ts";
 import { noisePng } from "./png.ts";
@@ -179,10 +180,11 @@ test.describe("working-tree mode", () => {
   }) => {
     await signInLocal(page);
     // Whatever the tags are, a new one lands last, and one step left puts it before the last.
-    const lastTag = onDisk("profile.yaml")
-      .match(/^tags: \[\s*(?:.*,\s*)?([^,\]]+?)\s*]$/m)?.[1]
-      ?.trim()
-      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const tagsOnDisk = () =>
+      (parse(onDisk("profile.yaml")).tags as Array<string | { label: string }>).map((t) =>
+        typeof t === "string" ? t : t.label,
+      );
+    const before = tagsOnDisk();
     await page.goto("/");
     await page.getByRole("button", { name: "Edit card" }).click();
     const form = page.getByRole("form", { name: "Edit card" });
@@ -199,7 +201,7 @@ test.describe("working-tree mode", () => {
     await expect(form).toHaveCount(0);
     await expect.poll(() => onDisk("profile.yaml")).toContain("tagline: Builds calm software");
     const yaml = onDisk("profile.yaml");
-    expect(yaml).toMatch(new RegExp(`^tags: \\[ .*Accessibility, ${lastTag} ]$`, "m"));
+    expect(tagsOnDisk()).toEqual([...before.slice(0, -1), "Accessibility", ...before.slice(-1)]);
     // Untouched lines keep their hand-written form.
     expect(yaml).toMatch(/^# /);
     expect(yaml).toContain(

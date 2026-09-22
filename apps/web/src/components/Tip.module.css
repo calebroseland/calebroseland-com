@@ -1,0 +1,72 @@
+@layer components {
+  .positioner {
+    z-index: var(--z-tooltip);
+  }
+
+  .popup {
+    position: relative;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-tight);
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      scale var(--duration-fast) var(--ease-out);
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+      scale: 0.96;
+    }
+
+    /* Moving between tooltips in the group: swap, no fade. */
+    &[data-instant] {
+      transition: none;
+    }
+  }
+
+  /* A small triangle on the side facing the trigger. */
+  .arrow {
+    position: absolute;
+    inline-size: 10px;
+    block-size: 5px;
+    overflow: clip;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset-inline-start: 50%;
+      inline-size: 7px;
+      block-size: 7px;
+      background: var(--color-text);
+      translate: -50% -50%;
+      rotate: 45deg;
+    }
+
+    &[data-side="top"] {
+      inset-block-end: -5px;
+      rotate: 180deg;
+    }
+
+    &[data-side="bottom"] {
+      inset-block-start: -5px;
+    }
+
+    &[data-side="left"] {
+      inset-inline-end: -7.5px;
+      rotate: 90deg;
+    }
+
+    &[data-side="right"] {
+      inset-inline-start: -7.5px;
+      rotate: -90deg;
+    }
+  }
+
+  .arrow::before {
+    inset-block-start: 100%;
+  }
+}

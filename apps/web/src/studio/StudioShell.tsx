@@ -3,12 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ThemeMenu } from "../components/ThemeMenu.tsx";
+import { siteProfile } from "../content/profile.ts";
 import { session } from "./auth/store.ts";
 import { viewerQuery } from "./github/queries.ts";
 import { useGitHub } from "./StudioProvider.tsx";
 import styles from "./studio.module.css";
 
-/* Chrome for authenticated studio routes: title, viewer, sign out. */
+/* Chrome for authenticated studio routes. The studio is a section of the site, not a room with one
+   door: the bar carries the site's logo and nav beside the studio's own links. */
 export function StudioShell({
   children,
   title = "Studio",
@@ -28,9 +30,26 @@ export function StudioShell({
     <div className={styles.shell}>
       <header className={styles.bar}>
         <div className={styles.barGroup}>
-          <Link to="/studio" className={styles.brand}>
-            Studio
+          {/* The logo leaves the studio for the site, as it does everywhere else; the page's own
+              heading says which studio screen this is, and the board is a click from there. */}
+          <Link
+            to="/home"
+            className={styles.brand}
+            aria-label={`${siteProfile.name}. Back to the site.`}
+          >
+            {siteProfile.name}
           </Link>
+          <nav className={styles.siteNav} aria-label="Site">
+            <Link to="/studio" className={styles.studioLink}>
+              Studio
+            </Link>
+            <Link to="/posts" className={styles.studioLink}>
+              Posts
+            </Link>
+            <Link to="/$slug" params={{ slug: "about" }} className={styles.studioLink}>
+              About
+            </Link>
+          </nav>
           {gh.kind === "fake" && <span className={styles.badge}>local fake GitHub</span>}
           {gh.kind === "local" && (
             <span className={styles.badge}>working tree · {viewer.data?.login ?? "…"}</span>

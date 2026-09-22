@@ -2,7 +2,9 @@ import type { Profile, ProfileLink } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
 import * as icons from "@crc/ui/icons";
 import { Link } from "@tanstack/react-router";
+import { useStore } from "@tanstack/react-store";
 import { useId } from "react";
+import { session } from "../studio/auth/store.ts";
 import styles from "./SiteFooter.module.css";
 import { footerLinkName } from "./viewTransition.ts";
 
@@ -13,6 +15,9 @@ const iconPath = (name: string): string =>
    many sites close. Each link shares a view-transition name with its place on the card, so entering
    the site carries the links down here and leaving carries them back. */
 export function SiteFooter({ profile }: { profile: Profile }) {
+  // The studio is for whoever can edit: someone signed in, or anyone running the dev server.
+  const signedIn = useStore(session.store, (s) => s.status === "authenticated");
+  const showStudio = signedIn || import.meta.env.DEV;
   return (
     <footer className={styles.footer}>
       <nav aria-label="Profiles and writing" className={styles.groups}>
@@ -25,6 +30,7 @@ export function SiteFooter({ profile }: { profile: Profile }) {
           © {new Date().getFullYear()} {profile.name}
         </span>
         <a href="/feed.xml">RSS</a>
+        {showStudio && <Link to="/studio">Studio</Link>}
       </div>
     </footer>
   );

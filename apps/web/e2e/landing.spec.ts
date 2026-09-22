@@ -43,54 +43,40 @@ test.describe("landing", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Posts" })).toBeVisible();
   });
 
-  test("enter leaves the card for the site, and the brand brings the visitor back to it", async ({
+  test("enter opens /home, and the brand goes home from a page and back to the card from home", async ({
     page,
   }) => {
     await page.goto("/");
     await page.getByRole("button", { name: "Enter" }).click();
     const site = page.getByRole("navigation", { name: "Site" });
     await expect(site).toBeVisible();
+    await expect(page).toHaveURL(/\/home$/);
     await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
     await expect(page.getByRole("navigation", { name: "Profiles and links" })).toHaveCount(0);
-    await expect(page).toHaveURL(/\/$/);
 
-    // Past the card, the brand stays in the site; Back returns to the card.
+    // From a page the brand goes home; from home it turns back into the card.
     await site.getByRole("link", { name: "About" }).click();
-    await page
-      .getByRole("banner")
-      .getByRole("link", { name: /Caleb Roseland/ })
-      .click();
-    await expect(site).toBeVisible();
-    for (const _ of ["about", "home", "card"]) await page.goBack();
-    await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
-  });
-
-  test("the business card button in the bar returns to the card from any page", async ({
-    page,
-  }) => {
-    await page.goto("/posts");
-    await page.getByRole("banner").getByRole("link", { name: "Back to business card" }).click();
-    await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
-    await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
+    const brand = page.getByRole("banner").getByRole("link", { name: /Caleb Roseland/ });
+    await brand.click();
+    await expect(page).toHaveURL(/\/home$/);
+    await brand.click();
     await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
   });
 
-  test("a click on the empty background toggles between the card and the site", async ({
-    page,
-  }) => {
+  test("a click on the empty background enters the site, and stops there", async ({ page }) => {
     await page.goto("/");
     // The handler exists once the app has mounted; the Enter button is the sign of that.
     await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
     await page.mouse.click(8, 8);
     await expect(page.getByRole("navigation", { name: "Site" })).toBeVisible();
-    // While a view transition runs, clicks land on its overlay; wait for it to end.
     await expect(page.locator("html")).not.toHaveAttribute("data-vt");
-    // Below the content, the site's main is empty background too.
-    const main = page.getByRole("main");
-    const box = await main.boundingBox();
+
+    // Past the card, a background click does nothing.
+    const box = await page.getByRole("main").boundingBox();
     if (!box) throw new Error("main has no box");
     await page.mouse.click(box.x + box.width / 2, box.y + box.height - 8);
-    await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
+    await expect(page).toHaveURL(/\/home$/);
   });
 
   test("uses the Adobe Fonts kit for the name and the text", async ({ page }) => {

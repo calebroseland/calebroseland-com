@@ -30,6 +30,7 @@ import {
 } from "../theme/custom.ts";
 import { themeController } from "../theme/store.ts";
 import styles from "./ThemeEditor.module.css";
+import { Tip } from "./Tip.tsx";
 
 type Range = { min: number; max: number; step: number };
 
@@ -82,16 +83,17 @@ function SliderField({
       <div className={styles.fieldHead}>
         <Slider.Label className={styles.label}>{label}</Slider.Label>
         <span className={styles.value}>{format(value)}</span>
-        <button
-          type="button"
-          className={styles.reset}
-          aria-label={`Reset ${label.toLowerCase()} to ${format(initial)}`}
-          title="Reset"
-          disabled={value === initial}
-          onClick={() => onChange(initial)}
-        >
-          <Icon path={mdiRestore} size="sm" />
-        </button>
+        <Tip label={`Reset to ${format(initial)}`}>
+          <button
+            type="button"
+            className={styles.reset}
+            aria-label={`Reset ${label.toLowerCase()} to ${format(initial)}`}
+            disabled={value === initial}
+            onClick={() => onChange(initial)}
+          >
+            <Icon path={mdiRestore} size="sm" />
+          </button>
+        </Tip>
       </div>
       <Slider.Control className={styles.sliderControl}>
         <Slider.Track className={styles.sliderTrack} style={trackStyle}>

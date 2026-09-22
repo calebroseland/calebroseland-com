@@ -1,10 +1,10 @@
-import { Tooltip } from "@base-ui/react/tooltip";
 import type { ResolvedTag } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
 import * as icons from "@crc/ui/icons";
 import { Link } from "@tanstack/react-router";
 import type { ReactElement } from "react";
 import styles from "./FocusChip.module.css";
+import { Tip } from "./Tip.tsx";
 
 const iconPath = (name: string): string =>
   (icons as Record<string, string>)[name] ?? icons.mdiCodeTags;
@@ -45,15 +45,5 @@ export function FocusChip({ tag }: { tag: ResolvedTag }) {
     <span className={className}>{body}</span>
   );
 
-  if (!iconOnly) return chip;
-  return (
-    <Tooltip.Root>
-      <Tooltip.Trigger render={chip} />
-      <Tooltip.Portal>
-        <Tooltip.Positioner className={styles.positioner} sideOffset={6}>
-          <Tooltip.Popup className={styles.tooltip}>{tag.label}</Tooltip.Popup>
-        </Tooltip.Positioner>
-      </Tooltip.Portal>
-    </Tooltip.Root>
-  );
+  return iconOnly ? <Tip label={tag.label}>{chip}</Tip> : chip;
 }

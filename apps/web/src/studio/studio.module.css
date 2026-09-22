@@ -24,9 +24,34 @@
   }
 
   .brand {
-    font-weight: var(--font-weight-semibold);
+    font-family: var(--font-brand);
+    font-size: var(--font-size-2xl);
+    line-height: var(--leading-snug);
+    white-space: nowrap;
     color: var(--color-text);
     text-decoration: none;
+
+    &:hover {
+      color: var(--color-link);
+    }
+  }
+
+  .siteNav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .studioLink {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
+    text-decoration: none;
+
+    &:hover,
+    &[data-status="active"] {
+      color: var(--color-text);
+    }
   }
 
   .badge {
@@ -128,6 +153,13 @@
     & > :not(summary) {
       margin-block-start: var(--space-4);
     }
+  }
+
+  /* One developer sign-in option: the control, then what that mode does. */
+  .option {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
   }
 
   .tokenForm {

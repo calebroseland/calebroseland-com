@@ -188,7 +188,10 @@ describe("Landing", () => {
     ).not.toBeInTheDocument();
     const site = screen.getByRole("navigation", { name: "Site" });
     expect(within(site).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
-    expect(screen.getByRole("link", { name: "Placeholder Name" })).toHaveAttribute("href", "/");
+    // At home the brand goes back to the card.
+    expect(
+      screen.getByRole("link", { name: /Placeholder Name\. Back to the business card/ }),
+    ).toHaveAttribute("href", "/");
     // The card's links carry on in the footer, every one of them, grouped as on the card.
     const footer = screen.getByRole("navigation", { name: "Profiles and writing" });
     expect(
@@ -197,38 +200,76 @@ describe("Landing", () => {
         .map((h) => h.textContent),
     ).toEqual(["Code", "Writings", "Social"]);
     expect(within(footer).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
+    // The dev server offers the studio to anyone; a built site offers it only once signed in.
+    expect(screen.getByRole("contentinfo")).toContainElement(
+      screen.getByRole("link", { name: "Studio" }),
+    );
+    expect(screen.getByRole("link", { name: "Studio" })).toHaveAttribute("href", "/studio");
     expect(
       within(footer).getByRole("link", { name: /LinkedIn.*opens in new tab/ }),
     ).toHaveAttribute("target", "_blank");
   });
 
-  it("a click on the empty background toggles between the card and the site", async () => {
+  it("a click on the empty background enters the site, but a click on the card does not", async () => {
     await renderLanding();
-    // A click on the card itself, or a modified click on the background, stays put.
     fireEvent.click(screen.getByRole("heading", { level: 1 }));
     fireEvent.click(screen.getByRole("main"), { metaKey: true });
     expect(screen.getByRole("button", { name: "Enter" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("main"));
     await screen.findByRole("heading", { level: 1, name: "Latest writing" });
-
-    fireEvent.click(screen.getByRole("heading", { level: 1 }));
-    expect(screen.getByRole("navigation", { name: "Site" })).toBeInTheDocument();
+    // Past the card the background is just background.
     fireEvent.click(screen.getByRole("main"));
-    await screen.findByRole("button", { name: "Enter" });
+    expect(screen.getByRole("navigation", { name: "Site" })).toBeInTheDocument();
   });
 
-  it("the bar's business card button returns to the card, with focus on its heading", async () => {
+  it("the brand returns home from a page, and turns home back into the card", async () => {
     await renderLanding();
     fireEvent.click(screen.getByRole("button", { name: "Enter" }));
-    const back = await screen.findByRole("link", { name: "Back to business card" });
-    expect(back).toHaveAttribute("href", "/");
+    await screen.findByRole("heading", { level: 1, name: "Latest writing" });
 
-    fireEvent.click(back);
-    const heading = await screen.findByRole("heading", { level: 1, name: "Placeholder Name" });
-    await vi.waitFor(() => expect(heading).toHaveFocus());
+    // From a page, the brand is an ordinary link home.
+    fireEvent.click(
+      within(screen.getByRole("navigation", { name: "Site" })).getByRole("link", { name: "Posts" }),
+    );
+    await screen.findByRole("heading", { level: 1, name: "Posts" });
+    const brand = screen.getByRole("link", { name: "Placeholder Name" });
+    expect(brand).toHaveAttribute("href", "/home");
+    fireEvent.click(brand);
+    await screen.findByRole("heading", { level: 1, name: "Latest writing" });
+
+    // From home it goes back to the card.
+    fireEvent.click(screen.getByRole("link", { name: /Back to the business card/ }));
+    await screen.findByRole("heading", { level: 1, name: "Placeholder Name" });
     expect(screen.getByRole("navigation", { name: "Profiles and links" })).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Site" })).not.toBeInTheDocument();
+  });
+
+  it("hides the studio link from a signed-out reader of the built site", async () => {
+    vi.stubEnv("DEV", false);
+    try {
+      await renderLanding();
+      fireEvent.click(screen.getByRole("button", { name: "Enter" }));
+      await screen.findByRole("heading", { level: 1, name: "Latest writing" });
+      expect(screen.queryByRole("link", { name: "Studio" })).not.toBeInTheDocument();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("keeps the studio link on the built site for someone signed in", async () => {
+    vi.stubEnv("DEV", false);
+    session.signIn({ status: "authenticated", backend: "fake", token: "fake" });
+    try {
+      await renderLanding();
+      fireEvent.click(screen.getByRole("button", { name: "Enter" }));
+      await screen.findByRole("heading", { level: 1, name: "Latest writing" });
+      expect(screen.getByRole("link", { name: "Studio" })).toHaveAttribute("href", "/studio");
+    } finally {
+      session.signOut();
+      localStorage.clear();
+      vi.unstubAllEnvs();
+    }
   });
 
   it("offers no editing to readers", async () => {
