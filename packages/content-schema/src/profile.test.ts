@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { parseYaml } from "./load.ts";
-import { profile, profileContact, profileLink } from "./profile.ts";
+import { compactTag, profile, profileContact, profileLink, resolveTag } from "./profile.ts";
 
 const validLink = { label: "GitHub", url: "https://github.com/calebroseland", icon: "mdiGithub" };
 
@@ -81,5 +81,48 @@ describe("profileContact", () => {
     ["a location with a relative url", { location: { label: "Home", url: "/home" } }],
   ])("rejects %s", (_name, input) => {
     expect(profileContact.safeParse(input).success).toBe(false);
+  });
+});
+
+describe("focus areas", () => {
+  const base = { name: "A", tagline: "b", groups: [{ title: "c", links: [validLink] }] };
+
+  it("accepts the short and long forms side by side", () => {
+    const parsed = profile.parse({
+      ...base,
+      tags: [
+        "TypeScript",
+        { label: "React", icon: "mdiReact", show: "icon" },
+        { label: ".NET", link: false },
+      ],
+    });
+    expect(parsed.tags.map(resolveTag)).toEqual([
+      { label: "TypeScript", icon: null, show: "label", link: true },
+      { label: "React", icon: "mdiReact", show: "icon", link: true },
+      { label: ".NET", icon: null, show: "label", link: false },
+    ]);
+  });
+
+  it.each([
+    ["an unknown display", { label: "x", show: "big" }],
+    ["a bad icon name", { label: "x", icon: "react" }],
+    ["a label over 24 characters", { label: "x".repeat(25) }],
+  ])("rejects %s", (_n, tag) => {
+    expect(profile.safeParse({ ...base, tags: [tag] }).success).toBe(false);
+  });
+
+  it("writes back the shortest form that means the same", () => {
+    expect(compactTag(resolveTag("Go"))).toBe("Go");
+    expect(compactTag(resolveTag({ label: "Go", show: "icon" }))).toBe("Go");
+    expect(compactTag({ label: "Go", icon: "mdiLanguageGo", show: "both", link: true })).toEqual({
+      label: "Go",
+      icon: "mdiLanguageGo",
+    });
+    expect(compactTag({ label: "Go", icon: "mdiLanguageGo", show: "icon", link: false })).toEqual({
+      label: "Go",
+      icon: "mdiLanguageGo",
+      show: "icon",
+      link: false,
+    });
   });
 });

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const iconName = z.string().regex(/^mdi[A-Z][A-Za-z0-9]+$/, "icon must be an @mdi/js export name");
+
 /** Icon names are keys of the ui package's icon barrel; validated by name so content stays decoupled from React.
     A url is absolute, or a root-relative path to a page on this site. */
 export const profileLink = z.object({
@@ -8,8 +10,54 @@ export const profileLink = z.object({
     z.url(),
     z.string().regex(/^\/(?![/\\])/, "url must be absolute or start with one /"),
   ]),
-  icon: z.string().regex(/^mdi[A-Z][A-Za-z0-9]+$/, "icon must be an @mdi/js export name"),
+  icon: iconName,
 });
+
+/** A focus area. The short form is just its label: shown as text, linking to its posts. The long form
+    adds an icon, chooses what the chip shows, or turns the link off. */
+export const profileTag = z.union([
+  z.string().min(1).max(24),
+  z.object({
+    label: z.string().min(1).max(24),
+    icon: iconName.optional(),
+    show: z.enum(["icon", "label", "both"]).optional(),
+    link: z.boolean().optional(),
+  }),
+]);
+
+export type ProfileTag = z.infer<typeof profileTag>;
+export type ResolvedTag = {
+  label: string;
+  icon: string | null;
+  show: "icon" | "label" | "both";
+  link: boolean;
+};
+
+/** Either form, with defaults filled in: no icon means text only, and a chip links unless told not to. */
+export function resolveTag(tag: ProfileTag): ResolvedTag {
+  if (typeof tag === "string") return { label: tag, icon: null, show: "label", link: true };
+  const icon = tag.icon ?? null;
+  return {
+    label: tag.label,
+    icon,
+    show: icon ? (tag.show ?? "both") : "label",
+    link: tag.link ?? true,
+  };
+}
+
+/** The shortest form that means the same thing, so profile.yaml stays readable. */
+export function compactTag(tag: ResolvedTag): ProfileTag {
+  const show = tag.icon && tag.show !== "both" ? tag.show : undefined;
+  if (!tag.icon && tag.link) return tag.label;
+  return {
+    label: tag.label,
+    ...(tag.icon && { icon: tag.icon }),
+    ...(show && { show }),
+    ...(!tag.link && { link: false }),
+  };
+}
+
+export const tagLabel = (tag: ProfileTag): string => (typeof tag === "string" ? tag : tag.label);
 
 /** The first link is the group's face on the collapsed card; the rest appear when it is expanded. */
 export const profileLinkGroup = z.object({
@@ -31,7 +79,7 @@ export const profile = z.object({
   name: z.string().min(1),
   tagline: z.string().min(1).max(120),
   bio: z.string().max(600).optional(),
-  tags: z.array(z.string().min(1).max(24)).max(12).default([]),
+  tags: z.array(profileTag).max(12).default([]),
   groups: z.array(profileLinkGroup).min(1),
   contact: profileContact.optional(),
   /** Marks copy that is scaffolding, not real content. Removed when real copy lands. */
