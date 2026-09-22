@@ -1,10 +1,18 @@
-import { type Profile, profile as profileSchema } from "@crc/content-schema";
+import {
+  compactTag,
+  type Profile,
+  profile as profileSchema,
+  type ResolvedTag,
+  resolveTag,
+} from "@crc/content-schema";
 import * as icons from "@crc/ui/icons";
 
 /* The card editor's working copy of the profile. Links and groups carry a key so React keeps their
    inputs (and focus) through reordering; the keys never reach the YAML. Validation is the profile
    schema itself, mapped to field paths. */
 
+/** A focus area with every setting filled in (see resolveTag); written back in its shortest form. */
+export type EditTag = ResolvedTag & { key: string };
 export type EditLink = { key: string; label: string; url: string; icon: string };
 export type EditGroup = { key: string; title: string; links: EditLink[] };
 /** The back of the card; empty fields are left out of the file. */
@@ -12,7 +20,7 @@ type EditContact = { email: string; phone: string; location: string; locationUrl
 export type EditState = {
   name: string;
   tagline: string;
-  tags: string[];
+  tags: EditTag[];
   groups: EditGroup[];
   contact: EditContact;
 };
@@ -26,7 +34,7 @@ export function fromProfile(p: Profile): EditState {
   return {
     name: p.name,
     tagline: p.tagline,
-    tags: [...p.tags],
+    tags: p.tags.map((t) => ({ key: key(), ...resolveTag(t) })),
     groups: p.groups.map((g) => ({
       key: key(),
       title: g.title,
@@ -62,7 +70,7 @@ export function toProfile(base: Profile, s: EditState): Profile {
     ...(contact && { contact }),
     name: s.name.trim(),
     tagline: s.tagline.trim(),
-    tags: s.tags,
+    tags: s.tags.map(({ key: _key, ...t }) => compactTag({ ...t, label: t.label.trim() })),
     groups: s.groups.map((g) => ({
       title: g.title.trim(),
       links: g.links.map(({ key: _key, ...l }) => ({
@@ -83,12 +91,22 @@ export const newLink = (): EditLink => ({
 export const newGroup = (): EditGroup => ({ key: key(), title: "", links: [newLink()] });
 
 /** Why a tag cannot be added, or null when it can. */
-export function tagProblem(tags: readonly string[], raw: string): string | null {
+export const newTag = (label: string): EditTag => ({
+  key: key(),
+  label,
+  icon: null,
+  show: "label",
+  link: true,
+});
+
+/** Why a tag cannot be added (or renamed to `raw`), or null when it can. */
+export function tagProblem(tags: readonly EditTag[], raw: string, except?: string): string | null {
   const tag = raw.trim();
   if (!tag) return "Type a focus area first.";
   if (tag.length > 24) return "Keep it to 24 characters.";
-  if (tags.some((t) => t.toLowerCase() === tag.toLowerCase())) return `${tag} is already there.`;
-  if (tags.length >= MAX_TAGS) return `Up to ${MAX_TAGS} focus areas.`;
+  if (tags.some((t) => t.key !== except && t.label.trim().toLowerCase() === tag.toLowerCase()))
+    return `${tag} is already there.`;
+  if (!except && tags.length >= MAX_TAGS) return `Up to ${MAX_TAGS} focus areas.`;
   return null;
 }
 
@@ -113,6 +131,11 @@ export function fieldErrors(p: Profile): Map<string, string> {
   for (const issue of result.error.issues) {
     const path = issue.path.join(".");
     const last = String(issue.path.at(-1) ?? "");
+    if (issue.path[0] === "tags" && issue.path.length >= 2) {
+      const at = `tags.${String(issue.path[1])}`;
+      if (!errors.has(at)) errors.set(at, "Give it a label of up to 24 characters.");
+      continue;
+    }
     if (!errors.has(path)) errors.set(path, MESSAGES[last] ?? issue.message);
   }
   return errors;

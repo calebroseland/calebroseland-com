@@ -1,4 +1,11 @@
-import type { Profile, ProfileContact, ProfileLink } from "@crc/content-schema";
+import {
+  type Profile,
+  type ProfileContact,
+  type ProfileLink,
+  type ProfileTag,
+  resolveTag,
+  tagLabel,
+} from "@crc/content-schema";
 import { Icon } from "@crc/ui";
 import * as icons from "@crc/ui/icons";
 import {
@@ -21,6 +28,7 @@ import type { ProfileSource } from "../studio/profile.ts";
 import { notify } from "../studio/Toast.tsx";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
 import type { EditResult } from "./cardEditor/CardEditor.tsx";
+import { FocusChip } from "./FocusChip.tsx";
 import styles from "./Landing.module.css";
 import { ThemeMenu } from "./ThemeMenu.tsx";
 import { vtName, withViewTransition } from "./viewTransition.ts";
@@ -92,8 +100,8 @@ function CardLink({ link, iconSize }: { link: ProfileLink; iconSize: "xl" | "lg"
 
 const TAGS_SHOWN = 6;
 
-/** Each focus area opens the posts filtered to it; past a handful, the rest wait behind "+N more". */
-function Tags({ tags }: { tags: readonly string[] }) {
+/** Focus areas (see FocusChip); past a handful, the rest wait behind "+N more". */
+function Tags({ tags }: { tags: readonly ProfileTag[] }) {
   const [all, setAll] = useState(false);
   const listId = useId();
   const hidden = tags.length - TAGS_SHOWN;
@@ -101,15 +109,8 @@ function Tags({ tags }: { tags: readonly string[] }) {
     <div className={`${styles.tags} ${styles.vt}`} style={vtName("card-tags")}>
       <ul id={listId} className={styles.tagList} role="list" aria-label="Focus areas">
         {(all ? tags : tags.slice(0, TAGS_SHOWN)).map((tag) => (
-          <li key={tag}>
-            <Link
-              to="/posts"
-              search={{ tag }}
-              className={styles.tag}
-              aria-label={`Posts tagged ${tag}`}
-            >
-              {tag}
-            </Link>
+          <li key={tagLabel(tag)}>
+            <FocusChip tag={resolveTag(tag)} />
           </li>
         ))}
       </ul>

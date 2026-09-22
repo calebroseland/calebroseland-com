@@ -1,0 +1,78 @@
+@layer components {
+  /* Text chips and icon tiles share one height, so a mixed row lines up. */
+  .chip {
+    --chip-size: 2.25rem;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--chip-size);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+    font-size: var(--font-size-base);
+    text-decoration: none;
+    transition: background-color var(--duration-fast) var(--ease-out);
+
+    &:is(a):hover {
+      background: var(--color-accent-hover);
+      color: var(--color-text-on-accent);
+    }
+
+    &:is(a):active {
+      background: var(--color-accent-active);
+    }
+  }
+
+  /* The link mark: a corner badge that appears on hover or keyboard focus, taking no room, so the row
+     never shifts under the pointer. */
+  .linkCue {
+    position: absolute;
+    inset-block-start: calc(-1 * var(--space-1));
+    inset-inline-end: calc(-1 * var(--space-1));
+    display: inline-flex;
+    padding: 1px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    color: var(--color-accent-text);
+    box-shadow: var(--shadow-sm);
+    opacity: 0;
+    scale: 0.6;
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      scale var(--duration-fast) var(--ease-out);
+
+    .chip:is(:hover, :focus-visible) & {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  /* Icon only: a square tile with the standard corner radius. */
+  .tile {
+    justify-content: center;
+    inline-size: var(--chip-size);
+    block-size: var(--chip-size);
+    padding: 0;
+    border-radius: var(--radius-md);
+  }
+
+  .positioner {
+    z-index: var(--z-tooltip);
+  }
+
+  .tooltip {
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-size: var(--font-size-sm);
+    transition: opacity var(--duration-fast) var(--ease-out);
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+    }
+  }
+}

@@ -5,7 +5,16 @@ vi.mock("virtual:content/profile", () => ({
   default: {
     name: "Placeholder Name",
     tagline: "Placeholder tagline",
-    tags: ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"],
+    tags: [
+      "One",
+      { label: "Two", icon: "mdiReact", show: "icon" },
+      { label: "Three", link: false },
+      "Four",
+      "Five",
+      "Six",
+      "Seven",
+      "Eight",
+    ],
     placeholder: true,
     groups: [
       {
@@ -108,11 +117,22 @@ describe("Landing", () => {
     expect(more).toHaveAttribute("aria-controls", areas.id);
 
     fireEvent.click(more);
-    expect(within(areas).getAllByRole("link")).toHaveLength(8);
+    expect(within(areas).getAllByRole("listitem")).toHaveLength(8);
+    expect(within(areas).getAllByRole("link")).toHaveLength(7);
     expect(screen.getByRole("button", { name: "Show fewer focus areas" })).toHaveAttribute(
       "aria-expanded",
       "true",
     );
+  });
+
+  it("shows an icon-only focus area as a labelled tile, and one without a link as plain text", async () => {
+    await renderLanding();
+    fireEvent.click(screen.getByRole("button", { name: "show more" }));
+    const areas = screen.getByRole("list", { name: "Focus areas" });
+    const tile = within(areas).getByRole("link", { name: "Posts tagged Two" });
+    expect(tile).not.toHaveTextContent("Two");
+    expect(tile).toHaveAttribute("href", "/posts?tag=Two");
+    expect(within(areas).getByText("Three").closest("a")).toBeNull();
   });
 
   it("falls back to a generic icon for an unknown icon name instead of crashing", async () => {
@@ -223,6 +243,10 @@ describe("Landing", () => {
         key: "Enter",
       });
       fireEvent.click(within(form).getByRole("button", { name: "Remove One" }));
+      // Each chip's settings: turn Two's link off.
+      fireEvent.click(within(form).getByRole("button", { name: "Settings for Two" }));
+      const settings = await screen.findByRole("dialog", { name: "Focus area" });
+      fireEvent.click(within(settings).getByRole("switch", { name: "Links to its posts" }));
 
       // An invalid address blocks saving and says why, on the field.
       const address = within(form).getByRole("textbox", { name: /Address for GitHub/ });
@@ -240,7 +264,9 @@ describe("Landing", () => {
       const fake = JSON.parse(localStorage.getItem("crc:fake-github") ?? "{}");
       const yaml: string = fake.branches["drafts/profile"].files["content/profile.yaml"].content;
       expect(yaml).toContain("tagline: A better tagline");
-      expect(yaml).toMatch(/tags: \[ Two, .*Nine ]/);
+      expect(yaml).toMatch(
+        /tags: \[ \{ label: Two, icon: mdiReact, show: icon, link: false }, \{ label: Three, link: false }, Four, .*Nine ]/,
+      );
       await waitFor(() => expect(screen.getByRole("button", { name: "Edit card" })).toHaveFocus());
     } finally {
       session.signOut();

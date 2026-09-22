@@ -1,9 +1,22 @@
+import { Field } from "@base-ui/react/field";
+import { Fieldset } from "@base-ui/react/fieldset";
+import { Popover } from "@base-ui/react/popover";
+import { Radio } from "@base-ui/react/radio";
+import { RadioGroup } from "@base-ui/react/radio-group";
 import { Select } from "@base-ui/react/select";
+import { Switch } from "@base-ui/react/switch";
 import type { Profile } from "@crc/content-schema";
 import { AuthError, StaleRefError } from "@crc/github-client";
 import { DropIndicator, reorder, useItemRegistration, useListReorder } from "@crc/interaction";
 import { Icon } from "@crc/ui";
-import { mdiCheck, mdiClose, mdiDragVertical, mdiPlus } from "@crc/ui/icons";
+import {
+  mdiCheck,
+  mdiClose,
+  mdiDragVertical,
+  mdiLinkVariant,
+  mdiPencil,
+  mdiPlus,
+} from "@crc/ui/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   type KeyboardEvent,
@@ -24,6 +37,7 @@ import {
   type EditGroup,
   type EditLink,
   type EditState,
+  type EditTag,
   fieldErrors,
   fromProfile,
   ICON_CHOICES,
@@ -31,6 +45,7 @@ import {
   MAX_TAGS,
   newGroup,
   newLink,
+  newTag,
   tagProblem,
   toProfile,
 } from "./model.ts";
@@ -100,6 +115,11 @@ export function CardEditorForm({
   };
   const next = toProfile(source.profile, state);
   const errors = fieldErrors(next);
+  // The schema allows repeats; the card should not show the same focus area twice.
+  state.tags.forEach((t, i) => {
+    const repeat = tagProblem(state.tags, t.label, t.key);
+    if (repeat && !errors.has(`tags.${i}`)) errors.set(`tags.${i}`, repeat);
+  });
   const working = gh.kind === "local";
 
   const save = useMutation({
@@ -172,9 +192,16 @@ export function CardEditorForm({
 
       <TagEditor
         tags={state.tags}
+        errors={errors}
         onChange={(tags) => update((s) => ({ ...s, tags }))}
         onMove={(from, to) => {
-          const tags = move(state.tags, from, to, state.tags[from] ?? "", (t) => `tag:${t}`);
+          const tags = move(
+            state.tags,
+            from,
+            to,
+            state.tags[from]?.label ?? "",
+            (t) => `tag:${t.key}`,
+          );
           update((s) => ({ ...s, tags }));
         }}
       />
@@ -354,24 +381,29 @@ function Handle({
 
 function TagEditor({
   tags,
+  errors,
   onChange,
   onMove,
 }: {
-  tags: string[];
-  onChange: (tags: string[]) => void;
+  tags: EditTag[];
+  errors: Map<string, string>;
+  onChange: (tags: EditTag[]) => void;
   onMove: (from: number, to: number) => void;
 }) {
   const [draft, setDraft] = useState("");
   const [problem, setProblem] = useState<string | null>(null);
   const inputId = useId();
-  const items = tags.map((t) => ({ id: t, tag: t }));
-  useListReorder(items, (nextItems) => onChange(nextItems.map((i) => i.tag)), { listId: "tags" });
+  useListReorder(
+    tags.map((t) => ({ ...t, id: t.key })),
+    (next) => onChange(next.map(({ id: _id, ...t }) => t)),
+    { listId: "tags" },
+  );
 
   const add = () => {
     const issue = tagProblem(tags, draft);
     setProblem(issue);
     if (issue) return;
-    onChange([...tags, draft.trim()]);
+    onChange([...tags, newTag(draft.trim())]);
     setDraft("");
   };
 
@@ -383,11 +415,13 @@ function TagEditor({
       <ul className={styles.chips} role="list">
         {tags.map((tag, i) => (
           <TagChip
-            key={tag}
+            key={tag.key}
             tag={tag}
             index={i}
+            error={errors.get(`tags.${i}`)}
+            onChange={(t) => onChange(tags.map((x) => (x.key === t.key ? t : x)))}
             onMove={(delta) => onMove(i, i + delta)}
-            onRemove={() => onChange(tags.filter((t) => t !== tag))}
+            onRemove={() => onChange(tags.filter((t) => t.key !== tag.key))}
           />
         ))}
       </ul>
@@ -428,46 +462,147 @@ function TagEditor({
   );
 }
 
+/* A focus area as the card will show it (icon, label, or both), marked when it links, with its
+   settings a click away. */
 function TagChip({
   tag,
   index,
+  error,
+  onChange,
   onMove,
   onRemove,
 }: {
-  tag: string;
+  tag: EditTag;
   index: number;
+  error: string | undefined;
+  onChange: (tag: EditTag) => void;
   onMove: (delta: -1 | 1) => void;
   onRemove: () => void;
 }) {
-  const { ref, handleRef, state } = useItemRegistration(tag, index, {
+  const { ref, handleRef, state } = useItemRegistration(tag.key, index, {
     listId: "tags",
     axis: "horizontal",
   });
+  const name = tag.label.trim() || "Untitled focus area";
+  const iconOnly = tag.icon !== null && tag.show === "icon";
   return (
     <li
       ref={ref as RefObject<HTMLLIElement>}
       className={styles.chip}
       data-dragging={state.dragging}
+      data-invalid={error ? true : undefined}
     >
       <Handle
-        label={`${tag}. Arrow keys move it.`}
-        reorderKey={`tag:${tag}`}
+        label={`${name}. Arrow keys move it.`}
+        reorderKey={`tag:${tag.key}`}
         axis="horizontal"
         onMove={onMove}
         handleRef={handleRef}
       >
-        {tag}
+        {tag.icon && <Icon path={iconPathFor(tag.icon)} size={iconOnly ? "md" : "sm"} />}
+        {!iconOnly && name}
+        {tag.link && (
+          <span className={styles.linkMark} title="Links to its posts">
+            <Icon path={mdiLinkVariant} size="xs" />
+          </span>
+        )}
       </Handle>
+      <TagSettings tag={tag} name={name} error={error} onChange={onChange} />
       <button
         type="button"
         className={styles.remove}
-        aria-label={`Remove ${tag}`}
+        aria-label={`Remove ${name}`}
         onClick={onRemove}
       >
         <Icon path={mdiClose} size="xs" />
       </button>
       <DropIndicator edge={state.edge} />
     </li>
+  );
+}
+
+const SHOW_OPTIONS = [
+  { value: "icon", label: "Icon" },
+  { value: "label", label: "Label" },
+  { value: "both", label: "Both" },
+] as const;
+
+function TagSettings({
+  tag,
+  name,
+  error,
+  onChange,
+}: {
+  tag: EditTag;
+  name: string;
+  error: string | undefined;
+  onChange: (tag: EditTag) => void;
+}) {
+  return (
+    <Popover.Root>
+      <Popover.Trigger className={styles.remove} aria-label={`Settings for ${name}`}>
+        <Icon path={mdiPencil} size="xs" />
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner className={styles.floating} side="bottom" align="start" sideOffset={6}>
+          <Popover.Popup className={styles.tagPopup}>
+            <Popover.Title className={styles.legend}>Focus area</Popover.Title>
+            <TextField
+              label="Label"
+              visibleLabel
+              value={tag.label}
+              error={error}
+              onChange={(label) => onChange({ ...tag, label })}
+            />
+            <div className={styles.iconRow}>
+              <span className={styles.label}>Icon</span>
+              <IconSelect
+                value={tag.icon}
+                allowNone
+                label={`Icon for ${name}`}
+                onChange={(icon) =>
+                  onChange({
+                    ...tag,
+                    icon,
+                    show: icon ? (tag.show === "label" ? "both" : tag.show) : "label",
+                  })
+                }
+              />
+            </div>
+            <Fieldset.Root
+              className={styles.showGroup}
+              disabled={tag.icon === null}
+              render={
+                <RadioGroup
+                  value={tag.icon === null ? "label" : tag.show}
+                  onValueChange={(show) => onChange({ ...tag, show: show as EditTag["show"] })}
+                />
+              }
+            >
+              <Fieldset.Legend className={styles.label}>Show</Fieldset.Legend>
+              {SHOW_OPTIONS.map((o) => (
+                <label key={o.value} className={styles.segment}>
+                  <Radio.Root value={o.value} className={styles.radio}>
+                    <Radio.Indicator className={styles.radioDot} />
+                  </Radio.Root>
+                  {o.label}
+                </label>
+              ))}
+            </Fieldset.Root>
+            <Field.Root className={styles.switchRow}>
+              <Field.Label className={styles.label}>Links to its posts</Field.Label>
+              <Switch.Root
+                className={styles.switch}
+                checked={tag.link}
+                onCheckedChange={(link) => onChange({ ...tag, link })}
+              >
+                <Switch.Thumb className={styles.switchThumb} />
+              </Switch.Root>
+            </Field.Root>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }
 
@@ -595,7 +730,7 @@ function LinkRow({
       <IconSelect
         value={link.icon}
         label={`Icon for ${name}`}
-        onChange={(icon) => onChange({ ...link, icon })}
+        onChange={(icon) => icon && onChange({ ...link, icon })}
       />
       <TextField
         label={`Label for ${name}`}
@@ -628,21 +763,41 @@ function LinkRow({
   );
 }
 
+const NO_ICON = "none";
+
 function IconSelect({
   value,
   label,
+  allowNone = false,
   onChange,
 }: {
-  value: string;
+  value: string | null;
   label: string;
-  onChange: (icon: string) => void;
+  allowNone?: boolean;
+  onChange: (icon: string | null) => void;
 }) {
-  const known = ICON_CHOICES.some((c) => c.value === value);
-  const choices = known ? ICON_CHOICES : [{ value, label: value }, ...ICON_CHOICES];
+  const known = value === null || ICON_CHOICES.some((c) => c.value === value);
+  const choices = [
+    ...(allowNone ? [{ value: NO_ICON, label: "No icon" }] : []),
+    ...(known || value === null ? [] : [{ value, label: value }]),
+    ...ICON_CHOICES,
+  ];
   return (
-    <Select.Root value={value} items={choices} onValueChange={(v) => v && onChange(v as string)}>
+    <Select.Root
+      value={value ?? NO_ICON}
+      items={choices}
+      onValueChange={(v) => v && onChange(v === NO_ICON ? null : (v as string))}
+    >
       <Select.Trigger className={styles.iconTrigger} aria-label={label}>
-        <Select.Value>{(v: string) => <Icon path={iconPathFor(v)} size="md" />}</Select.Value>
+        <Select.Value>
+          {(v: string) =>
+            v === NO_ICON ? (
+              <span className={styles.noIcon}>—</span>
+            ) : (
+              <Icon path={iconPathFor(v)} size="md" />
+            )
+          }
+        </Select.Value>
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner className={styles.floating} sideOffset={4} alignItemWithTrigger={false}>
@@ -650,7 +805,11 @@ function IconSelect({
             <Select.List>
               {choices.map((c) => (
                 <Select.Item key={c.value} value={c.value} className={styles.iconItem}>
-                  <Icon path={iconPathFor(c.value)} size="sm" />
+                  {c.value === NO_ICON ? (
+                    <span className={styles.noIcon}>—</span>
+                  ) : (
+                    <Icon path={iconPathFor(c.value)} size="sm" />
+                  )}
                   <Select.ItemText>{c.label}</Select.ItemText>
                   <Select.ItemIndicator className={styles.iconCheck}>
                     <Icon path={mdiCheck} size="sm" />

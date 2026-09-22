@@ -123,32 +123,14 @@
     padding-block: var(--space-3) var(--space-1);
   }
 
-  .tag,
   .tagMore {
     display: inline-flex;
     align-items: center;
-    min-block-size: 2rem;
+    min-block-size: 2.25rem;
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-sm);
     font-size: var(--font-size-base);
-    text-decoration: none;
-    transition:
-      background-color var(--duration-fast) var(--ease-out),
-      color var(--duration-fast) var(--ease-out);
-  }
-
-  .tag {
-    background: var(--color-accent);
-    color: var(--color-text-on-accent);
-
-    &:hover {
-      background: var(--color-accent-hover);
-      color: var(--color-text-on-accent);
-    }
-
-    &:active {
-      background: var(--color-accent-active);
-    }
+    transition: background-color var(--duration-fast) var(--ease-out);
   }
 
   .tagMore {
