@@ -6,7 +6,7 @@ import type { MouseEvent, ReactNode } from "react";
 import { siteProfile } from "../content/profile.ts";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
 import styles from "./Page.module.css";
-import { ThemeToggle } from "./ThemeToggle.tsx";
+import { ThemeMenu } from "./ThemeMenu.tsx";
 import { withViewTransition } from "./viewTransition.ts";
 
 /* Chrome for every page past the landing card: header with the brand + nav, main, footer. The brand and
@@ -75,7 +75,7 @@ export function Page({
           <Link to="/$slug" params={{ slug: "about" }} className={styles.navLink}>
             About
           </Link>
-          <ThemeToggle />
+          <ThemeMenu />
         </nav>
       </header>
       <Center as="main" id="main" max={width} className={styles.main} {...backdrop}>

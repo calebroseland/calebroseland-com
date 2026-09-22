@@ -2,7 +2,7 @@ import { Center } from "@crc/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { ThemeToggle } from "../components/ThemeToggle.tsx";
+import { ThemeMenu } from "../components/ThemeMenu.tsx";
 import { session } from "./auth/store.ts";
 import { viewerQuery } from "./github/queries.ts";
 import { useGitHub } from "./StudioProvider.tsx";
@@ -53,7 +53,7 @@ export function StudioShell({
           <button type="button" className={styles.secondary} onClick={signOut}>
             Sign out
           </button>
-          <ThemeToggle />
+          <ThemeMenu />
         </div>
       </header>
       <Center as="main" id="main" max="measure-wide" className={styles.main}>

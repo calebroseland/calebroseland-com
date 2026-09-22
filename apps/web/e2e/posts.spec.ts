@@ -63,8 +63,8 @@ test.describe("posts", () => {
     await page.goto("/posts/hello-placeholder");
     const token = page.locator("pre.shiki span span").first();
     const light = await token.evaluate((el) => getComputedStyle(el).color);
-    await page.getByRole("button", { name: /Theme: Auto/ }).click(); // → light
-    await page.getByRole("button", { name: /Theme: Light/ }).click(); // → dark
+    await page.getByRole("button", { name: /Theme: Auto/ }).click();
+    await page.getByRole("menuitemradio", { name: "Dark" }).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     const dark = await token.evaluate((el) => getComputedStyle(el).color);
     expect(dark).not.toBe(light);

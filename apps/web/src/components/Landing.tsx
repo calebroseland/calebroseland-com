@@ -16,7 +16,7 @@ import { AnimatePresence, m, type Transition, useReducedMotion } from "motion/re
 import { type ReactNode, type RefObject, useEffect, useId, useRef, useState } from "react";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
 import styles from "./Landing.module.css";
-import { ThemeToggle } from "./ThemeToggle.tsx";
+import { ThemeMenu } from "./ThemeMenu.tsx";
 import { vtName, withViewTransition } from "./viewTransition.ts";
 
 const iconPath = (name: string): string => (icons as Record<string, string>)[name] ?? mdiOpenInNew;
@@ -98,7 +98,7 @@ function Front({
     <>
       <div className={styles.corners}>
         <span className={`${styles.cornerSlot} ${styles.vt}`} style={vtName("card-theme")}>
-          <ThemeToggle />
+          <ThemeMenu />
         </span>
         {onFlip && (
           <button

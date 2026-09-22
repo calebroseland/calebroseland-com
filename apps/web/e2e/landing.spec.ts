@@ -79,6 +79,8 @@ test.describe("landing", () => {
     page,
   }) => {
     await page.goto("/");
+    // The handler exists once the app has mounted; the Enter button is the sign of that.
+    await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
     await page.mouse.click(8, 8);
     await expect(page.getByRole("navigation", { name: "Site" })).toBeVisible();
     // While a view transition runs, clicks land on its overlay; wait for it to end.
@@ -123,20 +125,75 @@ test.describe("landing", () => {
     await audit("entered");
   });
 
-  test("theme cycles and persists across reload without a flash", async ({ page }) => {
+  test("the theme menu switches theme, which persists across reload without a flash", async ({
+    page,
+  }) => {
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/");
     const html = page.locator("html");
     await expect(html).toHaveAttribute("data-theme", "light");
-    const toggle = page.getByRole("button", { name: /Theme: Auto/ });
-    await toggle.click();
-    await expect(page.getByRole("button", { name: /Theme: Light/ })).toBeVisible();
-    await page.getByRole("button", { name: /Theme: Light/ }).click();
+    await page.getByRole("button", { name: /Theme: Auto/ }).click();
+    await page.getByRole("menuitemradio", { name: "Dark" }).click();
     await expect(html).toHaveAttribute("data-theme", "dark");
     await page.reload();
     // The inline script sets the attribute before React mounts; assert it is right at first paint.
     await expect(html).toHaveAttribute("data-theme", "dark");
     await expect(page.getByRole("button", { name: /Theme: Dark/ })).toBeVisible();
+  });
+
+  test("a custom theme previews live, saves, and is painted before the app loads", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+    await page.goto("/");
+    // The colour the page paints for the accent, resolved through every token.
+    const accent = () =>
+      page.evaluate(() => {
+        const probe = document.createElement("span");
+        probe.style.color = "var(--color-accent)";
+        document.body.append(probe);
+        const c = getComputedStyle(probe).color;
+        probe.remove();
+        return c;
+      });
+    await page.getByRole("button", { name: /Theme: Auto/ }).click();
+    await page.getByRole("menuitem", { name: /New custom theme/ }).click();
+    const editor = page.getByRole("dialog", { name: "New theme" });
+    await editor.getByRole("radio", { name: "Dark" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    const builtInDarkAccent = await accent();
+    await editor.getByRole("textbox", { name: "Name" }).fill("Ember");
+    await editor.getByRole("textbox", { name: "Accent" }).fill("#e8590c");
+
+    // The relative-colour ramp resolves in this engine: picking a colour changes the painted accent.
+    await expect.poll(accent).not.toBe(builtInDarkAccent);
+    const previewed = await accent();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+    await editor.getByRole("button", { name: "Save theme" }).click();
+    await expect(editor).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await accent()).toBe(previewed);
+    await expect(page.getByRole("button", { name: /Theme: Ember/ })).toBeVisible();
+  });
+
+  test("the theme editor has no serious or critical accessibility violations", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await page.getByRole("button", { name: /Theme: Auto/ }).click();
+    const menu = page.getByRole("menu");
+    await expect(menu).toBeVisible();
+    // Base UI's invisible focus guards take role="button" in WebKit (for VoiceOver's focus handling);
+    // they are the library's, not this page's, and are never reachable as buttons.
+    const serious = async () =>
+      (
+        await new AxeBuilder({ page }).exclude("[data-base-ui-focus-guard]").analyze()
+      ).violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+    expect(await serious(), "menu").toEqual([]);
+    await page.getByRole("menuitem", { name: /New custom theme/ }).click();
+    await expect(page.getByRole("dialog", { name: "New theme" })).toBeVisible();
+    expect(await serious(), "editor").toEqual([]);
   });
 
   test("respects reduced motion", async ({ page }) => {
