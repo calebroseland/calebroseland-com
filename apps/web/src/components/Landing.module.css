@@ -20,7 +20,9 @@
   .card {
     --card-width: 34rem;
     position: relative;
-    overflow: hidden;
+    /* clip, not hidden: it clips the flip without making the card a scroll container, so the editor's
+       save bar can stick to the viewport. */
+    overflow: clip;
     container-type: inline-size;
     inline-size: min(100%, var(--card-width));
     padding: var(--space-2) var(--space-4) var(--space-3);
@@ -49,6 +51,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .cornerStart {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
   }
 
   .cornerSlot {
@@ -102,20 +110,58 @@
     color: var(--color-text-muted);
   }
 
-  .tags {
+  .tags,
+  .tagList {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
     gap: var(--space-3);
+  }
+
+  .tags {
     padding-block: var(--space-3) var(--space-1);
   }
 
-  .tag {
+  .tag,
+  .tagMore {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2rem;
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-sm);
+    font-size: var(--font-size-base);
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+
+  .tag {
     background: var(--color-accent);
     color: var(--color-text-on-accent);
-    font-size: var(--font-size-base);
+
+    &:hover {
+      background: var(--color-accent-hover);
+      color: var(--color-text-on-accent);
+    }
+
+    &:active {
+      background: var(--color-accent-active);
+    }
+  }
+
+  .tagMore {
+    border: var(--border-width) solid var(--color-accent-border);
+    color: var(--color-accent-text);
+
+    &:hover {
+      background: var(--color-accent-subtle);
+    }
+
+    &:active {
+      background: var(--color-accent-border);
+    }
   }
 
   .links {

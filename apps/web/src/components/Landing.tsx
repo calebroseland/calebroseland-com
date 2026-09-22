@@ -9,15 +9,26 @@ import {
   mdiEmailOutline,
   mdiMapMarkerOutline,
   mdiOpenInNew,
+  mdiPencil,
   mdiPhoneOutline,
 } from "@crc/ui/icons";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useStore } from "@tanstack/react-store";
 import { AnimatePresence, m, type Transition, useReducedMotion } from "motion/react";
 import { type ReactNode, type RefObject, useEffect, useId, useRef, useState } from "react";
+import { session } from "../studio/auth/store.ts";
+import type { ProfileSource } from "../studio/profile.ts";
+import { notify } from "../studio/Toast.tsx";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
+import type { EditResult } from "./cardEditor/CardEditor.tsx";
 import styles from "./Landing.module.css";
 import { ThemeMenu } from "./ThemeMenu.tsx";
 import { vtName, withViewTransition } from "./viewTransition.ts";
+
+type OpenEditor = {
+  source: ProfileSource;
+  Editor: (props: { source: ProfileSource; onDone: (r: EditResult) => void }) => ReactNode;
+};
 
 const iconPath = (name: string): string => (icons as Record<string, string>)[name] ?? mdiOpenInNew;
 
@@ -79,27 +90,87 @@ function CardLink({ link, iconSize }: { link: ProfileLink; iconSize: "xl" | "lg"
   );
 }
 
+const TAGS_SHOWN = 6;
+
+/** Each focus area opens the posts filtered to it; past a handful, the rest wait behind "+N more". */
+function Tags({ tags }: { tags: readonly string[] }) {
+  const [all, setAll] = useState(false);
+  const listId = useId();
+  const hidden = tags.length - TAGS_SHOWN;
+  return (
+    <div className={`${styles.tags} ${styles.vt}`} style={vtName("card-tags")}>
+      <ul id={listId} className={styles.tagList} role="list" aria-label="Focus areas">
+        {(all ? tags : tags.slice(0, TAGS_SHOWN)).map((tag) => (
+          <li key={tag}>
+            <Link
+              to="/posts"
+              search={{ tag }}
+              className={styles.tag}
+              aria-label={`Posts tagged ${tag}`}
+            >
+              {tag}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {hidden > 0 && (
+        <button
+          type="button"
+          className={styles.tagMore}
+          aria-expanded={all}
+          aria-controls={listId}
+          aria-label={all ? "Show fewer focus areas" : `+${hidden} more focus areas`}
+          onClick={() => setAll((a) => !a)}
+        >
+          {all ? "Show fewer" : `+${hidden} more`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function Front({
   profile,
   expanded,
   onToggle,
   onFlip,
+  onEdit,
+  opening,
   focusOnMount,
 }: {
   profile: Profile;
   expanded: boolean;
   onToggle: () => void;
   onFlip: (() => void) | null;
-  focusOnMount: boolean;
+  onEdit: (() => void) | null;
+  opening: boolean;
+  focusOnMount: "flip" | "edit" | null;
 }) {
   const linksId = useId();
-  const flipRef = useFocusOnMount<HTMLButtonElement>(focusOnMount);
+  const flipRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === "flip");
+  const editRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === "edit");
   return (
     <>
       <div className={styles.corners}>
-        <span className={`${styles.cornerSlot} ${styles.vt}`} style={vtName("card-theme")}>
-          <ThemeMenu />
-        </span>
+        <div className={styles.cornerStart}>
+          <span className={`${styles.cornerSlot} ${styles.vt}`} style={vtName("card-theme")}>
+            <ThemeMenu />
+          </span>
+          {onEdit && (
+            <button
+              ref={editRef}
+              type="button"
+              className={`${styles.cornerButton} ${styles.vt}`}
+              style={vtName("card-edit")}
+              aria-label="Edit card"
+              aria-busy={opening || undefined}
+              disabled={opening}
+              onClick={onEdit}
+            >
+              <Icon path={mdiPencil} size="md" />
+            </button>
+          )}
+        </div>
         {onFlip && (
           <button
             ref={flipRef}
@@ -122,20 +193,7 @@ function Front({
         {profile.tagline}
       </p>
 
-      {expanded && profile.tags.length > 0 && (
-        <ul
-          className={`${styles.tags} ${styles.vt}`}
-          style={vtName("card-tags")}
-          role="list"
-          aria-label="Focus areas"
-        >
-          {profile.tags.map((tag) => (
-            <li key={tag} className={styles.tag}>
-              {tag}
-            </li>
-          ))}
-        </ul>
-      )}
+      {expanded && profile.tags.length > 0 && <Tags tags={profile.tags} />}
 
       <nav
         id={linksId}
@@ -266,18 +324,46 @@ function Back({
   );
 }
 
-export function Landing({ profile }: { profile: Profile }) {
+export function Landing({ profile: published }: { profile: Profile }) {
+  // After a save to the working tree the file on disk is the new profile; show it without a reload.
+  const [saved, setSaved] = useState<Profile | null>(null);
+  const profile = saved ?? published;
   const reduce = useReducedMotion() ?? false;
   const navigate = useNavigate();
   const [side, setSide] = useState<"front" | "back">("front");
   const [expanded, setExpanded] = useState(false);
   // Focus follows the card only after the visitor has turned it; the first paint leaves focus alone.
   const [turned, setTurned] = useState(false);
+  const signedIn = useStore(session.store, (s) => s.status === "authenticated");
+  const [editing, setEditing] = useState<OpenEditor | null>(null);
+  const [opening, setOpening] = useState(false);
+  // After the editor closes, focus goes back to the Edit button once the front face has turned back.
+  const [returnToEdit, setReturnToEdit] = useState(false);
   const contact = profile.contact;
   const hasContact = Boolean(contact && (contact.email || contact.phone || contact.location));
 
+  /* The editor's code and the profile both load before the card turns, so it turns over straight into
+     a complete editor, the same motion as flipping to the contact side. Readers never load either. */
+  const openEditor = async () => {
+    setOpening(true);
+    try {
+      const mod = await import("./cardEditor/CardEditor.tsx");
+      setEditing({ source: await mod.prepareEdit(profile), Editor: mod.default });
+    } catch {
+      notify("Couldn't open the editor. Check the connection and try again.", { kind: "alert" });
+    } finally {
+      setOpening(false);
+    }
+  };
+  const closeEditor = (result: EditResult) => {
+    if (result?.workingTree) setSaved(result.profile);
+    setReturnToEdit(true);
+    setEditing(null);
+  };
+
   const flip = () => {
     setTurned(true);
+    setReturnToEdit(false);
     setSide((s) => (s === "front" ? "back" : "front"));
   };
 
@@ -302,12 +388,24 @@ export function Landing({ profile }: { profile: Profile }) {
       className={styles.page}
       {...backdrop}
       onClick={(e) => {
-        if (isBackdropClick(e)) void enter();
+        // Leaving mid-edit would throw the edit away, so the background only enters when not editing.
+        if (!editing && isBackdropClick(e)) void enter();
       }}
     >
       <main id="main" className={styles.stage} {...backdrop}>
         <AnimatePresence mode="wait" initial={false}>
-          {side === "back" && contact ? (
+          {editing ? (
+            <m.section
+              key="edit"
+              aria-label="Edit card"
+              className={styles.card}
+              data-expanded
+              data-editing
+              {...faceMotion(reduce)}
+            >
+              <editing.Editor source={editing.source} onDone={closeEditor} />
+            </m.section>
+          ) : side === "back" && contact ? (
             <m.section
               key="back"
               aria-labelledby="site-name"
@@ -332,7 +430,9 @@ export function Landing({ profile }: { profile: Profile }) {
                 expanded={expanded}
                 onToggle={() => withViewTransition("expand", () => setExpanded((e) => !e), reduce)}
                 onFlip={hasContact ? flip : null}
-                focusOnMount={turned}
+                onEdit={signedIn ? () => void openEditor() : null}
+                opening={opening}
+                focusOnMount={returnToEdit ? "edit" : turned ? "flip" : null}
               />
             </m.section>
           )}

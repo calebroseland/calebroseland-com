@@ -137,29 +137,26 @@ test.describe("studio drafts", () => {
     );
   });
 
-  test("profile links reorder with the keyboard menu and announce the move", async ({ page }) => {
+  test("the studio edits the card: links reorder from the keyboard and save to drafts/profile", async ({
+    page,
+  }) => {
     await signInFake(page);
-    await page.getByRole("link", { name: "Profile links" }).click();
-    const list = page.getByRole("list", { name: "Profile links" });
-    const first = await list.getByRole("listitem").first().textContent();
-    await list
-      .getByRole("button", { name: /^Move / })
-      .first()
-      .click();
-    await page.getByRole("menuitem", { name: "Move down" }).click();
-    await expect(list.getByRole("listitem").nth(1)).toContainText(
-      first
-        ?.split("·")[0]
-        ?.replace(/^Move\s*/, "")
-        .trim() ?? "",
+    await page.getByRole("link", { name: "Edit card" }).click();
+    const form = page.getByRole("form", { name: "Edit card" });
+    await expect(form.getByText("Saves to drafts/profile.")).toBeVisible();
+
+    const handle = form.getByRole("button", { name: /^Move GitHub\./ });
+    await handle.focus();
+    await page.keyboard.press("ArrowDown");
+    await expect(handle).toBeFocused();
+    await expect(page.getByText(/GitHub moved to position 2 of 3/)).toBeAttached();
+    await expect(form.getByRole("textbox", { name: /^Label for / }).nth(1)).toHaveValue("GitHub");
+
+    await form.getByRole("button", { name: "Save card" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Saved to" })).toContainText(
+      "Saved to drafts/profile",
     );
-    await expect(page.getByRole("status").filter({ hasText: "moved to position" })).toContainText(
-      "moved to position 2",
-    );
-    await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page.getByRole("status").filter({ hasText: "Committed" })).toContainText(
-      "Committed to drafts/profile",
-    );
+    await expect(page).toHaveURL(/\/studio\/?$/);
   });
 
   test("studio routes are accessible", async ({ page }) => {

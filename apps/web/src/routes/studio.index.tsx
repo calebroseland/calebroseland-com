@@ -64,7 +64,7 @@ function Board() {
       actions={
         <>
           <Link to="/studio/profile" className={styles.secondary}>
-            Profile links
+            Edit card
           </Link>
           <Link to="/studio/new" className={styles.primary}>
             New entry

@@ -173,4 +173,38 @@ test.describe("working-tree mode", () => {
     await dialog.getByRole("button", { name: "Delete" }).click();
     await expect(page.getByRole("link", { name: "Temporary" })).toHaveCount(0);
   });
+
+  test("the landing card edits in place and saves profile.yaml to the working tree", async ({
+    page,
+  }) => {
+    await signInLocal(page);
+    // Whatever the tags are, a new one lands last, and one step left puts it before the last.
+    const lastTag = onDisk("profile.yaml")
+      .match(/^tags: \[\s*(?:.*,\s*)?([^,\]]+?)\s*]$/m)?.[1]
+      ?.trim()
+      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    await page.goto("/");
+    await page.getByRole("button", { name: "Edit card" }).click();
+    const form = page.getByRole("form", { name: "Edit card" });
+    await expect(form.getByText("Saves to content/profile.yaml on this branch.")).toBeVisible();
+
+    await form.getByRole("textbox", { name: "Tagline" }).fill("Builds calm software");
+    await form.getByRole("textbox", { name: "New focus area" }).fill("Accessibility");
+    await form.getByRole("textbox", { name: "New focus area" }).press("Enter");
+    await form.getByRole("button", { name: /^Accessibility\./ }).focus();
+    await page.keyboard.press("ArrowLeft");
+    await expect(form.getByRole("button", { name: /^Accessibility\./ })).toBeFocused();
+    await form.getByRole("button", { name: "Save card" }).click();
+
+    await expect(form).toHaveCount(0);
+    await expect.poll(() => onDisk("profile.yaml")).toContain("tagline: Builds calm software");
+    const yaml = onDisk("profile.yaml");
+    expect(yaml).toMatch(new RegExp(`^tags: \\[ .*Accessibility, ${lastTag} ]$`, "m"));
+    // Untouched lines keep their hand-written form.
+    expect(yaml).toMatch(/^# /);
+    expect(yaml).toContain(
+      "- { label: GitHub, url: https://github.com/calebroseland, icon: mdiGithub }",
+    );
+    await expect(page.getByText("Builds calm software")).toBeVisible();
+  });
 });
