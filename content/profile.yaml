@@ -9,9 +9,9 @@ groups:
       - { label: GitHub, url: https://github.com/calebroseland, icon: mdiGithub }
       - { label: Gists, url: https://gist.github.com/calebroseland, icon: mdiCodeBraces }
       - { label: vue-dom-portal, url: https://github.com/calebroseland/vue-dom-portal, icon: mdiSourceBranch }
-  - title: Writing
+  - title: Writings
     links:
-      - { label: Medium, url: https://medium.com/@calebroseland, icon: mdiPencil }
+      - { label: Posts, url: /posts, icon: mdiPencil }
       - { label: State Management in Vue, url: https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81, icon: mdiFileDocumentOutline }
   - title: Social
     links:
