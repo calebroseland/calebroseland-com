@@ -1,9 +1,9 @@
-import { Stack } from "@crc/ui";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import * as z from "zod/mini";
 import { EntryHeader, TagList } from "../components/Article.tsx";
 import { Page } from "../components/Page.tsx";
-import { allTags, formatDate, posts } from "../content/entries.ts";
+import { PostList } from "../components/PostList.tsx";
+import { allTags, posts } from "../content/entries.ts";
 import { siteProfile } from "../content/profile.ts";
 import styles from "./posts.module.css";
 
@@ -50,23 +50,7 @@ function PostsIndex() {
       {shown.length === 0 ? (
         <p role="status">{tag ? `No posts tagged ‘${tag}’.` : "Nothing published yet."}</p>
       ) : (
-        <Stack as="ol" gap="8" role="list" className={styles.list}>
-          {shown.map((p) => (
-            <li key={p.id}>
-              <article className={styles.item}>
-                <h2 className={styles.itemTitle}>
-                  <Link to="/posts/$slug" params={{ slug: p.slug }}>
-                    {p.title}
-                  </Link>
-                </h2>
-                <time dateTime={p.date} className={styles.itemDate}>
-                  {formatDate(p.date)}
-                </time>
-                {p.summary && <p className={styles.summary}>{p.summary}</p>}
-              </article>
-            </li>
-          ))}
-        </Stack>
+        <PostList posts={shown} />
       )}
     </Page>
   );
