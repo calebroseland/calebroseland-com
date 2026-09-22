@@ -31,7 +31,7 @@ import type { EditResult } from "./cardEditor/CardEditor.tsx";
 import { FocusChip } from "./FocusChip.tsx";
 import styles from "./Landing.module.css";
 import { ThemeMenu } from "./ThemeMenu.tsx";
-import { vtName, withViewTransition } from "./viewTransition.ts";
+import { footerLinkName, vtName, withViewTransition } from "./viewTransition.ts";
 
 type OpenEditor = {
   source: ProfileSource;
@@ -218,8 +218,8 @@ function Front({
               )}
               <ul className={styles.list} role="list">
                 <li
-                  className={`${styles.linkItem} ${styles.vt}`}
-                  style={vtName(`card-link-${g}-0`)}
+                  className={`${styles.linkItem} ${styles.vt} ${styles.toFooter}`}
+                  style={{ ...vtName(`card-link-${g}-0`), ...footerLinkName(g, 0) }}
                 >
                   <CardLink link={primary} iconSize="xl" />
                 </li>
@@ -227,8 +227,11 @@ function Front({
                   rest.map((link, i) => (
                     <li
                       key={link.url}
-                      className={`${styles.linkItem} ${styles.vt}`}
-                      style={vtName(`card-link-${g}-${i + 1}`)}
+                      className={`${styles.linkItem} ${styles.vt} ${styles.toFooter}`}
+                      style={{
+                        ...vtName(`card-link-${g}-${i + 1}`),
+                        ...footerLinkName(g, i + 1),
+                      }}
                     >
                       <CardLink link={link} iconSize="lg" />
                     </li>

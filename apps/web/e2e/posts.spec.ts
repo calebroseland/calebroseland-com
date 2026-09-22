@@ -25,10 +25,12 @@ test.describe("posts", () => {
     await page.goto("/posts");
     await page.getByRole("list", { name: "Tags" }).getByRole("link", { name: "meta" }).click();
     await expect(page).toHaveURL(/\?tag=meta$/);
-    await expect(page.getByRole("heading", { level: 2 })).toHaveCount(1);
+    await expect(page.getByRole("main").getByRole("heading", { level: 2 })).toHaveCount(1);
     await page.getByRole("link", { name: "Clear filter" }).click();
     await expect(page).toHaveURL(/\/posts$/);
-    expect(await page.getByRole("heading", { level: 2 }).count()).toBeGreaterThan(1);
+    expect(await page.getByRole("main").getByRole("heading", { level: 2 }).count()).toBeGreaterThan(
+      1,
+    );
   });
 
   test("the bar stays at the top while a long post scrolls, without widening the page", async ({

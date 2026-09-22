@@ -66,7 +66,9 @@ async function renderAt(path: string) {
 describe("/posts", () => {
   it("lists posts newest first with dates and summaries", async () => {
     await renderAt("/posts");
-    const items = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+    const items = within(screen.getByRole("main"))
+      .getAllByRole("heading", { level: 2 })
+      .map((h) => h.textContent);
     expect(items).toEqual(["Alpha", "Beta"]);
     expect(screen.getByText("First")).toBeInTheDocument();
     expect(screen.getByText("September 19, 2026")).toBeInTheDocument();
@@ -75,9 +77,11 @@ describe("/posts", () => {
   it("filters by the typed tag search param and offers to clear", async () => {
     const router = await renderAt("/posts?tag=two");
     expect(router.state.location.search).toEqual({ tag: "two" });
-    expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual([
-      "Beta",
-    ]);
+    expect(
+      within(screen.getByRole("main"))
+        .getAllByRole("heading", { level: 2 })
+        .map((h) => h.textContent),
+    ).toEqual(["Beta"]);
     expect(screen.getByRole("link", { name: "Clear filter" })).toBeInTheDocument();
     expect(
       within(screen.getByRole("list", { name: "Tags" })).getByRole("link", { name: "two" }),

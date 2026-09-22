@@ -396,6 +396,20 @@
     animation: vt-fade-in calc(var(--vt-page) * 0.6) calc(var(--vt-page) * 0.4) var(--ease-out) both;
   }
 
+  /* Enter and leave also carry each card link to (and from) its place in the site footer, on the same
+     clock as the card and the name. */
+  :root:is([data-vt="enter"], [data-vt="leave"]) .toFooter {
+    view-transition-name: var(--vt-footer);
+    view-transition-class: footer-link;
+  }
+
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-group(*:global(.footer-link)),
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-old(*:global(.footer-link)),
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-new(*:global(.footer-link)) {
+    animation-duration: var(--vt-page);
+    animation-timing-function: var(--ease-in-out);
+  }
+
   @keyframes vt-fade-in {
     from {
       opacity: 0;

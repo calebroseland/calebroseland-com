@@ -6,6 +6,7 @@ import type { MouseEvent, ReactNode } from "react";
 import { siteProfile } from "../content/profile.ts";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
 import styles from "./Page.module.css";
+import { SiteFooter } from "./SiteFooter.tsx";
 import { ThemeMenu } from "./ThemeMenu.tsx";
 import { withViewTransition } from "./viewTransition.ts";
 
@@ -81,9 +82,7 @@ export function Page({
       <Center as="main" id="main" max={width} className={styles.main} {...backdrop}>
         {children}
       </Center>
-      <footer className={styles.footer} {...backdrop}>
-        <a href="/feed.xml">RSS</a>
-      </footer>
+      <SiteFooter profile={siteProfile} />
     </div>
   );
 }

@@ -145,13 +145,6 @@
     padding-block: var(--space-8) var(--space-16);
   }
 
-  .footer {
-    padding: var(--space-6) var(--space-4);
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    text-align: center;
-  }
-
   .centered {
     text-align: center;
     padding-block: var(--space-16);

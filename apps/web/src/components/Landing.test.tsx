@@ -189,6 +189,17 @@ describe("Landing", () => {
     const site = screen.getByRole("navigation", { name: "Site" });
     expect(within(site).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
     expect(screen.getByRole("link", { name: "Placeholder Name" })).toHaveAttribute("href", "/");
+    // The card's links carry on in the footer, every one of them, grouped as on the card.
+    const footer = screen.getByRole("navigation", { name: "Profiles and writing" });
+    expect(
+      within(footer)
+        .getAllByRole("heading", { level: 2 })
+        .map((h) => h.textContent),
+    ).toEqual(["Code", "Writings", "Social"]);
+    expect(within(footer).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
+    expect(
+      within(footer).getByRole("link", { name: /LinkedIn.*opens in new tab/ }),
+    ).toHaveAttribute("target", "_blank");
   });
 
   it("a click on the empty background toggles between the card and the site", async () => {

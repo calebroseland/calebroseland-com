@@ -28,3 +28,8 @@ export function withViewTransition(
 
 /** Style that gives an element a view-transition name while a scoped transition runs (see `.vt`). */
 export const vtName = (name: string): CSSProperties => ({ "--vt-name": name }) as CSSProperties;
+
+/** Pairs a card link with the same link in the site footer, so entering and leaving move it between
+    the two (see `.toFooter` in Landing.module.css and `.footerLink` in SiteFooter.module.css). */
+export const footerLinkName = (group: number, index: number): CSSProperties =>
+  ({ "--vt-footer": `footer-link-${group}-${index}` }) as CSSProperties;
