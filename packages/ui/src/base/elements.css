@@ -6,6 +6,18 @@
     accent-color: var(--color-accent);
   }
 
+  /* The document fades in once per load. body survives client-side navigation, so route changes do not
+     replay it; the duration token collapses to nothing under reduced motion. */
+  body {
+    animation: document-in calc(var(--duration-slower) * 1.6) var(--ease-in-out) backwards;
+  }
+
+  @keyframes document-in {
+    from {
+      opacity: 0;
+    }
+  }
+
   h1,
   h2,
   h3,

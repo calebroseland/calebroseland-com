@@ -1,11 +1,13 @@
 /* The only place @mdi/js is imported. Add an icon here, never inline. */
 export {
   mdiArrowDown,
+  mdiArrowRight,
   mdiArrowUp,
   mdiBrightnessAuto,
   mdiCardAccountDetails,
   mdiChevronDoubleDown,
   mdiChevronDoubleUp,
+  mdiChevronLeft,
   mdiChevronRight,
   mdiClose,
   mdiCodeBraces,
