@@ -1,7 +1,8 @@
 /* Pure list reordering shared by pointer drag-and-drop and the keyboard "Move" menu, so both paths
    produce identical results and the keyboard path is testable without a DOM. */
 
-export type Edge = "top" | "bottom";
+/** Where a drop lands on a row (vertical lists) or a chip (horizontal lists). */
+export type Edge = "top" | "bottom" | "left" | "right";
 
 export function reorder<T>(items: readonly T[], from: number, to: number): T[] {
   if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length)
@@ -14,7 +15,7 @@ export function reorder<T>(items: readonly T[], from: number, to: number): T[] {
 
 /** Index the dragged item lands on when dropped on `target` at `edge`. */
 export function dropIndex(from: number, target: number, edge: Edge): number {
-  let to = edge === "top" ? target : target + 1;
+  let to = edge === "top" || edge === "left" ? target : target + 1;
   if (from < to) to -= 1;
   return to;
 }

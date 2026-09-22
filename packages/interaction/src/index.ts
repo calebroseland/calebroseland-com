@@ -7,4 +7,9 @@ export {
   moveIndex,
   reorder,
 } from "./reorder.ts";
-export { useItemRegistration, useListReorder } from "./useListReorder.ts";
+export {
+  type ItemOptions,
+  type ListOptions,
+  useItemRegistration,
+  useListReorder,
+} from "./useListReorder.ts";

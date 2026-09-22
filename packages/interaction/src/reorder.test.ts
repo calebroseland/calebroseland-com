@@ -26,6 +26,11 @@ describe("reorder", () => {
 });
 
 describe("dropIndex", () => {
+  it("treats left like top and right like bottom for horizontal lists", () => {
+    expect(dropIndex(0, 2, "left")).toBe(dropIndex(0, 2, "top"));
+    expect(dropIndex(3, 1, "right")).toBe(dropIndex(3, 1, "bottom"));
+  });
+
   it.each([
     [0, 2, "bottom", 2],
     [0, 2, "top", 1],
