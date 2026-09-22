@@ -31,6 +31,21 @@ test.describe("posts", () => {
     expect(await page.getByRole("heading", { level: 2 }).count()).toBeGreaterThan(1);
   });
 
+  test("the bar stays at the top while a long post scrolls, without widening the page", async ({
+    page,
+  }) => {
+    await page.goto("/posts/hello-placeholder");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 900));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    const bar = await page.getByRole("banner").boundingBox();
+    expect(bar?.y).toBe(0);
+    await expect(page.getByRole("button", { name: /Theme/ })).toBeInViewport();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    ).toBe(true);
+  });
+
   test("unknown post shows the not-found state", async ({ page }) => {
     await page.goto("/posts/does-not-exist");
     await expect(

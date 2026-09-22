@@ -13,6 +13,10 @@ vi.mock("virtual:content/profile", () => ({
         links: [{ label: "GitHub", url: "https://github.com/x", icon: "mdiGithub" }],
       },
       {
+        title: "Writings",
+        links: [{ label: "Posts", url: "/posts", icon: "mdiPencil" }],
+      },
+      {
         title: "Social",
         links: [
           { label: "LinkedIn", url: "https://linkedin.com/in/x", icon: "mdiLinkedin" },
@@ -55,6 +59,7 @@ describe("Landing", () => {
     const links = within(nav()).getAllByRole("link");
     expect(links.map((l) => l.getAttribute("href"))).toEqual([
       "https://github.com/x",
+      "/posts",
       "https://linkedin.com/in/x",
     ]);
     expect(links[0]).toHaveAttribute("target", "_blank");
@@ -78,15 +83,15 @@ describe("Landing", () => {
       within(nav())
         .getAllByRole("heading", { level: 2 })
         .map((h) => h.textContent),
-    ).toEqual(["Code", "Social"]);
-    expect(within(nav()).getAllByRole("link")).toHaveLength(3);
+    ).toEqual(["Code", "Writings", "Social"]);
+    expect(within(nav()).getAllByRole("link")).toHaveLength(4);
     expect(
       within(screen.getByRole("list", { name: "Focus areas" })).getAllByRole("listitem"),
     ).toHaveLength(2);
 
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
-    await vi.waitFor(() => expect(within(nav()).getAllByRole("link")).toHaveLength(2));
+    await vi.waitFor(() => expect(within(nav()).getAllByRole("link")).toHaveLength(3));
   });
 
   it("falls back to a generic icon for an unknown icon name instead of crashing", async () => {
@@ -122,9 +127,55 @@ describe("Landing", () => {
     expect(screen.queryByRole("list", { name: "Contact" })).not.toBeInTheDocument();
   });
 
-  it("exposes the theme control and a link to posts", async () => {
+  it("exposes the theme control, and links a site page in place rather than in a new tab", async () => {
     await renderLanding();
     expect(screen.getByRole("button", { name: /Theme: Auto/ })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
+    const posts = within(nav()).getByRole("link", { name: "Posts" });
+    expect(posts).toHaveAttribute("href", "/posts");
+    expect(posts).not.toHaveAttribute("target");
+  });
+
+  it("enter leaves the card for the site, with its nav, and moves focus to the page heading", async () => {
+    await renderLanding();
+    expect(screen.queryByRole("navigation", { name: "Site" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Enter" }));
+
+    const heading = await screen.findByRole("heading", { level: 1, name: "Latest writing" });
+    await vi.waitFor(() => expect(heading).toHaveFocus());
+    expect(
+      screen.queryByRole("navigation", { name: "Profiles and links" }),
+    ).not.toBeInTheDocument();
+    const site = screen.getByRole("navigation", { name: "Site" });
+    expect(within(site).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
+    expect(screen.getByRole("link", { name: "Placeholder Name" })).toHaveAttribute("href", "/");
+  });
+
+  it("a click on the empty background toggles between the card and the site", async () => {
+    await renderLanding();
+    // A click on the card itself, or a modified click on the background, stays put.
+    fireEvent.click(screen.getByRole("heading", { level: 1 }));
+    fireEvent.click(screen.getByRole("main"), { metaKey: true });
+    expect(screen.getByRole("button", { name: "Enter" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("main"));
+    await screen.findByRole("heading", { level: 1, name: "Latest writing" });
+
+    fireEvent.click(screen.getByRole("heading", { level: 1 }));
+    expect(screen.getByRole("navigation", { name: "Site" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("main"));
+    await screen.findByRole("button", { name: "Enter" });
+  });
+
+  it("the bar's business card button returns to the card, with focus on its heading", async () => {
+    await renderLanding();
+    fireEvent.click(screen.getByRole("button", { name: "Enter" }));
+    const back = await screen.findByRole("link", { name: "Back to business card" });
+    expect(back).toHaveAttribute("href", "/");
+
+    fireEvent.click(back);
+    const heading = await screen.findByRole("heading", { level: 1, name: "Placeholder Name" });
+    await vi.waitFor(() => expect(heading).toHaveFocus());
+    expect(screen.getByRole("navigation", { name: "Profiles and links" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Site" })).not.toBeInTheDocument();
   });
 });

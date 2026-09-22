@@ -1,20 +1,77 @@
 @layer components {
+  /* minmax(0, 1fr): wide content (a code block, a table) scrolls inside itself instead of widening the
+     column, which would push the bar's controls off a phone screen. */
   .page {
     min-block-size: 100dvh;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto 1fr auto;
   }
 
+  /* Anchored to the top while the page scrolls, on the page's own background so content passes under it.
+     On the narrowest phones the nav wraps under the brand rather than widening the page. */
   .bar {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-sticky);
+    background: var(--color-bg);
+    border-block-end: 1px solid var(--color-border-subtle);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-4);
+    gap: var(--space-1) var(--space-4);
     padding: var(--space-3) var(--space-4);
+
+    @media (width < 30rem) {
+      column-gap: var(--space-2);
+    }
+  }
+
+  /* In-page links (headings, the skip link) land below the bar, not under it. */
+  :root:has(.bar) {
+    scroll-padding-block-start: 5rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  /* A back button: chevron first, mirroring the card's own flip button (card, then chevron right). The
+     bar's inline padding is pulled back so the chevron sits at the page edge. */
+  .cardLink {
+    display: inline-flex;
+    align-items: center;
+    block-size: 2.75rem;
+    padding-inline: var(--space-1) var(--space-2);
+    margin-inline-start: calc(-1 * var(--space-2));
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-surface-hover);
+      color: var(--color-text);
+    }
+
+    /* Pressed reads as the accent, not just a darker grey, so a tap is unmistakable. */
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
   }
 
   .home {
-    font-weight: var(--font-weight-semibold);
+    view-transition-name: site-card;
+    font-family: var(--font-brand);
+    font-size: clamp(var(--font-size-lg), 0.75rem + 3vw, var(--font-size-2xl));
+    white-space: nowrap;
+    font-weight: var(--font-weight-normal);
+    line-height: var(--leading-snug);
     color: var(--color-text);
     text-decoration: none;
 
@@ -23,10 +80,20 @@
     }
   }
 
+  .siteName {
+    display: inline-block;
+    view-transition-name: site-name;
+  }
+
   .nav {
+    view-transition-name: site-nav;
     display: flex;
     gap: var(--space-4);
     align-items: center;
+
+    @media (width < 30rem) {
+      gap: var(--space-2);
+    }
   }
 
   .navLink {
@@ -45,6 +112,32 @@
     &[data-status="active"] {
       text-decoration: underline;
       text-underline-offset: 0.3em;
+    }
+  }
+
+  /* Arriving from the card, the nav slides in over the second part of the flight and lands with the
+     name. --vt-page is set in Landing.module.css. */
+  :root[data-vt="enter"]::view-transition-new(site-nav):only-child {
+    animation: nav-in calc(var(--vt-page, 0.55s) * 0.6) calc(var(--vt-page, 0.55s) * 0.4)
+      var(--ease-out) both;
+  }
+
+  @keyframes nav-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+  }
+
+  /* Leaving for the card, the nav goes first. */
+  :root[data-vt="leave"]::view-transition-old(site-nav):only-child {
+    animation: nav-out 0.2s var(--ease-in) both;
+  }
+
+  @keyframes nav-out {
+    to {
+      opacity: 0;
+      transform: translateY(-0.5rem);
     }
   }
 

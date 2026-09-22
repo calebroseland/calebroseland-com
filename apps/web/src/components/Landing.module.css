@@ -7,13 +7,16 @@
 
   .stage {
     display: grid;
-    place-items: center;
+    align-content: center;
+    justify-items: center;
+    gap: var(--space-8);
     min-block-size: 100dvh;
     padding: var(--space-12) var(--space-4);
   }
 
-  /* The card. Its height is driven by Motion during a flip, so it clips; its width is a length per
-     state (not fit-content) so the change between them can transition in every engine. */
+  /* The card. Its height is driven by Motion during a flip, so it clips. Its width changes between
+     collapsed and expanded inside a view transition, which animates it; a CSS transition here would
+     run inside the new snapshot and reflow the links mid-flight. */
   .card {
     --card-width: 34rem;
     position: relative;
@@ -26,16 +29,11 @@
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg);
     text-align: center;
-    transition:
-      inline-size 0.75s ease,
-      background-color var(--duration-slow) var(--ease-in-out);
+    view-transition-name: site-card;
+    transition: background-color var(--duration-slow) var(--ease-in-out);
 
     &[data-expanded] {
       --card-width: 54rem;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      transition: none;
     }
   }
 
@@ -53,14 +51,11 @@
     align-items: center;
   }
 
-  .cornerStart {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
+  .cornerSlot {
+    display: inline-flex;
   }
 
-  .cornerButton,
-  .cornerLink {
+  .cornerButton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -78,6 +73,12 @@
       background: var(--color-surface-hover);
       color: var(--color-text);
     }
+
+    /* Pressed reads as the accent, not just a darker grey, so a tap is unmistakable. */
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
   }
 
   .name {
@@ -89,14 +90,16 @@
     letter-spacing: var(--tracking-normal);
   }
 
+  /* Shrink-wrapped so its snapshot has the text's own proportions, and scales cleanly into the bar's
+     brand when the visitor enters. */
+  .siteName {
+    display: inline-block;
+    view-transition-name: site-name;
+  }
+
   .tagline {
     font-size: var(--font-size-xl);
     color: var(--color-text-muted);
-  }
-
-  /* Rows only the expanded card shows. Clipped because Motion animates their height. */
-  .reveal {
-    overflow: hidden;
   }
 
   .tags {
@@ -151,7 +154,11 @@
     display: grid;
   }
 
-  /* Links sit inside clipping containers, so their focus ring is drawn inside the box. */
+  .linkItem {
+    view-transition-class: card-link;
+  }
+
+  /* Links sit inside a clipping card, so their focus ring is drawn inside the box. */
   .link,
   .detail {
     display: flex;
@@ -171,6 +178,7 @@
   }
 
   .link {
+    font-size: var(--font-size-xl);
     transition:
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
@@ -179,17 +187,22 @@
       background: var(--color-surface-hover);
       color: var(--color-text);
     }
+
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
   }
 
-  .primaryLabel {
-    font-size: var(--font-size-xl);
+  /* Collapsed, each group's face link keeps its label on one line. */
+  .links:not([data-expanded]) .label {
     white-space: nowrap;
   }
 
   /* A collapsed card on a phone keeps the three faces as icons, as the 2019 card did; the label stays
      in the accessibility tree. */
   @container (inline-size < 30rem) {
-    .links:not([data-expanded]) .primaryLabel {
+    .links:not([data-expanded]) .label {
       position: absolute;
       inline-size: 1px;
       block-size: 1px;
@@ -209,7 +222,9 @@
     font-size: var(--font-size-lg);
     text-decoration: underline;
     text-underline-offset: 0.2em;
-    transition: background-color var(--duration-fast) var(--ease-out);
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
 
     &:hover {
       background: var(--color-surface-hover);
@@ -218,6 +233,12 @@
     [data-expanded] > & {
       inline-size: 100%;
       background: var(--color-surface-sunken);
+    }
+
+    /* After the expanded rule, which it must beat at equal specificity. */
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
     }
   }
 
@@ -249,6 +270,113 @@
 
     &:is(a):hover {
       color: var(--color-link);
+    }
+  }
+
+  .enter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-block-size: 3.5rem;
+    padding: var(--space-3) var(--space-8);
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+    font-size: var(--font-size-xl);
+    box-shadow: var(--shadow-md);
+    transition: background-color var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-accent-hover);
+    }
+
+    &:active {
+      background: var(--color-accent-active);
+    }
+  }
+
+  /* Named only during "show more", so each row travels on its own and the card's snapshot is just its
+     surface, which can stretch. During "enter" they stay part of the card and shrink with it. */
+  :root[data-vt="expand"] .vt {
+    view-transition-name: var(--vt-name);
+  }
+
+  :root[data-vt="expand"]::view-transition-group(*) {
+    animation-duration: 0.6s;
+    animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  /* Snapshots keep their natural size, so a row whose box widens (the tagline, the toggle bar) moves
+     without its text scaling. Only the card's own surface stretches. */
+  :root[data-vt="expand"]::view-transition-old(*),
+  :root[data-vt="expand"]::view-transition-new(*) {
+    block-size: 100%;
+    object-fit: none;
+  }
+
+  /* Expanded, a link fills its column, so its snapshot widens; keep the icon and label on the start
+     edge, where they stay, instead of re-centring them. */
+  :root[data-vt="expand"]::view-transition-old(*:global(.card-link)),
+  :root[data-vt="expand"]::view-transition-new(*:global(.card-link)) {
+    object-position: left center;
+  }
+
+  /* The expanded toggle is a full-width bar; clipped to its growing box, it widens with the card. */
+  :root[data-vt="expand"]::view-transition-group(card-more) {
+    overflow: clip;
+    border-radius: var(--radius-md);
+  }
+
+  :root[data-vt="expand"]::view-transition-old(site-card),
+  :root[data-vt="expand"]::view-transition-new(site-card) {
+    object-fit: fill;
+  }
+
+  /* Rows only one state has: arrivals fade in once the card has made room; departures leave at once, so
+     they are gone before the card shrinks past them. */
+  :root[data-vt="expand"]::view-transition-new(*):only-child {
+    animation: vt-fade-in 0.3s 0.3s both;
+  }
+
+  :root[data-vt="expand"]::view-transition-old(*):only-child {
+    animation: vt-fade-out 0.15s both;
+  }
+
+  /* Enter: the card flies to the brand in the bar and dissolves on the way, and the name lands in its
+     place in the bar. Only the name travels on its own; everything else goes with the card or the nav.
+     Leave (the bar's card button) runs the same morph back. */
+  /* One duration and curve for the flight, the page cross-fade and the card's fade, so the name lands as
+     the new page settles. Page.module.css times the nav against the same value. */
+  :root {
+    --vt-page: 0.55s;
+  }
+
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-group(site-card),
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-group(site-name),
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-old(root),
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-new(root) {
+    animation-duration: var(--vt-page);
+    animation-timing-function: var(--ease-in-out);
+  }
+
+  :root[data-vt="enter"]::view-transition-old(site-card) {
+    animation: vt-fade-out var(--vt-page) var(--ease-in) both;
+  }
+
+  /* Leave: the reverse, with the card gathering itself as it grows out of the brand. */
+  :root[data-vt="leave"]::view-transition-new(site-card) {
+    animation: vt-fade-in calc(var(--vt-page) * 0.6) calc(var(--vt-page) * 0.4) var(--ease-out) both;
+  }
+
+  @keyframes vt-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes vt-fade-out {
+    to {
+      opacity: 0;
     }
   }
 }

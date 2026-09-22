@@ -1,7 +1,8 @@
-import type { Profile, ProfileContact } from "@crc/content-schema";
-import { durations, Icon } from "@crc/ui";
+import type { Profile, ProfileContact, ProfileLink } from "@crc/content-schema";
+import { Icon } from "@crc/ui";
 import * as icons from "@crc/ui/icons";
 import {
+  mdiArrowRight,
   mdiCardAccountDetails,
   mdiChevronRight,
   mdiClose,
@@ -10,18 +11,21 @@ import {
   mdiOpenInNew,
   mdiPhoneOutline,
 } from "@crc/ui/icons";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, m, type Transition, useReducedMotion } from "motion/react";
 import { type ReactNode, type RefObject, useEffect, useId, useRef, useState } from "react";
+import { backdrop, isBackdropClick } from "./backdrop.ts";
 import styles from "./Landing.module.css";
 import { ThemeToggle } from "./ThemeToggle.tsx";
+import { vtName, withViewTransition } from "./viewTransition.ts";
 
 const iconPath = (name: string): string => (icons as Record<string, string>)[name] ?? mdiOpenInNew;
 
-/* The landing is a business card, after the 2019 site. Two user-initiated motions carry over from it:
-   flipping to the contact side (animate.css simpleFlip on X, inverted, under a 400px perspective, with
-   the card's height following) and "show more", which unfolds the extra rows. The timings are that
-   card's, not the token scale: they are what made the flip read as a card turning over. */
+/* The landing is a business card, after the 2019 site. Flipping to the contact side carries over from
+   it (animate.css simpleFlip on X, inverted, under a 400px perspective, with the card's height
+   following); the timings are that card's, not the token scale, because they are what made the flip
+   read as a card turning over. "Show more" and "Enter" reflow the page, so they run as view
+   transitions (Landing.module.css) rather than Motion animations. */
 const CSS_EASE = [0.25, 0.1, 0.25, 1] as const;
 const FLIP_IN = 0.7;
 const FLIP_OUT = 0.5;
@@ -40,46 +44,6 @@ function faceMotion(reduce: boolean) {
   };
 }
 
-function revealMotion(reduce: boolean) {
-  const t: Transition = reduce
-    ? still
-    : { duration: durations.slower, ease: CSS_EASE, height: { duration: HEIGHT, ease: CSS_EASE } };
-  return {
-    initial: { opacity: 0, height: 0 },
-    animate: { opacity: 1, height: "auto", transition: t },
-    exit: { opacity: 0, height: 0, transition: t },
-  };
-}
-
-/** Rows that exist only on the expanded card. Unmounted when collapsed, so they are not in the
-    accessibility tree or the tab order while hidden. */
-function Reveal({
-  open,
-  as = "div",
-  className,
-  children,
-}: {
-  open: boolean;
-  as?: "div" | "li";
-  className?: string;
-  children: ReactNode;
-}) {
-  const reduce = useReducedMotion() ?? false;
-  const Tag = as === "li" ? m.li : m.div;
-  return (
-    <AnimatePresence initial={false}>
-      {open && (
-        <Tag
-          className={[styles.reveal, className].filter(Boolean).join(" ")}
-          {...revealMotion(reduce)}
-        >
-          {children}
-        </Tag>
-      )}
-    </AnimatePresence>
-  );
-}
-
 /** Moves focus to the element once it mounts, when the mount was caused by the user turning the card. */
 function useFocusOnMount<T extends HTMLElement>(when: boolean): RefObject<T | null> {
   const ref = useRef<T>(null);
@@ -95,6 +59,23 @@ function ExternalLink({ href, children }: { href: string; children: ReactNode })
       {children}
       <span className="visually-hidden"> (opens in new tab)</span>
     </a>
+  );
+}
+
+/** A root-relative url is a page on this site, so it goes through the router (and its basepath). */
+function CardLink({ link, iconSize }: { link: ProfileLink; iconSize: "xl" | "lg" }) {
+  const body = (
+    <>
+      <Icon path={iconPath(link.icon)} size={iconSize} />
+      <span className={styles.label}>{link.label}</span>
+    </>
+  );
+  return link.url.startsWith("/") ? (
+    <Link to={link.url} className={styles.link}>
+      {body}
+    </Link>
+  ) : (
+    <ExternalLink href={link.url}>{body}</ExternalLink>
   );
 }
 
@@ -116,17 +97,15 @@ function Front({
   return (
     <>
       <div className={styles.corners}>
-        <div className={styles.cornerStart}>
+        <span className={`${styles.cornerSlot} ${styles.vt}`} style={vtName("card-theme")}>
           <ThemeToggle />
-          <Link to="/posts" className={styles.cornerLink}>
-            Posts
-          </Link>
-        </div>
+        </span>
         {onFlip && (
           <button
             ref={flipRef}
             type="button"
-            className={styles.cornerButton}
+            className={`${styles.cornerButton} ${styles.vt}`}
+            style={vtName("card-flip")}
             aria-label="Contact information"
             onClick={onFlip}
           >
@@ -137,20 +116,25 @@ function Front({
       </div>
 
       <h1 id="site-name" className={styles.name}>
-        {profile.name}
+        <span className={styles.siteName}>{profile.name}</span>
       </h1>
-      <p className={styles.tagline}>{profile.tagline}</p>
+      <p className={`${styles.tagline} ${styles.vt}`} style={vtName("card-tagline")}>
+        {profile.tagline}
+      </p>
 
-      {profile.tags.length > 0 && (
-        <Reveal open={expanded}>
-          <ul className={styles.tags} role="list" aria-label="Focus areas">
-            {profile.tags.map((tag) => (
-              <li key={tag} className={styles.tag}>
-                {tag}
-              </li>
-            ))}
-          </ul>
-        </Reveal>
+      {expanded && profile.tags.length > 0 && (
+        <ul
+          className={`${styles.tags} ${styles.vt}`}
+          style={vtName("card-tags")}
+          role="list"
+          aria-label="Focus areas"
+        >
+          {profile.tags.map((tag) => (
+            <li key={tag} className={styles.tag}>
+              {tag}
+            </li>
+          ))}
+        </ul>
       )}
 
       <nav
@@ -159,32 +143,37 @@ function Front({
         className={styles.links}
         data-expanded={expanded || undefined}
       >
-        {profile.groups.map((group) => {
+        {profile.groups.map((group, g) => {
           const [primary, ...rest] = group.links;
           if (!primary) return null;
           return (
             <div key={group.title} className={styles.group}>
-              <Reveal open={expanded}>
-                <h2 className={styles.groupTitle}>
+              {expanded && (
+                <h2
+                  className={`${styles.groupTitle} ${styles.vt}`}
+                  style={vtName(`card-group-${g}`)}
+                >
                   {group.title}
                   <Icon path={mdiOpenInNew} size="xs" />
                 </h2>
-              </Reveal>
+              )}
               <ul className={styles.list} role="list">
-                <li>
-                  <ExternalLink href={primary.url}>
-                    <Icon path={iconPath(primary.icon)} size="xl" />
-                    <span className={styles.primaryLabel}>{primary.label}</span>
-                  </ExternalLink>
+                <li
+                  className={`${styles.linkItem} ${styles.vt}`}
+                  style={vtName(`card-link-${g}-0`)}
+                >
+                  <CardLink link={primary} iconSize="xl" />
                 </li>
-                {rest.map((link) => (
-                  <Reveal key={link.url} as="li" open={expanded}>
-                    <ExternalLink href={link.url}>
-                      <Icon path={iconPath(link.icon)} size="lg" />
-                      <span>{link.label}</span>
-                    </ExternalLink>
-                  </Reveal>
-                ))}
+                {expanded &&
+                  rest.map((link, i) => (
+                    <li
+                      key={link.url}
+                      className={`${styles.linkItem} ${styles.vt}`}
+                      style={vtName(`card-link-${g}-${i + 1}`)}
+                    >
+                      <CardLink link={link} iconSize="lg" />
+                    </li>
+                  ))}
               </ul>
             </div>
           );
@@ -193,7 +182,8 @@ function Front({
 
       <button
         type="button"
-        className={styles.more}
+        className={`${styles.more} ${styles.vt}`}
+        style={vtName("card-more")}
         aria-expanded={expanded}
         aria-controls={linksId}
         onClick={onToggle}
@@ -220,7 +210,7 @@ function Back({
     <div className={styles.back}>
       <div>
         <h1 id="site-name" className={styles.backName}>
-          {profile.name}
+          <span className={styles.siteName}>{profile.name}</span>
         </h1>
         <p className={styles.tagline}>{profile.tagline}</p>
         <ul className={styles.details} role="list" aria-label="Contact">
@@ -278,6 +268,7 @@ function Back({
 
 export function Landing({ profile }: { profile: Profile }) {
   const reduce = useReducedMotion() ?? false;
+  const navigate = useNavigate();
   const [side, setSide] = useState<"front" | "back">("front");
   const [expanded, setExpanded] = useState(false);
   // Focus follows the card only after the visitor has turned it; the first paint leaves focus alone.
@@ -290,9 +281,31 @@ export function Landing({ profile }: { profile: Profile }) {
     setSide((s) => (s === "front" ? "back" : "front"));
   };
 
+  // The path does not change, so the root layout's focus-on-navigate does not fire; do it here. The
+  // router's own viewTransition option is not used because it renders the new state after its
+  // transition callback resolves, which can leave the card in the new snapshot.
+  const enter = async () => {
+    await withViewTransition(
+      "enter",
+      () => navigate({ to: "/", state: { entered: true } }),
+      reduce,
+    );
+    const h1 = document.querySelector<HTMLElement>("main h1");
+    if (h1) {
+      h1.tabIndex = -1;
+      h1.focus({ preventScroll: true });
+    }
+  };
+
   return (
-    <div className={styles.page}>
-      <main id="main" className={styles.stage}>
+    <div
+      className={styles.page}
+      {...backdrop}
+      onClick={(e) => {
+        if (isBackdropClick(e)) void enter();
+      }}
+    >
+      <main id="main" className={styles.stage} {...backdrop}>
         <AnimatePresence mode="wait" initial={false}>
           {side === "back" && contact ? (
             <m.section
@@ -317,13 +330,22 @@ export function Landing({ profile }: { profile: Profile }) {
               <Front
                 profile={profile}
                 expanded={expanded}
-                onToggle={() => setExpanded((e) => !e)}
+                onToggle={() => withViewTransition("expand", () => setExpanded((e) => !e), reduce)}
                 onFlip={hasContact ? flip : null}
                 focusOnMount={turned}
               />
             </m.section>
           )}
         </AnimatePresence>
+        <button
+          type="button"
+          className={`${styles.enter} ${styles.vt}`}
+          style={vtName("card-enter")}
+          onClick={enter}
+        >
+          Enter
+          <Icon path={mdiArrowRight} size="md" />
+        </button>
       </main>
     </div>
   );

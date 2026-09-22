@@ -15,5 +15,11 @@
       background: var(--color-surface-hover);
       color: var(--color-text);
     }
+
+    /* Pressed reads as the accent, not just a darker grey, so a tap is unmistakable. */
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
   }
 }

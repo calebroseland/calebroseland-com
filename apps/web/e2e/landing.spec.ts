@@ -17,7 +17,7 @@ test.describe("landing", () => {
       "aria-expanded",
       "true",
     );
-    expect(await nav.getByRole("link").count()).toBeGreaterThanOrEqual(10);
+    expect(await nav.getByRole("link").count()).toBeGreaterThanOrEqual(9);
     await expect(nav.getByRole("heading", { level: 2 })).toHaveCount(3);
   });
 
@@ -33,6 +33,62 @@ test.describe("landing", () => {
     await page.keyboard.press("Escape");
     await expect(page.getByRole("button", { name: "Contact information" })).toBeFocused();
     await expect(contact).toHaveCount(0);
+  });
+
+  test("the Writings column opens posts in place", async ({ page }) => {
+    await page.goto("/");
+    const nav = page.getByRole("navigation", { name: "Profiles and links" });
+    await nav.getByRole("link", { name: "Posts" }).click();
+    await expect(page).toHaveURL(/\/posts$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Posts" })).toBeVisible();
+  });
+
+  test("enter leaves the card for the site, and the brand brings the visitor back to it", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Enter" }).click();
+    const site = page.getByRole("navigation", { name: "Site" });
+    await expect(site).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
+    await expect(page.getByRole("navigation", { name: "Profiles and links" })).toHaveCount(0);
+    await expect(page).toHaveURL(/\/$/);
+
+    // Past the card, the brand stays in the site; Back returns to the card.
+    await site.getByRole("link", { name: "About" }).click();
+    await page
+      .getByRole("banner")
+      .getByRole("link", { name: /Caleb Roseland/ })
+      .click();
+    await expect(site).toBeVisible();
+    for (const _ of ["about", "home", "card"]) await page.goBack();
+    await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
+  });
+
+  test("the business card button in the bar returns to the card from any page", async ({
+    page,
+  }) => {
+    await page.goto("/posts");
+    await page.getByRole("banner").getByRole("link", { name: "Back to business card" }).click();
+    await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("a click on the empty background toggles between the card and the site", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.mouse.click(8, 8);
+    await expect(page.getByRole("navigation", { name: "Site" })).toBeVisible();
+    // While a view transition runs, clicks land on its overlay; wait for it to end.
+    await expect(page.locator("html")).not.toHaveAttribute("data-vt");
+    // Below the content, the site's main is empty background too.
+    const main = page.getByRole("main");
+    const box = await main.boundingBox();
+    if (!box) throw new Error("main has no box");
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height - 8);
+    await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
   });
 
   test("uses the Adobe Fonts kit for the name and the text", async ({ page }) => {
@@ -62,6 +118,9 @@ test.describe("landing", () => {
     await page.getByRole("button", { name: "Contact information" }).click();
     await expect(page.getByRole("button", { name: "Back to links" })).toBeVisible();
     await audit("contact side");
+    await page.getByRole("button", { name: "Enter" }).click();
+    await expect(page.getByRole("navigation", { name: "Site" })).toBeVisible();
+    await audit("entered");
   });
 
   test("theme cycles and persists across reload without a flash", async ({ page }) => {
