@@ -4,6 +4,32 @@ import { createFakeClient } from "./fake.ts";
 import { StaleRefError } from "./types.ts";
 
 describe("fake GitHub client", () => {
+  it("seeds a fresh default branch once, and ignores the seed once the default branch has files", async () => {
+    const about = {
+      path: "content/pages/about/index.md",
+      content: "# About",
+      sha: "s",
+      encoding: "utf-8" as const,
+    };
+    let calls = 0;
+    const seed = async () => {
+      calls += 1;
+      return [about];
+    };
+    const gh = createFakeClient({ seed });
+    const [one, two] = await Promise.all([
+      gh.readBundle("master", "content"),
+      gh.readBundle("master", "content"),
+    ]);
+    expect(one.files.map((f) => f.path)).toEqual([about.path]);
+    expect(two.files).toEqual(one.files);
+    expect(calls).toBe(1);
+
+    const resumed = createFakeClient({ state: gh.state, seed });
+    await resumed.listDrafts();
+    expect(calls).toBe(1);
+  });
+
   it("creates a draft from the default branch tip and lists it", async () => {
     const gh = createFakeClient();
     const d = await gh.createDraft("hello");

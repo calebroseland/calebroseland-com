@@ -13,7 +13,7 @@ import {
   type Viewer,
 } from "./types.ts";
 
-/* In-memory GitHub with just enough git semantics for the studio: branches with a head sha, a flat
+/* In-memory GitHub with just enough git semantics for the editor: branches with a head sha, a flat
    file map per branch, pull requests, and squash merges into the default branch. Used by tests and by
    local development when no GitHub App exists. State can be persisted through a storage adapter. */
 
@@ -67,12 +67,37 @@ export function initialFakeState(): FakeState {
 }
 
 export function createFakeClient(
-  opts: { storage?: FakeStorage; state?: FakeState; latencyMs?: number } = {},
+  opts: {
+    storage?: FakeStorage;
+    state?: FakeState;
+    latencyMs?: number;
+    /** Files for a fresh default branch, so a new fake repository starts with the content the site
+        already shows instead of empty. Not consulted once the default branch has files. */
+    seed?: () => Promise<Bundle["files"]>;
+  } = {},
 ): GitHubClient & { state: FakeState; reset(): void } {
-  let state: FakeState = opts.state ?? opts.storage?.load() ?? initialFakeState();
+  const existing = opts.state ?? opts.storage?.load();
+  let state: FakeState = existing ?? initialFakeState();
   const persist = () => opts.storage?.save(state);
-  const delay = () =>
-    opts.latencyMs ? new Promise((r) => setTimeout(r, opts.latencyMs)) : Promise.resolve();
+  const seedOnce = async () => {
+    const files = await opts.seed?.().catch(() => []);
+    if (!files?.length) return;
+    state.branches[state.defaultBranch] = {
+      headSha: sha("seed"),
+      files: Object.fromEntries(
+        files.map((f) => [f.path, { content: f.content, encoding: f.encoding, sha: f.sha }]),
+      ),
+    };
+    persist();
+  };
+  // A default branch that is still empty is seeded too, so state saved before seeding existed catches up.
+  const hasFiles = Object.keys(existing?.branches[existing.defaultBranch]?.files ?? {}).length > 0;
+  let seeded: Promise<void> | undefined = hasFiles ? Promise.resolve() : undefined;
+  const delay = async () => {
+    seeded ??= seedOnce();
+    await seeded;
+    if (opts.latencyMs) await new Promise((r) => setTimeout(r, opts.latencyMs));
+  };
 
   const branch = (ref: string): Branch => {
     const b = state.branches[ref];
@@ -103,6 +128,7 @@ export function createFakeClient(
     },
     reset() {
       state = initialFakeState();
+      seeded = undefined;
       persist();
     },
 
