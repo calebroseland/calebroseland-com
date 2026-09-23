@@ -28,7 +28,7 @@ jobs:
         with: { cache: true }
       - run: npm ci
       - run: mise run build
-        env: { GITHUB_SHA: "${{ github.sha }}" }
+        env: { GITHUB_SHA: "${{ github.sha }}", CONTENT_BRANCH: next }
       - run: npx wrangler deploy --env staging
         working-directory: apps/web
         env:

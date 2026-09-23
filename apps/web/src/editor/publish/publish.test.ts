@@ -1,6 +1,5 @@
 import { createFakeClient } from "@crc/github-client";
-import { QueryClient } from "@tanstack/react-query";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   mergeAndCleanUp,
   openPr,
@@ -39,10 +38,8 @@ describe("pullRequestBody", () => {
 });
 
 describe("openPr and mergeAndCleanUp against the fake", () => {
-  it("opens, merges, deletes the branch, and invalidates queries", async () => {
+  it("opens a pull request, merges it, and deletes the branch", async () => {
     const gh = createFakeClient();
-    const qc = new QueryClient();
-    const invalidate = vi.spyOn(qc, "invalidateQueries");
     const draft = await gh.createDraft("t");
     await gh.saveBundle({
       ref: draft.ref,
@@ -51,12 +48,11 @@ describe("openPr and mergeAndCleanUp against the fake", () => {
       message: "m",
       expectedHeadSha: draft.headSha,
     });
-    const pr = await openPr(gh, qc, { ref: draft.ref, title: "T", slug: "t" });
-    expect(qc.getQueryData(["editor", "pull", draft.ref])).toEqual(pr);
-    const merged = await mergeAndCleanUp(gh, qc, { ref: draft.ref, number: pr.number });
+    const pr = await openPr(gh, { ref: draft.ref, title: "T", slug: "t" });
+    expect(await gh.getPullRequest(draft.ref)).toEqual(pr);
+    const merged = await mergeAndCleanUp(gh, { ref: draft.ref, number: pr.number });
     expect(gh.state.branches.master?.headSha).toBe(merged.sha);
     expect(await gh.listDrafts()).toEqual([]);
-    expect(invalidate).toHaveBeenCalled();
   });
 });
 

@@ -1,18 +1,13 @@
 import type { Entry } from "@crc/content-schema";
 import type { Draft, FileInput, GitHubClient } from "@crc/github-client";
 import { serializeEntry } from "@crc/markdown";
-import { type QueryClient, queryOptions } from "@tanstack/react-query";
 import type { Buffer } from "../drafts/buffer.ts";
-import { bundleDirFor, CONTENT_ROOT, type EntryKind, findEntryDir } from "../drafts/paths.ts";
-import { editorKeys } from "./queries.ts";
+import { bundleDirFor, type EntryKind } from "../drafts/paths.ts";
+import { deleteLocalEntry } from "../github/local.ts";
+import { capabilitiesOf } from "./backend.ts";
 
-/** Everything under content/ on a branch: locates any entry's bundle, posts and pages alike. */
-export const contentTreeQuery = (gh: GitHubClient, ref: string) =>
-  queryOptions({
-    queryKey: editorKeys.bundle(ref, CONTENT_ROOT),
-    queryFn: () => gh.readBundle(ref, CONTENT_ROOT),
-    staleTime: 10_000,
-  });
+/* The editor's writes, as plain async functions of a client. Caching is not their concern: the
+   mutation options in mutations.ts say what each write makes stale. */
 
 /** meta mirrors an Entry with the date as a string; the kind discriminant is carried through. */
 function toFrontmatter(meta: Buffer["meta"]): Entry {
@@ -30,9 +25,11 @@ function bundleFiles(b: Buffer): FileInput[] {
   return [index, ...assets];
 }
 
+export type NewEntry = { kind: EntryKind; title: string; slug: string; date: Date };
+
 export async function createEntryDraft(
   gh: GitHubClient,
-  input: { kind: EntryKind; title: string; slug: string; date: Date },
+  input: NewEntry,
 ): Promise<{ draft: Draft; dir: string; headSha: string }> {
   const draft = await gh.createDraft(input.slug);
   const dir = bundleDirFor(input.kind, input.date, input.slug);
@@ -76,11 +73,8 @@ export async function saveDraft(
   });
 }
 
-export async function invalidateDraft(queryClient: QueryClient, ref: string) {
-  await Promise.all([
-    queryClient.invalidateQueries({ queryKey: editorKeys.all }),
-    queryClient.invalidateQueries({ queryKey: editorKeys.bundle(ref, CONTENT_ROOT) }),
-  ]);
+/** Throws the draft away: its branch, or on the working tree the entry's files. */
+export async function discardEntry(gh: GitHubClient, row: { ref: string; dir: string }) {
+  if (capabilitiesOf(gh.kind).branches) await gh.deleteDraft(row.ref);
+  else await deleteLocalEntry(row.dir);
 }
-
-export { findEntryDir };

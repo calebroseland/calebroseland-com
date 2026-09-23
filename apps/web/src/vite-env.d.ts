@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 declare const __BUILD_SHA__: string;
 declare const __API_ORIGIN__: string;
+/** Branch the editor branches from and publishes into. */
+declare const __CONTENT_BRANCH__: string;
 declare module "*.module.css" {
   const classes: Readonly<Record<string, string>>;
   export default classes;

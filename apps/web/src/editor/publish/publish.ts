@@ -1,17 +1,7 @@
 import type { GitHubClient, PullRequest } from "@crc/github-client";
-import { type QueryClient, queryOptions } from "@tanstack/react-query";
-import { editorKeys } from "../github/queries.ts";
 
 /* Publish = pull request → checks → merge → deploy. The editor never force-merges: a conflicting PR is
    explained and linked, and the merge button only enables when GitHub reports it mergeable. */
-
-export const pullQuery = (gh: GitHubClient, ref: string, opts: { poll?: boolean } = {}) =>
-  queryOptions({
-    queryKey: editorKeys.pull(ref),
-    queryFn: () => gh.getPullRequest(ref),
-    staleTime: 5_000,
-    refetchInterval: opts.poll ? 15_000 : false,
-  });
 
 export type PublishState =
   | { kind: "none" }
@@ -43,31 +33,21 @@ export function pullRequestBody(input: {
   ].join("\n");
 }
 
-export async function openPr(
-  gh: GitHubClient,
-  queryClient: QueryClient,
-  input: { ref: string; title: string; summary?: string | undefined; slug: string },
-) {
-  const pr = await gh.openPullRequest({
-    ref: input.ref,
-    title: input.title,
-    body: pullRequestBody(input),
-  });
-  queryClient.setQueryData(editorKeys.pull(input.ref), pr);
-  await queryClient.invalidateQueries({ queryKey: editorKeys.drafts() });
-  return pr;
+export type PullRequestInput = {
+  ref: string;
+  title: string;
+  summary?: string | undefined;
+  slug: string;
+};
+
+export function openPr(gh: GitHubClient, input: PullRequestInput) {
+  return gh.openPullRequest({ ref: input.ref, title: input.title, body: pullRequestBody(input) });
 }
 
-export async function mergeAndCleanUp(
-  gh: GitHubClient,
-  queryClient: QueryClient,
-  input: { ref: string; number: number },
-) {
+export async function mergeAndCleanUp(gh: GitHubClient, input: { ref: string; number: number }) {
   const merged = await gh.mergePullRequest(input.number);
   // GitHub's delete_branch_on_merge may already have removed it; ignore a missing ref.
   await gh.deleteDraft(input.ref).catch(() => undefined);
-  // editorKeys.all, not just the drafts: a merge changes what is published, which the board also shows.
-  await queryClient.invalidateQueries({ queryKey: editorKeys.all });
   return merged;
 }
 

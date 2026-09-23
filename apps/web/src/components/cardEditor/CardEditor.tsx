@@ -17,7 +17,7 @@ import {
   mdiPencil,
   mdiPlus,
 } from "@crc/ui/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
   type KeyboardEvent,
   type ReactNode,
@@ -27,10 +27,10 @@ import {
   useState,
 } from "react";
 import { session } from "../../editor/auth/store.ts";
-import { EditorProvider, useGitHub } from "../../editor/EditorProvider.tsx";
+import { saveProfileMutation } from "../../editor/data/mutations.ts";
+import { EditorProvider, useCapabilities, useGitHub } from "../../editor/EditorProvider.tsx";
 import { clientFor } from "../../editor/github/client.ts";
-import { editorKeys } from "../../editor/github/queries.ts";
-import { loadProfile, PROFILE_REF, type ProfileSource, saveProfile } from "../../editor/profile.ts";
+import { loadProfile, PROFILE_REF, type ProfileSource } from "../../editor/profile.ts";
 import { notify } from "../../editor/Toast.tsx";
 import { Tip } from "../Tip.tsx";
 import styles from "./CardEditor.module.css";
@@ -57,8 +57,6 @@ export type EditResult = { profile: Profile; workingTree: boolean } | null;
 /* The landing card, editable in place for a signed-in editor. It loads the profile through the
    editor's backend (the drafts/profile branch, or the working tree), edits a copy, and saves it back
    as content/profile.yaml. Loaded only when an editor opens it, so readers never download it. */
-
-const profileKey = editorKeys.bundle(PROFILE_REF, "profile.yaml");
 
 /** Loads what the editor needs before it is shown, so the card can turn over straight into it. */
 export function prepareEdit(published: Profile): Promise<ProfileSource> {
@@ -103,7 +101,7 @@ function CardEditorForm({
   heading?: boolean;
 }) {
   const gh = useGitHub();
-  const queryClient = useQueryClient();
+  const working = !useCapabilities().branches;
   const [state, setState] = useState<EditState>(() => fromProfile(source.profile));
   const [dirty, setDirty] = useState(false);
   const [announcement, setAnnouncement] = useState("");
@@ -121,13 +119,10 @@ function CardEditorForm({
     const repeat = tagProblem(state.tags, t.label, t.key);
     if (repeat && !errors.has(`tags.${i}`)) errors.set(`tags.${i}`, repeat);
   });
-  const working = gh.kind === "local";
 
   const save = useMutation({
-    mutationFn: () => saveProfile(gh, source, next, "profile: edit from the landing card"),
-    onSuccess: async (saved) => {
-      queryClient.setQueryData(profileKey, saved);
-      await queryClient.invalidateQueries({ queryKey: editorKeys.drafts() });
+    ...saveProfileMutation(gh, source),
+    onSuccess: (saved) => {
       notify(
         working
           ? "Saved content/profile.yaml."
@@ -136,8 +131,8 @@ function CardEditorForm({
       onDone({ profile: saved.profile, workingTree: working });
     },
     onError: (err) => {
+      // The query client has already ended the session on an AuthError.
       if (err instanceof AuthError) {
-        session.signOut();
         notify("Your sign-in expired. Sign in again to save.", { kind: "alert" });
       } else if (err instanceof StaleRefError) {
         notify("The profile changed since you opened it. Close the editor and open it again.", {
@@ -168,7 +163,7 @@ function CardEditorForm({
       aria-label={heading ? undefined : "Edit card"}
       onSubmit={(e) => {
         e.preventDefault();
-        if (errors.size === 0 && dirty) save.mutate();
+        if (errors.size === 0 && dirty) save.mutate(next);
       }}
     >
       {heading && (

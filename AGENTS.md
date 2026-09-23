@@ -35,6 +35,8 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
   - **Working tree** edits the real files in `content/` on the branch you have checked out, through dev-server routes under `/@local/`. There are no branches or pull requests: the edit is an unstaged change you commit yourself, beside any code change. Images and other binaries stream to disk as bytes (`POST /@local/upload`), never as base64. A file changed outside the browser between load and save is detected and the save is refused.
   - **Fake GitHub** simulates branches, pull requests and merges in memory (persisted to `localStorage`), and a merge writes the result into `content/` so the loop ends at a rendered page.
   - **Pasted token** uses real GitHub through Octokit.
+- The editor branches from and publishes into `CONTENT_BRANCH`, fixed at build time: `master` by default, `next` for the staging build.
+- Editor data lives in `src/editor/data`: query keys, query options, and mutation options that declare what they make stale. One lazily created query client serves every editing surface, refreshes those queries after a write, and ends the session on a rejected token. Screens ask the backend's capabilities (`useCapabilities`), never its kind.
 - `CRC_CONTENT_DIR` points the content pipeline and the local store at another directory; the E2E suite uses it so tests never write into the repository's own `content/`.
 - Secrets: `apps/web/.dev.vars` (git-ignored) locally, `wrangler secret put` remotely. No `VITE_` variable may hold a credential.
 

@@ -9,10 +9,12 @@ import type { Session } from "../auth/store.ts";
 import { CONTENT_ROOT } from "../drafts/paths.ts";
 import { createLocalClient } from "./local.ts";
 
+/* Edits branch from, and publish into, the branch this build was made from (CONTENT_BRANCH at build
+   time), so staging edits what staging shows. */
 const repo: RepoRef = {
   owner: "calebroseland",
   repo: "calebroseland-com",
-  defaultBranch: "master",
+  defaultBranch: __CONTENT_BRANCH__,
 };
 
 const FAKE_KEY = "crc:fake-github";

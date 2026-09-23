@@ -1,14 +1,13 @@
 import { Stack } from "@crc/ui";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import * as z from "zod/mini";
+import { createEntryMutation } from "../editor/data/mutations.ts";
 import { type EntryKind, slugify } from "../editor/drafts/paths.ts";
 import { useGitHub } from "../editor/EditorProvider.tsx";
 import { EditorShell } from "../editor/EditorShell.tsx";
 import styles from "../editor/editor.module.css";
-import { createEntryDraft } from "../editor/github/mutations.ts";
-import { editorKeys } from "../editor/github/queries.ts";
 
 export const Route = createFileRoute("/editor/new")({
   validateSearch: z.object({ kind: z.optional(z.enum(["post", "page"])) }),
@@ -19,7 +18,6 @@ export const Route = createFileRoute("/editor/new")({
 function NewEntry() {
   const gh = useGitHub();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { kind: initialKind = "post" } = Route.useSearch();
   const [kind, setKind] = useState<EntryKind>(initialKind);
   const [title, setTitle] = useState("");
@@ -30,17 +28,8 @@ function NewEntry() {
   const slugOk = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(effectiveSlug);
 
   const create = useMutation({
-    mutationFn: () =>
-      createEntryDraft(gh, {
-        kind,
-        title: title.trim(),
-        slug: effectiveSlug,
-        date: new Date(`${date}T00:00:00Z`),
-      }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: editorKeys.all });
-      await navigate({ to: "/editor/$slug", params: { slug: effectiveSlug } });
-    },
+    ...createEntryMutation(gh),
+    onSuccess: ({ draft }) => navigate({ to: "/editor/$slug", params: { slug: draft.slug } }),
   });
 
   return (
@@ -50,7 +39,13 @@ function NewEntry() {
         style={{ maxInlineSize: "32rem" }}
         onSubmit={(e) => {
           e.preventDefault();
-          if (title.trim() && slugOk) create.mutate();
+          if (title.trim() && slugOk)
+            create.mutate({
+              kind,
+              title: title.trim(),
+              slug: effectiveSlug,
+              date: new Date(`${date}T00:00:00Z`),
+            });
         }}
         aria-busy={create.isPending}
       >

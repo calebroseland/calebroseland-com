@@ -1,8 +1,6 @@
-import type { Bundle, GitHubClient, PullRequest } from "@crc/github-client";
+import type { Bundle, PullRequest } from "@crc/github-client";
 import { parseEntry } from "@crc/markdown";
-import { queryOptions } from "@tanstack/react-query";
 import { CONTENT_ROOT, type EntryKind } from "./drafts/paths.ts";
-import { editorKeys } from "./github/queries.ts";
 
 /* One list for everything the editor can open, whatever backend is behind it: entries already on the
    default branch (or, in working-tree mode, on disk) plus the draft branches in flight. */
@@ -50,18 +48,6 @@ export function entriesFromBundle(bundle: Bundle, status: EntryStatus): EditorEn
     a.date === b.date ? a.slug.localeCompare(b.slug) : b.date.localeCompare(a.date),
   );
 }
-
-export const publishedQuery = (
-  gh: GitHubClient,
-  defaultBranch: string,
-  status: EntryStatus = "published",
-) =>
-  queryOptions({
-    queryKey: editorKeys.published(),
-    queryFn: async () =>
-      entriesFromBundle(await gh.readBundle(defaultBranch, CONTENT_ROOT), status),
-    staleTime: 15_000,
-  });
 
 /** Draft branches shadow the published entry with the same slug, so only one row appears per slug. */
 export function mergeEntries(

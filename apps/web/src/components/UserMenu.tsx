@@ -18,6 +18,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useStore } from "@tanstack/react-store";
 import { lazy, Suspense, useState } from "react";
 import { session } from "../editor/auth/store.ts";
+import { capabilitiesOf } from "../editor/data/backend.ts";
 import { type CustomTheme, defaultTheme } from "../theme/custom.ts";
 import {
   customPreference,
@@ -35,12 +36,6 @@ const builtIns = [
   { value: "light", label: "Light", icon: mdiWhiteBalanceSunny },
   { value: "dark", label: "Dark", icon: mdiMoonWaningCrescent },
 ] as const;
-
-const MODES: Record<string, string> = {
-  local: "working tree",
-  fake: "local fake GitHub",
-  octokit: "GitHub",
-};
 
 /* The account menu (Base UI Menu): the theme, and what the visitor can do as themselves — signing in
    or out, and, once signed in, the editing screens. Custom themes sit under the built-ins with their
@@ -70,7 +65,7 @@ export function UserMenu() {
           className={styles.button}
           aria-label={
             signedIn
-              ? `Account: signed in with ${MODES[current.backend] ?? current.backend}. Theme: ${label}.`
+              ? `Account: signed in with ${capabilitiesOf(current.backend).label}. Theme: ${label}.`
               : `Account: signed out. Theme: ${label}.`
           }
         >
@@ -131,7 +126,7 @@ export function UserMenu() {
               {signedIn ? (
                 <Menu.Group>
                   <Menu.GroupLabel className={styles.groupLabel}>
-                    Signed in · {MODES[current.backend] ?? current.backend}
+                    Signed in · {capabilitiesOf(current.backend).label}
                   </Menu.GroupLabel>
                   <Menu.Item
                     className={styles.item}

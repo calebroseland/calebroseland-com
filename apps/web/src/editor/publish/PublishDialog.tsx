@@ -1,18 +1,20 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { mergeMutation, openPullRequestMutation } from "../data/mutations.ts";
+import { pullQuery } from "../data/queries.ts";
 import type { Buffer } from "../drafts/buffer.ts";
-import { useGitHub } from "../EditorProvider.tsx";
+import { useCapabilities, useGitHub } from "../EditorProvider.tsx";
 import styles from "../editor.module.css";
 import { notify } from "../Toast.tsx";
-import { mergeAndCleanUp, openPr, publishState, pullQuery, waitForDeploy } from "./publish.ts";
+import { publishState, waitForDeploy } from "./publish.ts";
 
 /* States follow UX-SPEC §3.5: pre-flight → PR open (checks) → mergeable → merging → deploying → done, plus conflict. */
 
 export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?: boolean }) {
   const gh = useGitHub();
-  const queryClient = useQueryClient();
+  const { deploys } = useCapabilities();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<"idle" | "deploying" | "slow">("idle");
@@ -20,28 +22,21 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
   const state = publishState(pull.data ?? null);
 
   const openMutation = useMutation({
-    mutationFn: () =>
-      openPr(gh, queryClient, {
-        ref: buffer.ref,
-        title: buffer.meta.title,
-        summary: buffer.meta.summary,
-        slug: buffer.meta.slug,
-      }),
+    ...openPullRequestMutation(gh, buffer.ref),
     onError: () => notify("Couldn't open the pull request.", { kind: "alert" }),
   });
 
   const merge = useMutation({
-    mutationFn: async (number: number) => {
-      const merged = await mergeAndCleanUp(gh, queryClient, { ref: buffer.ref, number });
-      if (gh.kind === "fake") return { merged, deployed: true };
-      setPhase("deploying");
-      const deployed = await waitForDeploy({
-        healthUrl: `${window.location.origin}/api/health`,
-        sha: merged.sha,
-      });
-      return { merged, deployed };
-    },
-    onSuccess: async ({ deployed }) => {
+    ...mergeMutation(gh, buffer.ref),
+    onSuccess: async (merged) => {
+      let deployed = true;
+      if (deploys) {
+        setPhase("deploying");
+        deployed = await waitForDeploy({
+          healthUrl: `${window.location.origin}/api/health`,
+          sha: merged.sha,
+        });
+      }
       if (deployed) {
         notify("Published.");
         setOpen(false);
@@ -107,7 +102,7 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
             )}
             {state.kind === "conflict" && (
               <span>
-                This draft can't be merged automatically because master changed.{" "}
+                This draft can't be merged automatically because {gh.defaultBranch} changed.{" "}
                 <a href={state.pr.url} target="_blank" rel="noopener noreferrer">
                   Resolve on GitHub.
                 </a>
@@ -125,7 +120,13 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
               <button
                 type="button"
                 className={styles.primary}
-                onClick={() => openMutation.mutate()}
+                onClick={() =>
+                  openMutation.mutate({
+                    title: buffer.meta.title,
+                    summary: buffer.meta.summary,
+                    slug: buffer.meta.slug,
+                  })
+                }
                 disabled={busy || buffer.dirty}
               >
                 {openMutation.isPending ? "Opening…" : "Open pull request"}

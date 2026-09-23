@@ -1,9 +1,10 @@
 import { type Profile, profile as profileSchema } from "@crc/content-schema";
 import type { GitHubClient } from "@crc/github-client";
 import { Document, isMap, isScalar, isSeq, parseDocument, visit } from "yaml";
+import { capabilitiesOf } from "./data/backend.ts";
 
-/* One path for reading and writing content/profile.yaml, shared by Editor › Profile and the landing
-   card's in-place editor. On GitHub (and the fake) edits accumulate on a drafts/profile branch that is
+/* One path for reading and writing content/profile.yaml, used by the landing card's in-place editor.
+   On GitHub (and the fake) edits accumulate on a drafts/profile branch that is
    published like any draft; in working-tree mode they are the file on disk. */
 
 export const PROFILE_REF = "drafts/profile";
@@ -20,22 +21,22 @@ export type ProfileSource = {
   branchExists: boolean;
 };
 
-/** Reads the profile from the draft branch if one exists, otherwise from what is published. The fake
-    backend starts with an empty repository, so `fallback` (the profile this build was made from)
-    stands in until the first save. */
+/** Reads the profile from the draft branch if one exists, otherwise from what is published. When the
+    target branch has no profile yet, `fallback` (the profile this build was made from) stands in until
+    the first save. */
 export async function loadProfile(gh: GitHubClient, fallback: Profile): Promise<ProfileSource> {
-  const draft =
-    gh.kind === "local"
-      ? null
-      : ((await gh.listDrafts()).find((d) => d.ref === PROFILE_REF) ?? null);
+  const { branches } = capabilitiesOf(gh.kind);
+  const draft = branches
+    ? ((await gh.listDrafts()).find((d) => d.ref === PROFILE_REF) ?? null)
+    : null;
   const bundle = await gh.readBundle(draft?.ref ?? gh.defaultBranch, "content");
   const file = bundle.files.find((f) => f.path === PROFILE_PATH);
   return {
     profile: file ? profileSchema.parse(parseDocument(file.content).toJS()) : fallback,
     yaml: file?.content ?? "",
-    ref: gh.kind === "local" ? bundle.ref : PROFILE_REF,
-    headSha: gh.kind === "local" || draft ? bundle.headSha : "",
-    branchExists: gh.kind === "local" || draft !== null,
+    ref: branches ? PROFILE_REF : bundle.ref,
+    headSha: !branches || draft ? bundle.headSha : "",
+    branchExists: !branches || draft !== null,
   };
 }
 

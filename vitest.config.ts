@@ -7,6 +7,7 @@ const root = fileURLToPath(new URL(".", import.meta.url));
 export default defineConfig({
   // Makes virtual:content/* resolvable in unit and dom tests; individual tests vi.mock them for fixtures.
   plugins: [content({ root, includeDrafts: true })],
+  define: { __CONTENT_BRANCH__: JSON.stringify("master") },
   test: {
     projects: [
       {

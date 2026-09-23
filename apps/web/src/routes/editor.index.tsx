@@ -1,18 +1,17 @@
 import { Stack } from "@crc/ui";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import * as z from "zod/mini";
 import { ConfirmDialog } from "../editor/Dialogs.tsx";
+import { beginEditingMutation, discardEntryMutation } from "../editor/data/mutations.ts";
+import { draftsQuery, publishedQuery, viewerQuery } from "../editor/data/queries.ts";
 import type { EntryKind } from "../editor/drafts/paths.ts";
 import { RowMenu, RowMenuItem } from "../editor/drafts/RowMenu.tsx";
-import { useGitHub } from "../editor/EditorProvider.tsx";
+import { useCapabilities, useGitHub } from "../editor/EditorProvider.tsx";
 import { EditorShell } from "../editor/EditorShell.tsx";
 import styles from "../editor/editor.module.css";
-import { type EditorEntry, mergeEntries, publishedQuery } from "../editor/entries.ts";
-import { deleteLocalEntry } from "../editor/github/local.ts";
-import { beginEditing } from "../editor/github/mutations.ts";
-import { draftsQuery, editorKeys, viewerQuery } from "../editor/github/queries.ts";
+import { type EditorEntry, mergeEntries } from "../editor/entries.ts";
 import { notify } from "../editor/Toast.tsx";
 
 export const Route = createFileRoute("/editor/")({
@@ -29,42 +28,31 @@ const FILTERS = [
 
 const NEW_LABEL = { post: "New post", page: "New page" } as const;
 
-const MODES: Record<string, string> = {
-  local: "working tree",
-  fake: "local fake GitHub",
-  octokit: "GitHub",
-};
-
 function Board() {
   const gh = useGitHub();
   const { kind } = Route.useSearch();
   const viewer = useQuery(viewerQuery(gh));
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const local = gh.kind === "local";
+  const caps = useCapabilities();
+  const local = !caps.branches;
   const drafts = useQuery({ ...draftsQuery(gh), enabled: !local });
-  const published = useQuery(
-    publishedQuery(gh, gh.defaultBranch, local ? "working-tree" : "published"),
-  );
+  const published = useQuery(publishedQuery(gh));
   const [discarding, setDiscarding] = useState<{ ref: string; slug: string; dir: string } | null>(
     null,
   );
 
   // In working-tree mode there is no branch to throw away: discarding deletes the entry's files.
   const discard = useMutation({
-    mutationFn: (row: { ref: string; dir: string }) =>
-      local ? deleteLocalEntry(row.dir) : gh.deleteDraft(row.ref),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: editorKeys.all });
+    ...discardEntryMutation(gh),
+    onSuccess: () => {
       notify(local ? "Deleted from your working tree" : "Discarded the draft branch");
     },
     onError: () => notify("Couldn't discard that.", { kind: "alert" }),
   });
 
   const edit = useMutation({
-    mutationFn: (slug: string) => beginEditing(gh, slug),
+    ...beginEditingMutation(gh),
     onSuccess: async (_, slug) => {
-      await queryClient.invalidateQueries({ queryKey: editorKeys.all });
       await navigate({ to: "/editor/$slug", params: { slug } });
     },
     onError: () => notify("Couldn't start editing that entry.", { kind: "alert" }),
@@ -89,7 +77,7 @@ function Board() {
       }
     >
       <p className={styles.muted}>
-        Signed in as {viewer.data?.login ?? "…"} · {MODES[gh.kind]}
+        Signed in as {viewer.data?.login ?? "…"} · {caps.label}
       </p>
       {/* Posts and pages share one board; the filter lives in the URL so a view can be linked to. */}
       <nav className={`${styles.tabs} ${styles.filters}`} aria-label="Show">

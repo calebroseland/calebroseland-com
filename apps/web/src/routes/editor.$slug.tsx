@@ -1,4 +1,4 @@
-import { type Bundle, StaleRefError } from "@crc/github-client";
+import { AuthError, type Bundle, StaleRefError } from "@crc/github-client";
 import { Stack } from "@crc/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -6,6 +6,9 @@ import { useStore } from "@tanstack/react-store";
 import { useEffect, useRef, useState } from "react";
 import * as z from "zod/mini";
 import { ConfirmDialog } from "../editor/Dialogs.tsx";
+import { editorKeys } from "../editor/data/keys.ts";
+import { beginEditingMutation, saveDraftMutation } from "../editor/data/mutations.ts";
+import { contentTreeQuery, draftsQuery } from "../editor/data/queries.ts";
 import { AssetsPanel } from "../editor/document/AssetsPanel.tsx";
 import { Editor, type EditorApi } from "../editor/document/Editor.tsx";
 import { MetaPanel } from "../editor/document/MetaPanel.tsx";
@@ -22,17 +25,10 @@ import {
   writeLocalBuffer,
 } from "../editor/drafts/buffer.ts";
 import { bufferFromBundle } from "../editor/drafts/load.ts";
-import { useGitHub } from "../editor/EditorProvider.tsx";
+import { findEntryDir } from "../editor/drafts/paths.ts";
+import { useCapabilities, useGitHub } from "../editor/EditorProvider.tsx";
 import { EditorShell } from "../editor/EditorShell.tsx";
 import styles from "../editor/editor.module.css";
-import {
-  beginEditing,
-  contentTreeQuery,
-  findEntryDir,
-  invalidateDraft,
-  saveDraft,
-} from "../editor/github/mutations.ts";
-import { draftsQuery, editorKeys } from "../editor/github/queries.ts";
 import { PublishDialog } from "../editor/publish/PublishDialog.tsx";
 import { notify } from "../editor/Toast.tsx";
 
@@ -45,7 +41,6 @@ export const Route = createFileRoute("/editor/$slug")({
 function DraftRoute() {
   const { slug } = Route.useParams();
   const gh = useGitHub();
-  const queryClient = useQueryClient();
   const drafts = useQuery(draftsQuery(gh));
   // A slug with no branch of its own is already on the default branch; read it there so the entry can
   // be previewed, and branch from it only when the author actually chooses to edit.
@@ -54,10 +49,7 @@ function DraftRoute() {
   const tree = useQuery({ ...contentTreeQuery(gh, ref), enabled: drafts.isSuccess });
 
   const beginEdit = useMutation({
-    mutationFn: () => beginEditing(gh, slug),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: editorKeys.all });
-    },
+    ...beginEditingMutation(gh),
     onError: () => notify("Couldn't start editing this entry.", { kind: "alert" }),
   });
 
@@ -111,7 +103,7 @@ function DraftRoute() {
             <button
               type="button"
               className={styles.primary}
-              onClick={() => beginEdit.mutate()}
+              onClick={() => beginEdit.mutate(slug)}
               disabled={beginEdit.isPending}
               aria-busy={beginEdit.isPending}
             >
@@ -129,6 +121,7 @@ function DraftRoute() {
 
 function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   const gh = useGitHub();
+  const { branches, publishes } = useCapabilities();
   const queryClient = useQueryClient();
   const { panel = "meta" } = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -166,22 +159,13 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
     return () => window.removeEventListener("beforeunload", guard);
   }, [buffer.dirty, controller, storage]);
 
+  // The cache is refetched rather than patched after a save, so it always matches what was committed.
   const save = useMutation({
-    mutationFn: async (mode: "save" | "overwrite") => {
-      const b = controller.store.state;
-      if (mode === "overwrite") {
-        const fresh = await gh.readBundle(b.ref, b.dir);
-        controller.rebase(fresh.headSha);
-      }
-      return saveDraft(gh, controller.store.state);
-    },
-    onSuccess: async ({ headSha, commitUrl }) => {
+    ...saveDraftMutation(gh, controller),
+    onSuccess: ({ headSha, commitUrl }) => {
       controller.markSaved(headSha);
       writeLocalBuffer(controller.store.state, storage);
-      // Refetch from the backend rather than patching the cache, so the cached bundle always matches
-      // what was actually committed.
-      await invalidateDraft(queryClient, buffer.ref);
-      if (gh.kind === "local") {
+      if (!branches) {
         notify(`Saved ${buffer.dir} to your working tree`);
       } else {
         notify(`Committed to ${buffer.ref}`, {
@@ -194,9 +178,13 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
     },
     onError: (err) => {
       if (err instanceof StaleRefError) setConflict(err);
+      else if (err instanceof AuthError)
+        notify("Your sign-in expired. Sign in again; your changes are kept on this device.", {
+          kind: "alert",
+        });
       else
         notify(
-          gh.kind === "local"
+          !branches
             ? "Couldn't write to your working tree. Your changes are still here."
             : "Couldn't save to GitHub. Your changes are still here.",
           { kind: "alert", action: { label: "Retry", onClick: () => save.mutate("save") } },
@@ -258,7 +246,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
     const fresh = await gh.readBundle(buffer.ref, buffer.dir);
     controller.replace(bufferFromBundle(fresh, slug));
     setEditorGeneration((g) => g + 1);
-    await invalidateDraft(queryClient, buffer.ref);
+    await queryClient.invalidateQueries({ queryKey: editorKeys.tree(buffer.ref) });
   };
 
   return (
@@ -279,7 +267,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
             {save.isPending ? "Saving…" : "Save"}
           </button>
           {/* Nothing to publish in working-tree mode: the file is already on your branch. */}
-          {gh.kind !== "local" && <PublishDialog buffer={buffer} disabled={save.isPending} />}
+          {publishes && <PublishDialog buffer={buffer} disabled={save.isPending} />}
         </div>
       }
     >
@@ -337,12 +325,12 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
         open={conflict !== null}
         onOpenChange={(o) => !o && setConflict(null)}
         title={
-          gh.kind === "local"
+          !branches
             ? "This file changed on disk since you opened it."
             : "This post changed on GitHub since you opened it."
         }
         description={
-          gh.kind === "local"
+          !branches
             ? "Reload to see what is on disk now (your unsaved edits are discarded), or overwrite the file with what you have here."
             : "Reload to see the newer version (your local edits are discarded), or overwrite it with what you have here."
         }
@@ -352,7 +340,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
               Cancel
             </button>
             <button type="button" className={styles.secondary} onClick={reloadFromGitHub}>
-              {gh.kind === "local" ? "Reload from disk" : "Reload from GitHub"}
+              {!branches ? "Reload from disk" : "Reload from GitHub"}
             </button>
             <button
               type="button"
