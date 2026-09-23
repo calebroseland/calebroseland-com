@@ -2,7 +2,7 @@ import { type Entry, entry } from "@crc/content-schema";
 import { parse, stringify } from "yaml";
 
 /* Frontmatter split and join on `---` fences. Hand-rolled over gray-matter because that package reaches
-   for Node's Buffer and this code also runs in the studio (browser). */
+   for Node's Buffer and this code also runs in the editor (browser). */
 
 export type ParsedEntry = { meta: Entry; body: string };
 
@@ -21,7 +21,7 @@ export function parseEntry(text: string): ParsedEntry {
 }
 
 /** Inverse of parseEntry. Dates serialize as YYYY-MM-DD; defaults are written explicitly so the file is self-describing. */
-/* A fixed key order, so editing a hand-written file in the studio produces a minimal diff rather than
+/* A fixed key order, so editing a hand-written file in the editor produces a minimal diff rather than
    reshuffling its frontmatter. Unknown keys keep their original position at the end. */
 const KEY_ORDER = ["kind", "title", "slug", "date", "draft", "tags", "summary", "placeholder"];
 

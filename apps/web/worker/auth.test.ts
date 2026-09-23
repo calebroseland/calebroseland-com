@@ -14,7 +14,7 @@ const post = (body: unknown, origin = site) =>
 const valid = {
   code: "good-code",
   codeVerifier: "v".repeat(43),
-  redirectUri: `${site}/studio/callback`,
+  redirectUri: `${site}/login/callback`,
 };
 
 describe("GET /api/auth/config", () => {

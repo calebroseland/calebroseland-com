@@ -43,8 +43,8 @@ vi.mock("virtual:content/profile", () => ({
 vi.mock("virtual:content/index", () => ({ default: [], loaders: {} }));
 
 import { createMemoryHistory, createRouter, RouterProvider } from "@tanstack/react-router";
+import { session } from "../editor/auth/store.ts";
 import { routeTree } from "../routeTree.gen.ts";
-import { session } from "../studio/auth/store.ts";
 
 async function renderLanding() {
   const router = createRouter({
@@ -200,11 +200,11 @@ describe("Landing", () => {
         .map((h) => h.textContent),
     ).toEqual(["Code", "Writings", "Social"]);
     expect(within(footer).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
-    // The dev server offers the studio to anyone; a built site offers it only once signed in.
+    // The dev server offers the editor to anyone; a built site offers it only once signed in.
     expect(screen.getByRole("contentinfo")).toContainElement(
-      screen.getByRole("link", { name: "Studio" }),
+      screen.getByRole("link", { name: "Editor" }),
     );
-    expect(screen.getByRole("link", { name: "Studio" })).toHaveAttribute("href", "/studio");
+    expect(screen.getByRole("link", { name: "Editor" })).toHaveAttribute("href", "/editor");
     expect(
       within(footer).getByRole("link", { name: /LinkedIn.*opens in new tab/ }),
     ).toHaveAttribute("target", "_blank");
@@ -245,26 +245,26 @@ describe("Landing", () => {
     expect(screen.queryByRole("navigation", { name: "Site" })).not.toBeInTheDocument();
   });
 
-  it("hides the studio link from a signed-out reader of the built site", async () => {
+  it("hides the editor link from a signed-out reader of the built site", async () => {
     vi.stubEnv("DEV", false);
     try {
       await renderLanding();
       fireEvent.click(screen.getByRole("button", { name: "Enter" }));
       await screen.findByRole("heading", { level: 1, name: "Latest writing" });
-      expect(screen.queryByRole("link", { name: "Studio" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "Editor" })).not.toBeInTheDocument();
     } finally {
       vi.unstubAllEnvs();
     }
   });
 
-  it("keeps the studio link on the built site for someone signed in", async () => {
+  it("keeps the editor link on the built site for someone signed in", async () => {
     vi.stubEnv("DEV", false);
     session.signIn({ status: "authenticated", backend: "fake", token: "fake" });
     try {
       await renderLanding();
       fireEvent.click(screen.getByRole("button", { name: "Enter" }));
       await screen.findByRole("heading", { level: 1, name: "Latest writing" });
-      expect(screen.getByRole("link", { name: "Studio" })).toHaveAttribute("href", "/studio");
+      expect(screen.getByRole("link", { name: "Editor" })).toHaveAttribute("href", "/editor");
     } finally {
       session.signOut();
       localStorage.clear();

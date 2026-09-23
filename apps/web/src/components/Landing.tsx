@@ -23,14 +23,14 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useStore } from "@tanstack/react-store";
 import { AnimatePresence, m, type Transition, useReducedMotion } from "motion/react";
 import { type ReactNode, type RefObject, useEffect, useId, useRef, useState } from "react";
-import { session } from "../studio/auth/store.ts";
-import type { ProfileSource } from "../studio/profile.ts";
-import { notify } from "../studio/Toast.tsx";
+import { session } from "../editor/auth/store.ts";
+import type { ProfileSource } from "../editor/profile.ts";
+import { notify } from "../editor/Toast.tsx";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
 import type { EditResult } from "./cardEditor/CardEditor.tsx";
 import { FocusChip } from "./FocusChip.tsx";
 import styles from "./Landing.module.css";
-import { ThemeMenu } from "./ThemeMenu.tsx";
+import { UserMenu } from "./UserMenu.tsx";
 import { footerLinkName, vtName, withViewTransition } from "./viewTransition.ts";
 
 type OpenEditor = {
@@ -156,7 +156,7 @@ function Front({
       <div className={styles.corners}>
         <div className={styles.cornerStart}>
           <span className={`${styles.cornerSlot} ${styles.vt}`} style={vtName("card-theme")}>
-            <ThemeMenu />
+            <UserMenu />
           </span>
           {onEdit && (
             <button

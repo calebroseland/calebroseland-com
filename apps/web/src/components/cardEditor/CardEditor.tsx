@@ -26,12 +26,12 @@ import {
   useId,
   useState,
 } from "react";
-import { session } from "../../studio/auth/store.ts";
-import { clientFor } from "../../studio/github/client.ts";
-import { studioKeys } from "../../studio/github/queries.ts";
-import { loadProfile, PROFILE_REF, type ProfileSource, saveProfile } from "../../studio/profile.ts";
-import { StudioProvider, useGitHub } from "../../studio/StudioProvider.tsx";
-import { notify } from "../../studio/Toast.tsx";
+import { session } from "../../editor/auth/store.ts";
+import { EditorProvider, useGitHub } from "../../editor/EditorProvider.tsx";
+import { clientFor } from "../../editor/github/client.ts";
+import { editorKeys } from "../../editor/github/queries.ts";
+import { loadProfile, PROFILE_REF, type ProfileSource, saveProfile } from "../../editor/profile.ts";
+import { notify } from "../../editor/Toast.tsx";
 import { Tip } from "../Tip.tsx";
 import styles from "./CardEditor.module.css";
 import {
@@ -55,17 +55,17 @@ import {
 export type EditResult = { profile: Profile; workingTree: boolean } | null;
 
 /* The landing card, editable in place for a signed-in editor. It loads the profile through the
-   studio's backend (the drafts/profile branch, or the working tree), edits a copy, and saves it back
+   editor's backend (the drafts/profile branch, or the working tree), edits a copy, and saves it back
    as content/profile.yaml. Loaded only when an editor opens it, so readers never download it. */
 
-export const profileKey = studioKeys.bundle(PROFILE_REF, "profile.yaml");
+const profileKey = editorKeys.bundle(PROFILE_REF, "profile.yaml");
 
 /** Loads what the editor needs before it is shown, so the card can turn over straight into it. */
 export function prepareEdit(published: Profile): Promise<ProfileSource> {
   return loadProfile(clientFor(session.store.state), published);
 }
 
-/** The landing card's editor: brings its own studio context, since the landing sits outside /studio. */
+/** The landing card's editor: brings its own editor context, since the landing sits outside /editor. */
 export default function CardEditor({
   source,
   onDone,
@@ -74,9 +74,9 @@ export default function CardEditor({
   onDone: (result: EditResult) => void;
 }) {
   return (
-    <StudioProvider>
+    <EditorProvider>
       <CardEditorForm source={source} onDone={onDone} heading />
-    </StudioProvider>
+    </EditorProvider>
   );
 }
 
@@ -91,15 +91,15 @@ function useFocusAfterMove() {
   return setPending;
 }
 
-/** The card's editing surface. Studio › Profile renders it inside the studio's shell. */
-export function CardEditorForm({
+/** The card's editing surface. */
+function CardEditorForm({
   source,
   onDone,
   heading = false,
 }: {
   source: ProfileSource;
   onDone: (result: EditResult) => void;
-  /** Adds the page heading; the landing needs one, the studio's shell already has it. */
+  /** Adds the page heading; the landing needs one, the editor's shell already has it. */
   heading?: boolean;
 }) {
   const gh = useGitHub();
@@ -127,11 +127,11 @@ export function CardEditorForm({
     mutationFn: () => saveProfile(gh, source, next, "profile: edit from the landing card"),
     onSuccess: async (saved) => {
       queryClient.setQueryData(profileKey, saved);
-      await queryClient.invalidateQueries({ queryKey: studioKeys.drafts() });
+      await queryClient.invalidateQueries({ queryKey: editorKeys.drafts() });
       notify(
         working
           ? "Saved content/profile.yaml."
-          : `Saved to ${PROFILE_REF}. Publish it from the studio to update the site.`,
+          : `Saved to ${PROFILE_REF}. Publish it from the editor to update the site.`,
       );
       onDone({ profile: saved.profile, workingTree: working });
     },

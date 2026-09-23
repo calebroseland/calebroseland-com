@@ -4,7 +4,7 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { type Entry, type EntryMeta, parseYaml, profile } from "@crc/content-schema";
 import { parseEntry, renderMarkdown } from "@crc/markdown";
 import type { Plugin } from "vite";
-import { contentDirFor, isStudioTree } from "./content-dir.ts";
+import { contentDirFor, isEditorTree } from "./content-dir.ts";
 import { readTree } from "./local-store.ts";
 
 /* Parses, validates, and renders everything under content/ at build time.
@@ -220,9 +220,9 @@ function invalidateContent(server: import("vite").ViteDevServer, contentDir: str
   for (const mod of server.moduleGraph.idToModuleMap.values()) {
     if (mod.id?.includes("virtual:content/")) server.moduleGraph.invalidateModule(mod);
   }
-  // Skip the reload when the tree on disk is exactly what the studio just wrote: it already shows
+  // Skip the reload when the tree on disk is exactly what the editor just wrote: it already shows
   // that, and reloading would remount the editor. Any other change still reloads the open page.
-  if (!isStudioTree(readTree(contentDir, "content").headSha))
+  if (!isEditorTree(readTree(contentDir, "content").headSha))
     server.ws.send({ type: "full-reload" });
 }
 

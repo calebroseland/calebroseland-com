@@ -36,10 +36,10 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
-    // Transform every route and studio module at startup so dependency discovery finishes before the first request.
-    warmup: { clientFiles: ["./src/main.tsx", "./src/routes/**/*.tsx", "./src/studio/**/*.tsx"] },
+    // Transform every route and editor module at startup so dependency discovery finishes before the first request.
+    warmup: { clientFiles: ["./src/main.tsx", "./src/routes/**/*.tsx", "./src/editor/**/*.tsx"] },
   },
-  // Studio routes are lazy; pre-bundle their deps so the first visit in dev does not trigger a re-optimize reload.
+  // Editor routes are lazy; pre-bundle their deps so the first visit in dev does not trigger a re-optimize reload.
   optimizeDeps: {
     include: [
       "@tiptap/react",

@@ -1,6 +1,6 @@
 # Agent context — calebroseland-com
 
-Personal site + git-backed studio. React 19 SPA on a Cloudflare Worker; GitHub is the content store. Spec and plan live outside this repo (owner's artifacts folder); this file records what an agent needs to work here.
+Personal site + git-backed editor. React 19 SPA on a Cloudflare Worker; GitHub is the content store. Spec and plan live outside this repo (owner's artifacts folder); this file records what an agent needs to work here.
 
 ## Commands (mise is the only entry point)
 
@@ -31,7 +31,7 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 - Motion: `m` inside `LazyMotion strict`; reduced motion is honoured twice (CSS tokens + `MotionConfig`).
 - Tests colocated as `*.test.ts(x)`; RTL queries by role; unexpected `console.error`/`warn` fails a test. Worker tests run in workerd.
 - Commits: Conventional Commits with workspace scope (`feat(web):`, `chore(ui):`, `ci:`). Squash-merge. Never push without the owner's go.
-- Studio backends, offered by the login page in dev (and whenever OAuth is unconfigured):
+- Editor backends, offered by the login page in dev (and whenever OAuth is unconfigured):
   - **Working tree** edits the real files in `content/` on the branch you have checked out, through dev-server routes under `/@local/`. There are no branches or pull requests: the edit is an unstaged change you commit yourself, beside any code change. Images and other binaries stream to disk as bytes (`POST /@local/upload`), never as base64. A file changed outside the browser between load and save is detected and the save is refused.
   - **Fake GitHub** simulates branches, pull requests and merges in memory (persisted to `localStorage`), and a merge writes the result into `content/` so the loop ends at a rendered page.
   - **Pasted token** uses real GitHub through Octokit.

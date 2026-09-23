@@ -1,6 +1,6 @@
 import { defaultSchema, type Options } from "rehype-sanitize";
 
-/* One allowlist shared by the build and the studio preview. Anything not here is stripped.
+/* One allowlist shared by the build and the editor preview. Anything not here is stripped.
    Shiki output needs `style` on spans and `class`/data attrs on pre/code; images need alt and dimensions. */
 export const sanitizeSchema: Options = {
   ...defaultSchema,

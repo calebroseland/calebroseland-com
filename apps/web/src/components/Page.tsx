@@ -5,7 +5,7 @@ import type { MouseEvent, ReactNode } from "react";
 import { siteProfile } from "../content/profile.ts";
 import styles from "./Page.module.css";
 import { SiteFooter } from "./SiteFooter.tsx";
-import { ThemeMenu } from "./ThemeMenu.tsx";
+import { UserMenu } from "./UserMenu.tsx";
 import { withViewTransition } from "./viewTransition.ts";
 
 /* Chrome for every page past the landing card: header with the brand + nav, main, footer. The brand is
@@ -54,7 +54,7 @@ export function Page({
           <Link to="/$slug" params={{ slug: "about" }} className={styles.navLink}>
             About
           </Link>
-          <ThemeMenu />
+          <UserMenu />
         </nav>
       </header>
       <Center as="main" id="main" max={width} className={styles.main}>

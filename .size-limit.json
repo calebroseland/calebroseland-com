@@ -18,8 +18,8 @@
     "gzip": true
   },
   {
-    "name": "studio editor chunk (gzip)",
-    "path": ["apps/web/dist/client/assets/studio._draft-*.js"],
+    "name": "entry editor chunk (gzip)",
+    "path": ["apps/web/dist/client/assets/editor._slug-*.js"],
     "limit": "600 kB",
     "gzip": true
   }

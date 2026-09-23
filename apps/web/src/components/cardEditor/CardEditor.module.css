@@ -7,7 +7,7 @@
     text-align: start;
   }
 
-  /* Studio › Profile: a card-shaped surface, so the form reads like the card it edits. */
+  /* Editor › Profile: a card-shaped surface, so the form reads like the card it edits. */
   .surface {
     padding-inline: var(--space-4);
     border-radius: var(--radius-md);

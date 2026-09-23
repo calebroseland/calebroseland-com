@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 import { scratchContentDir } from "./e2e/global-setup.ts";
 
 /** Specs that mutate the shared content directory, and so cannot run beside anything else. */
-const WRITES_FILES = /studio-local\.spec\.ts/;
+const WRITES_FILES = /editor-local\.spec\.ts/;
 
 /* Not the dev server's port. Reusing a server someone already has running would point the specs that
    write files at the repository's content/ instead of the scratch copy. */
@@ -37,7 +37,7 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 7"] }, testIgnore: WRITES_FILES },
     {
       // Working-tree mode writes real files on the one dev server every project shares, so it runs
-      // after the others rather than beside them, and in a single browser: the studio it drives is
+      // after the others rather than beside them, and in a single browser: the editor it drives is
       // the same one the other projects already cover on all three.
       name: "working-tree",
       testMatch: WRITES_FILES,

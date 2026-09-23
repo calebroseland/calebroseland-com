@@ -1,4 +1,4 @@
-/* The narrow surface the studio needs. Two implementations: Octokit (real GitHub) and an in-memory fake.
+/* The narrow surface the editor needs. Two implementations: Octokit (real GitHub) and an in-memory fake.
    Every method maps to a small number of REST calls; saveBundle is one atomic commit via the Git Data API. */
 
 export type Viewer = { login: string; name: string | null; avatarUrl: string };

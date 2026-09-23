@@ -25,7 +25,7 @@ Preconditions: the rollback below has been rehearsed on staging and timed; stagi
    - `curl -s https://calebroseland.com/api/health` returns the sha that was just merged.
    - `dig +short calebroseland.com TXT` still returns the Mailgun SPF record.
    - `BASE_URL=https://calebroseland.com mise run smoke` passes.
-   - Sign in to `/studio` and load the draft board.
+   - Sign in at `/login` and load `/editor`.
 5. Soak for one week. Leave the Netlify site locked and intact for the whole soak.
 6. Decommission only after three consecutive green backup deploys: delete the Netlify site, delete `develop` and `feature/ci-build`, and remove any unused OAuth callback.
 

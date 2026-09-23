@@ -1,6 +1,8 @@
 /* The only place @mdi/js is imported. Add an icon here, never inline. Link and focus-area icons in
    the profile are chosen from these by name, so technology logos live here too. */
 export {
+  mdiAccountCircleOutline,
+  mdiAccountOutline,
   mdiAlertOutline,
   mdiAndroid,
   mdiAngular,
@@ -34,6 +36,7 @@ export {
   mdiDragVertical,
   mdiElectronFramework,
   mdiEmailOutline,
+  mdiFileDocumentEditOutline,
   mdiFileDocumentOutline,
   mdiFirebase,
   mdiFormatBold,
@@ -72,6 +75,8 @@ export {
   mdiLinkedin,
   mdiLinkVariant,
   mdiLinux,
+  mdiLoginVariant,
+  mdiLogoutVariant,
   mdiMapMarkerOutline,
   mdiMaterialDesign,
   mdiMicrosoftAzure,
@@ -79,10 +84,12 @@ export {
   mdiMinus,
   mdiMoonWaningCrescent,
   mdiNodejs,
+  mdiNotePlusOutline,
   mdiNpm,
   mdiOpenInNew,
   mdiPaletteOutline,
   mdiPencil,
+  mdiPencilOutline,
   mdiPhoneOutline,
   mdiPlus,
   mdiReact,

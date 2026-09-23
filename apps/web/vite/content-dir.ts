@@ -7,12 +7,12 @@ export function contentDirFor(root: string): string {
     : resolve(root, "content");
 }
 
-/* A write made through the studio would otherwise come back as a full page reload, remounting the
+/* A write made through the editor would otherwise come back as a full page reload, remounting the
    editor under the author's hands. The store records the tree it just produced; the content plugin
    still invalidates its modules on every change, and only skips the reload when the tree on disk is
-   exactly what the studio wrote. Anything else, including an edit in your code editor, still reloads. */
-let studioTreeHash = "";
-export const recordStudioTree = (headSha: string) => {
-  studioTreeHash = headSha;
+   exactly what the editor wrote. Anything else, including an edit in your code editor, still reloads. */
+let editorTreeHash = "";
+export const recordEditorTree = (headSha: string) => {
+  editorTreeHash = headSha;
 };
-export const isStudioTree = (headSha: string) => headSha !== "" && headSha === studioTreeHash;
+export const isEditorTree = (headSha: string) => headSha !== "" && headSha === editorTreeHash;

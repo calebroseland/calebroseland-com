@@ -4,7 +4,7 @@ import { CenteredMessage, Page } from "../components/Page.tsx";
 import { findBySlug, loadEntry } from "../content/entries.ts";
 import { siteProfile } from "../content/profile.ts";
 
-/* Top-level pages such as /about. Studio routes are more specific and win. */
+/* Top-level pages such as /about. Editor routes are more specific and win. */
 export const Route = createFileRoute("/$slug")({
   loader: async ({ params }) => {
     const meta = findBySlug("page", params.slug);

@@ -14,9 +14,9 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { dirname, extname, join, relative, resolve } from "node:path";
 import { pipeline } from "node:stream/promises";
 import type { Plugin } from "vite";
-import { contentDirFor, recordStudioTree } from "./content-dir.ts";
+import { contentDirFor, recordEditorTree } from "./content-dir.ts";
 
-/* Working-tree editing. The studio can read and write the real content files on whatever branch is
+/* Working-tree editing. The editor can read and write the real content files on whatever branch is
    checked out, so an edit made in the browser is an ordinary unstaged change you commit alongside any
    code change. Dev only: the routes are mounted from configureServer and never exist in a build.
    Every path is confined to the content directory. */
@@ -141,7 +141,7 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
                 );
               }
               const afterWrite = readTree(contentDir, prefix).headSha;
-              recordStudioTree(afterWrite);
+              recordEditorTree(afterWrite);
               return json(res, 200, { headSha: afterWrite });
             }
             /* Binary upload. The bytes are streamed straight to the file: an image never becomes a
@@ -161,7 +161,7 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
               mkdirSync(dirname(abs), { recursive: true });
               await pipeline(req, createWriteStream(abs));
               const afterUpload = readTree(contentDir, prefix).headSha;
-              recordStudioTree(afterUpload);
+              recordEditorTree(afterUpload);
               return json(res, 200, { headSha: afterUpload });
             }
             if (url === "/@local/delete" && req.method === "POST") {
@@ -169,7 +169,7 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
               const abs = payload.dir ? inside(payload.dir) : null;
               if (abs && abs !== contentDir) rmSync(abs, { recursive: true, force: true });
               const afterDelete = readTree(contentDir, prefix).headSha;
-              recordStudioTree(afterDelete);
+              recordEditorTree(afterDelete);
               return json(res, 200, { headSha: afterDelete });
             }
             return json(res, 404, { error: "unknown local-store route" });

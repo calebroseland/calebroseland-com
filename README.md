@@ -1,6 +1,6 @@
 # calebroseland.com
 
-Source for [calebroseland.com](https://calebroseland.com): a React SPA served by a Cloudflare Worker, with content stored as markdown in this repository and (in progress) a browser studio that commits straight to it.
+Source for [calebroseland.com](https://calebroseland.com): a React SPA served by a Cloudflare Worker, with content stored as markdown in this repository and (in progress) a browser editor that commits straight to it.
 
 ## Quick start
 

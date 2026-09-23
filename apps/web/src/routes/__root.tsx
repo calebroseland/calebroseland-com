@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { MotionProvider } from "../components/MotionProvider.tsx";
 import { CenteredMessage, Page } from "../components/Page.tsx";
 import { TipProvider } from "../components/Tip.tsx";
-import { Toasts } from "../studio/Toast.tsx";
+import { Toasts } from "../editor/Toast.tsx";
 
 export const Route = createRootRoute({
   component: RootLayout,
