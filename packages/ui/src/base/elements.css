@@ -51,6 +51,12 @@
     outline-offset: var(--focus-ring-offset);
   }
 
+  /* A heading takes focus after a navigation so screen readers start on the new page. It is not a
+     control, so it shows no ring, even where the browser counts script focus as keyboard focus. */
+  :is(h1, h2, h3)[tabindex="-1"]:focus-visible {
+    outline: none;
+  }
+
   ::selection {
     background: var(--color-accent-subtle);
   }
