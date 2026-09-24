@@ -2,9 +2,8 @@ import type { Profile, ProfileLink } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
 import * as icons from "@crc/ui/icons";
 import { Link } from "@tanstack/react-router";
-import { useStore } from "@tanstack/react-store";
-import { useId } from "react";
-import { session } from "../editor/auth/store.ts";
+import { useSignedIn } from "../editor/auth/hooks.ts";
+import { useSectionHeading } from "../hooks/useSectionHeading.ts";
 import styles from "./SiteFooter.module.css";
 import { footerLinkName } from "./viewTransition.ts";
 
@@ -16,7 +15,7 @@ const iconPath = (name: string): string =>
    the site carries the links down here and leaving carries them back. */
 export function SiteFooter({ profile }: { profile: Profile }) {
   // The editor is for whoever can edit: someone signed in, or anyone running the dev server.
-  const signedIn = useStore(session.store, (s) => s.status === "authenticated");
+  const signedIn = useSignedIn();
   const showEditor = signedIn || import.meta.env.DEV;
   return (
     <footer className={styles.footer}>
@@ -45,10 +44,10 @@ function FooterGroup({
   links: readonly ProfileLink[];
   index: number;
 }) {
-  const headingId = useId();
+  const named = useSectionHeading();
   return (
-    <section aria-labelledby={headingId} className={styles.group}>
-      <h2 id={headingId} className={styles.groupTitle}>
+    <section {...named.region} className={styles.group}>
+      <h2 {...named.heading} className={styles.groupTitle}>
         {title}
       </h2>
       <ul role="list" className={styles.list}>

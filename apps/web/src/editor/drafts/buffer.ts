@@ -42,6 +42,15 @@ export type Buffer = {
 
 const key = (ref: string) => `crc:buffer:${ref}`;
 
+/** Local storage when there is a browser that allows it; the buffer works without it. */
+export function browserStorage(): BufferStorage | undefined {
+  try {
+    return typeof window === "undefined" ? undefined : window.localStorage;
+  } catch {
+    return undefined;
+  }
+}
+
 export type BufferStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
 export function readLocalBuffer(ref: string, storage: BufferStorage | undefined): Buffer | null {

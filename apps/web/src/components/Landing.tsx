@@ -20,12 +20,12 @@ import {
   mdiPhoneOutline,
 } from "@crc/ui/icons";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useStore } from "@tanstack/react-store";
-import { AnimatePresence, m, type Transition, useReducedMotion } from "motion/react";
+import { AnimatePresence, m, type Transition } from "motion/react";
 import { type ReactNode, type RefObject, useEffect, useId, useRef, useState } from "react";
-import { session } from "../editor/auth/store.ts";
+import { useSignedIn } from "../editor/auth/hooks.ts";
 import type { ProfileSource } from "../editor/profile.ts";
 import { notify } from "../editor/Toast.tsx";
+import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
 import type { EditResult } from "./cardEditor/CardEditor.tsx";
 import { FocusChip } from "./FocusChip.tsx";
@@ -333,13 +333,13 @@ export function Landing({ profile: published }: { profile: Profile }) {
   // After a save to the working tree the file on disk is the new profile; show it without a reload.
   const [saved, setSaved] = useState<Profile | null>(null);
   const profile = saved ?? published;
-  const reduce = useReducedMotion() ?? false;
+  const reduce = useReduceMotion();
   const navigate = useNavigate();
   const [side, setSide] = useState<"front" | "back">("front");
   const [expanded, setExpanded] = useState(false);
   // Focus follows the card only after the visitor has turned it; the first paint leaves focus alone.
   const [turned, setTurned] = useState(false);
-  const signedIn = useStore(session.store, (s) => s.status === "authenticated");
+  const signedIn = useSignedIn();
   const [editing, setEditing] = useState<OpenEditor | null>(null);
   const [opening, setOpening] = useState(false);
   // After the editor closes, focus goes back to the Edit button once the front face has turned back.
@@ -375,7 +375,8 @@ export function Landing({ profile: published }: { profile: Profile }) {
   /* The router's own viewTransition option is not used because it renders the new state after its
      transition callback resolves, which can leave the card in the new snapshot. Focus follows the
      path change through the root layout's focus-on-navigate. */
-  const enter = () => withViewTransition("enter", () => navigate({ to: "/home" }), reduce);
+  const enter = () =>
+    withViewTransition("enter", () => navigate({ to: "/home" }), reduce);
 
   return (
     <div

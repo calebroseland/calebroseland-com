@@ -35,6 +35,7 @@ export default defineConfig({
           ENVIRONMENT: "test",
           ALLOWED_ORIGINS: "https://example.com",
           GITHUB_CLIENT_ID: "Iv1.test",
+          FEATURE_GITHUB_EDITING: "on",
           GITHUB_CLIENT_SECRET: "test-secret",
           GITHUB_OAUTH_ORIGIN: GITHUB_STUB,
         },

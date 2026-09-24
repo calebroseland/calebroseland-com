@@ -30,8 +30,12 @@ function dismiss(id: number) {
   toasts.setState((t) => t.filter((x) => x.id !== id));
 }
 
+function useToasts(): Toast[] {
+  return useStore(toasts);
+}
+
 export function Toasts() {
-  const items = useStore(toasts);
+  const items = useToasts();
   const status = items.filter((t) => t.kind === "status");
   const alerts = items.filter((t) => t.kind === "alert");
   return (

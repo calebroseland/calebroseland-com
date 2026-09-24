@@ -1,18 +1,22 @@
 import { Stack } from "@crc/ui";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import * as z from "zod/mini";
 import { ConfirmDialog } from "../editor/Dialogs.tsx";
-import { beginEditingMutation, discardEntryMutation } from "../editor/data/mutations.ts";
-import { draftsQuery, publishedQuery, viewerQuery } from "../editor/data/queries.ts";
+import {
+  useBeginEditing,
+  useBoard,
+  useDiscardEntry,
+  useViewerLogin,
+} from "../editor/data/hooks.ts";
 import type { EntryKind } from "../editor/drafts/paths.ts";
 import { RowMenu, RowMenuItem } from "../editor/drafts/RowMenu.tsx";
-import { useCapabilities, useGitHub } from "../editor/EditorProvider.tsx";
+import { useCapabilities } from "../editor/EditorProvider.tsx";
 import { EditorShell } from "../editor/EditorShell.tsx";
 import styles from "../editor/editor.module.css";
-import { type EditorEntry, mergeEntries } from "../editor/entries.ts";
+import type { EditorEntry } from "../editor/entries.ts";
+import { useOpenInEditor } from "../editor/navigation.ts";
 import { notify } from "../editor/Toast.tsx";
+import { useDialogState } from "../hooks/useDialogState.ts";
 
 export const Route = createFileRoute("/editor/")({
   validateSearch: z.object({ kind: z.optional(z.enum(["post", "page"])) }),
@@ -28,45 +32,39 @@ const FILTERS = [
 
 const NEW_LABEL = { post: "New post", page: "New page" } as const;
 
+/** The kind the board is narrowed to, kept in the URL so a view can be linked to. */
+function useKindFilter(): EntryKind | undefined {
+  return Route.useSearch().kind;
+}
+
+type Discarding = { ref: string; slug: string; dir: string };
+
 function Board() {
-  const gh = useGitHub();
-  const { kind } = Route.useSearch();
-  const viewer = useQuery(viewerQuery(gh));
-  const navigate = useNavigate();
+  const kind = useKindFilter();
+  const board = useBoard(kind);
+  const login = useViewerLogin();
   const caps = useCapabilities();
   const local = !caps.branches;
-  const drafts = useQuery({ ...draftsQuery(gh), enabled: !local });
-  const published = useQuery(publishedQuery(gh));
-  const [discarding, setDiscarding] = useState<{ ref: string; slug: string; dir: string } | null>(
-    null,
-  );
+  const discarding = useDialogState<Discarding>();
+  const discard = useDiscardEntry();
+  const edit = useBeginEditing();
+  const openInEditor = useOpenInEditor();
 
-  // In working-tree mode there is no branch to throw away: discarding deletes the entry's files.
-  const discard = useMutation({
-    ...discardEntryMutation(gh),
-    onSuccess: () => {
-      notify(local ? "Deleted from your working tree" : "Discarded the draft branch");
-    },
-    onError: () => notify("Couldn't discard that.", { kind: "alert" }),
-  });
+  // Without branches there is nothing to throw away but the entry's files.
+  const runDiscard = async (row: Discarding) => {
+    const outcome = await discard.run(row);
+    if (outcome.ok) notify(local ? "Deleted from your working tree" : "Discarded the draft branch");
+    else notify("Couldn't discard that.", { kind: "alert" });
+  };
 
-  const edit = useMutation({
-    ...beginEditingMutation(gh),
-    onSuccess: async (_, slug) => {
-      await navigate({ to: "/editor/$slug", params: { slug } });
-    },
-    onError: () => notify("Couldn't start editing that entry.", { kind: "alert" }),
-  });
+  const startEditing = async (slug: string) => {
+    const outcome = await edit.run(slug);
+    if (outcome.ok) await openInEditor(slug);
+    else notify("Couldn't start editing that entry.", { kind: "alert" });
+  };
 
-  // Working-tree rows are already the entries themselves; there are no branches to merge over them.
-  const all = local
-    ? (published.data ?? [])
-    : mergeEntries(published.data ?? [], drafts.data ?? []);
-  const count = (k: EntryKind | undefined) => (k ? all.filter((r) => r.kind === k) : all).length;
-  const rows = kind ? all.filter((r) => r.kind === kind) : all;
-  const inProgress = rows.filter((r) => r.status === "draft" || r.status === "pull-request");
-  const live = rows.filter((r) => r.status === "published" || r.status === "working-tree");
-  const pending = (!local && drafts.isPending) || published.isPending;
+  const ready = board.status === "ready" ? board : null;
+  const target = discarding.subject;
 
   return (
     <EditorShell
@@ -77,7 +75,7 @@ function Board() {
       }
     >
       <p className={styles.muted}>
-        Signed in as {viewer.data?.login ?? "…"} · {caps.label}
+        Signed in as {login ?? "…"} · {caps.label}
       </p>
       {/* Posts and pages share one board; the filter lives in the URL so a view can be linked to. */}
       <nav className={`${styles.tabs} ${styles.filters}`} aria-label="Show">
@@ -90,28 +88,21 @@ function Board() {
             className={styles.tab}
           >
             {f.label}
-            {!pending && <span className={styles.tabCount}> {count(f.kind)}</span>}
+            {ready && <span className={styles.tabCount}> {ready.counts[f.kind ?? "all"]}</span>}
           </Link>
         ))}
       </nav>
-      <div className={styles.board} aria-busy={pending}>
-        {pending && <p className={styles.muted}>Loading…</p>}
-        {(drafts.isError || published.isError) && (
+      <div className={styles.board} aria-busy={board.status === "loading"}>
+        {board.status === "loading" && <p className={styles.muted}>Loading…</p>}
+        {board.status === "error" && (
           <p role="alert" className={styles.alert}>
             Couldn't load entries from GitHub.{" "}
-            <button
-              type="button"
-              className={styles.toastAction}
-              onClick={() => {
-                void drafts.refetch();
-                void published.refetch();
-              }}
-            >
+            <button type="button" className={styles.toastAction} onClick={board.retry}>
               Retry
             </button>
           </p>
         )}
-        {!pending && rows.length === 0 && (
+        {ready && ready.inProgress.length + ready.live.length === 0 && (
           <p className={styles.muted}>
             {kind === "page"
               ? "No pages yet."
@@ -121,24 +112,28 @@ function Board() {
           </p>
         )}
 
-        {inProgress.length > 0 && (
-          <Group title={`In progress (${inProgress.length})`}>
-            {inProgress.map((row) => (
+        {ready && ready.inProgress.length > 0 && (
+          <Group title={`In progress (${ready.inProgress.length})`}>
+            {ready.inProgress.map((row) => (
               <Row
                 key={row.ref}
                 entry={row}
                 action="Open"
-                onDiscard={() => setDiscarding({ ref: row.ref, slug: row.slug, dir: row.dir })}
+                onDiscard={() => discarding.open({ ref: row.ref, slug: row.slug, dir: row.dir })}
               />
             ))}
           </Group>
         )}
 
-        {live.length > 0 && (
+        {ready && ready.live.length > 0 && (
           <Group
-            title={local ? `Files on this branch (${live.length})` : `Published (${live.length})`}
+            title={
+              local
+                ? `Files on this branch (${ready.live.length})`
+                : `Published (${ready.live.length})`
+            }
           >
-            {live.map((row) => (
+            {ready.live.map((row) => (
               <Row
                 key={`${row.kind}:${row.slug}`}
                 entry={row}
@@ -146,11 +141,11 @@ function Board() {
                 {...(local
                   ? {
                       onDiscard: () =>
-                        setDiscarding({ ref: row.ref, slug: row.slug, dir: row.dir }),
+                        discarding.open({ ref: row.ref, slug: row.slug, dir: row.dir }),
                     }
                   : {
-                      busy: edit.isPending && edit.variables === row.slug,
-                      onAction: () => edit.mutate(row.slug),
+                      busy: edit.pending && edit.variables === row.slug,
+                      onAction: () => void startEditing(row.slug),
                     })}
               />
             ))}
@@ -159,25 +154,25 @@ function Board() {
       </div>
 
       <ConfirmDialog
-        open={discarding !== null}
-        onOpenChange={(o) => !o && setDiscarding(null)}
-        title={local ? `Delete ‘${discarding?.slug}’?` : `Discard ‘${discarding?.slug}’?`}
+        open={discarding.isOpen}
+        onOpenChange={discarding.onOpenChange}
+        title={local ? `Delete ‘${target?.slug}’?` : `Discard ‘${target?.slug}’?`}
         description={
           local
-            ? `This deletes ${discarding?.dir} from your working tree. It is an ordinary file deletion you can undo with git.`
-            : `This deletes the branch ${discarding?.ref} and closes its pull request. Local unsaved changes are kept.`
+            ? `This deletes ${target?.dir} from your working tree. It is an ordinary file deletion you can undo with git.`
+            : `This deletes the branch ${target?.ref} and closes its pull request. Local unsaved changes are kept.`
         }
         actions={
           <>
-            <button type="button" className={styles.secondary} onClick={() => setDiscarding(null)}>
+            <button type="button" className={styles.secondary} onClick={discarding.close}>
               Cancel
             </button>
             <button
               type="button"
               className={`${styles.primary} ${styles.danger}`}
               onClick={() => {
-                if (discarding) discard.mutate(discarding);
-                setDiscarding(null);
+                if (target) void runDiscard(target);
+                discarding.close();
               }}
             >
               {local ? "Delete" : "Discard"}

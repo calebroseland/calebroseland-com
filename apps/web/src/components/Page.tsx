@@ -1,12 +1,24 @@
 import { Center } from "@crc/ui";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useReducedMotion } from "motion/react";
 import type { MouseEvent, ReactNode } from "react";
 import { siteProfile } from "../content/profile.ts";
+import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import styles from "./Page.module.css";
 import { SiteFooter } from "./SiteFooter.tsx";
 import { UserMenu } from "./UserMenu.tsx";
 import { withViewTransition } from "./viewTransition.ts";
+
+function useAtHome(): boolean {
+  return useRouterState({ select: (s) => s.location.pathname.replace(/\/$/, "") === "/home" });
+}
+
+/** Turns the page back into the landing card, morphing unless motion is reduced. */
+function useBackToCard() {
+  const reduce = useReduceMotion();
+  const navigate = useNavigate();
+  return () =>
+    withViewTransition("leave", () => navigate({ to: "/" }), reduce);
+}
 
 /* Chrome for every page past the landing card: header with the brand + nav, main, footer. The brand is
    the way back: from any page it goes home, and from home it turns back into the card, which it shares
@@ -18,13 +30,8 @@ export function Page({
   children: ReactNode;
   width?: "measure" | "measure-wide";
 }) {
-  const reduce = useReducedMotion() ?? false;
-  const navigate = useNavigate();
-  const atHome = useRouterState({
-    select: (s) => s.location.pathname.replace(/\/$/, "") === "/home",
-  });
-
-  const toCard = () => withViewTransition("leave", () => navigate({ to: "/" }), reduce);
+  const atHome = useAtHome();
+  const toCard = useBackToCard();
 
   // A plain click on the brand at home runs the reverse morph; modified clicks open the card in a new
   // tab, and everywhere else the brand is an ordinary link home.

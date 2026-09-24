@@ -14,12 +14,15 @@ import {
   mdiPlus,
   mdiWhiteBalanceSunny,
 } from "@crc/ui/icons";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { useStore } from "@tanstack/react-store";
-import { lazy, Suspense, useState } from "react";
-import { session } from "../editor/auth/store.ts";
+import { lazy, Suspense } from "react";
+import { useSession, useSignInMethods, useSignOut } from "../editor/auth/hooks.ts";
+import { canSignIn } from "../editor/auth/methods.ts";
 import { capabilitiesOf } from "../editor/data/backend.ts";
+import { useAccountLinks } from "../editor/navigation.ts";
+import { useDialogState } from "../hooks/useDialogState.ts";
+import { useDisclosure } from "../hooks/useDisclosure.ts";
 import { type CustomTheme, defaultTheme } from "../theme/custom.ts";
+import { useThemeState } from "../theme/hooks.ts";
 import {
   customPreference,
   newThemeId,
@@ -41,13 +44,16 @@ const builtIns = [
    or out, and, once signed in, the editing screens. Custom themes sit under the built-ins with their
    accent as a swatch, and the theme editor opens from here too. */
 export function UserMenu() {
-  const { preference, resolved, customThemes } = useStore(themeController.store, (s) => s);
-  const current = useStore(session.store, (s) => s);
-  const [editing, setEditing] = useState<{ theme: CustomTheme; isNew: boolean } | null>(null);
-  const navigate = useNavigate();
-  const location = useRouterState({ select: (s) => s.location.href });
-  const onEditingRoute = location.startsWith("/editor");
+  const { preference, resolved, customThemes } = useThemeState();
+  const current = useSession();
+  const editing = useDialogState<{ theme: CustomTheme; isNew: boolean }>();
+  const links = useAccountLinks();
+  const signOut = useSignOut();
+  const menu = useDisclosure();
   const signedIn = current.status === "authenticated";
+  // Asked only once the menu opens, so readers who never open it never call the Worker for it.
+  const methods = useSignInMethods(menu.open && !signedIn);
+  const offerSignIn = methods !== null && canSignIn(methods);
 
   const active = customThemes.find((t) => customPreference(t.id) === preference);
   const builtIn = builtIns.find((b) => b.value === preference);
@@ -55,12 +61,12 @@ export function UserMenu() {
 
   const startNew = () => {
     const n = customThemes.length + 1;
-    setEditing({ theme: defaultTheme(resolved, newThemeId(), `Custom ${n}`), isNew: true });
+    editing.open({ theme: defaultTheme(resolved, newThemeId(), `Custom ${n}`), isNew: true });
   };
 
   return (
     <>
-      <Menu.Root>
+      <Menu.Root open={menu.open} onOpenChange={menu.setOpen}>
         <Menu.Trigger
           className={styles.button}
           aria-label={
@@ -112,7 +118,7 @@ export function UserMenu() {
               {active && (
                 <Menu.Item
                   className={styles.item}
-                  onClick={() => setEditing({ theme: active, isNew: false })}
+                  onClick={() => editing.open({ theme: active, isNew: false })}
                 >
                   <Icon path={mdiPencil} size="sm" />
                   <span className={styles.itemLabel}>Edit {active.name}…</span>
@@ -122,60 +128,44 @@ export function UserMenu() {
                 <Icon path={mdiPlus} size="sm" />
                 <span className={styles.itemLabel}>New custom theme…</span>
               </Menu.Item>
-              <Menu.Separator className={styles.separator} />
+              {(signedIn || offerSignIn) && <Menu.Separator className={styles.separator} />}
               {signedIn ? (
                 <Menu.Group>
                   <Menu.GroupLabel className={styles.groupLabel}>
                     Signed in · {capabilitiesOf(current.backend).label}
                   </Menu.GroupLabel>
-                  <Menu.Item
-                    className={styles.item}
-                    onClick={() => void navigate({ to: "/editor" })}
-                  >
+                  <Menu.Item className={styles.item} onClick={links.board}>
                     <Icon path={mdiFileDocumentEditOutline} size="sm" />
                     <span className={styles.itemLabel}>Editor</span>
                   </Menu.Item>
-                  <Menu.Item
-                    className={styles.item}
-                    onClick={() => void navigate({ to: "/editor/new" })}
-                  >
+                  <Menu.Item className={styles.item} onClick={links.newEntry}>
                     <Icon path={mdiNotePlusOutline} size="sm" />
                     <span className={styles.itemLabel}>New entry</span>
                   </Menu.Item>
-                  <Menu.Item
-                    className={styles.item}
-                    onClick={() => {
-                      // Leave the editing routes before the session goes, so their guard never has to
-                      // redirect a page that is already rendering.
-                      void navigate({ to: onEditingRoute ? "/home" : "." }).then(() =>
-                        session.signOut(),
-                      );
-                    }}
-                  >
+                  <Menu.Item className={styles.item} onClick={signOut}>
                     <Icon path={mdiLogoutVariant} size="sm" />
                     <span className={styles.itemLabel}>Sign out</span>
                   </Menu.Item>
                 </Menu.Group>
               ) : (
-                <Menu.Item
-                  className={styles.item}
-                  onClick={() => void navigate({ to: "/login", search: { returnTo: location } })}
-                >
-                  <Icon path={mdiLoginVariant} size="sm" />
-                  <span className={styles.itemLabel}>Sign in</span>
-                </Menu.Item>
+                offerSignIn && (
+                  <Menu.Item className={styles.item} onClick={links.signIn}>
+                    <Icon path={mdiLoginVariant} size="sm" />
+                    <span className={styles.itemLabel}>Sign in</span>
+                  </Menu.Item>
+                )
               )}
             </Menu.Popup>
           </Menu.Positioner>
         </Menu.Portal>
       </Menu.Root>
-      {editing && (
+      {editing.subject && (
         <Suspense fallback={null}>
           <ThemeEditor
-            key={editing.theme.id}
-            initial={editing.theme}
-            isNew={editing.isNew}
-            onClose={() => setEditing(null)}
+            key={editing.subject.theme.id}
+            initial={editing.subject.theme}
+            isNew={editing.subject.isNew}
+            onClose={editing.close}
           />
         </Suspense>
       )}

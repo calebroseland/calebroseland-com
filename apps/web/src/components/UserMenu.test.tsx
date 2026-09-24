@@ -5,7 +5,7 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { themeController } from "../theme/store.ts";
 import { UserMenu } from "./UserMenu.tsx";
 
@@ -129,5 +129,49 @@ describe("UserMenu", () => {
     expect(themeController.store.state.customThemes).toHaveLength(0);
     expect(themeController.store.state.preference).toBe("auto");
     expect(root.style.getPropertyValue("--accent-600")).toBe("");
+  });
+});
+
+describe("UserMenu sign-in", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  /* The ways to sign in are asked of the Worker once per page load, so each case loads fresh. */
+  async function renderFresh(github: boolean) {
+    vi.resetModules();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json({ github, oauth: false, clientId: null })),
+    );
+    const router = await import("@tanstack/react-router");
+    const { UserMenu: Fresh } = await import("./UserMenu.tsx");
+    render(
+      <router.RouterProvider
+        router={router.createRouter({
+          routeTree: router.createRootRoute({ component: Fresh }),
+          history: router.createMemoryHistory({ initialEntries: ["/"] }),
+        })}
+      />,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /^Account:/ }));
+    return screen.findByRole("menu");
+  }
+
+  it("offers sign-in when the environment has a way to sign in", async () => {
+    vi.stubEnv("DEV", true);
+    const menu = await renderFresh(false);
+    expect(await within(menu).findByRole("menuitem", { name: "Sign in" })).toBeInTheDocument();
+  });
+
+  it("leaves sign-in out when there is no way to sign in", async () => {
+    vi.stubEnv("DEV", false);
+    const menu = await renderFresh(false);
+    await waitFor(() => expect(vi.mocked(fetch)).toHaveBeenCalled());
+    // Let the answer land before checking that nothing appeared.
+    await new Promise((r) => setTimeout(r, 0));
+    expect(within(menu).queryByRole("menuitem", { name: "Sign in" })).not.toBeInTheDocument();
+    expect(within(menu).getByRole("menuitem", { name: /New custom theme/ })).toBeInTheDocument();
   });
 });

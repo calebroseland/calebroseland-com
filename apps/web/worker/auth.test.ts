@@ -1,5 +1,6 @@
 import { env, SELF } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
+import { authCallback, authConfig } from "./auth.ts";
 
 /* The vitest worker config points GITHUB_OAUTH_ORIGIN at a Miniflare outbound stub (see vitest.worker.config.ts)
    so the exchange exercises the real handler against a scripted GitHub. */
@@ -18,10 +19,26 @@ const valid = {
 };
 
 describe("GET /api/auth/config", () => {
-  it("reports OAuth as configured with the public client id only", async () => {
+  it("reports GitHub on and OAuth configured, with the public client id only", async () => {
     const res = await SELF.fetch(`${site}/api/auth/config`);
-    expect(await res.json()).toEqual({ enabled: true, clientId: env.GITHUB_CLIENT_ID });
+    expect(await res.json()).toEqual({ github: true, oauth: true, clientId: env.GITHUB_CLIENT_ID });
     expect(res.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("offers nothing through GitHub while the flag is off, configured or not", async () => {
+    const res = authConfig({ ...env, FEATURE_GITHUB_EDITING: "off" });
+    expect(await res.json()).toEqual({ github: false, oauth: false, clientId: null });
+  });
+});
+
+describe("POST /api/auth/callback with GitHub editing off", () => {
+  it("refuses the exchange", async () => {
+    const req = new Request(`${site}/api/auth/callback`, {
+      method: "POST",
+      body: JSON.stringify(valid),
+    });
+    const res = await authCallback(req, { ...env, FEATURE_GITHUB_EDITING: "off" }, "r");
+    expect(res.status).toBe(404);
   });
 });
 

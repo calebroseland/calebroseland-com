@@ -145,8 +145,13 @@
     padding-block: var(--space-8) var(--space-16);
   }
 
+  /* The title stands apart from what follows, and everything is centred on the page's axis. */
   .centered {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-8);
     text-align: center;
     padding-block: var(--space-16);
   }
+
 }

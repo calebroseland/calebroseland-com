@@ -1,6 +1,6 @@
 # Agent context — calebroseland-com
 
-Personal site + git-backed editor. React 19 SPA on a Cloudflare Worker; GitHub is the content store. Spec and plan live outside this repo (owner's artifacts folder); this file records what an agent needs to work here.
+Personal site + git-backed editor. React 19 SPA on a Cloudflare Worker; GitHub is the content store. Spec, plan and design notes live in `.fieldkit/20260918-site-and-editor/` (git-excluded, on the owner's machine); this file records what an agent needs to work here.
 
 ## Commands (mise is the only entry point)
 
@@ -29,12 +29,14 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 - CSS Modules, every module wrapped in `@layer components`; semantic tokens only (`var(--color-text-muted)`), never primitives; logical properties; one level of nesting.
 - State: URL (Router) → server (Query) → form (Form) → client (Store). Challenge any new `useState`/store field against that order.
 - Motion: `m` inside `LazyMotion strict`; reduced motion is honoured twice (CSS tokens + `MotionConfig`).
+- Components call only purpose-named custom hooks; built-in and library hooks (`useState`, `useQuery`, `useNavigate`, `Route.useSearch`, `useId`, …) are called inside those hooks. Data hooks (`src/editor/data/hooks.ts`) return views to switch on and commands whose runs resolve to typed outcomes; toasts, copy and navigation stay in the component. `tools/biome/no-direct-hooks.grit` enforces this for the files listed in `biome.json`'s override; extend that list as components move over.
 - Tests colocated as `*.test.ts(x)`; RTL queries by role; unexpected `console.error`/`warn` fails a test. Worker tests run in workerd.
 - Commits: Conventional Commits with workspace scope (`feat(web):`, `chore(ui):`, `ci:`). Squash-merge. Never push without the owner's go.
-- Editor backends, offered by the login page in dev (and whenever OAuth is unconfigured):
+- Editor backends. The working tree is the editor for now; everything through GitHub is experimental and off unless the Worker var `FEATURE_GITHUB_EDITING` is `"on"`. The login page and the account menu offer only what the environment has, and a built site with the flag off offers no sign-in at all:
   - **Working tree** edits the real files in `content/` on the branch you have checked out, through dev-server routes under `/@local/`. There are no branches or pull requests: the edit is an unstaged change you commit yourself, beside any code change. Images and other binaries stream to disk as bytes (`POST /@local/upload`), never as base64. A file changed outside the browser between load and save is detected and the save is refused.
-  - **Fake GitHub** simulates branches, pull requests and merges in memory (persisted to `localStorage`), and a merge writes the result into `content/` so the loop ends at a rendered page.
-  - **Pasted token** uses real GitHub through Octokit.
+  - **Fake GitHub** (flag) simulates branches, pull requests and merges in memory (persisted to `localStorage`), starting in dev from a copy of `content/`.
+  - **Pasted token** and **GitHub OAuth** (flag) use real GitHub through Octokit; OAuth also needs the OAuth app configured.
+- Feature flags are Worker vars: per environment in `wrangler.jsonc`, locally in `apps/web/.dev.vars`; the SPA reads them at runtime from `/api/auth/config`, never from `VITE_*`. The E2E dev server turns `FEATURE_GITHUB_EDITING` on through its process env.
 - The editor branches from and publishes into `CONTENT_BRANCH`, fixed at build time: `master` by default, `next` for the staging build.
 - Editor data lives in `src/editor/data`: query keys, query options, and mutation options that declare what they make stale. One lazily created query client serves every editing surface, refreshes those queries after a write, and ends the session on a rejected token. Screens ask the backend's capabilities (`useCapabilities`), never its kind.
 - `CRC_CONTENT_DIR` points the content pipeline and the local store at another directory; the E2E suite uses it so tests never write into the repository's own `content/`.

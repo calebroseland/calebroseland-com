@@ -1,13 +1,12 @@
 import { Stack } from "@crc/ui";
-import { useMutation } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import * as z from "zod/mini";
-import { createEntryMutation } from "../editor/data/mutations.ts";
-import { type EntryKind, slugify } from "../editor/drafts/paths.ts";
-import { useGitHub } from "../editor/EditorProvider.tsx";
+import { useCreateEntry } from "../editor/data/hooks.ts";
+import { useNewEntryForm } from "../editor/drafts/newEntry.ts";
+import type { EntryKind } from "../editor/drafts/paths.ts";
 import { EditorShell } from "../editor/EditorShell.tsx";
 import styles from "../editor/editor.module.css";
+import { useOpenInEditor } from "../editor/navigation.ts";
 
 export const Route = createFileRoute("/editor/new")({
   validateSearch: z.object({ kind: z.optional(z.enum(["post", "page"])) }),
@@ -15,22 +14,23 @@ export const Route = createFileRoute("/editor/new")({
   component: NewEntry,
 });
 
-function NewEntry() {
-  const gh = useGitHub();
-  const navigate = useNavigate();
-  const { kind: initialKind = "post" } = Route.useSearch();
-  const [kind, setKind] = useState<EntryKind>(initialKind);
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugTouched, setSlugTouched] = useState(false);
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const effectiveSlug = slugTouched ? slug : slugify(title);
-  const slugOk = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(effectiveSlug);
+/** The kind asked for in the URL (the board's New page link asks for a page). */
+function useRequestedKind(): EntryKind {
+  return Route.useSearch().kind ?? "post";
+}
 
-  const create = useMutation({
-    ...createEntryMutation(gh),
-    onSuccess: ({ draft }) => navigate({ to: "/editor/$slug", params: { slug: draft.slug } }),
-  });
+function NewEntry() {
+  const form = useNewEntryForm(useRequestedKind());
+  const { kind, title, slugOk, date } = form;
+  const effectiveSlug = form.slug;
+  const create = useCreateEntry();
+  const openInEditor = useOpenInEditor();
+
+  const submit = async () => {
+    if (!form.entry) return;
+    const outcome = await create.run(form.entry);
+    if (outcome.ok) await openInEditor(outcome.value.draft.slug);
+  };
 
   return (
     <EditorShell title="New entry">
@@ -39,15 +39,9 @@ function NewEntry() {
         style={{ maxInlineSize: "32rem" }}
         onSubmit={(e) => {
           e.preventDefault();
-          if (title.trim() && slugOk)
-            create.mutate({
-              kind,
-              title: title.trim(),
-              slug: effectiveSlug,
-              date: new Date(`${date}T00:00:00Z`),
-            });
+          void submit();
         }}
-        aria-busy={create.isPending}
+        aria-busy={create.pending}
       >
         <Stack gap="4">
           <fieldset className={styles.fieldset}>
@@ -59,7 +53,7 @@ function NewEntry() {
                   name="kind"
                   value={k}
                   checked={kind === k}
-                  onChange={() => setKind(k)}
+                  onChange={() => form.setKind(k)}
                 />
                 <span>
                   {k === "post"
@@ -75,7 +69,7 @@ function NewEntry() {
               id="new-title"
               className={styles.input}
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => form.setTitle(e.target.value)}
               required
             />
           </div>
@@ -85,10 +79,7 @@ function NewEntry() {
               id="new-slug"
               className={styles.input}
               value={effectiveSlug}
-              onChange={(e) => {
-                setSlugTouched(true);
-                setSlug(e.target.value);
-              }}
+              onChange={(e) => form.setSlug(e.target.value)}
               aria-invalid={effectiveSlug.length > 0 && !slugOk}
               aria-describedby="new-slug-hint"
             />
@@ -109,23 +100,25 @@ function NewEntry() {
                 type="date"
                 className={styles.input}
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => form.setDate(e.target.value)}
               />
             </div>
           )}
-          {create.isError && (
+          {create.failure && (
             <p role="alert" className={styles.alert}>
               Couldn't create it:{" "}
-              {create.error instanceof Error ? create.error.message : "unknown error"}
+              {create.failure.error instanceof Error
+                ? create.failure.error.message
+                : "unknown error"}
             </p>
           )}
           <div>
             <button
               type="submit"
               className={styles.primary}
-              disabled={!title.trim() || !slugOk || create.isPending}
+              disabled={!form.entry || create.pending}
             >
-              {create.isPending ? "Creating…" : `Create ${kind}`}
+              {create.pending ? "Creating…" : `Create ${kind}`}
             </button>
           </div>
         </Stack>

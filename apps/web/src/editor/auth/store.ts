@@ -3,7 +3,7 @@ import { Store } from "@tanstack/store";
 /* Who is signed in and how the editor talks to GitHub. Lives in memory, mirrored to sessionStorage
    so a reload keeps the session but closing the tab ends it. */
 
-type Backend = "octokit" | "fake" | "local";
+export type Backend = "octokit" | "fake" | "local";
 
 export type Session =
   | { status: "anonymous" }

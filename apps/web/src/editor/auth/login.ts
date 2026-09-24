@@ -14,7 +14,7 @@ export async function startGitHubLogin(
   navigate: (url: string) => void = (url) => window.location.assign(url),
 ) {
   const config = await fetchAuthConfig();
-  if (!config.enabled || !config.clientId)
+  if (!config.oauth || !config.clientId)
     throw new Error("GitHub sign-in is not configured for this environment.");
   const verifier = createVerifier();
   const state = createState();

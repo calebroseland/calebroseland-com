@@ -1,61 +1,47 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { mergeMutation, openPullRequestMutation } from "../data/mutations.ts";
-import { pullQuery } from "../data/queries.ts";
+import { useDisclosure } from "../../hooks/useDisclosure.ts";
+import { useMergeAndDeploy, useOpenPullRequest, usePublishState } from "../data/hooks.ts";
 import type { Buffer } from "../drafts/buffer.ts";
-import { useCapabilities, useGitHub } from "../EditorProvider.tsx";
+import { useGitHub } from "../EditorProvider.tsx";
 import styles from "../editor.module.css";
+import { useShowLive } from "../navigation.ts";
 import { notify } from "../Toast.tsx";
-import { publishState, waitForDeploy } from "./publish.ts";
 
 /* States follow UX-SPEC §3.5: pre-flight → PR open (checks) → mergeable → merging → deploying → done, plus conflict. */
 
 export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?: boolean }) {
   const gh = useGitHub();
-  const { deploys } = useCapabilities();
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [phase, setPhase] = useState<"idle" | "deploying" | "slow">("idle");
-  const pull = useQuery({ ...pullQuery(gh, buffer.ref, { poll: open }), enabled: open });
-  const state = publishState(pull.data ?? null);
+  const dialog = useDisclosure();
+  const state = usePublishState(buffer.ref, dialog.open);
+  const openPr = useOpenPullRequest(buffer.ref);
+  const merge = useMergeAndDeploy(buffer.ref);
+  const showLive = useShowLive();
 
-  const openMutation = useMutation({
-    ...openPullRequestMutation(gh, buffer.ref),
-    onError: () => notify("Couldn't open the pull request.", { kind: "alert" }),
-  });
+  const open = async () => {
+    const outcome = await openPr.run({
+      title: buffer.meta.title,
+      summary: buffer.meta.summary,
+      slug: buffer.meta.slug,
+    });
+    if (!outcome.ok) notify("Couldn't open the pull request.", { kind: "alert" });
+  };
 
-  const merge = useMutation({
-    ...mergeMutation(gh, buffer.ref),
-    onSuccess: async (merged) => {
-      let deployed = true;
-      if (deploys) {
-        setPhase("deploying");
-        deployed = await waitForDeploy({
-          healthUrl: `${window.location.origin}/api/health`,
-          sha: merged.sha,
-        });
-      }
-      if (deployed) {
-        notify("Published.");
-        setOpen(false);
-        // A page lives at its own address; only posts sit under /posts.
-        await (buffer.meta.kind === "page"
-          ? navigate({ to: "/$slug", params: { slug: buffer.meta.slug } })
-          : navigate({ to: "/posts/$slug", params: { slug: buffer.meta.slug } }));
-      } else {
-        setPhase("slow");
-      }
-    },
-    onError: () =>
-      notify("Merge didn't complete. Check the pull request on GitHub.", { kind: "alert" }),
-  });
+  const mergeAndShow = async (number: number) => {
+    const outcome = await merge.run(number);
+    if (!outcome.ok) {
+      notify("Merge didn't complete. Check the pull request on GitHub.", { kind: "alert" });
+      return;
+    }
+    if (!outcome.value.deployed) return;
+    notify("Published.");
+    dialog.setOpen(false);
+    await showLive(buffer.meta);
+  };
 
-  const busy = openMutation.isPending || merge.isPending;
+  const busy = openPr.pending || merge.pending;
 
   return (
-    <Dialog.Root open={open} onOpenChange={(o) => !busy && setOpen(o)}>
+    <Dialog.Root open={dialog.open} onOpenChange={(o) => !busy && dialog.setOpen(o)}>
       <Dialog.Trigger className={styles.secondary} disabled={disabled}>
         Publish
       </Dialog.Trigger>
@@ -91,7 +77,7 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
           </Dialog.Description>
 
           <div role="status" aria-live="polite" className={styles.prStatus}>
-            {pull.isPending && open && <span>Checking for a pull request…</span>}
+            {state.checking && <span>Checking for a pull request…</span>}
             {state.kind === "open" && (
               <span>
                 <a href={state.pr.url} target="_blank" rel="noopener noreferrer">
@@ -108,8 +94,10 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
                 </a>
               </span>
             )}
-            {phase === "deploying" && <span>Published. Deploying…</span>}
-            {phase === "slow" && <span>Deploy is taking longer than usual. Check Actions.</span>}
+            {merge.stage === "deploying" && <span>Published. Deploying…</span>}
+            {merge.stage === "slow" && (
+              <span>Deploy is taking longer than usual. Check Actions.</span>
+            )}
           </div>
 
           <div className={styles.dialogActions}>
@@ -120,28 +108,22 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
               <button
                 type="button"
                 className={styles.primary}
-                onClick={() =>
-                  openMutation.mutate({
-                    title: buffer.meta.title,
-                    summary: buffer.meta.summary,
-                    slug: buffer.meta.slug,
-                  })
-                }
+                onClick={open}
                 disabled={busy || buffer.dirty}
               >
-                {openMutation.isPending ? "Opening…" : "Open pull request"}
+                {openPr.pending ? "Opening…" : "Open pull request"}
               </button>
             )}
             {state.kind === "open" && (
               <button
                 type="button"
                 className={styles.primary}
-                onClick={() => merge.mutate(state.pr.number)}
+                onClick={() => void mergeAndShow(state.pr.number)}
                 disabled={busy || state.mergeable !== true}
                 title={state.mergeable !== true ? "Waiting for checks" : undefined}
               >
-                {merge.isPending
-                  ? phase === "deploying"
+                {merge.pending
+                  ? merge.stage === "deploying"
                     ? "Deploying…"
                     : "Merging…"
                   : "Merge and publish"}

@@ -6,7 +6,6 @@ import { RadioGroup } from "@base-ui/react/radio-group";
 import { Select } from "@base-ui/react/select";
 import { Switch } from "@base-ui/react/switch";
 import type { Profile } from "@crc/content-schema";
-import { AuthError, StaleRefError } from "@crc/github-client";
 import { DropIndicator, reorder, useItemRegistration, useListReorder } from "@crc/interaction";
 import { Icon } from "@crc/ui";
 import {
@@ -17,7 +16,6 @@ import {
   mdiPencil,
   mdiPlus,
 } from "@crc/ui/icons";
-import { useMutation } from "@tanstack/react-query";
 import {
   type KeyboardEvent,
   type ReactNode,
@@ -27,20 +25,18 @@ import {
   useState,
 } from "react";
 import { session } from "../../editor/auth/store.ts";
-import { saveProfileMutation } from "../../editor/data/mutations.ts";
-import { EditorProvider, useCapabilities, useGitHub } from "../../editor/EditorProvider.tsx";
+import { useSaveProfile } from "../../editor/data/hooks.ts";
+import { EditorProvider, useCapabilities } from "../../editor/EditorProvider.tsx";
 import { clientFor } from "../../editor/github/client.ts";
 import { loadProfile, PROFILE_REF, type ProfileSource } from "../../editor/profile.ts";
 import { notify } from "../../editor/Toast.tsx";
 import { Tip } from "../Tip.tsx";
 import styles from "./CardEditor.module.css";
+import { useAnnouncer, useProfileDraft } from "./hooks.ts";
 import {
   type EditGroup,
   type EditLink,
-  type EditState,
   type EditTag,
-  fieldErrors,
-  fromProfile,
   ICON_CHOICES,
   iconPathFor,
   MAX_TAGS,
@@ -48,7 +44,6 @@ import {
   newLink,
   newTag,
   tagProblem,
-  toProfile,
 } from "./model.ts";
 
 /** What a save produced; the card shows it when it is already the site's source (the working tree). */
@@ -100,47 +95,30 @@ function CardEditorForm({
   /** Adds the page heading; the landing needs one, the editor's shell already has it. */
   heading?: boolean;
 }) {
-  const gh = useGitHub();
   const working = !useCapabilities().branches;
-  const [state, setState] = useState<EditState>(() => fromProfile(source.profile));
-  const [dirty, setDirty] = useState(false);
-  const [announcement, setAnnouncement] = useState("");
+  const { state, dirty, next, errors, update } = useProfileDraft(source.profile);
+  const announcer = useAnnouncer();
   const focusAfterMove = useFocusAfterMove();
   const headingId = useId();
+  const save = useSaveProfile(source);
 
-  const update = (fn: (s: EditState) => EditState) => {
-    setState(fn);
-    setDirty(true);
-  };
-  const next = toProfile(source.profile, state);
-  const errors = fieldErrors(next);
-  // The schema allows repeats; the card should not show the same focus area twice.
-  state.tags.forEach((t, i) => {
-    const repeat = tagProblem(state.tags, t.label, t.key);
-    if (repeat && !errors.has(`tags.${i}`)) errors.set(`tags.${i}`, repeat);
-  });
-
-  const save = useMutation({
-    ...saveProfileMutation(gh, source),
-    onSuccess: (saved) => {
+  const submit = async () => {
+    const outcome = await save.run(next);
+    if (outcome.ok) {
       notify(
         working
           ? "Saved content/profile.yaml."
           : `Saved to ${PROFILE_REF}. Publish it from the editor to update the site.`,
       );
-      onDone({ profile: saved.profile, workingTree: working });
-    },
-    onError: (err) => {
-      // The query client has already ended the session on an AuthError.
-      if (err instanceof AuthError) {
-        notify("Your sign-in expired. Sign in again to save.", { kind: "alert" });
-      } else if (err instanceof StaleRefError) {
-        notify("The profile changed since you opened it. Close the editor and open it again.", {
-          kind: "alert",
-        });
-      } else notify("Couldn't save the profile.", { kind: "alert" });
-    },
-  });
+      onDone({ profile: outcome.value.profile, workingTree: working });
+    } else if (outcome.reason === "expired")
+      notify("Your sign-in expired. Sign in again to save.", { kind: "alert" });
+    else if (outcome.reason === "conflict")
+      notify("The profile changed since you opened it. Close the editor and open it again.", {
+        kind: "alert",
+      });
+    else notify("Couldn't save the profile.", { kind: "alert" });
+  };
 
   const move = <T,>(
     items: readonly T[],
@@ -152,7 +130,7 @@ function CardEditorForm({
     const moved = items[from];
     if (moved === undefined || to < 0 || to >= items.length) return [...items];
     focusAfterMove(keyOf(moved));
-    setAnnouncement(`${label} moved to position ${to + 1} of ${items.length}`);
+    announcer.announce(`${label} moved to position ${to + 1} of ${items.length}`);
     return reorder(items, from, to);
   };
 
@@ -163,7 +141,7 @@ function CardEditorForm({
       aria-label={heading ? undefined : "Edit card"}
       onSubmit={(e) => {
         e.preventDefault();
-        if (errors.size === 0 && dirty) save.mutate(next);
+        if (errors.size === 0 && dirty) void submit();
       }}
     >
       {heading && (
@@ -262,7 +240,7 @@ function CardEditorForm({
       </fieldset>
 
       <p className="visually-hidden" aria-live="polite">
-        {announcement}
+        {announcer.message}
       </p>
 
       <div className={styles.bar}>
@@ -284,10 +262,10 @@ function CardEditorForm({
           <button
             type="submit"
             className={styles.primary}
-            disabled={!dirty || errors.size > 0 || save.isPending}
-            aria-busy={save.isPending}
+            disabled={!dirty || errors.size > 0 || save.pending}
+            aria-busy={save.pending}
           >
-            {save.isPending ? "Saving…" : "Save card"}
+            {save.pending ? "Saving…" : "Save card"}
           </button>
         </div>
       </div>

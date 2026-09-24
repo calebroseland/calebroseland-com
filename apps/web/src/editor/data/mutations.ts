@@ -1,9 +1,16 @@
 import type { Profile } from "@crc/content-schema";
 import type { GitHubClient } from "@crc/github-client";
 import { mutationOptions } from "@tanstack/react-query";
-import type { BufferController } from "../drafts/buffer.ts";
+import { type BufferController, browserStorage, writeLocalBuffer } from "../drafts/buffer.ts";
+import { bufferFromBundle } from "../drafts/load.ts";
 import { type ProfileSource, saveProfile } from "../profile.ts";
-import { mergeAndCleanUp, openPr, type PullRequestInput } from "../publish/publish.ts";
+import {
+  mergeAndCleanUp,
+  openPr,
+  type PullRequestInput,
+  waitForDeploy,
+} from "../publish/publish.ts";
+import { capabilitiesOf } from "./backend.ts";
 import { editorKeys } from "./keys.ts";
 import { beginEditing, createEntryDraft, discardEntry, type NewEntry, saveDraft } from "./ops.ts";
 
@@ -52,10 +59,42 @@ export const openPullRequestMutation = (gh: GitHubClient, ref: string) =>
     meta: { invalidates: [editorKeys.drafts(), editorKeys.pull(ref)] },
   });
 
-/** A merge changes what is published, so everything the editor has read is stale. */
-export const mergeMutation = (gh: GitHubClient, ref: string) =>
+/** Throws away the local copy and loads the branch's current version as the new base. */
+export const reloadDraftMutation = (
+  gh: GitHubClient,
+  controller: BufferController,
+  slug: string,
+) => {
+  const { ref } = controller.store.state;
+  return mutationOptions({
+    mutationFn: async () => {
+      const b = controller.store.state;
+      // A clean buffer removes its local copy.
+      writeLocalBuffer({ ...b, dirty: false }, browserStorage());
+      controller.replace(bufferFromBundle(await gh.readBundle(b.ref, b.dir), slug));
+    },
+    meta: { invalidates: [editorKeys.tree(ref)] },
+  });
+};
+
+/** Merges, then waits for the deploy where there is one. A merge changes what is published, so
+    everything the editor has read is stale. */
+export const mergeMutation = (
+  gh: GitHubClient,
+  ref: string,
+  onDeploying: () => void = () => undefined,
+) =>
   mutationOptions({
-    mutationFn: (number: number) => mergeAndCleanUp(gh, { ref, number }),
+    mutationFn: async (number: number) => {
+      const merged = await mergeAndCleanUp(gh, { ref, number });
+      if (!capabilitiesOf(gh.kind).deploys) return { deployed: true };
+      onDeploying();
+      const deployed = await waitForDeploy({
+        healthUrl: `${window.location.origin}/api/health`,
+        sha: merged.sha,
+      });
+      return { deployed };
+    },
     meta: { invalidates: [editorKeys.all] },
   });
 

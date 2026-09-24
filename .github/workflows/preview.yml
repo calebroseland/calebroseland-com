@@ -1,6 +1,8 @@
 name: preview
 
-# Draft branches get a preview URL via `wrangler versions upload`; the URL is posted once per PR and kept current.
+# Draft branches get a Version URL (Cloudflare's name for what were preview URLs) via `wrangler versions
+# upload`; the URL is posted once per PR and kept current. Version URLs are public unless Cloudflare Access
+# protects them, and drafts/** branches exist only while the experimental GitHub editing is on.
 on:
   push:
     branches: ["drafts/**"]
@@ -34,7 +36,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      - name: Comment preview URL on the PR (idempotent)
+      - name: Comment the Version URL on the PR (idempotent)
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           PREVIEW_URL: ${{ steps.upload.outputs.url }}
@@ -42,7 +44,7 @@ jobs:
           script: |
             const marker = "<!-- crc-preview -->";
             const url = process.env.PREVIEW_URL;
-            if (!url) { core.warning("no preview url"); return; }
+            if (!url) { core.warning("no Version URL"); return; }
             const { data: prs } = await github.rest.pulls.list({ ...context.repo, state: "open", head: `${context.repo.owner}:${context.ref.replace("refs/heads/", "")}` });
             for (const pr of prs) {
               const body = `${marker}\nPreview: ${url}\n\nBuilt from ${context.sha.slice(0, 7)}.`;

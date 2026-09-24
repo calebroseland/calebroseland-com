@@ -25,8 +25,13 @@ export default defineConfig({
   },
   webServer: {
     command: `npm run dev -- --port ${port} --strictPort`,
-    // Backends that write files do so here, never in the repository's content/.
-    env: { CRC_CONTENT_DIR: scratchContentDir },
+    env: {
+      // Backends that write files do so here, never in the repository's content/.
+      CRC_CONTENT_DIR: scratchContentDir,
+      // The suite covers the experimental GitHub editing too, so the Worker gets its flag from here.
+      CLOUDFLARE_INCLUDE_PROCESS_ENV: "true",
+      FEATURE_GITHUB_EDITING: "on",
+    },
     url: `http://localhost:${port}/api/health`,
     reuseExistingServer: false,
     timeout: 120_000,

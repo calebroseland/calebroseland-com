@@ -3,6 +3,7 @@ import "@crc/ui/index.css";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { dropUnavailableSession } from "./editor/auth/methods.ts";
 import { installErrorReporting } from "./reportError.ts";
 import { routeTree } from "./routeTree.gen.ts";
 
@@ -20,6 +21,8 @@ declare module "@tanstack/react-router" {
 }
 
 installErrorReporting();
+// Only someone already signed in pays for the check; readers never call the Worker for it.
+void dropUnavailableSession();
 
 const rootEl = document.getElementById("root");
 if (!rootEl) throw new Error("#root missing from index.html");

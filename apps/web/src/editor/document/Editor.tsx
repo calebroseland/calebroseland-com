@@ -1,9 +1,10 @@
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Markdown } from "@tiptap/markdown";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { EditorContent, type Editor as TipTap, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect, useRef } from "react";
+import { type RefObject, useEffect, useRef } from "react";
+import { useLatest } from "../../hooks/useLatest.ts";
 import styles from "./Editor.module.css";
 import { Toolbar } from "./Toolbar.tsx";
 
@@ -17,21 +18,32 @@ export type EditorApi = {
   focus(): void;
 };
 
-export function Editor({
-  initialMarkdown,
-  onChange,
-  onImageFiles,
-  apiRef,
-}: {
+/** A handle for the screen to reach into the document (insert an image, set its alt text). */
+export function useEditorApi() {
+  return useRef<EditorApi | null>(null);
+}
+
+type EditorProps = {
   initialMarkdown: string;
   onChange: (markdown: string) => void;
   onImageFiles: (files: File[]) => void;
-  apiRef?: React.RefObject<EditorApi | null>;
-}) {
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
-  const onImageFilesRef = useRef(onImageFiles);
-  onImageFilesRef.current = onImageFiles;
+  apiRef?: RefObject<EditorApi | null>;
+};
+
+export function Editor(props: EditorProps) {
+  const { editor, pickImages } = useMarkdownEditor(props);
+  return (
+    <div className={styles.frame}>
+      {editor && <Toolbar editor={editor} onPickImage={pickImages} />}
+      <EditorContent editor={editor} />
+    </div>
+  );
+}
+
+/** The TipTap editor for one document: markdown in and out, pasted or dropped images handed back. */
+function useMarkdownEditor({ initialMarkdown, onChange, onImageFiles, apiRef }: EditorProps) {
+  const onChangeRef = useLatest(onChange);
+  const onImageFilesRef = useLatest(onImageFiles);
 
   const editor = useEditor({
     extensions: [
@@ -74,7 +86,12 @@ export function Editor({
     },
     onUpdate: ({ editor }) => onChangeRef.current(editor.getMarkdown()),
   });
+  useApiBinding(editor, apiRef);
+  return { editor, pickImages: (files: File[]) => onImageFilesRef.current(files) };
+}
 
+/** Exposes the editor's commands through `apiRef` for as long as the editor exists. */
+function useApiBinding(editor: TipTap | null, apiRef: RefObject<EditorApi | null> | undefined) {
   useEffect(() => {
     if (!apiRef || !editor) return;
     apiRef.current = {
@@ -96,13 +113,4 @@ export function Editor({
       apiRef.current = null;
     };
   }, [editor, apiRef]);
-
-  return (
-    <div className={styles.frame}>
-      {editor && (
-        <Toolbar editor={editor} onPickImage={(files) => onImageFilesRef.current(files)} />
-      )}
-      <EditorContent editor={editor} />
-    </div>
-  );
 }

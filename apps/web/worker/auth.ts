@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { WorkerEnv } from "./env.ts";
+import { featureOn } from "./features.ts";
 import { problem } from "./problem.ts";
 
 /* GitHub requires the client secret at code redemption and sends no CORS headers, so the exchange
@@ -21,16 +22,21 @@ const githubToken = z.object({
 
 const githubError = z.object({ error: z.string(), error_description: z.string().optional() });
 
-type AuthConfig = { enabled: boolean; clientId: string | null };
+type AuthConfig = {
+  /** Editing through GitHub is switched on here (FEATURE_GITHUB_EDITING). */
+  github: boolean;
+  /** GitHub is on and its OAuth app is configured, so the sign-in round trip can run. */
+  oauth: boolean;
+  clientId: string | null;
+};
 
-/** Tells the SPA whether OAuth is configured for this environment (so dev can fall back to token entry). */
+/** Tells the SPA which ways of signing in to offer in this environment. */
 export function authConfig(env: WorkerEnv): Response {
-  const enabled = Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
+  const github = featureOn(env.FEATURE_GITHUB_EDITING);
+  const oauth = github && Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
   return Response.json(
-    { enabled, clientId: enabled ? env.GITHUB_CLIENT_ID : null } satisfies AuthConfig,
-    {
-      headers: { "cache-control": "no-store" },
-    },
+    { github, oauth, clientId: oauth ? env.GITHUB_CLIENT_ID : null } satisfies AuthConfig,
+    { headers: { "cache-control": "no-store" } },
   );
 }
 
@@ -39,6 +45,9 @@ export async function authCallback(
   env: WorkerEnv,
   requestId: string,
 ): Promise<Response> {
+  if (!featureOn(env.FEATURE_GITHUB_EDITING)) {
+    return problem(404, "GitHub editing is off", "FEATURE_GITHUB_EDITING is not on here.");
+  }
   if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
     return problem(
       503,

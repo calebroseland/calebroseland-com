@@ -1,36 +1,23 @@
-import { AuthError, type Bundle, StaleRefError } from "@crc/github-client";
+import type { Bundle, StaleRefError } from "@crc/github-client";
 import { Stack } from "@crc/ui";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useStore } from "@tanstack/react-store";
-import { useEffect, useRef, useState } from "react";
 import * as z from "zod/mini";
 import { ConfirmDialog } from "../editor/Dialogs.tsx";
-import { editorKeys } from "../editor/data/keys.ts";
-import { beginEditingMutation, saveDraftMutation } from "../editor/data/mutations.ts";
-import { contentTreeQuery, draftsQuery } from "../editor/data/queries.ts";
+import { useBeginEditing, useEntry, useReloadDraft, useSaveDraft } from "../editor/data/hooks.ts";
 import { AssetsPanel } from "../editor/document/AssetsPanel.tsx";
-import { Editor, type EditorApi } from "../editor/document/Editor.tsx";
+import { Editor, useEditorApi } from "../editor/document/Editor.tsx";
 import { MetaPanel } from "../editor/document/MetaPanel.tsx";
-import {
-  ImageTooLargeError,
-  resizeImage,
-  UnsupportedImageError,
-} from "../editor/document/resize.ts";
-import {
-  type BufferController,
-  createBufferStore,
-  missingAlt,
-  readLocalBuffer,
-  writeLocalBuffer,
-} from "../editor/drafts/buffer.ts";
-import { bufferFromBundle } from "../editor/drafts/load.ts";
-import { findEntryDir } from "../editor/drafts/paths.ts";
+import { missingAlt } from "../editor/drafts/buffer.ts";
+import { useDraftBuffer } from "../editor/drafts/hooks.ts";
+import { addImage } from "../editor/drafts/images.ts";
 import { useCapabilities, useGitHub } from "../editor/EditorProvider.tsx";
 import { EditorShell } from "../editor/EditorShell.tsx";
 import styles from "../editor/editor.module.css";
 import { PublishDialog } from "../editor/publish/PublishDialog.tsx";
 import { notify } from "../editor/Toast.tsx";
+import { useDialogState } from "../hooks/useDialogState.ts";
+
+type Panel = "meta" | "media";
 
 export const Route = createFileRoute("/editor/$slug")({
   validateSearch: z.object({ panel: z.optional(z.enum(["meta", "media"])) }),
@@ -38,136 +25,105 @@ export const Route = createFileRoute("/editor/$slug")({
   component: DraftRoute,
 });
 
+function useSlug(): string {
+  return Route.useParams().slug;
+}
+
+/** The side panel on show, kept in the URL. */
+function usePanel() {
+  const { panel = "meta" } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  return { panel, show: (next: Panel) => navigate({ search: { panel: next } }) };
+}
+
 function DraftRoute() {
-  const { slug } = Route.useParams();
-  const gh = useGitHub();
-  const drafts = useQuery(draftsQuery(gh));
-  // A slug with no branch of its own is already on the default branch; read it there so the entry can
-  // be previewed, and branch from it only when the author actually chooses to edit.
-  const draft = drafts.data?.find((d) => d.slug === slug);
-  const ref = draft?.ref ?? gh.defaultBranch;
-  const tree = useQuery({ ...contentTreeQuery(gh, ref), enabled: drafts.isSuccess });
-
-  const beginEdit = useMutation({
-    ...beginEditingMutation(gh),
-    onError: () => notify("Couldn't start editing this entry.", { kind: "alert" }),
-  });
-
-  if (drafts.isPending || tree.isPending) {
-    return (
-      <EditorShell title={slug}>
-        <p className={styles.muted} aria-busy="true">
-          Loading…
-        </p>
-      </EditorShell>
-    );
-  }
-  if (drafts.isError || tree.isError || !tree.data) {
-    return (
-      <EditorShell title={slug}>
-        <p role="alert" className={styles.alert}>
-          Couldn't load this entry from GitHub.{" "}
-          <button type="button" className={styles.toastAction} onClick={() => tree.refetch()}>
-            Retry
-          </button>
-        </p>
-      </EditorShell>
-    );
-  }
-  if (
-    !findEntryDir(
-      tree.data.files.map((f) => f.path),
-      slug,
-    )
-  ) {
-    return (
-      <EditorShell title={slug}>
-        <p role="alert" className={styles.alert}>
-          No entry with the slug “{slug}” exists on {ref}.
-        </p>
-        <p className={styles.muted}>
-          <Link to="/editor">← Editor</Link>
-        </p>
-      </EditorShell>
-    );
-  }
-  if (!draft) {
-    return (
-      <EditorShell title={slug}>
-        <Stack gap="4">
-          <p className={styles.muted}>
-            This entry is published on <code>{gh.defaultBranch}</code>. Editing it starts a draft
-            branch from there and reuses the existing bundle, so nothing is duplicated.
+  const slug = useSlug();
+  const entry = useEntry(slug);
+  switch (entry.status) {
+    case "loading":
+      return (
+        <EditorShell title={slug}>
+          <p className={styles.muted} aria-busy="true">
+            Loading…
           </p>
-          <div>
-            <button
-              type="button"
-              className={styles.primary}
-              onClick={() => beginEdit.mutate(slug)}
-              disabled={beginEdit.isPending}
-              aria-busy={beginEdit.isPending}
-            >
-              {beginEdit.isPending ? "Starting…" : "Edit this entry"}
+        </EditorShell>
+      );
+    case "error":
+      return (
+        <EditorShell title={slug}>
+          <p role="alert" className={styles.alert}>
+            Couldn't load this entry from GitHub.{" "}
+            <button type="button" className={styles.toastAction} onClick={entry.retry}>
+              Retry
             </button>
-          </div>
-        </Stack>
-      </EditorShell>
-    );
+          </p>
+        </EditorShell>
+      );
+    case "missing":
+      return (
+        <EditorShell title={slug}>
+          <p role="alert" className={styles.alert}>
+            No entry with the slug “{slug}” exists on {entry.ref}.
+          </p>
+          <p className={styles.muted}>
+            <Link to="/editor">← Editor</Link>
+          </p>
+        </EditorShell>
+      );
+    case "published":
+      return <StartEditing slug={slug} />;
+    case "draft":
+      // Keyed by ref only: a save advances the head, and remounting on that would rebuild the editor
+      // from the pre-save cache and blank the body. Wholesale replacements are handled inside.
+      return <DraftEditor key={entry.ref} slug={slug} bundle={entry.bundle} />;
   }
-  // Keyed by ref only: a save advances the head, and remounting on that would rebuild the editor from
-  // the pre-save cache and blank the body. Wholesale replacements are handled inside the component.
-  return <DraftEditor key={ref} slug={slug} bundle={tree.data} />;
+}
+
+function StartEditing({ slug }: { slug: string }) {
+  const gh = useGitHub();
+  const begin = useBeginEditing();
+  const start = async () => {
+    const outcome = await begin.run(slug);
+    if (!outcome.ok) notify("Couldn't start editing this entry.", { kind: "alert" });
+  };
+  return (
+    <EditorShell title={slug}>
+      <Stack gap="4">
+        <p className={styles.muted}>
+          This entry is published on <code>{gh.defaultBranch}</code>. Editing it starts a draft
+          branch from there and reuses the existing bundle, so nothing is duplicated.
+        </p>
+        <div>
+          <button
+            type="button"
+            className={styles.primary}
+            onClick={start}
+            disabled={begin.pending}
+            aria-busy={begin.pending}
+          >
+            {begin.pending ? "Starting…" : "Edit this entry"}
+          </button>
+        </div>
+      </Stack>
+    </EditorShell>
+  );
 }
 
 function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
-  const gh = useGitHub();
   const { branches, publishes } = useCapabilities();
-  const queryClient = useQueryClient();
-  const { panel = "meta" } = Route.useSearch();
-  const navigate = Route.useNavigate();
-  const storage = typeof window === "undefined" ? undefined : window.localStorage;
-  // Built once per branch; later refetches update the cache, not the working copy.
-  const [controller] = useState<BufferController>(() => {
-    const initial = bufferFromBundle(bundle, slug);
-    const local = readLocalBuffer(initial.ref, storage);
-    // Unsaved work always wins on load, even when the source moved underneath it: it keeps its own
-    // base, so saving is refused with the conflict dialog rather than the edit being thrown away here.
-    const start = local ? { ...local, existingAssets: initial.existingAssets } : initial;
-    return createBufferStore(start);
-  });
-  const buffer = useStore(controller.store);
-  const api = useRef<EditorApi | null>(null);
-  const [conflict, setConflict] = useState<StaleRefError | null>(null);
-  // TipTap reads its content once; bump this to remount the editor when the buffer is replaced wholesale.
-  const [editorGeneration, setEditorGeneration] = useState(0);
+  const { panel, show } = usePanel();
+  const { buffer, controller } = useDraftBuffer(bundle, slug);
+  const save = useSaveDraft(controller);
+  const reload = useReloadDraft(controller, slug);
+  const conflict = useDialogState<StaleRefError>();
+  const api = useEditorApi();
 
-  // Autosave the working copy locally, debounced; never commits.
-  useEffect(() => {
-    const t = setTimeout(() => writeLocalBuffer(buffer, storage), 500);
-    return () => clearTimeout(t);
-  }, [buffer, storage]);
-
-  useEffect(() => {
-    if (!buffer.dirty) return;
-    const guard = (e: BeforeUnloadEvent) => {
-      // Flush synchronously: a reload inside the autosave debounce would otherwise lose the edit, and
-      // the dev server reloads the page whenever content changes on disk.
-      writeLocalBuffer(controller.store.state, storage);
-      e.preventDefault();
-    };
-    window.addEventListener("beforeunload", guard);
-    return () => window.removeEventListener("beforeunload", guard);
-  }, [buffer.dirty, controller, storage]);
-
-  // The cache is refetched rather than patched after a save, so it always matches what was committed.
-  const save = useMutation({
-    ...saveDraftMutation(gh, controller),
-    onSuccess: ({ headSha, commitUrl }) => {
-      controller.markSaved(headSha);
-      writeLocalBuffer(controller.store.state, storage);
-      if (!branches) {
-        notify(`Saved ${buffer.dir} to your working tree`);
-      } else {
+  const runSave = async (mode: "save" | "overwrite") => {
+    const outcome = await save.run(mode);
+    if (outcome.ok) {
+      if (!branches) notify(`Saved ${buffer.dir} to your working tree`);
+      else {
+        const { commitUrl } = outcome.value;
         notify(`Committed to ${buffer.ref}`, {
           action: {
             label: "View commit",
@@ -175,22 +131,19 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
           },
         });
       }
-    },
-    onError: (err) => {
-      if (err instanceof StaleRefError) setConflict(err);
-      else if (err instanceof AuthError)
-        notify("Your sign-in expired. Sign in again; your changes are kept on this device.", {
-          kind: "alert",
-        });
-      else
-        notify(
-          !branches
-            ? "Couldn't write to your working tree. Your changes are still here."
-            : "Couldn't save to GitHub. Your changes are still here.",
-          { kind: "alert", action: { label: "Retry", onClick: () => save.mutate("save") } },
-        );
-    },
-  });
+    } else if (outcome.reason === "conflict") conflict.open(outcome.error);
+    else if (outcome.reason === "expired")
+      notify("Your sign-in expired. Sign in again; your changes are kept on this device.", {
+        kind: "alert",
+      });
+    else
+      notify(
+        branches
+          ? "Couldn't save to GitHub. Your changes are still here."
+          : "Couldn't write to your working tree. Your changes are still here.",
+        { kind: "alert", action: { label: "Retry", onClick: () => void runSave("save") } },
+      );
+  };
 
   const onSave = () => {
     const missing = missingAlt(buffer);
@@ -198,15 +151,21 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
       notify(`Add alt text for ${missing.length} image${missing.length > 1 ? "s" : ""}.`, {
         kind: "alert",
       });
-      void navigate({ search: { panel: "media" } });
+      void show("media");
       return;
     }
     if (!buffer.meta.title.trim()) {
       notify("Add a title before saving.", { kind: "alert" });
-      void navigate({ search: { panel: "meta" } });
+      void show("meta");
       return;
     }
-    save.mutate("save");
+    void runSave("save");
+  };
+
+  const reloadFromSource = async () => {
+    conflict.close();
+    const outcome = await reload.run();
+    if (!outcome.ok) notify("Couldn't load the current version.", { kind: "alert" });
   };
 
   /* Alt text lives in two places by necessity: the buffer, which enforces it before a save, and the
@@ -218,35 +177,15 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
 
   const onImageFiles = async (files: File[]) => {
     for (const file of files) {
-      try {
-        const img = await resizeImage(file);
-        controller.addAsset({
-          name: img.name,
-          type: img.type,
-          blob: img.blob,
-          objectUrl: URL.createObjectURL(img.blob),
-          alt: "",
-          width: img.width,
-          height: img.height,
+      const added = await addImage(controller, file);
+      if (added.ok) {
+        api.current?.insertImage(added.asset.name, "");
+        void show("media");
+      } else
+        notify(added.reason === "rejected" ? added.message : "Couldn't process that image.", {
+          kind: "alert",
         });
-        api.current?.insertImage(img.name, "");
-        void navigate({ search: { panel: "media" } });
-      } catch (err) {
-        if (err instanceof UnsupportedImageError || err instanceof ImageTooLargeError)
-          notify(err.message, { kind: "alert" });
-        else notify("Couldn't process that image.", { kind: "alert" });
-      }
     }
-  };
-
-  const reloadFromGitHub = async () => {
-    setConflict(null);
-    // Clear the local copy first (a clean buffer removes its key), then take the remote version as the new base.
-    writeLocalBuffer({ ...controller.store.state, dirty: false }, storage);
-    const fresh = await gh.readBundle(buffer.ref, buffer.dir);
-    controller.replace(bufferFromBundle(fresh, slug));
-    setEditorGeneration((g) => g + 1);
-    await queryClient.invalidateQueries({ queryKey: editorKeys.tree(buffer.ref) });
   };
 
   return (
@@ -255,19 +194,19 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
       actions={
         <div className={styles.editorBar}>
           <span className={styles.status} data-dirty={buffer.dirty}>
-            {save.isPending ? "Saving…" : buffer.dirty ? "Unsaved changes" : "Saved"}
+            {save.pending ? "Saving…" : buffer.dirty ? "Unsaved changes" : "Saved"}
           </span>
           <button
             type="button"
             className={styles.primary}
             onClick={onSave}
-            disabled={!buffer.dirty || save.isPending}
-            aria-busy={save.isPending}
+            disabled={!buffer.dirty || save.pending}
+            aria-busy={save.pending}
           >
-            {save.isPending ? "Saving…" : "Save"}
+            {save.pending ? "Saving…" : "Save"}
           </button>
           {/* Nothing to publish in working-tree mode: the file is already on your branch. */}
-          {publishes && <PublishDialog buffer={buffer} disabled={save.isPending} />}
+          {publishes && <PublishDialog buffer={buffer} disabled={save.pending} />}
         </div>
       }
     >
@@ -275,7 +214,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
         <p role="status" className={styles.banner}>
           Restored unsaved changes from this device.
           {buffer.imagesDropped ? " Images added but not saved were not kept." : ""}
-          <button type="button" className={styles.toastAction} onClick={reloadFromGitHub}>
+          <button type="button" className={styles.toastAction} onClick={reloadFromSource}>
             Discard local changes
           </button>
         </p>
@@ -286,7 +225,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
       <div className={styles.editorContainer}>
         <div className={styles.editorLayout}>
           <Editor
-            key={editorGeneration}
+            key={reload.generation}
             initialMarkdown={buffer.markdown}
             onChange={controller.setMarkdown}
             onImageFiles={onImageFiles}
@@ -303,7 +242,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
                   aria-selected={panel === p}
                   aria-controls={`panel-${p}`}
                   className={styles.tab}
-                  onClick={() => navigate({ search: { panel: p } })}
+                  onClick={() => show(p)}
                 >
                   {p === "meta"
                     ? "Details"
@@ -322,8 +261,8 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
         </div>
       </div>
       <ConfirmDialog
-        open={conflict !== null}
-        onOpenChange={(o) => !o && setConflict(null)}
+        open={conflict.isOpen}
+        onOpenChange={conflict.onOpenChange}
         title={
           !branches
             ? "This file changed on disk since you opened it."
@@ -336,18 +275,18 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
         }
         actions={
           <>
-            <button type="button" className={styles.secondary} onClick={() => setConflict(null)}>
+            <button type="button" className={styles.secondary} onClick={conflict.close}>
               Cancel
             </button>
-            <button type="button" className={styles.secondary} onClick={reloadFromGitHub}>
+            <button type="button" className={styles.secondary} onClick={reloadFromSource}>
               {!branches ? "Reload from disk" : "Reload from GitHub"}
             </button>
             <button
               type="button"
               className={`${styles.primary} ${styles.danger}`}
               onClick={() => {
-                setConflict(null);
-                save.mutate("overwrite");
+                conflict.close();
+                void runSave("overwrite");
               }}
             >
               Overwrite

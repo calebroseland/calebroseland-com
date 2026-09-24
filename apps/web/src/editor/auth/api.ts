@@ -4,7 +4,11 @@ import * as z from "zod/mini";
 
 const apiOrigin = (): string => (typeof __API_ORIGIN__ === "string" && __API_ORIGIN__) || "";
 
-const configSchema = z.object({ enabled: z.boolean(), clientId: z.nullable(z.string()) });
+const configSchema = z.object({
+  github: z.boolean(),
+  oauth: z.boolean(),
+  clientId: z.nullable(z.string()),
+});
 const tokenSchema = z.object({
   accessToken: z.string(),
   tokenType: z.string(),

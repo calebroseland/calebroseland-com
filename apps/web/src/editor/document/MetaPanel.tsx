@@ -16,31 +16,7 @@ export function MetaPanel({
   buffer: Buffer;
   controller: BufferController;
 }) {
-  const form = useForm({
-    defaultValues: {
-      title: buffer.meta.title,
-      date: buffer.meta.date,
-      tags: buffer.meta.tags.join(", "),
-      summary: buffer.meta.summary ?? "",
-      draft: buffer.meta.draft,
-    } satisfies Values,
-    listeners: {
-      onChange: ({ formApi }) => {
-        const v = formApi.state.values;
-        const tags = v.tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean);
-        controller.setMeta({
-          title: v.title,
-          date: v.date,
-          tags,
-          draft: v.draft,
-          ...(v.summary.trim() ? { summary: v.summary.trim() } : { summary: undefined }),
-        });
-      },
-    },
-  });
+  const form = useMetaForm(buffer, controller);
 
   const isPost = buffer.meta.kind === "post";
 
@@ -197,4 +173,33 @@ function Field({
       )}
     </div>
   );
+}
+
+/** The frontmatter as a form whose every change goes straight into the buffer. */
+function useMetaForm(buffer: Buffer, controller: BufferController) {
+  return useForm({
+    defaultValues: {
+      title: buffer.meta.title,
+      date: buffer.meta.date,
+      tags: buffer.meta.tags.join(", "),
+      summary: buffer.meta.summary ?? "",
+      draft: buffer.meta.draft,
+    } satisfies Values,
+    listeners: {
+      onChange: ({ formApi }) => {
+        const v = formApi.state.values;
+        const tags = v.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+        controller.setMeta({
+          title: v.title,
+          date: v.date,
+          tags,
+          draft: v.draft,
+          ...(v.summary.trim() ? { summary: v.summary.trim() } : { summary: undefined }),
+        });
+      },
+    },
+  });
 }
