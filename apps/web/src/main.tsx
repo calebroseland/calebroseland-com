@@ -3,16 +3,20 @@ import "@crc/ui/index.css";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { routeTransitions } from "./components/pageTransition.ts";
 import { dropUnavailableSession } from "./editor/auth/methods.ts";
 import { installErrorReporting } from "./reportError.ts";
 import { routeTree } from "./routeTree.gen.ts";
 
+const transitions = routeTransitions();
 const router = createRouter({
   routeTree,
   basepath: import.meta.env.BASE_URL,
   defaultPreload: "intent",
   scrollRestoration: true,
+  defaultViewTransition: { types: transitions.types },
 });
+transitions.bind(router);
 
 declare module "@tanstack/react-router" {
   interface Register {

@@ -17,7 +17,7 @@ function useBackToCard() {
   const reduce = useReduceMotion();
   const navigate = useNavigate();
   return () =>
-    withViewTransition("leave", () => navigate({ to: "/" }), reduce);
+    withViewTransition("leave", () => navigate({ to: "/", viewTransition: false }), reduce);
 }
 
 /* Chrome for every page past the landing card: header with the brand + nav, main, footer. The brand is

@@ -376,7 +376,12 @@ export function Landing({ profile: published }: { profile: Profile }) {
      transition callback resolves, which can leave the card in the new snapshot. Focus follows the
      path change through the root layout's focus-on-navigate. */
   const enter = () =>
-    withViewTransition("enter", () => navigate({ to: "/home" }), reduce);
+    withViewTransition(
+      "enter",
+      // The card runs its own transition; the router's would cut it short.
+      () => navigate({ to: "/home", viewTransition: false }),
+      reduce,
+    );
 
   return (
     <div
