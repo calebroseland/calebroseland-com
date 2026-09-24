@@ -107,6 +107,23 @@ test.describe("editor drafts", () => {
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
   });
 
+  test("Close goes back to the list and keeps unsaved edits for next time", async ({ page }) => {
+    await signInFake(page);
+    await page.getByRole("link", { name: "New entry" }).click();
+    await page.getByLabel("Title").fill("Close Me");
+    await page.getByRole("button", { name: "Create post" }).click();
+    await expect(page).toHaveURL(/\/editor\/close-me/);
+    await page.getByRole("textbox", { name: "Post body" }).click();
+    await page.keyboard.type("Half a thought");
+    // Straight away, inside the autosave debounce: closing writes the edit down itself.
+    await page.getByRole("link", { name: "Close" }).click();
+    await expect(page).toHaveURL(/\/editor\/?$/);
+    await expect(page.getByRole("status").filter({ hasText: "kept on this device" })).toBeVisible();
+    // A draft branch with nothing published under its slug is listed by the slug.
+    await page.getByRole("link", { name: "close-me" }).first().click();
+    await expect(page.getByRole("textbox", { name: "Post body" })).toContainText("Half a thought");
+  });
+
   test("a stale head shows the conflict dialog and nothing is overwritten silently", async ({
     page,
   }) => {

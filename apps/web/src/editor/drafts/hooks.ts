@@ -25,6 +25,7 @@ export function useDraftBuffer(bundle: Bundle, slug: string) {
   });
   const buffer = useStore(controller.store);
   useLocalAutosave(buffer);
+  useFlushOnUnmount(controller);
   useFlushBeforeLeaving(controller, buffer.dirty);
   return { buffer, controller };
 }
@@ -35,6 +36,12 @@ function useLocalAutosave(buffer: Buffer) {
     const t = setTimeout(() => writeLocalBuffer(buffer, browserStorage()), 500);
     return () => clearTimeout(t);
   }, [buffer]);
+}
+
+/** Writes the working copy down when the editor closes, so an edit inside the autosave debounce is
+    not lost to an in-app navigation. */
+function useFlushOnUnmount(controller: BufferController) {
+  useEffect(() => () => writeLocalBuffer(controller.store.state, browserStorage()), [controller]);
 }
 
 /** Asks before leaving with unsaved changes, and writes them down first: a reload inside the autosave

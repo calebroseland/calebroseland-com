@@ -207,6 +207,16 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
           </button>
           {/* Nothing to publish in working-tree mode: the file is already on your branch. */}
           {publishes && <PublishDialog buffer={buffer} disabled={save.pending} />}
+          {/* Unsaved work stays on this device and is restored when the entry is opened again. */}
+          <Link
+            to="/editor"
+            className={styles.secondary}
+            onClick={() => {
+              if (buffer.dirty) notify("Unsaved changes are kept on this device.");
+            }}
+          >
+            Close
+          </Link>
         </div>
       }
     >

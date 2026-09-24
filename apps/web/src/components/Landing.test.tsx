@@ -200,11 +200,10 @@ describe("Landing", () => {
         .map((h) => h.textContent),
     ).toEqual(["Code", "Writings", "Social"]);
     expect(within(footer).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
-    // The dev server offers the editor to anyone; a built site offers it only once signed in.
-    expect(screen.getByRole("contentinfo")).toContainElement(
-      screen.getByRole("link", { name: "Editor" }),
-    );
-    expect(screen.getByRole("link", { name: "Editor" })).toHaveAttribute("href", "/editor");
+    // The way into the editor is the account menu, not the footer.
+    expect(
+      within(screen.getByRole("contentinfo")).queryByRole("link", { name: "Editor" }),
+    ).not.toBeInTheDocument();
     expect(
       within(footer).getByRole("link", { name: /LinkedIn.*opens in new tab/ }),
     ).toHaveAttribute("target", "_blank");
@@ -243,33 +242,6 @@ describe("Landing", () => {
     await screen.findByRole("heading", { level: 1, name: "Placeholder Name" });
     expect(screen.getByRole("navigation", { name: "Profiles and links" })).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Site" })).not.toBeInTheDocument();
-  });
-
-  it("hides the editor link from a signed-out reader of the built site", async () => {
-    vi.stubEnv("DEV", false);
-    try {
-      await renderLanding();
-      fireEvent.click(screen.getByRole("button", { name: "Enter" }));
-      await screen.findByRole("heading", { level: 1, name: "Latest writing" });
-      expect(screen.queryByRole("link", { name: "Editor" })).not.toBeInTheDocument();
-    } finally {
-      vi.unstubAllEnvs();
-    }
-  });
-
-  it("keeps the editor link on the built site for someone signed in", async () => {
-    vi.stubEnv("DEV", false);
-    session.signIn({ status: "authenticated", backend: "fake", token: "fake" });
-    try {
-      await renderLanding();
-      fireEvent.click(screen.getByRole("button", { name: "Enter" }));
-      await screen.findByRole("heading", { level: 1, name: "Latest writing" });
-      expect(screen.getByRole("link", { name: "Editor" })).toHaveAttribute("href", "/editor");
-    } finally {
-      session.signOut();
-      localStorage.clear();
-      vi.unstubAllEnvs();
-    }
   });
 
   it("offers no editing to readers", async () => {
