@@ -46,7 +46,7 @@
   }
 
   /* Named only while entering or leaving, like the card side. */
-  :root:is([data-vt="enter"], [data-vt="leave"]) .link {
+  :root:is([data-vt="enter"], [data-vt="leave"]) :is(.link, .groupTitle) {
     view-transition-name: var(--vt-footer);
     view-transition-class: footer-link;
   }
@@ -59,8 +59,7 @@
     font-size: var(--font-size-xs);
   }
 
-  /* During a page transition the footer is lifted out of the page's snapshot and simply switches: it
-     neither fades nor travels with the page (Page.module.css). */
+  /* Page transitions: the footer switches without animating (Page.module.css). */
   :root[data-page]:not([data-vt]) .footer {
     view-transition-name: site-footer;
   }

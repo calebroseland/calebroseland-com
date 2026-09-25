@@ -21,7 +21,15 @@ import {
 } from "@crc/ui/icons";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, m, type Transition } from "motion/react";
-import { type ReactNode, type RefObject, useEffect, useId, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type ReactNode,
+  type RefObject,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { useSignedIn } from "../editor/auth/hooks.ts";
 import type { ProfileSource } from "../editor/profile.ts";
 import { notify } from "../editor/Toast.tsx";
@@ -31,7 +39,7 @@ import type { EditResult } from "./cardEditor/CardEditor.tsx";
 import { FocusChip } from "./FocusChip.tsx";
 import styles from "./Landing.module.css";
 import { UserMenu } from "./UserMenu.tsx";
-import { footerLinkName, vtName, withViewTransition } from "./viewTransition.ts";
+import { footerHeadingName, footerLinkName, vtName, withViewTransition } from "./viewTransition.ts";
 
 type OpenEditor = {
   source: ProfileSource;
@@ -208,14 +216,21 @@ function Front({
           if (!primary) return null;
           return (
             <div key={group.title} className={styles.group}>
-              {expanded && (
+              {expanded ? (
                 <h2
-                  className={`${styles.groupTitle} ${styles.vt}`}
-                  style={vtName(`card-group-${g}`)}
+                  className={`${styles.groupTitle} ${styles.vt} ${styles.toFooter}`}
+                  style={{ ...vtName(`card-group-${g}`), ...footerHeadingName(g) }}
                 >
                   {group.title}
                   <Icon path={mdiOpenInNew} size="xs" />
                 </h2>
+              ) : (
+                // Where the heading would be, so the footer's heading grows out of the collapsed card.
+                <span
+                  aria-hidden="true"
+                  className={`${styles.headingAnchor} ${styles.toFooter}`}
+                  style={footerHeadingName(g)}
+                />
               )}
               <ul className={styles.list} role="list">
                 <li
@@ -223,6 +238,20 @@ function Front({
                   style={{ ...vtName(`card-link-${g}-0`), ...footerLinkName(g, 0) }}
                 >
                   <CardLink link={primary} />
+                  {/* Where each hidden link would sit, so the footer's links flow out of the card. */}
+                  {!expanded &&
+                    rest.map((link, i) => (
+                      <span
+                        key={link.url}
+                        aria-hidden="true"
+                        inert
+                        className={`${styles.linkAnchor} ${styles.toFooter}`}
+                        style={{ ...footerLinkName(g, i + 1), "--row": i + 1 } as CSSProperties}
+                      >
+                        {/* Invisible; sizes the mark like the link so it does not stretch. */}
+                        <CardLink link={link} />
+                      </span>
+                    ))}
                 </li>
                 {expanded &&
                   rest.map((link, i) => (

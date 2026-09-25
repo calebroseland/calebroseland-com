@@ -33,3 +33,7 @@ export const vtName = (name: string): CSSProperties => ({ "--vt-name": name }) a
     the two (see `.toFooter` in Landing.module.css and `.footerLink` in SiteFooter.module.css). */
 export const footerLinkName = (group: number, index: number): CSSProperties =>
   ({ "--vt-footer": `footer-link-${group}-${index}` }) as CSSProperties;
+
+/** Pairs a link group's heading on the card with its heading in the site footer, the same way. */
+export const footerHeadingName = (group: number): CSSProperties =>
+  ({ "--vt-footer": `footer-heading-${group}` }) as CSSProperties;

@@ -4,7 +4,7 @@ import * as icons from "@crc/ui/icons";
 import { Link } from "@tanstack/react-router";
 import { useSectionHeading } from "../hooks/useSectionHeading.ts";
 import styles from "./SiteFooter.module.css";
-import { footerLinkName } from "./viewTransition.ts";
+import { footerHeadingName, footerLinkName } from "./viewTransition.ts";
 
 const iconPath = (name: string): string =>
   (icons as Record<string, string>)[name] ?? icons.mdiOpenInNew;
@@ -42,7 +42,7 @@ function FooterGroup({
   const named = useSectionHeading();
   return (
     <section {...named.region} className={styles.group}>
-      <h2 {...named.heading} className={styles.groupTitle}>
+      <h2 {...named.heading} className={styles.groupTitle} style={footerHeadingName(index)}>
         {title}
       </h2>
       <ul role="list" className={styles.list}>
