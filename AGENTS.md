@@ -39,7 +39,7 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 - Feature flags are Worker vars: per environment in `wrangler.jsonc`, locally in `apps/web/.dev.vars`; the SPA reads them at runtime from `/api/auth/config`, never from `VITE_*`. The E2E dev server turns `FEATURE_GITHUB_EDITING` on through its process env.
 - The editor branches from and publishes into `CONTENT_BRANCH`, fixed at build time: `master` by default, `next` for the staging build.
 - Editor data lives in `src/editor/data`: query keys, query options, and mutation options that declare what they make stale. One lazily created query client serves every editing surface, refreshes those queries after a write, and ends the session on a rejected token. Screens ask the backend's capabilities (`useCapabilities`), never its kind.
-- `CRC_CONTENT_DIR` points the content pipeline and the local store at another directory; the E2E suite uses it so tests never write into the repository's own `content/`.
+- Tests never read the live `content/`: unit tests and the E2E suite use the fixed fixture in `apps/web/fixtures/content` (E2E on a fresh copy, through `CRC_CONTENT_DIR`). Change the fixture when a test needs different content.
 - Secrets: `apps/web/.dev.vars` (git-ignored) locally, `wrangler secret put` remotely. No `VITE_` variable may hold a credential.
 
 ## Operations

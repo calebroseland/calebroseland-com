@@ -37,8 +37,10 @@ export function content(opts: {
   root: string;
   includeDrafts?: boolean;
   siteOrigin?: string;
+  /** Read from here instead of the repository's content/ (tests use a fixture). */
+  contentDir?: string;
 }): Plugin {
-  const contentDir = contentDirFor(opts.root);
+  const contentDir = opts.contentDir ?? contentDirFor(opts.root);
   const profilePath = join(contentDir, "profile.yaml");
   let includeDrafts = opts.includeDrafts ?? false;
   let isBuild = false;
