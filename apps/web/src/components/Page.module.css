@@ -154,47 +154,74 @@
     padding-block: var(--space-16);
   }
 
-  /* Page transitions (pageTransition.ts). Only the page's content moves; the bar holds still and the
-     footer (SiteFooter.module.css) switches without animating. */
-  :root:active-view-transition-type(page) .bar {
+  /* Page transitions (pageTransition.ts sets data-page). The page moves as one viewport-sized
+     snapshot, so any content, width, length or scroll position animates the same. The bar is lifted
+     out and holds still; the footer (SiteFooter.module.css) switches without animating. The card's
+     own transitions (data-vt) are left alone. */
+  :root[data-page]:not([data-vt]) .bar {
     view-transition-name: site-bar;
   }
 
-  :root:active-view-transition-type(page) .main {
-    view-transition-name: site-page;
-  }
-
-  /* The content box takes its new size at once rather than stretching between the two pages. Each
-     snapshot keeps its own size, centred as the content column is. */
-  :root:active-view-transition-type(page)::view-transition-group(site-page) {
+  /* The bar and the parts of it the card morphs into (brand, name, nav) switch instantly. */
+  :root[data-page]:not([data-vt])::view-transition-group(site-bar),
+  :root[data-page]:not([data-vt])::view-transition-new(site-bar),
+  :root[data-page]:not([data-vt])::view-transition-group(site-card),
+  :root[data-page]:not([data-vt])::view-transition-new(site-card),
+  :root[data-page]:not([data-vt])::view-transition-group(site-name),
+  :root[data-page]:not([data-vt])::view-transition-new(site-name),
+  :root[data-page]:not([data-vt])::view-transition-group(site-nav),
+  :root[data-page]:not([data-vt])::view-transition-new(site-nav) {
     animation: none;
   }
 
-  :root:active-view-transition-type(page)::view-transition-old(site-page),
-  :root:active-view-transition-type(page)::view-transition-new(site-page) {
-    inset-inline: 0;
-    inline-size: auto;
-    block-size: auto;
-    margin-inline: auto;
+  :root[data-page]:not([data-vt])::view-transition-old(site-bar),
+  :root[data-page]:not([data-vt])::view-transition-old(site-card),
+  :root[data-page]:not([data-vt])::view-transition-old(site-name),
+  :root[data-page]:not([data-vt])::view-transition-old(site-nav) {
+    display: none;
+  }
+
+  /* Fade: the old page leaves faster than the new one arrives, so the two overlap only briefly. */
+  :root[data-page~="fade"]::view-transition-old(root) {
+    animation-duration: var(--duration-fast);
+    animation-timing-function: var(--ease-out);
+  }
+
+  :root[data-page~="fade"]::view-transition-new(root) {
     animation-duration: var(--duration-normal);
     animation-timing-function: var(--ease-out);
   }
 
   /* Slide: a short travel with the fade, the way the reader is going. */
-  :root:active-view-transition-type(page-slide)::view-transition-old(site-page) {
-    animation: var(--duration-slow) var(--ease-out) both page-out;
+  :root[data-page~="slide"]::view-transition-old(root) {
+    animation: var(--duration-fast) var(--ease-out) both page-out;
   }
 
-  :root:active-view-transition-type(page-slide)::view-transition-new(site-page) {
+  :root[data-page~="slide"]::view-transition-new(root) {
     animation: var(--duration-slow) var(--ease-out) both page-in;
   }
 
-  :root:active-view-transition-type(page-forward) {
+  :root[data-page~="forward"] {
     --page-travel: 1.5rem;
   }
 
-  :root:active-view-transition-type(page-back) {
+  :root[data-page~="back"] {
     --page-travel: -1.5rem;
+  }
+
+  :root[data-page="none"]::view-transition-old(root),
+  :root[data-page="none"]::view-transition-new(root) {
+    animation: none;
+  }
+
+  /* A safety net for any view transition: reduced motion swaps instantly. */
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      /* biome-ignore lint/complexity/noImportantStyles: it has to outrank every transition's own animation */
+      animation: none !important;
+    }
   }
 }
 

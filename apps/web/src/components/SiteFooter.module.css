@@ -59,18 +59,18 @@
     font-size: var(--font-size-xs);
   }
 
-  /* During a page transition the footer is its own layer that simply switches: it neither fades nor
-     travels with the content (Page.module.css). */
-  :root:active-view-transition-type(page) .footer {
+  /* During a page transition the footer is lifted out of the page's snapshot and simply switches: it
+     neither fades nor travels with the page (Page.module.css). */
+  :root[data-page]:not([data-vt]) .footer {
     view-transition-name: site-footer;
   }
 
-  :root:active-view-transition-type(page)::view-transition-group(site-footer),
-  :root:active-view-transition-type(page)::view-transition-new(site-footer) {
+  :root[data-page]:not([data-vt])::view-transition-group(site-footer),
+  :root[data-page]:not([data-vt])::view-transition-new(site-footer) {
     animation: none;
   }
 
-  :root:active-view-transition-type(page)::view-transition-old(site-footer) {
+  :root[data-page]:not([data-vt])::view-transition-old(site-footer) {
     display: none;
   }
 }
