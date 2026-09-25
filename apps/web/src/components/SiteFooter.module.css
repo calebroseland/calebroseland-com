@@ -1,19 +1,69 @@
 @layer components {
+  /* Collapsed: one centred line, every section (groups, actions, copyright) a rule and one gap apart. */
   .footer {
-    display: grid;
-    gap: var(--space-8);
-    padding: var(--space-10) var(--space-4) var(--space-6);
+    --section-gap: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2) var(--section-gap);
+    padding: var(--space-3) max(var(--space-4), (100% - var(--measure-wide)) / 2);
     border-block-start: var(--border-width) solid var(--color-border-subtle);
     color: var(--color-text-muted);
     font-size: var(--font-size-sm);
+
+    &[data-expanded] {
+      --section-gap: var(--space-6);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas: "links links" "actions copy";
+      gap: var(--space-8) var(--space-6);
+      padding-block: var(--space-10) var(--space-6);
+    }
+  }
+
+  .copyright {
+    grid-area: copy;
+    margin: 0;
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
   }
 
   .groups {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-    gap: var(--space-6) var(--space-8);
-    inline-size: min(100%, var(--measure-wide));
-    margin-inline: auto;
+    grid-area: links;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--section-gap);
+
+    [data-expanded] > & {
+      justify-content: center;
+      align-items: start;
+      gap: var(--space-6) var(--section-gap);
+    }
+  }
+
+  .group {
+    display: flex;
+    align-items: center;
+
+    [data-expanded] & {
+      display: block;
+    }
+  }
+
+  .footer:not([data-expanded]) :is(.group + .group, .actions, .copyright),
+  .footer[data-expanded] .group + .group {
+    padding-inline-start: var(--section-gap);
+    border-inline-start: var(--border-width) solid var(--color-border-subtle);
+  }
+
+  /* Narrow, sections wrap; a rule would start a line, so the gap alone separates them. */
+  @media (width < 48rem) {
+    .footer:not([data-expanded]) :is(.group + .group, .actions, .copyright),
+    .footer[data-expanded] .group + .group {
+      padding-inline-start: 0;
+      border-inline-start: 0;
+    }
   }
 
   .groupTitle {
@@ -25,51 +75,140 @@
   }
 
   .list {
-    display: grid;
+    display: flex;
     gap: var(--space-1);
+
+    [data-expanded] & {
+      display: grid;
+      justify-items: start;
+      margin-inline-start: calc(-1 * var(--space-2));
+    }
+  }
+
+  .actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    [data-expanded] > & {
+      justify-self: end;
+    }
+  }
+
+  .tipTarget {
+    display: inline-flex;
   }
 
   /* Content-sized, so its snapshot matches the card link it pairs with and only moves and scales. */
+  /* Same padding in both layouts, so the icon stays put when the label comes and goes. */
   .link {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
     min-block-size: 2rem;
+    padding-inline: var(--space-2);
+    border-radius: var(--radius-md);
     color: var(--color-text-muted);
     text-decoration: none;
 
     &:hover {
       color: var(--color-text);
+      background: var(--color-surface-hover);
+    }
+
+    [data-expanded] &:hover {
+      background: none;
       text-decoration: underline;
       text-underline-offset: 0.2em;
     }
   }
 
-  /* Named only while entering or leaving, like the card side. */
-  :root:is([data-vt="enter"], [data-vt="leave"]) :is(.link, .groupTitle) {
+  .toggle {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+
+    &:hover {
+      color: var(--color-text);
+      background: var(--color-surface-hover);
+    }
+
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
+  }
+
+  /* Collapsed, titles and labels stay for screen readers only. */
+  .footer:not([data-expanded]) :is(.groupTitle, .label) {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Named only while entering or leaving, like the card side; headings only when they show. */
+  :root:is([data-vt="enter"], [data-vt="leave"]) :is(.link, [data-expanded] .groupTitle) {
     view-transition-name: var(--vt-footer);
     view-transition-class: footer-link;
   }
 
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-2) var(--space-6);
-    font-size: var(--font-size-xs);
+  /* Into icon-only links, snapshots keep their size: a card link's label fades as its icon lands. */
+  :root[data-footer="collapsed"]:is([data-vt="enter"], [data-vt="leave"])::view-transition-old(
+    *:global(.footer-link)
+  ),
+  :root[data-footer="collapsed"]:is([data-vt="enter"], [data-vt="leave"])::view-transition-new(
+    *:global(.footer-link)
+  ) {
+    block-size: 100%;
+    object-fit: none;
+    object-position: left center;
   }
 
-  /* Page transitions: the footer switches without animating (Page.module.css). */
-  :root[data-page]:not([data-vt]) .footer {
+  /* Expanding and collapsing morph each link, heading and action between the two layouts. */
+  :root[data-vt="footer"] :is(.link, .groupTitle) {
+    view-transition-name: var(--vt-footer);
+  }
+
+  :root[data-vt="footer"] .copyright {
+    view-transition-name: footer-copy;
+  }
+
+  :root[data-vt="footer"] .toggle {
+    view-transition-name: footer-toggle;
+  }
+
+  :root[data-vt="footer"]::view-transition-group(*) {
+    animation-duration: var(--duration-slow);
+    animation-timing-function: var(--ease-in-out);
+  }
+
+  /* Natural size, so a link that gains its label reveals it rather than stretching. */
+  :root[data-vt="footer"]::view-transition-old(*),
+  :root[data-vt="footer"]::view-transition-new(*) {
+    block-size: 100%;
+    object-fit: none;
+    object-position: left center;
+  }
+
+  :root[data-vt="footer"]::view-transition-old(root),
+  :root[data-vt="footer"]::view-transition-new(root) {
+    object-fit: fill;
+  }
+
+  /* Page transitions: the footer takes its new place at once; identical, its crossfade is invisible. */
+  :root:active-view-transition-type(page) .footer {
     view-transition-name: site-footer;
   }
 
-  :root[data-page]:not([data-vt])::view-transition-group(site-footer),
-  :root[data-page]:not([data-vt])::view-transition-new(site-footer) {
+  :root:active-view-transition-type(page)::view-transition-group(site-footer) {
     animation: none;
-  }
-
-  :root[data-page]:not([data-vt])::view-transition-old(site-footer) {
-    display: none;
   }
 }

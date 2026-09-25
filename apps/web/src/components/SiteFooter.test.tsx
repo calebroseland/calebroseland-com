@@ -1,0 +1,55 @@
+import type { Profile } from "@crc/content-schema";
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRouter,
+  RouterProvider,
+} from "@tanstack/react-router";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { SiteFooter } from "./SiteFooter.tsx";
+
+const profile = {
+  name: "Name",
+  tagline: "Tag",
+  tags: [],
+  groups: [
+    { title: "Code", links: [{ label: "GitHub", url: "https://github.test", icon: "mdiGithub" }] },
+    { title: "Writings", links: [{ label: "Posts", url: "/posts", icon: "mdiPencil" }] },
+  ],
+  placeholder: true,
+} as unknown as Profile;
+
+function renderFooter() {
+  const routeTree = createRootRoute({ component: () => <SiteFooter profile={profile} /> });
+  const router = createRouter({
+    routeTree,
+    history: createMemoryHistory({ initialEntries: ["/"] }),
+  });
+  return render(<RouterProvider router={router} />);
+}
+
+describe("SiteFooter", () => {
+  it("starts collapsed, one line of named links, and the copyright", async () => {
+    renderFooter();
+    const toggle = await screen.findByRole("button", { name: "Expand the footer" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    const links = screen.getByRole("navigation", { name: "Profiles and writing" });
+    expect(within(links).getByRole("link", { name: /GitHub/ })).toBeInTheDocument();
+    expect(within(links).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
+    expect(screen.getByText(/© \d{4} Name/)).toBeInTheDocument();
+  });
+
+  it("expands and collapses, and keeps the choice when it remounts on the next page", async () => {
+    const first = renderFooter();
+    fireEvent.click(await screen.findByRole("button", { name: "Expand the footer" }));
+    expect(screen.getByRole("button", { name: "Collapse the footer" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    first.unmount();
+    renderFooter();
+    fireEvent.click(await screen.findByRole("button", { name: "Collapse the footer" }));
+    expect(screen.getByRole("button", { name: "Expand the footer" })).toBeInTheDocument();
+  });
+});

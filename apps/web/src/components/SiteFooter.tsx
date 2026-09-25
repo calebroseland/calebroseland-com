@@ -1,32 +1,87 @@
 import type { Profile, ProfileLink } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
 import * as icons from "@crc/ui/icons";
+import { mdiRss, mdiUnfoldLessHorizontal, mdiUnfoldMoreHorizontal } from "@crc/ui/icons";
 import { Link } from "@tanstack/react-router";
+import type { CSSProperties, ReactElement } from "react";
+import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { useSectionHeading } from "../hooks/useSectionHeading.ts";
+import { useFooterExpanded } from "./footerState.ts";
 import styles from "./SiteFooter.module.css";
-import { footerHeadingName, footerLinkName } from "./viewTransition.ts";
+import { Tip } from "./Tip.tsx";
+import { footerHeadingName, footerLinkName, withViewTransition } from "./viewTransition.ts";
 
 const iconPath = (name: string): string =>
   (icons as Record<string, string>)[name] ?? icons.mdiOpenInNew;
 
-/* The card's links, kept at hand once the visitor is past the card: one column per group, the way
-   many sites close. Each link shares a view-transition name with its place on the card, so entering
-   the site carries the links down here and leaving carries them back. */
+const LINKS_ID = "site-footer-links";
+
+/* The card's links, kept at hand past the card. Collapsed, one line of icons by group; expanded, a
+   column per group with labels. Each link shares a view-transition name with its place on the card. */
 export function SiteFooter({ profile }: { profile: Profile }) {
+  const { expanded, toggle } = useFooterExpanded();
+  const reduce = useReduceMotion();
+  const iconOnly = !expanded;
   return (
-    <footer className={styles.footer}>
-      <nav aria-label="Profiles and writing" className={styles.groups}>
+    <footer className={styles.footer} data-expanded={expanded || undefined}>
+      <nav id={LINKS_ID} aria-label="Profiles and writing" className={styles.groups}>
         {profile.groups.map((group, g) => (
-          <FooterGroup key={group.title} title={group.title} links={group.links} index={g} />
+          <FooterGroup
+            key={group.title}
+            title={group.title}
+            links={group.links}
+            index={g}
+            iconOnly={iconOnly}
+          />
         ))}
       </nav>
-      <div className={styles.meta}>
-        <span>
-          © {new Date().getFullYear()} {profile.name}
-        </span>
-        <a href="/feed.xml">RSS</a>
+      <div className={styles.actions}>
+        <Named label="RSS" when={iconOnly}>
+          <a
+            href="/feed.xml"
+            className={styles.link}
+            style={{ "--vt-footer": "footer-rss" } as CSSProperties}
+          >
+            <Icon path={mdiRss} size="sm" />
+            <span className={styles.label}>RSS</span>
+          </a>
+        </Named>
+        <Tip label={expanded ? "Fewer details" : "More details"}>
+          <button
+            type="button"
+            className={styles.toggle}
+            aria-expanded={expanded}
+            aria-controls={LINKS_ID}
+            aria-label={expanded ? "Collapse the footer" : "Expand the footer"}
+            onClick={() => void withViewTransition("footer", toggle, reduce)}
+          >
+            <Icon path={expanded ? mdiUnfoldLessHorizontal : mdiUnfoldMoreHorizontal} size="sm" />
+          </button>
+        </Tip>
       </div>
+      <p className={styles.copyright}>
+        © {new Date().getFullYear()} {profile.name}
+      </p>
     </footer>
+  );
+}
+
+/** An icon-only control gets its name as a tooltip; the control keeps its own accessible name. */
+function Named({
+  label,
+  when,
+  children,
+}: {
+  label: string;
+  when: boolean;
+  children: ReactElement;
+}) {
+  return when ? (
+    <Tip label={label}>
+      <span className={styles.tipTarget}>{children}</span>
+    </Tip>
+  ) : (
+    children
   );
 }
 
@@ -34,10 +89,12 @@ function FooterGroup({
   title,
   links,
   index,
+  iconOnly,
 }: {
   title: string;
   links: readonly ProfileLink[];
   index: number;
+  iconOnly: boolean;
 }) {
   const named = useSectionHeading();
   return (
@@ -48,7 +105,9 @@ function FooterGroup({
       <ul role="list" className={styles.list}>
         {links.map((link, i) => (
           <li key={link.url}>
-            <FooterLink link={link} group={index} index={i} />
+            <Named label={link.label} when={iconOnly}>
+              <FooterLink link={link} group={index} index={i} />
+            </Named>
           </li>
         ))}
       </ul>
@@ -61,7 +120,7 @@ function FooterLink({ link, group, index }: { link: ProfileLink; group: number; 
   const body = (
     <>
       <Icon path={iconPath(link.icon)} size="sm" />
-      <span>{link.label}</span>
+      <span className={styles.label}>{link.label}</span>
     </>
   );
   return link.url.startsWith("/") ? (
