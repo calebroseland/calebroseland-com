@@ -154,23 +154,38 @@
     padding-block: var(--space-16);
   }
 
-  /* Page transitions (pageTransition.ts). The bar holds still; the rest of the page (root) moves. */
+  /* Page transitions (pageTransition.ts). Only the page's content moves; the bar holds still and the
+     footer (SiteFooter.module.css) switches without animating. */
   :root:active-view-transition-type(page) .bar {
     view-transition-name: site-bar;
   }
 
-  :root:active-view-transition-type(page)::view-transition-old(root),
-  :root:active-view-transition-type(page)::view-transition-new(root) {
+  :root:active-view-transition-type(page) .main {
+    view-transition-name: site-page;
+  }
+
+  /* The content box takes its new size at once rather than stretching between the two pages. Each
+     snapshot keeps its own size, centred as the content column is. */
+  :root:active-view-transition-type(page)::view-transition-group(site-page) {
+    animation: none;
+  }
+
+  :root:active-view-transition-type(page)::view-transition-old(site-page),
+  :root:active-view-transition-type(page)::view-transition-new(site-page) {
+    inset-inline: 0;
+    inline-size: auto;
+    block-size: auto;
+    margin-inline: auto;
     animation-duration: var(--duration-normal);
     animation-timing-function: var(--ease-out);
   }
 
   /* Slide: a short travel with the fade, the way the reader is going. */
-  :root:active-view-transition-type(page-slide)::view-transition-old(root) {
+  :root:active-view-transition-type(page-slide)::view-transition-old(site-page) {
     animation: var(--duration-slow) var(--ease-out) both page-out;
   }
 
-  :root:active-view-transition-type(page-slide)::view-transition-new(root) {
+  :root:active-view-transition-type(page-slide)::view-transition-new(site-page) {
     animation: var(--duration-slow) var(--ease-out) both page-in;
   }
 

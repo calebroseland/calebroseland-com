@@ -58,4 +58,19 @@
     gap: var(--space-2) var(--space-6);
     font-size: var(--font-size-xs);
   }
+
+  /* During a page transition the footer is its own layer that simply switches: it neither fades nor
+     travels with the content (Page.module.css). */
+  :root:active-view-transition-type(page) .footer {
+    view-transition-name: site-footer;
+  }
+
+  :root:active-view-transition-type(page)::view-transition-group(site-footer),
+  :root:active-view-transition-type(page)::view-transition-new(site-footer) {
+    animation: none;
+  }
+
+  :root:active-view-transition-type(page)::view-transition-old(site-footer) {
+    display: none;
+  }
 }
