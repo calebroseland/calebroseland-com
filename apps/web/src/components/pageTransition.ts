@@ -1,15 +1,9 @@
 import type { AnyRouter, ParsedLocation } from "@tanstack/react-router";
 
-/* Page transitions: same-document view transitions started by the router. When a navigation starts,
-   the effect is written to <html data-page="…">, and Page.module.css animates the page's snapshot by
-   it. The attribute, not view-transition types, carries the effect, so it works wherever view
-   transitions do (Chrome, Edge, Safari 18+ on macOS and iOS, Firefox); elsewhere the change is
-   instant. The snapshot is the whole viewport, so it holds for any page's width, length or scroll.
-
-   A route declares its effect in `staticData.transition`; a link overrides it through history state,
-   `<Link state={{ transition: "fade" }}>`; unset, pages slide between levels (deeper is forward,
-   shallower is back) and fade between siblings. Search or hash changes, the first load, reduced motion
-   and a back swipe the browser already animated (iOS) get none. */
+/* Page transitions. Each navigation's effect goes to <html data-page> (an attribute, not view-transition
+   types, so every browser with view transitions gets it); Page.module.css animates by it. Set it per
+   route (`staticData.transition`) or per link (`state={{ transition }}`); unset, deeper slides and
+   siblings fade. */
 
 /** How a page arrives: a crossfade, a short slide in the direction of travel, or nothing. */
 export type PageEffect = "fade" | "slide" | false;
@@ -55,8 +49,7 @@ export function installPageTransitions(router: AnyRouter): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
 
-  // A back swipe on iOS (and gesture navigation on Android) has already animated by the time the
-  // router hears of it. The flag is read before the router's own popstate listener runs.
+  // A browser-animated back swipe (iOS, Android gestures); read before the router's own listener.
   let uaAnimated = false;
   window.addEventListener(
     "popstate",
@@ -73,6 +66,27 @@ export function installPageTransitions(router: AnyRouter): void {
         ?.staticData.transition;
     root.dataset.page = uaAnimated ? "none" : pageEffect(declared, info);
     uaAnimated = false;
+    generation++;
+  });
+
+  // The effect belongs to one navigation; clear it after, so a later non-navigation transition skips it.
+  let generation = 0;
+  let running = 0;
+  let startedIn = 0;
+  const ofTransition = (e: AnimationEvent) => e.pseudoElement.startsWith("::view-transition");
+  root.addEventListener("animationstart", (e) => {
+    if (ofTransition(e) && running++ === 0) startedIn = generation;
+  });
+  const ended = (e: AnimationEvent) => {
+    if (!ofTransition(e) || --running > 0) return;
+    running = 0;
+    if (startedIn === generation) delete root.dataset.page;
+  };
+  root.addEventListener("animationend", ended);
+  root.addEventListener("animationcancel", ended);
+  // No transition ran at all (nothing to animate), so nothing will end: clear it now.
+  router.subscribe("onResolved", () => {
+    if (root.dataset.page === "none") delete root.dataset.page;
   });
 }
 

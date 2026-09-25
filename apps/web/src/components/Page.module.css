@@ -154,10 +154,7 @@
     padding-block: var(--space-16);
   }
 
-  /* Page transitions (pageTransition.ts sets data-page). The page moves as one viewport-sized
-     snapshot, so any content, width, length or scroll position animates the same. The bar is lifted
-     out and holds still; the footer (SiteFooter.module.css) switches without animating. The card's
-     own transitions (data-vt) are left alone. */
+  /* Page transitions (pageTransition.ts). The bar holds still; the card's morph (data-vt) moves it itself. */
   :root[data-page]:not([data-vt]) .bar {
     view-transition-name: site-bar;
   }
@@ -181,36 +178,36 @@
     display: none;
   }
 
-  /* Fade: the old page leaves faster than the new one arrives, so the two overlap only briefly. */
-  :root[data-page~="fade"]::view-transition-old(root) {
+  /* Effects use :where so a transition with its own timing (the card's) wins. The old page leaves first. */
+  :root:where([data-page~="fade"])::view-transition-old(root) {
     animation-duration: var(--duration-fast);
     animation-timing-function: var(--ease-out);
   }
 
-  :root[data-page~="fade"]::view-transition-new(root) {
+  :root:where([data-page~="fade"])::view-transition-new(root) {
     animation-duration: var(--duration-normal);
     animation-timing-function: var(--ease-out);
   }
 
   /* Slide: a short travel with the fade, the way the reader is going. */
-  :root[data-page~="slide"]::view-transition-old(root) {
+  :root:where([data-page~="slide"])::view-transition-old(root) {
     animation: var(--duration-fast) var(--ease-out) both page-out;
   }
 
-  :root[data-page~="slide"]::view-transition-new(root) {
+  :root:where([data-page~="slide"])::view-transition-new(root) {
     animation: var(--duration-slow) var(--ease-out) both page-in;
   }
 
-  :root[data-page~="forward"] {
+  :root:where([data-page~="forward"]) {
     --page-travel: 1.5rem;
   }
 
-  :root[data-page~="back"] {
+  :root:where([data-page~="back"]) {
     --page-travel: -1.5rem;
   }
 
-  :root[data-page="none"]::view-transition-old(root),
-  :root[data-page="none"]::view-transition-new(root) {
+  :root:where([data-page="none"])::view-transition-old(root),
+  :root:where([data-page="none"])::view-transition-new(root) {
     animation: none;
   }
 

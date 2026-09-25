@@ -5,7 +5,7 @@ import { expect, test } from "./fixtures.ts";
    effect in <html data-page>, and which snapshots animate. Where a browser has no view transitions
    the change is instant, and there is nothing to record. */
 
-type Recorded = { page: string | null; animated: string[] };
+type Recorded = { page: string | null; vt: string | null; animated: string[]; names: string[] };
 
 async function record(page: Page) {
   await page.addInitScript(() => {
@@ -18,10 +18,12 @@ async function record(page: Page) {
       void t.ready.then(() =>
         w.__vts.push({
           page: document.documentElement.dataset.page ?? null,
+          vt: document.documentElement.dataset.vt ?? null,
           animated: document
             .getAnimations()
             .map((a) => (a.effect as KeyframeEffect | null)?.pseudoElement ?? "")
             .filter(Boolean),
+          names: document.getAnimations().map((a) => (a as CSSAnimation).animationName ?? ""),
         }),
       );
       return t;
@@ -75,6 +77,37 @@ test.describe("page transitions", () => {
     await expect(page).toHaveURL(/tag=meta/);
     const moving = (await transitions(page)).filter((t) => t.page !== "none" || t.animated.length);
     expect(moving).toEqual([]);
+  });
+
+  test("entering from the card crossfades the page rather than sliding it", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Enter" }).click();
+    await expect(page).toHaveURL(/\/home$/);
+    test.skip(!(await supported(page)), "no view transitions: the change is instant");
+    await expect.poll(() => transitions(page)).toHaveLength(1);
+    const [t] = await transitions(page);
+    expect(t?.vt).toBe("enter");
+    // The Enter button asks for a crossfade through the link's history state.
+    expect(t?.page).toBe("fade forward");
+    expect(t?.names.filter((n) => /page-(in|out)/.test(n))).toEqual([]);
+  });
+
+  test("a navigation's effect does not leak into the card's own animations", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Enter" }).click();
+    await expect(page).toHaveURL(/\/home$/);
+    test.skip(!(await supported(page)), "no view transitions: the change is instant");
+    await expect.poll(() => transitions(page)).toHaveLength(1);
+    await page.getByRole("link", { name: /Back to the business card/ }).click();
+    await expect.poll(() => transitions(page)).toHaveLength(2);
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dataset.page ?? null))
+      .toBe(null);
+    await page.getByRole("button", { name: /show more/i }).click();
+    await expect.poll(() => transitions(page)).toHaveLength(3);
+    const expand = (await transitions(page))[2];
+    expect(expand?.vt).toBe("expand");
+    expect(expand?.page).toBe(null);
   });
 
   test("reduced motion swaps pages without animating", async ({ page }) => {
