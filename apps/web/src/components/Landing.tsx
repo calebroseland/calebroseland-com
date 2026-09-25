@@ -408,7 +408,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
     withViewTransition(
       "enter",
       // The card runs its own transition; the router's would cut it short.
-      () => navigate({ to: "/home", viewTransition: false, state: { transition: "fade" } }),
+      () => navigate({ to: "/home", viewTransition: false }),
       reduce,
     );
 

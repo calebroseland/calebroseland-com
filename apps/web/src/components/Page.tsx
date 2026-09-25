@@ -17,11 +17,7 @@ function useBackToCard() {
   const reduce = useReduceMotion();
   const navigate = useNavigate();
   return () =>
-    withViewTransition(
-      "leave",
-      () => navigate({ to: "/", viewTransition: false, state: { transition: "fade" } }),
-      reduce,
-    );
+    withViewTransition("leave", () => navigate({ to: "/", viewTransition: false }), reduce);
 }
 
 /* Chrome for every page past the landing card: header with the brand + nav, main, footer. The brand is
@@ -51,7 +47,6 @@ export function Page({
         <div className={styles.brand}>
           <Link
             to={atHome ? "/" : "/home"}
-            {...(atHome && { state: { transition: "fade" as const } })}
             className={styles.home}
             aria-label={atHome ? `${siteProfile.name}. Back to the business card.` : undefined}
             onClick={onBrandClick}

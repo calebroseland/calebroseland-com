@@ -1,4 +1,5 @@
 import { test as base, expect } from "@playwright/test";
+import { probeTransitionCoverage } from "./coverage.ts";
 
 /* Every test fails on an unexpected console error. Opt out per test with `test.use({ allowConsoleErrors: true })`. */
 export const test = base.extend<{ allowConsoleErrors: boolean }>({
@@ -28,8 +29,14 @@ export const test = base.extend<{ allowConsoleErrors: boolean }>({
       if (res.status() >= 400 && !handled(res.url()))
         errors.push(`HTTP ${res.status()}: ${res.url()}`);
     });
+    // Every view transition in every test must keep the page covered from start to end.
+    await page.addInitScript(probeTransitionCoverage);
     await use(page);
     if (!allowConsoleErrors) expect(errors, "unexpected console errors").toEqual([]);
+    const gaps = await page
+      .evaluate(() => (window as unknown as { __vtGaps?: string[] }).__vtGaps ?? [])
+      .catch(() => []);
+    expect(gaps, "a view transition let the page behind show through").toEqual([]);
   },
 });
 

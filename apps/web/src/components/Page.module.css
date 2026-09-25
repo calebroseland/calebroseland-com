@@ -154,61 +154,34 @@
     padding-block: var(--space-16);
   }
 
-  /* Page transitions (pageTransition.ts). The bar holds still; the card's morph (data-vt) moves it itself. */
-  :root[data-page]:not([data-vt]) .bar {
+  /* Page transitions (pageTransition.ts): the page crossfades or slides; the bar holds still. */
+  :root:active-view-transition-type(page) .bar {
     view-transition-name: site-bar;
   }
 
-  /* The bar and the parts of it the card morphs into (brand, name, nav) switch instantly. */
-  :root[data-page]:not([data-vt])::view-transition-group(site-bar),
-  :root[data-page]:not([data-vt])::view-transition-new(site-bar),
-  :root[data-page]:not([data-vt])::view-transition-group(site-card),
-  :root[data-page]:not([data-vt])::view-transition-new(site-card),
-  :root[data-page]:not([data-vt])::view-transition-group(site-name),
-  :root[data-page]:not([data-vt])::view-transition-new(site-name),
-  :root[data-page]:not([data-vt])::view-transition-group(site-nav),
-  :root[data-page]:not([data-vt])::view-transition-new(site-nav) {
-    animation: none;
-  }
-
-  :root[data-page]:not([data-vt])::view-transition-old(site-bar),
-  :root[data-page]:not([data-vt])::view-transition-old(site-card),
-  :root[data-page]:not([data-vt])::view-transition-old(site-name),
-  :root[data-page]:not([data-vt])::view-transition-old(site-nav) {
-    display: none;
-  }
-
-  /* Effects use :where so a transition with its own timing (the card's) wins. The old page leaves first. */
-  :root:where([data-page~="fade"])::view-transition-old(root) {
-    animation-duration: var(--duration-fast);
-    animation-timing-function: var(--ease-out);
-  }
-
-  :root:where([data-page~="fade"])::view-transition-new(root) {
+  /* Old and new blend additively on one clock, so together they always cover the page (e2e/coverage.ts). */
+  :root:active-view-transition-type(page-fade)::view-transition-old(root),
+  :root:active-view-transition-type(page-fade)::view-transition-new(root) {
     animation-duration: var(--duration-normal);
     animation-timing-function: var(--ease-out);
   }
 
-  /* Slide: a short travel with the fade, the way the reader is going. */
-  :root:where([data-page~="slide"])::view-transition-old(root) {
-    animation: var(--duration-fast) var(--ease-out) both page-out;
+  :root:active-view-transition-type(page-slide)::view-transition-old(root) {
+    animation: var(--duration-slow) var(--ease-out) both page-out;
+    mix-blend-mode: plus-lighter;
   }
 
-  :root:where([data-page~="slide"])::view-transition-new(root) {
+  :root:active-view-transition-type(page-slide)::view-transition-new(root) {
     animation: var(--duration-slow) var(--ease-out) both page-in;
+    mix-blend-mode: plus-lighter;
   }
 
-  :root:where([data-page~="forward"]) {
+  :root:active-view-transition-type(page-forward) {
     --page-travel: 1.5rem;
   }
 
-  :root:where([data-page~="back"]) {
+  :root:active-view-transition-type(page-back) {
     --page-travel: -1.5rem;
-  }
-
-  :root:where([data-page="none"])::view-transition-old(root),
-  :root:where([data-page="none"])::view-transition-new(root) {
-    animation: none;
   }
 
   /* A safety net for any view transition: reduced motion swaps instantly. */
