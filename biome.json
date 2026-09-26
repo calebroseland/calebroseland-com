@@ -76,7 +76,9 @@
         "apps/web/src/components/Article.tsx",
         "apps/web/src/components/Page.tsx",
         "apps/web/src/components/SiteFooter.tsx",
-        "apps/web/src/components/UserMenu.tsx"
+        "apps/web/src/components/UserMenu.tsx",
+        "apps/web/src/components/CommandPalette*.tsx",
+        "apps/web/src/components/SearchButton.tsx"
       ],
       "plugins": ["./tools/biome/no-direct-hooks.grit"]
     }

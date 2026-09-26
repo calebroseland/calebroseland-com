@@ -4,6 +4,7 @@ import type { MouseEvent, ReactNode } from "react";
 import { siteProfile } from "../content/profile.ts";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import styles from "./Page.module.css";
+import { SearchButton } from "./SearchButton.tsx";
 import { SiteFooter } from "./SiteFooter.tsx";
 import { UserMenu } from "./UserMenu.tsx";
 import { withViewTransition } from "./viewTransition.ts";
@@ -61,6 +62,7 @@ export function Page({
           <Link to="/$slug" params={{ slug: "about" }} className={styles.navLink}>
             About
           </Link>
+          <SearchButton />
           <UserMenu />
         </nav>
       </header>

@@ -10,6 +10,7 @@ export type LoadedEntry = {
 
 const entries: readonly EntryMeta[] = index;
 export const posts = entries.filter((e) => e.kind === "post");
+export const pages = entries.filter((e) => e.kind === "page");
 
 export const allTags = [...new Set(posts.flatMap((p) => p.tags))].sort();
 

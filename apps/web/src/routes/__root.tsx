@@ -6,6 +6,7 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { CommandPalette } from "../components/CommandPalette.tsx";
 import { MotionProvider } from "../components/MotionProvider.tsx";
 import { CenteredMessage, Page } from "../components/Page.tsx";
 import { TipProvider } from "../components/Tip.tsx";
@@ -31,6 +32,7 @@ function RootLayout() {
         </MotionProvider>
       </TipProvider>
       <Toasts />
+      <CommandPalette />
     </>
   );
 }

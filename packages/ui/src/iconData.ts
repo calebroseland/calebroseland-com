@@ -1,6 +1,7 @@
 /* Every icon the site can draw, one per line, named the Iconify way: Lucide for the interface, Simple
    Icons for brands and technologies. The only place icon data is imported. */
 export { default as "lucide:arrow-down" } from "@iconify-icons/lucide/arrow-down";
+export { default as "lucide:arrow-left" } from "@iconify-icons/lucide/arrow-left";
 export { default as "lucide:arrow-right" } from "@iconify-icons/lucide/arrow-right";
 export { default as "lucide:arrow-up" } from "@iconify-icons/lucide/arrow-up";
 export { default as "lucide:bold" } from "@iconify-icons/lucide/bold";
@@ -12,6 +13,7 @@ export { default as "lucide:chevron-right" } from "@iconify-icons/lucide/chevron
 export { default as "lucide:circle-user" } from "@iconify-icons/lucide/circle-user";
 export { default as "lucide:cloud" } from "@iconify-icons/lucide/cloud";
 export { default as "lucide:code" } from "@iconify-icons/lucide/code";
+export { default as "lucide:corner-down-left" } from "@iconify-icons/lucide/corner-down-left";
 export { default as "lucide:database" } from "@iconify-icons/lucide/database";
 export { default as "lucide:ellipsis-vertical" } from "@iconify-icons/lucide/ellipsis-vertical";
 export { default as "lucide:external-link" } from "@iconify-icons/lucide/external-link";
@@ -27,6 +29,7 @@ export { default as "lucide:grip-vertical" } from "@iconify-icons/lucide/grip-ve
 export { default as "lucide:heading-1" } from "@iconify-icons/lucide/heading-1";
 export { default as "lucide:heading-2" } from "@iconify-icons/lucide/heading-2";
 export { default as "lucide:heading-3" } from "@iconify-icons/lucide/heading-3";
+export { default as "lucide:house" } from "@iconify-icons/lucide/house";
 export { default as "lucide:id-card" } from "@iconify-icons/lucide/id-card";
 export { default as "lucide:image-plus" } from "@iconify-icons/lucide/image-plus";
 export { default as "lucide:italic" } from "@iconify-icons/lucide/italic";
@@ -39,6 +42,7 @@ export { default as "lucide:mail" } from "@iconify-icons/lucide/mail";
 export { default as "lucide:map-pin" } from "@iconify-icons/lucide/map-pin";
 export { default as "lucide:minus" } from "@iconify-icons/lucide/minus";
 export { default as "lucide:moon" } from "@iconify-icons/lucide/moon";
+export { default as "lucide:newspaper" } from "@iconify-icons/lucide/newspaper";
 export { default as "lucide:palette" } from "@iconify-icons/lucide/palette";
 export { default as "lucide:pencil" } from "@iconify-icons/lucide/pencil";
 export { default as "lucide:pencil-line" } from "@iconify-icons/lucide/pencil-line";
@@ -47,10 +51,12 @@ export { default as "lucide:plus" } from "@iconify-icons/lucide/plus";
 export { default as "lucide:quote" } from "@iconify-icons/lucide/quote";
 export { default as "lucide:rotate-ccw" } from "@iconify-icons/lucide/rotate-ccw";
 export { default as "lucide:rss" } from "@iconify-icons/lucide/rss";
+export { default as "lucide:search" } from "@iconify-icons/lucide/search";
 export { default as "lucide:server" } from "@iconify-icons/lucide/server";
 export { default as "lucide:strikethrough" } from "@iconify-icons/lucide/strikethrough";
 export { default as "lucide:sun" } from "@iconify-icons/lucide/sun";
 export { default as "lucide:sun-moon" } from "@iconify-icons/lucide/sun-moon";
+export { default as "lucide:tag" } from "@iconify-icons/lucide/tag";
 export { default as "lucide:terminal" } from "@iconify-icons/lucide/terminal";
 export { default as "lucide:test-tube" } from "@iconify-icons/lucide/test-tube";
 export { default as "lucide:trash-2" } from "@iconify-icons/lucide/trash-2";
