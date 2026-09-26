@@ -1,20 +1,4 @@
 import { Icon } from "@crc/ui";
-import {
-  mdiCodeBraces,
-  mdiCodeTags,
-  mdiFormatBold,
-  mdiFormatHeader1,
-  mdiFormatHeader2,
-  mdiFormatHeader3,
-  mdiFormatItalic,
-  mdiFormatListBulleted,
-  mdiFormatListNumbered,
-  mdiFormatQuoteClose,
-  mdiFormatStrikethrough,
-  mdiImagePlus,
-  mdiLinkVariant,
-  mdiMinus,
-} from "@crc/ui/icons";
 import type { Editor } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
 import { type KeyboardEvent, useRef } from "react";
@@ -35,7 +19,7 @@ const commands: Cmd[] = [
   {
     id: "bold",
     label: "Bold",
-    icon: mdiFormatBold,
+    icon: "lucide:bold",
     shortcut: "⌘B",
     active: (e) => e.isActive("bold"),
     run: (e) => e.chain().focus().toggleBold().run(),
@@ -43,7 +27,7 @@ const commands: Cmd[] = [
   {
     id: "italic",
     label: "Italic",
-    icon: mdiFormatItalic,
+    icon: "lucide:italic",
     shortcut: "⌘I",
     active: (e) => e.isActive("italic"),
     run: (e) => e.chain().focus().toggleItalic().run(),
@@ -51,76 +35,76 @@ const commands: Cmd[] = [
   {
     id: "strike",
     label: "Strikethrough",
-    icon: mdiFormatStrikethrough,
+    icon: "lucide:strikethrough",
     active: (e) => e.isActive("strike"),
     run: (e) => e.chain().focus().toggleStrike().run(),
   },
   {
     id: "code",
     label: "Inline code",
-    icon: mdiCodeTags,
+    icon: "lucide:code",
     active: (e) => e.isActive("code"),
     run: (e) => e.chain().focus().toggleCode().run(),
   },
   {
     id: "h1",
     label: "Heading 1",
-    icon: mdiFormatHeader1,
+    icon: "lucide:heading-1",
     active: (e) => e.isActive("heading", { level: 1 }),
     run: (e) => e.chain().focus().toggleHeading({ level: 1 }).run(),
   },
   {
     id: "h2",
     label: "Heading 2",
-    icon: mdiFormatHeader2,
+    icon: "lucide:heading-2",
     active: (e) => e.isActive("heading", { level: 2 }),
     run: (e) => e.chain().focus().toggleHeading({ level: 2 }).run(),
   },
   {
     id: "h3",
     label: "Heading 3",
-    icon: mdiFormatHeader3,
+    icon: "lucide:heading-3",
     active: (e) => e.isActive("heading", { level: 3 }),
     run: (e) => e.chain().focus().toggleHeading({ level: 3 }).run(),
   },
   {
     id: "ul",
     label: "Bullet list",
-    icon: mdiFormatListBulleted,
+    icon: "lucide:list",
     active: (e) => e.isActive("bulletList"),
     run: (e) => e.chain().focus().toggleBulletList().run(),
   },
   {
     id: "ol",
     label: "Numbered list",
-    icon: mdiFormatListNumbered,
+    icon: "lucide:list-ordered",
     active: (e) => e.isActive("orderedList"),
     run: (e) => e.chain().focus().toggleOrderedList().run(),
   },
   {
     id: "quote",
     label: "Quote",
-    icon: mdiFormatQuoteClose,
+    icon: "lucide:quote",
     active: (e) => e.isActive("blockquote"),
     run: (e) => e.chain().focus().toggleBlockquote().run(),
   },
   {
     id: "codeblock",
     label: "Code block",
-    icon: mdiCodeBraces,
+    icon: "lucide:braces",
     active: (e) => e.isActive("codeBlock"),
     run: (e) => e.chain().focus().toggleCodeBlock().run(),
   },
   {
     id: "hr",
     label: "Divider",
-    icon: mdiMinus,
+    icon: "lucide:minus",
     run: (e) => e.chain().focus().setHorizontalRule().run(),
   },
   {
     id: "link",
     label: "Link",
-    icon: mdiLinkVariant,
+    icon: "lucide:link",
     shortcut: "⌘K",
     active: (e) => e.isActive("link"),
     run: (e) => {
@@ -173,7 +157,7 @@ export function Toolbar({
           tabIndex={i === 0 ? 0 : -1}
           onClick={() => c.run(editor)}
         >
-          <Icon path={c.icon} size="sm" />
+          <Icon name={c.icon} size="sm" />
         </button>
       ))}
       <button
@@ -183,7 +167,7 @@ export function Toolbar({
         tabIndex={-1}
         onClick={() => fileInput.current?.click()}
       >
-        <Icon path={mdiImagePlus} size="sm" />
+        <Icon name="lucide:image-plus" size="sm" />
       </button>
       <input
         ref={fileInput}

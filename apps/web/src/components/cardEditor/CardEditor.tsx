@@ -9,14 +9,6 @@ import type { Profile } from "@crc/content-schema";
 import { DropIndicator, reorder, useItemRegistration, useListReorder } from "@crc/interaction";
 import { Icon } from "@crc/ui";
 import {
-  mdiCheck,
-  mdiClose,
-  mdiDragVertical,
-  mdiLinkVariant,
-  mdiPencil,
-  mdiPlus,
-} from "@crc/ui/icons";
-import {
   type KeyboardEvent,
   type ReactNode,
   type RefObject,
@@ -38,7 +30,6 @@ import {
   type EditLink,
   type EditTag,
   ICON_CHOICES,
-  iconPathFor,
   MAX_TAGS,
   newGroup,
   newLink,
@@ -212,7 +203,7 @@ function CardEditorForm({
           className={styles.addGroup}
           onClick={() => update((s) => ({ ...s, groups: [...s.groups, newGroup()] }))}
         >
-          <Icon path={mdiPlus} size="sm" />
+          <Icon name="lucide:plus" size="sm" />
           Add group
         </button>
       </div>
@@ -423,7 +414,7 @@ function TagEditor({
           }}
         />
         <button type="button" className={styles.secondary} onClick={add}>
-          <Icon path={mdiPlus} size="sm" />
+          <Icon name="lucide:plus" size="sm" />
           Add
         </button>
       </div>
@@ -473,12 +464,12 @@ function TagChip({
         onMove={onMove}
         handleRef={handleRef}
       >
-        {tag.icon && <Icon path={iconPathFor(tag.icon)} size={iconOnly ? "md" : "sm"} />}
+        {tag.icon && <Icon name={tag.icon} size={iconOnly ? "md" : "sm"} />}
         {!iconOnly && name}
         {tag.link && (
           <Tip label="Links to its posts">
             <span className={styles.linkMark}>
-              <Icon path={mdiLinkVariant} size="xs" />
+              <Icon name="lucide:link" size="xs" />
             </span>
           </Tip>
         )}
@@ -490,7 +481,7 @@ function TagChip({
         aria-label={`Remove ${name}`}
         onClick={onRemove}
       >
-        <Icon path={mdiClose} size="xs" />
+        <Icon name="lucide:x" size="xs" />
       </button>
       <DropIndicator edge={state.edge} />
     </li>
@@ -517,7 +508,7 @@ function TagSettings({
   return (
     <Popover.Root>
       <Popover.Trigger className={styles.remove} aria-label={`Settings for ${name}`}>
-        <Icon path={mdiPencil} size="xs" />
+        <Icon name="lucide:pencil" size="xs" />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner className={styles.floating} side="bottom" align="start" sideOffset={6}>
@@ -630,7 +621,7 @@ function GroupEditor({
             aria-label={`Remove group ${name}`}
             onClick={onRemove}
           >
-            <Icon path={mdiClose} size="sm" />
+            <Icon name="lucide:x" size="sm" />
           </button>
         )}
       </div>
@@ -658,7 +649,7 @@ function GroupEditor({
         className={styles.addLink}
         onClick={() => onChange({ ...group, links: [...group.links, newLink()] })}
       >
-        <Icon path={mdiPlus} size="sm" />
+        <Icon name="lucide:plus" size="sm" />
         Add link to {name}
       </button>
     </fieldset>
@@ -701,7 +692,7 @@ function LinkRow({
         onMove={onMove}
         handleRef={handleRef}
       >
-        <Icon path={mdiDragVertical} size="sm" />
+        <Icon name="lucide:grip-vertical" size="sm" />
       </Handle>
       <IconSelect
         value={link.icon}
@@ -722,7 +713,7 @@ function LinkRow({
           aria-label={`Remove ${name}`}
           onClick={onRemove}
         >
-          <Icon path={mdiClose} size="sm" />
+          <Icon name="lucide:x" size="sm" />
         </button>
       )}
       <div className={styles.linkUrl}>
@@ -767,11 +758,7 @@ function IconSelect({
       <Select.Trigger className={styles.iconTrigger} aria-label={label}>
         <Select.Value>
           {(v: string) =>
-            v === NO_ICON ? (
-              <span className={styles.noIcon}>—</span>
-            ) : (
-              <Icon path={iconPathFor(v)} size="md" />
-            )
+            v === NO_ICON ? <span className={styles.noIcon}>—</span> : <Icon name={v} size="md" />
           }
         </Select.Value>
       </Select.Trigger>
@@ -784,11 +771,11 @@ function IconSelect({
                   {c.value === NO_ICON ? (
                     <span className={styles.noIcon}>—</span>
                   ) : (
-                    <Icon path={iconPathFor(c.value)} size="sm" />
+                    <Icon name={c.value} size="sm" />
                   )}
                   <Select.ItemText>{c.label}</Select.ItemText>
                   <Select.ItemIndicator className={styles.iconCheck}>
-                    <Icon path={mdiCheck} size="sm" />
+                    <Icon name="lucide:check" size="sm" />
                   </Select.ItemIndicator>
                 </Select.Item>
               ))}

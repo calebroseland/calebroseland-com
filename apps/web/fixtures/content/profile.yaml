@@ -6,20 +6,20 @@ tags: [TypeScript, React, Web Platform]
 groups:
   - title: Projects
     links:
-      - { label: GitHub, url: https://github.com/calebroseland, icon: mdiGithub }
-      - { label: Gists, url: https://gist.github.com/calebroseland, icon: mdiCodeBraces }
-      - { label: vue-dom-portal, url: https://github.com/calebroseland/vue-dom-portal, icon: mdiSourceBranch }
+      - { label: GitHub, url: https://github.com/calebroseland, icon: simple-icons:github }
+      - { label: Gists, url: https://gist.github.com/calebroseland, icon: lucide:braces }
+      - { label: vue-dom-portal, url: https://github.com/calebroseland/vue-dom-portal, icon: lucide:git-branch }
   - title: Writings
     links:
-      - { label: Posts, url: /posts, icon: mdiPencil }
-      - { label: State Management in Vue, url: https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81, icon: mdiFileDocumentOutline }
+      - { label: Posts, url: /posts, icon: lucide:pencil }
+      - { label: State Management in Vue, url: https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81, icon: lucide:file-text }
   - title: Social
     links:
-      - { label: LinkedIn, url: https://linkedin.com/in/calebroseland, icon: mdiLinkedin }
-      - { label: Twitter, url: https://twitter.com/calebroseland, icon: mdiTwitter }
-      - { label: npm, url: https://npmjs.com/~calebroseland, icon: mdiNpm }
-      - { label: Stack Overflow, url: https://stackoverflow.com/users/1352410, icon: mdiStackOverflow }
-      - { label: Pluralsight, url: https://pluralsight.com/profile/caleb-roseland, icon: mdiSchoolOutline }
+      - { label: LinkedIn, url: https://linkedin.com/in/calebroseland, icon: simple-icons:linkedin }
+      - { label: Twitter, url: https://twitter.com/calebroseland, icon: simple-icons:x }
+      - { label: npm, url: https://npmjs.com/~calebroseland, icon: simple-icons:npm }
+      - { label: Stack Overflow, url: https://stackoverflow.com/users/1352410, icon: simple-icons:stackoverflow }
+      - { label: Pluralsight, url: https://pluralsight.com/profile/caleb-roseland, icon: lucide:graduation-cap }
 contact:
   email: caleb@calebroseland.com
   phone: +1 507 476 1225

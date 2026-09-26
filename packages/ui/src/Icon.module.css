@@ -3,6 +3,5 @@
     inline-size: var(--size);
     block-size: var(--size);
     flex: none;
-    fill: currentColor;
   }
 }

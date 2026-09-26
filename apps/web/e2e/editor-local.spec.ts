@@ -206,7 +206,7 @@ test.describe("working-tree mode", () => {
     // Untouched lines keep their hand-written form.
     expect(yaml).toMatch(/^# /);
     expect(yaml).toContain(
-      "- { label: GitHub, url: https://github.com/calebroseland, icon: mdiGithub }",
+      "- { label: GitHub, url: https://github.com/calebroseland, icon: simple-icons:github }",
     );
     await expect(page.getByText("Builds calm software")).toBeVisible();
   });

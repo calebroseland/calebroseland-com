@@ -124,7 +124,7 @@
     --border-width: 1px;
     --border-width-thick: 2px;
 
-    /* Icon sizes: outer box on the MDI 24-grid */
+    /* Icon sizes: outer box on the 24-unit icon grid */
     --icon-xs: 0.875rem;
     --icon-sm: 1rem;
     --icon-md: 1.25rem;

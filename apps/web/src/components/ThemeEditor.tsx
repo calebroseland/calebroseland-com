@@ -8,14 +8,6 @@ import { Select } from "@base-ui/react/select";
 import { Slider } from "@base-ui/react/slider";
 import { Switch } from "@base-ui/react/switch";
 import { Icon } from "@crc/ui";
-import {
-  mdiAlertOutline,
-  mdiCheck,
-  mdiChevronDown,
-  mdiClose,
-  mdiDeleteOutline,
-  mdiRestore,
-} from "@crc/ui/icons";
 import { type CSSProperties, type ReactNode, useEffect, useId, useState } from "react";
 import { HexColorInput, HexColorPicker } from "react-colorful";
 import { contrastRatio, parseColor } from "../theme/contrast.ts";
@@ -91,7 +83,7 @@ function SliderField({
             disabled={value === initial}
             onClick={() => onChange(initial)}
           >
-            <Icon path={mdiRestore} size="sm" />
+            <Icon name="lucide:rotate-ccw" size="sm" />
           </button>
         </Tip>
       </div>
@@ -170,7 +162,7 @@ function SelectField<V extends string>({
         <Select.Trigger className={styles.selectTrigger}>
           <Select.Value />
           <Select.Icon className={styles.selectIcon}>
-            <Icon path={mdiChevronDown} size="sm" />
+            <Icon name="lucide:chevron-down" size="sm" />
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>
@@ -185,7 +177,7 @@ function SelectField<V extends string>({
                   <Select.Item key={o.value} value={o.value} className={styles.selectItem}>
                     <Select.ItemText style={{ fontFamily: o.font }}>{o.label}</Select.ItemText>
                     <Select.ItemIndicator className={styles.selectCheck}>
-                      <Icon path={mdiCheck} size="sm" />
+                      <Icon name="lucide:check" size="sm" />
                     </Select.ItemIndicator>
                   </Select.Item>
                 ))}
@@ -238,7 +230,7 @@ function ContrastReadout({ rows }: { rows: ContrastRow[] }) {
   return (
     <section className={styles.contrast} aria-label="Contrast">
       <p role="status" className={failing ? styles.warn : styles.ok}>
-        <Icon path={failing ? mdiAlertOutline : mdiCheck} size="sm" />
+        <Icon name={failing ? "lucide:triangle-alert" : "lucide:check"} size="sm" />
         {failing === 0
           ? "Every checked pair meets WCAG AA."
           : `${failing} ${failing === 1 ? "pair is" : "pairs are"} below WCAG AA.`}
@@ -327,7 +319,7 @@ export default function ThemeEditor({
               </Dialog.Description>
             </div>
             <Dialog.Close className={styles.iconButton} aria-label="Cancel and close">
-              <Icon path={mdiClose} size="md" />
+              <Icon name="lucide:x" size="md" />
             </Dialog.Close>
           </header>
 
@@ -487,7 +479,7 @@ export default function ThemeEditor({
                   onClose();
                 }}
               >
-                <Icon path={mdiDeleteOutline} size="sm" />
+                <Icon name="lucide:trash-2" size="sm" />
                 {confirmDelete ? "Delete for good" : "Delete"}
               </button>
             )}

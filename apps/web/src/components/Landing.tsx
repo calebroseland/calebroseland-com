@@ -7,18 +7,6 @@ import {
   tagLabel,
 } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
-import * as icons from "@crc/ui/icons";
-import {
-  mdiArrowRight,
-  mdiCardAccountDetails,
-  mdiChevronRight,
-  mdiClose,
-  mdiEmailOutline,
-  mdiMapMarkerOutline,
-  mdiOpenInNew,
-  mdiPencil,
-  mdiPhoneOutline,
-} from "@crc/ui/icons";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, m, type Transition } from "motion/react";
 import {
@@ -45,8 +33,6 @@ type OpenEditor = {
   source: ProfileSource;
   Editor: (props: { source: ProfileSource; onDone: (r: EditResult) => void }) => ReactNode;
 };
-
-const iconPath = (name: string): string => (icons as Record<string, string>)[name] ?? mdiOpenInNew;
 
 /* The landing is a business card, after the 2019 site. Flipping to the contact side carries over from
    it (animate.css simpleFlip on X, inverted, under a 400px perspective, with the card's height
@@ -94,7 +80,7 @@ function ExternalLink({ href, children }: { href: string; children: ReactNode })
 function CardLink({ link }: { link: ProfileLink }) {
   const body = (
     <>
-      <Icon path={iconPath(link.icon)} size="xl" className={styles.linkIcon} />
+      <Icon name={link.icon} size="xl" className={styles.linkIcon} />
       <span className={styles.label}>{link.label}</span>
     </>
   );
@@ -177,7 +163,7 @@ function Front({
               disabled={opening}
               onClick={onEdit}
             >
-              <Icon path={mdiPencil} size="md" />
+              <Icon name="lucide:pencil" size="md" />
             </button>
           )}
         </div>
@@ -190,8 +176,8 @@ function Front({
             aria-label="Contact information"
             onClick={onFlip}
           >
-            <Icon path={mdiCardAccountDetails} size="lg" />
-            <Icon path={mdiChevronRight} size="sm" />
+            <Icon name="lucide:id-card" size="lg" />
+            <Icon name="lucide:chevron-right" size="sm" />
           </button>
         )}
       </div>
@@ -222,7 +208,7 @@ function Front({
                   style={{ ...vtName(`card-group-${g}`), ...footerHeadingName(g) }}
                 >
                   {group.title}
-                  <Icon path={mdiOpenInNew} size="xs" />
+                  <Icon name="lucide:external-link" size="xs" />
                 </h2>
               ) : (
                 // Where the heading would be, so the footer's heading grows out of the collapsed card.
@@ -309,7 +295,7 @@ function Back({
           {contact.phone && (
             <li>
               <a className={styles.detail} href={`tel:${contact.phone.replaceAll(/[^+\d]/g, "")}`}>
-                <Icon path={mdiPhoneOutline} size="md" />
+                <Icon name="lucide:phone" size="md" />
                 <span>{contact.phone}</span>
               </a>
             </li>
@@ -317,7 +303,7 @@ function Back({
           {contact.email && (
             <li>
               <a className={styles.detail} href={`mailto:${contact.email}`}>
-                <Icon path={mdiEmailOutline} size="md" />
+                <Icon name="lucide:mail" size="md" />
                 <span>{contact.email}</span>
               </a>
             </li>
@@ -331,13 +317,13 @@ function Back({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Icon path={mdiMapMarkerOutline} size="md" />
+                  <Icon name="lucide:map-pin" size="md" />
                   <span>{contact.location.label}</span>
                   <span className="visually-hidden"> (map, opens in new tab)</span>
                 </a>
               ) : (
                 <span className={styles.detail}>
-                  <Icon path={mdiMapMarkerOutline} size="md" />
+                  <Icon name="lucide:map-pin" size="md" />
                   <span>{contact.location.label}</span>
                 </span>
               )}
@@ -352,7 +338,7 @@ function Back({
         aria-label="Back to links"
         onClick={onFlip}
       >
-        <Icon path={mdiClose} size="lg" />
+        <Icon name="lucide:x" size="lg" />
       </button>
     </div>
   );
@@ -473,7 +459,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
           onClick={enter}
         >
           Enter
-          <Icon path={mdiArrowRight} size="md" />
+          <Icon name="lucide:arrow-right" size="md" />
         </button>
       </main>
     </div>

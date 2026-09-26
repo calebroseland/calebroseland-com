@@ -1,5 +1,4 @@
 import { Icon } from "@crc/ui";
-import { mdiPencilOutline } from "@crc/ui/icons";
 import { Link } from "@tanstack/react-router";
 import type { EntryMeta, LoadedEntry } from "../content/entries.ts";
 import { formatDate } from "../content/entries.ts";
@@ -29,7 +28,7 @@ function EditEntry({ slug, title }: { slug: string; title: string }) {
   if (!signedIn) return null;
   return (
     <Link to="/editor/$slug" params={{ slug }} className={styles.edit} aria-label={`Edit ${title}`}>
-      <Icon path={mdiPencilOutline} size="sm" />
+      <Icon name="lucide:pencil-line" size="sm" />
       Edit
     </Link>
   );

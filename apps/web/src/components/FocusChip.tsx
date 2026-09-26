@@ -1,13 +1,11 @@
 import type { ResolvedTag } from "@crc/content-schema";
-import { Icon } from "@crc/ui";
-import * as icons from "@crc/ui/icons";
+import { Icon, isIconName } from "@crc/ui";
 import { Link } from "@tanstack/react-router";
 import type { ReactElement } from "react";
 import styles from "./FocusChip.module.css";
 import { Tip } from "./Tip.tsx";
 
-const iconPath = (name: string): string =>
-  (icons as Record<string, string>)[name] ?? icons.mdiCodeTags;
+const chipIcon = (name: string) => (isIconName(name) ? name : "lucide:code");
 
 /* One focus area on the card. It links to the posts tagged with it unless the profile turns that off,
    and shows its icon, its label, or both. An icon-only chip is a square tile whose label is its
@@ -18,11 +16,11 @@ export function FocusChip({ tag }: { tag: ResolvedTag }) {
   const className = [styles.chip, iconOnly && styles.tile].filter(Boolean).join(" ");
   const body = (
     <>
-      {tag.icon && <Icon path={iconPath(tag.icon)} size={iconOnly ? "lg" : "sm"} />}
+      {tag.icon && <Icon name={chipIcon(tag.icon)} size={iconOnly ? "lg" : "sm"} />}
       {!iconOnly && tag.label}
       {tag.link && (
         <span className={styles.linkCue} aria-hidden="true">
-          <Icon path={icons.mdiLinkVariant} size="xs" />
+          <Icon name="lucide:link" size="xs" />
         </span>
       )}
     </>

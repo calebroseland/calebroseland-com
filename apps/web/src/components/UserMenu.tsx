@@ -1,19 +1,5 @@
 import { Menu } from "@base-ui/react/menu";
 import { Icon } from "@crc/ui";
-import {
-  mdiAccountCircleOutline,
-  mdiAccountOutline,
-  mdiBrightnessAuto,
-  mdiCheck,
-  mdiFileDocumentEditOutline,
-  mdiLoginVariant,
-  mdiLogoutVariant,
-  mdiMoonWaningCrescent,
-  mdiNotePlusOutline,
-  mdiPencil,
-  mdiPlus,
-  mdiWhiteBalanceSunny,
-} from "@crc/ui/icons";
 import { lazy, Suspense } from "react";
 import { useSession, useSignInMethods, useSignOut } from "../editor/auth/hooks.ts";
 import { canSignIn } from "../editor/auth/methods.ts";
@@ -35,9 +21,9 @@ import styles from "./UserMenu.module.css";
 const ThemeEditor = lazy(() => import("./ThemeEditor.tsx"));
 
 const builtIns = [
-  { value: "auto", label: "Auto", icon: mdiBrightnessAuto },
-  { value: "light", label: "Light", icon: mdiWhiteBalanceSunny },
-  { value: "dark", label: "Dark", icon: mdiMoonWaningCrescent },
+  { value: "auto", label: "Auto", icon: "lucide:sun-moon" },
+  { value: "light", label: "Light", icon: "lucide:sun" },
+  { value: "dark", label: "Dark", icon: "lucide:moon" },
 ] as const;
 
 /* The account menu (Base UI Menu): the theme, and what the visitor can do as themselves — signing in
@@ -75,7 +61,7 @@ export function UserMenu() {
               : `Account: signed out. Theme: ${label}.`
           }
         >
-          <Icon path={signedIn ? mdiAccountCircleOutline : mdiAccountOutline} size="md" />
+          <Icon name={signedIn ? "lucide:circle-user" : "lucide:user"} size="md" />
         </Menu.Trigger>
         <Menu.Portal>
           <Menu.Positioner className={styles.positioner} side="bottom" align="end" sideOffset={6}>
@@ -92,10 +78,10 @@ export function UserMenu() {
                     className={styles.item}
                     closeOnClick
                   >
-                    <Icon path={b.icon} size="sm" />
+                    <Icon name={b.icon} size="sm" />
                     <span className={styles.itemLabel}>{b.label}</span>
                     <Menu.RadioItemIndicator className={styles.indicator}>
-                      <Icon path={mdiCheck} size="sm" />
+                      <Icon name="lucide:check" size="sm" />
                     </Menu.RadioItemIndicator>
                   </Menu.RadioItem>
                 ))}
@@ -109,7 +95,7 @@ export function UserMenu() {
                     <span className={styles.swatch} style={{ background: t.accent }} aria-hidden />
                     <span className={styles.itemLabel}>{t.name}</span>
                     <Menu.RadioItemIndicator className={styles.indicator}>
-                      <Icon path={mdiCheck} size="sm" />
+                      <Icon name="lucide:check" size="sm" />
                     </Menu.RadioItemIndicator>
                   </Menu.RadioItem>
                 ))}
@@ -120,12 +106,12 @@ export function UserMenu() {
                   className={styles.item}
                   onClick={() => editing.open({ theme: active, isNew: false })}
                 >
-                  <Icon path={mdiPencil} size="sm" />
+                  <Icon name="lucide:pencil" size="sm" />
                   <span className={styles.itemLabel}>Edit {active.name}…</span>
                 </Menu.Item>
               )}
               <Menu.Item className={styles.item} onClick={startNew}>
-                <Icon path={mdiPlus} size="sm" />
+                <Icon name="lucide:plus" size="sm" />
                 <span className={styles.itemLabel}>New custom theme…</span>
               </Menu.Item>
               {(signedIn || offerSignIn) && <Menu.Separator className={styles.separator} />}
@@ -135,22 +121,22 @@ export function UserMenu() {
                     Signed in · {capabilitiesOf(current.backend).label}
                   </Menu.GroupLabel>
                   <Menu.Item className={styles.item} onClick={links.board}>
-                    <Icon path={mdiFileDocumentEditOutline} size="sm" />
+                    <Icon name="lucide:file-pen" size="sm" />
                     <span className={styles.itemLabel}>Editor</span>
                   </Menu.Item>
                   <Menu.Item className={styles.item} onClick={links.newEntry}>
-                    <Icon path={mdiNotePlusOutline} size="sm" />
+                    <Icon name="lucide:file-plus" size="sm" />
                     <span className={styles.itemLabel}>New entry</span>
                   </Menu.Item>
                   <Menu.Item className={styles.item} onClick={signOut}>
-                    <Icon path={mdiLogoutVariant} size="sm" />
+                    <Icon name="lucide:log-out" size="sm" />
                     <span className={styles.itemLabel}>Sign out</span>
                   </Menu.Item>
                 </Menu.Group>
               ) : (
                 offerSignIn && (
                   <Menu.Item className={styles.item} onClick={links.signIn}>
-                    <Icon path={mdiLoginVariant} size="sm" />
+                    <Icon name="lucide:log-in" size="sm" />
                     <span className={styles.itemLabel}>Sign in</span>
                   </Menu.Item>
                 )

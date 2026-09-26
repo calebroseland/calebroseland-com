@@ -14,8 +14,11 @@ const profile = {
   tagline: "Tag",
   tags: [],
   groups: [
-    { title: "Code", links: [{ label: "GitHub", url: "https://github.test", icon: "mdiGithub" }] },
-    { title: "Writings", links: [{ label: "Posts", url: "/posts", icon: "mdiPencil" }] },
+    {
+      title: "Code",
+      links: [{ label: "GitHub", url: "https://github.test", icon: "simple-icons:github" }],
+    },
+    { title: "Writings", links: [{ label: "Posts", url: "/posts", icon: "lucide:pencil" }] },
   ],
   placeholder: true,
 } as unknown as Profile;

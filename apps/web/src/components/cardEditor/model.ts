@@ -5,7 +5,7 @@ import {
   type ResolvedTag,
   resolveTag,
 } from "@crc/content-schema";
-import * as icons from "@crc/ui/icons";
+import { type IconName, iconLabel, icons } from "@crc/ui/icons";
 
 /* The card editor's working copy of the profile. Links and groups carry a key so React keeps their
    inputs (and focus) through reordering; the keys never reach the YAML. Validation is the profile
@@ -86,7 +86,7 @@ export const newLink = (): EditLink => ({
   key: key(),
   label: "",
   url: "https://",
-  icon: "mdiOpenInNew",
+  icon: "lucide:external-link",
 });
 export const newGroup = (): EditGroup => ({ key: key(), title: "", links: [newLink()] });
 
@@ -141,14 +141,7 @@ export function fieldErrors(p: Profile): Map<string, string> {
   return errors;
 }
 
-/** Icons a link can use: every icon in the design system's barrel, named for people. */
-export const ICON_CHOICES = Object.keys(icons)
-  .filter((name) => name.startsWith("mdi"))
-  .sort()
-  .map((name) => ({
-    value: name,
-    label: name.replace(/^mdi/, "").replace(/([a-z])([A-Z])/g, "$1 $2"),
-  }));
-
-export const iconPathFor = (name: string): string =>
-  (icons as Record<string, string>)[name] ?? icons.mdiOpenInNew;
+/** Icons a link or focus area can use: every icon in the design system's registry, named for people. */
+export const ICON_CHOICES = (Object.keys(icons) as IconName[])
+  .map((name) => ({ value: name, label: iconLabel(name) }))
+  .sort((a, b) => a.label.localeCompare(b.label));

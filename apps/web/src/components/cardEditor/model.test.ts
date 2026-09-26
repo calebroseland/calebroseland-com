@@ -15,7 +15,10 @@ const base: Profile = {
   tagline: "Does things",
   tags: ["One"],
   groups: [
-    { title: "Code", links: [{ label: "GitHub", url: "https://github.com/x", icon: "mdiGithub" }] },
+    {
+      title: "Code",
+      links: [{ label: "GitHub", url: "https://github.com/x", icon: "simple-icons:github" }],
+    },
   ],
   contact: { email: "a@b.co", location: { label: "Here", url: "https://maps.example.com" } },
   placeholder: false,
@@ -79,14 +82,14 @@ describe("card editor model", () => {
       ...base,
       tags: [
         "One",
-        { label: "React", icon: "mdiReact", show: "icon" as const },
+        { label: "React", icon: "simple-icons:react", show: "icon" as const },
         { label: ".NET", link: false },
       ],
     };
     const s = fromProfile(withTags);
     expect(s.tags.map((t) => [t.label, t.icon, t.show, t.link])).toEqual([
       ["One", null, "label", true],
-      ["React", "mdiReact", "icon", true],
+      ["React", "simple-icons:react", "icon", true],
       [".NET", null, "label", false],
     ]);
     expect(toProfile(withTags, s).tags).toEqual(withTags.tags);

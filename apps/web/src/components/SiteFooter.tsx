@@ -1,7 +1,5 @@
 import type { Profile, ProfileLink } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
-import * as icons from "@crc/ui/icons";
-import { mdiRss, mdiUnfoldLessHorizontal, mdiUnfoldMoreHorizontal } from "@crc/ui/icons";
 import { Link } from "@tanstack/react-router";
 import type { CSSProperties, ReactElement } from "react";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
@@ -10,9 +8,6 @@ import { useFooterExpanded } from "./footerState.ts";
 import styles from "./SiteFooter.module.css";
 import { Tip } from "./Tip.tsx";
 import { footerHeadingName, footerLinkName, withViewTransition } from "./viewTransition.ts";
-
-const iconPath = (name: string): string =>
-  (icons as Record<string, string>)[name] ?? icons.mdiOpenInNew;
 
 const LINKS_ID = "site-footer-links";
 
@@ -42,7 +37,7 @@ export function SiteFooter({ profile }: { profile: Profile }) {
             className={styles.link}
             style={{ "--vt-footer": "footer-rss" } as CSSProperties}
           >
-            <Icon path={mdiRss} size="sm" />
+            <Icon name="lucide:rss" size="sm" />
             <span className={styles.label}>RSS</span>
           </a>
         </Named>
@@ -55,7 +50,7 @@ export function SiteFooter({ profile }: { profile: Profile }) {
             aria-label={expanded ? "Collapse the footer" : "Expand the footer"}
             onClick={() => void withViewTransition("footer", toggle, reduce)}
           >
-            <Icon path={expanded ? mdiUnfoldLessHorizontal : mdiUnfoldMoreHorizontal} size="sm" />
+            <Icon name={expanded ? "lucide:fold-vertical" : "lucide:unfold-vertical"} size="sm" />
           </button>
         </Tip>
       </div>
@@ -119,7 +114,7 @@ function FooterLink({ link, group, index }: { link: ProfileLink; group: number; 
   const props = { className: styles.link, style: footerLinkName(group, index) };
   const body = (
     <>
-      <Icon path={iconPath(link.icon)} size="sm" />
+      <Icon name={link.icon} size="sm" />
       <span className={styles.label}>{link.label}</span>
     </>
   );

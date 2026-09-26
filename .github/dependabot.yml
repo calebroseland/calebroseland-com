@@ -6,9 +6,10 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
-        exclude-patterns: ["@mdi/js"]
-      exact-pinned:
-        patterns: ["@mdi/js"]
+        exclude-patterns: ["@iconify-icons/*"]
+      # Icon sets can drop icons in any release; each update is reviewed on its own.
+      icon-data:
+        patterns: ["@iconify-icons/*"]
     open-pull-requests-limit: 5
   - package-ecosystem: github-actions
     directory: /

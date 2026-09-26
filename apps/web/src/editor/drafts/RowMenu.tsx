@@ -1,6 +1,5 @@
 import { Menu } from "@base-ui/react/menu";
 import { Icon } from "@crc/ui";
-import { mdiDotsVertical } from "@crc/ui/icons";
 import type { ReactNode } from "react";
 import styles from "../editor.module.css";
 
@@ -9,7 +8,7 @@ export function RowMenu({ label, children }: { label: string; children: ReactNod
   return (
     <Menu.Root>
       <Menu.Trigger className={styles.handle} aria-label={label}>
-        <Icon path={mdiDotsVertical} size="sm" />
+        <Icon name="lucide:ellipsis-vertical" size="sm" />
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner side="bottom" align="end" sideOffset={4}>

@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-const iconName = z.string().regex(/^mdi[A-Z][A-Za-z0-9]+$/, "icon must be an @mdi/js export name");
+const iconName = z
+  .string()
+  .regex(
+    /^(lucide|simple-icons):[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    "icon must be an Iconify name (lucide:… or simple-icons:…)",
+  );
 
 /** Icon names are keys of the ui package's icon barrel; validated by name so content stays decoupled from React.
     A url is absolute, or a root-relative path to a page on this site. */

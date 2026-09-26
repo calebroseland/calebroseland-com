@@ -6,7 +6,7 @@ import { parse } from "yaml";
 import { loadProfile, PROFILE_REF, saveProfile, serializeProfile } from "./profile.ts";
 
 const sourceYaml = readFileSync(
-  new URL("../../../../content/profile.yaml", import.meta.url),
+  new URL("../../fixtures/content/profile.yaml", import.meta.url),
   "utf8",
 );
 const published: Profile = profileSchema.parse(parse(sourceYaml));
@@ -23,7 +23,7 @@ tags: [ One, Two ]
 groups:
   - title: Code
     links:
-      - { label: GitHub, url: https://github.com/x, icon: mdiGithub }
+      - { label: GitHub, url: https://github.com/x, icon: simple-icons:github }
 `;
     expect(serializeProfile(file, profileSchema.parse(parse(file)))).toBe(file);
   });
@@ -35,7 +35,7 @@ groups:
     expect(out).toContain("tagline: Engineer");
     expect(out).toMatch(/tags: \[.*Rust ]/);
     expect(out).toMatch(
-      /- \{ label: GitHub, url: https:\/\/github\.com\/calebroseland, icon: mdiGithub }/,
+      /- \{ label: GitHub, url: https:\/\/github\.com\/calebroseland, icon: simple-icons:github }/,
     );
     expect(profileSchema.parse(parse(out))).toEqual(next);
   });

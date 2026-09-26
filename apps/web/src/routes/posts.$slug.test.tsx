@@ -20,7 +20,9 @@ vi.mock("virtual:content/profile", () => ({
     name: "Name",
     tagline: "Tag",
     tags: [],
-    groups: [{ title: "g", links: [{ label: "L", url: "https://x.test", icon: "mdiGithub" }] }],
+    groups: [
+      { title: "g", links: [{ label: "L", url: "https://x.test", icon: "simple-icons:github" }] },
+    ],
     placeholder: true,
   },
 }));

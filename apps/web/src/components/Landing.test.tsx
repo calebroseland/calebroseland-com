@@ -7,7 +7,7 @@ vi.mock("virtual:content/profile", () => ({
     tagline: "Placeholder tagline",
     tags: [
       "One",
-      { label: "Two", icon: "mdiReact", show: "icon" },
+      { label: "Two", icon: "simple-icons:react", show: "icon" },
       { label: "Three", link: false },
       "Four",
       "Five",
@@ -19,17 +19,17 @@ vi.mock("virtual:content/profile", () => ({
     groups: [
       {
         title: "Code",
-        links: [{ label: "GitHub", url: "https://github.com/x", icon: "mdiGithub" }],
+        links: [{ label: "GitHub", url: "https://github.com/x", icon: "simple-icons:github" }],
       },
       {
         title: "Writings",
-        links: [{ label: "Posts", url: "/posts", icon: "mdiPencil" }],
+        links: [{ label: "Posts", url: "/posts", icon: "lucide:pencil" }],
       },
       {
         title: "Social",
         links: [
-          { label: "LinkedIn", url: "https://linkedin.com/in/x", icon: "mdiLinkedin" },
-          { label: "Unknown icon", url: "https://example.com", icon: "mdiDoesNotExist" },
+          { label: "LinkedIn", url: "https://linkedin.com/in/x", icon: "simple-icons:linkedin" },
+          { label: "Unknown icon", url: "https://example.com", icon: "lucide:does-not-exist" },
         ],
       },
     ],
@@ -289,7 +289,7 @@ describe("Landing", () => {
       const yaml: string = fake.branches["drafts/profile"].files["content/profile.yaml"].content;
       expect(yaml).toContain("tagline: A better tagline");
       expect(yaml).toMatch(
-        /tags: \[ \{ label: Two, icon: mdiReact, show: icon, link: false }, \{ label: Three, link: false }, Four, .*Nine ]/,
+        /tags: \[ \{ label: Two, icon: simple-icons:react, show: icon, link: false }, \{ label: Three, link: false }, Four, .*Nine ]/,
       );
       await waitFor(() => expect(screen.getByRole("button", { name: "Edit card" })).toHaveFocus());
     } finally {
