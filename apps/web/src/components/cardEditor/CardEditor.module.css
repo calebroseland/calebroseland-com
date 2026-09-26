@@ -402,7 +402,7 @@
     padding: var(--space-1) var(--space-2);
     border-radius: var(--radius-sm);
     color: var(--color-text);
-    cursor: default;
+    cursor: pointer;
     outline: none;
 
     &[data-highlighted] {

@@ -501,7 +501,7 @@
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-sm);
     min-block-size: 2.5rem;
-    cursor: default;
+    cursor: pointer;
 
     &[data-highlighted] {
       background: var(--color-surface-hover);

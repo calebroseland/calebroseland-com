@@ -365,7 +365,7 @@
     min-block-size: 2.25rem;
     padding: 0.25rem 0.625rem;
     border-radius: 6px;
-    cursor: default;
+    cursor: pointer;
     outline: none;
 
     &[data-highlighted] {

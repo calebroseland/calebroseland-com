@@ -72,7 +72,7 @@
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-md);
     color: var(--color-text-muted);
-    cursor: default;
+    cursor: pointer;
     outline: none;
 
     &[data-highlighted] {
