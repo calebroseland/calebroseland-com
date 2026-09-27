@@ -1,6 +1,7 @@
 import type { IconName } from "@crc/ui/icons";
 import { useEffect } from "react";
 import { allTags, formatDate, pages, posts } from "../content/entries.ts";
+import { hasContact, siteProfile } from "../content/profile.ts";
 import { canSignIn, signInMethods } from "../editor/auth/methods.ts";
 import { session } from "../editor/auth/store.ts";
 import { customPreference, type ThemePreference, themeController } from "../theme/store.ts";
@@ -19,7 +20,10 @@ function siteCommands(): Command[] {
     go("go.home", "Home", "/home", "lucide:house", ["start", "latest"]),
     go("go.posts", "Posts", "/posts", "lucide:newspaper", ["writing", "blog"]),
     ...pages.map((p) => go(`go.page.${p.slug}`, p.title, `/${p.slug}`, "lucide:file-text")),
-    go("go.card", "Business card", "/", "lucide:id-card", ["landing", "contact"]),
+    go("go.card", "Business card", "/", "lucide:id-card", ["landing"]),
+    ...(hasContact(siteProfile)
+      ? [go("go.contact", "Contact", "/contact", "lucide:mail", ["email", "phone", "card"])]
+      : []),
     ...posts.map(
       (p): Command => ({
         id: `post.${p.slug}`,

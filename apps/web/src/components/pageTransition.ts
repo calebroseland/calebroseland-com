@@ -11,6 +11,8 @@ declare module "@tanstack/react-router" {
   interface StaticDataRouteOption {
     /** How this page arrives. Unset: slide between levels, fade between siblings. */
     transition?: PageEffect;
+    /** Moves between this route's children are its own animation, never a page transition. */
+    animatesChildren?: boolean;
   }
 }
 
@@ -51,10 +53,15 @@ let uaAnimated = false;
 export const pageViewTransition = {
   types: (info: ChangeInfo): string[] | false => {
     // A back swipe the browser already animated (iOS, Android gestures) is not animated twice.
-    if (uaAnimated) return false;
-    const declared = router
-      ?.matchRoutes(info.toLocation)
-      .findLast((m) => m.staticData?.transition !== undefined)?.staticData.transition;
+    if (uaAnimated || !router) return false;
+    const to = router.matchRoutes(info.toLocation);
+    const from = info.fromLocation ? router.matchRoutes(info.fromLocation) : [];
+    const within = to.some(
+      (m) => m.staticData?.animatesChildren && from.some((f) => f.routeId === m.routeId),
+    );
+    if (within) return false;
+    const declared = to.findLast((m) => m.staticData?.transition !== undefined)?.staticData
+      .transition;
     return pageTypes(declared, info);
   },
 };

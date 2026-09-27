@@ -157,11 +157,12 @@ describe("Landing", () => {
     expect(screen.getByRole("link", { name: /Unknown icon/ })).toBeInTheDocument();
   });
 
-  it("turns over to the contact side and back, moving focus with the card", async () => {
-    await renderLanding();
+  it("turns over to the contact side at /contact and back, moving focus with the card", async () => {
+    const router = await renderLanding();
     fireEvent.click(screen.getByRole("button", { name: "Contact information" }));
 
     const close = await screen.findByRole("button", { name: "Back to links" });
+    expect(router.state.location.pathname).toBe("/contact");
     await vi.waitFor(() => expect(close).toHaveFocus());
     const contact = screen.getByRole("list", { name: "Contact" });
     expect(within(contact).getByRole("link", { name: /\+1 555 010 0000/ })).toHaveAttribute(
@@ -182,6 +183,7 @@ describe("Landing", () => {
     const flip = await screen.findByRole("button", { name: "Contact information" });
     await vi.waitFor(() => expect(flip).toHaveFocus());
     expect(screen.queryByRole("list", { name: "Contact" })).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/");
   });
 
   it("exposes the theme control, and links a site page in place rather than in a new tab", async () => {

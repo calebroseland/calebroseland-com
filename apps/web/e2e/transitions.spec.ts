@@ -60,6 +60,17 @@ test.describe("page transitions", () => {
     expect(t?.animated).not.toContain("::view-transition-group(site-footer)");
   });
 
+  test("turning the card between its front and contact side is not a page transition", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Contact information" }).click();
+    await expect(page).toHaveURL(/\/contact$/);
+    await page.goBack();
+    await expect(page.getByRole("button", { name: "Contact information" })).toBeVisible();
+    expect(await transitions(page)).toEqual([]);
+  });
+
   test("a post slides in forward, and the back button slides it back", async ({ page }) => {
     await page.goto("/posts");
     await page

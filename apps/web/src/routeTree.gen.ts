@@ -9,10 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as SlugRouteImport } from './routes/$slug'
+import { Route as CardRouteImport } from './routes/_card'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as CardIndexRouteImport } from './routes/_card.index'
+import { Route as CardContactRouteImport } from './routes/_card.contact'
 import { Route as EditorIndexRouteImport } from './routes/editor.index'
 import { Route as EditorSlugRouteImport } from './routes/editor.$slug'
 import { Route as EditorNewRouteImport } from './routes/editor.new'
@@ -21,14 +23,13 @@ import { Route as LoginCallbackRouteImport } from './routes/login.callback'
 import { Route as PostsIndexRouteImport } from './routes/posts.index'
 import { Route as PostsSlugRouteImport } from './routes/posts.$slug'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SlugRoute = SlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CardRoute = CardRouteImport.update({
+  id: '/_card',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EditorRoute = EditorRouteImport.update({
@@ -40,6 +41,16 @@ const HomeRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CardIndexRoute = CardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CardRoute,
+} as any)
+const CardContactRoute = CardContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => CardRoute,
 } as any)
 const EditorIndexRoute = EditorIndexRouteImport.update({
   id: '/',
@@ -78,10 +89,11 @@ const PostsSlugRoute = PostsSlugRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/': typeof CardIndexRoute
   '/editor': typeof EditorRouteWithChildren
   '/home': typeof HomeRoute
+  '/contact': typeof CardContactRoute
   '/editor/$slug': typeof EditorSlugRoute
   '/editor/new': typeof EditorNewRoute
   '/login/callback': typeof LoginCallbackRoute
@@ -91,27 +103,30 @@ export interface FileRoutesByFullPath {
   '/posts/': typeof PostsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/home': typeof HomeRoute
+  '/contact': typeof CardContactRoute
   '/editor/$slug': typeof EditorSlugRoute
   '/editor/new': typeof EditorNewRoute
   '/login/callback': typeof LoginCallbackRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/': typeof CardIndexRoute
   '/editor': typeof EditorIndexRoute
   '/login': typeof LoginIndexRoute
   '/posts': typeof PostsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/_card': typeof CardRouteWithChildren
   '/editor': typeof EditorRouteWithChildren
   '/home': typeof HomeRoute
+  '/_card/contact': typeof CardContactRoute
   '/editor/$slug': typeof EditorSlugRoute
   '/editor/new': typeof EditorNewRoute
   '/login/callback': typeof LoginCallbackRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/_card/': typeof CardIndexRoute
   '/editor/': typeof EditorIndexRoute
   '/login/': typeof LoginIndexRoute
   '/posts/': typeof PostsIndexRoute
@@ -119,10 +134,11 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/$slug'
+    | '/'
     | '/editor'
     | '/home'
+    | '/contact'
     | '/editor/$slug'
     | '/editor/new'
     | '/login/callback'
@@ -132,34 +148,37 @@ export interface FileRouteTypes {
     | '/posts/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/$slug'
     | '/home'
+    | '/contact'
     | '/editor/$slug'
     | '/editor/new'
     | '/login/callback'
     | '/posts/$slug'
+    | '/'
     | '/editor'
     | '/login'
     | '/posts'
   id:
     | '__root__'
-    | '/'
     | '/$slug'
+    | '/_card'
     | '/editor'
     | '/home'
+    | '/_card/contact'
     | '/editor/$slug'
     | '/editor/new'
     | '/login/callback'
     | '/posts/$slug'
+    | '/_card/'
     | '/editor/'
     | '/login/'
     | '/posts/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   SlugRoute: typeof SlugRoute
+  CardRoute: typeof CardRouteWithChildren
   EditorRoute: typeof EditorRouteWithChildren
   HomeRoute: typeof HomeRoute
   LoginCallbackRoute: typeof LoginCallbackRoute
@@ -170,18 +189,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/$slug': {
       id: '/$slug'
       path: '/$slug'
       fullPath: '/$slug'
       preLoaderRoute: typeof SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_card': {
+      id: '/_card'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof CardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/editor': {
@@ -197,6 +216,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/home'
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_card/': {
+      id: '/_card/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof CardIndexRouteImport
+      parentRoute: typeof CardRoute
+    }
+    '/_card/contact': {
+      id: '/_card/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof CardContactRouteImport
+      parentRoute: typeof CardRoute
     }
     '/editor/': {
       id: '/editor/'
@@ -250,6 +283,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CardRouteChildren {
+  CardContactRoute: typeof CardContactRoute
+  CardIndexRoute: typeof CardIndexRoute
+}
+
+const CardRouteChildren: CardRouteChildren = {
+  CardContactRoute: CardContactRoute,
+  CardIndexRoute: CardIndexRoute,
+}
+
+const CardRouteWithChildren = CardRoute._addFileChildren(CardRouteChildren)
+
 interface EditorRouteChildren {
   EditorSlugRoute: typeof EditorSlugRoute
   EditorNewRoute: typeof EditorNewRoute
@@ -266,8 +311,8 @@ const EditorRouteWithChildren =
   EditorRoute._addFileChildren(EditorRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   SlugRoute: SlugRoute,
+  CardRoute: CardRouteWithChildren,
   EditorRoute: EditorRouteWithChildren,
   HomeRoute: HomeRoute,
   LoginCallbackRoute: LoginCallbackRoute,

@@ -7,7 +7,7 @@ import {
   tagLabel,
 } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useMatch, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, m, type Transition } from "motion/react";
 import {
   type CSSProperties,
@@ -19,6 +19,7 @@ import {
   useState,
 } from "react";
 import { useSignedIn } from "../editor/auth/hooks.ts";
+import { hasContact } from "../content/profile.ts";
 import type { ProfileSource } from "../editor/profile.ts";
 import { notify } from "../editor/Toast.tsx";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
@@ -345,13 +346,18 @@ function Back({
   );
 }
 
+/** Which face the URL shows: the front at /, the contact side at /contact. */
+function useCardSide(): "front" | "back" {
+  return useMatch({ from: "/_card/contact", shouldThrow: false }) ? "back" : "front";
+}
+
 export function Landing({ profile: published }: { profile: Profile }) {
   // After a save to the working tree the file on disk is the new profile; show it without a reload.
   const [saved, setSaved] = useState<Profile | null>(null);
   const profile = saved ?? published;
   const reduce = useReduceMotion();
   const navigate = useNavigate();
-  const [side, setSide] = useState<"front" | "back">("front");
+  const side = useCardSide();
   const { expanded, toggle: toggleDetails } = useDetailsExpanded();
   // Focus follows the card only after the visitor has turned it; the first paint leaves focus alone.
   const [turned, setTurned] = useState(false);
@@ -361,7 +367,13 @@ export function Landing({ profile: published }: { profile: Profile }) {
   // After the editor closes, focus goes back to the Edit button once the front face has turned back.
   const [returnToEdit, setReturnToEdit] = useState(false);
   const contact = profile.contact;
-  const hasContact = Boolean(contact && (contact.email || contact.phone || contact.location));
+  // Turning by the buttons or by back and forward alike, the new face takes focus.
+  const [shownSide, setShownSide] = useState(side);
+  if (side !== shownSide) {
+    setShownSide(side);
+    setTurned(true);
+    setReturnToEdit(false);
+  }
 
   /* The editor's code and the profile both load before the card turns, so it turns over straight into
      a complete editor, the same motion as flipping to the contact side. Readers never load either. */
@@ -382,11 +394,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
     setEditing(null);
   };
 
-  const flip = () => {
-    setTurned(true);
-    setReturnToEdit(false);
-    setSide((s) => (s === "front" ? "back" : "front"));
-  };
+  const flip = () => void navigate({ to: side === "front" ? "/contact" : "/" });
 
   /* The router's own viewTransition option is not used because it renders the new state after its
      transition callback resolves, which can leave the card in the new snapshot. Focus follows the
@@ -445,7 +453,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
                 profile={profile}
                 expanded={expanded}
                 onToggle={() => withViewTransition("expand", toggleDetails, reduce)}
-                onFlip={hasContact ? flip : null}
+                onFlip={hasContact(profile) ? flip : null}
                 onEdit={signedIn ? () => void openEditor() : null}
                 opening={opening}
                 focusOnMount={returnToEdit ? "edit" : turned ? "flip" : null}

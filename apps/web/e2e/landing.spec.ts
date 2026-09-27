@@ -30,9 +30,27 @@ test.describe("landing", () => {
     await expect(contact.getByRole("link", { name: /@/ })).toHaveAttribute("href", /^mailto:/);
     await expect(contact.getByRole("link", { name: /\d{3}/ })).toHaveAttribute("href", /^tel:\+/);
 
+    await expect(page).toHaveURL(/\/contact$/);
+
     await page.keyboard.press("Escape");
     await expect(page.getByRole("button", { name: "Contact information" })).toBeFocused();
     await expect(contact).toHaveCount(0);
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("the contact side has its own address, and back and forward turn the card", async ({
+    page,
+  }) => {
+    await page.goto("/contact");
+    const contact = page.getByRole("list", { name: "Contact" });
+    await expect(contact).toBeVisible();
+    await expect(page).toHaveTitle(/^Contact · /);
+
+    await page.getByRole("button", { name: "Back to links" }).click();
+    await expect(contact).toHaveCount(0);
+    await page.goBack();
+    await expect(contact).toBeVisible();
+    await expect(page.getByRole("button", { name: "Back to links" })).toBeFocused();
   });
 
   test("the Writings column opens posts in place", async ({ page }) => {
