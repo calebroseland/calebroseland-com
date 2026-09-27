@@ -144,6 +144,16 @@ export function content(opts: {
         if (type) res.setHeader("content-type", type);
         res.end(readFileSync(abs));
       });
+      // This plugin runs the schema and the renderer in the dev server itself, which keeps the copies it
+      // started with; restart on a change so content is never read by a stale schema.
+      const packages = ["content-schema", "markdown"].map((p) =>
+        resolve(opts.root, "packages", p, "src"),
+      );
+      server.watcher.add(packages);
+      server.watcher.on("change", (file: string) => {
+        if (packages.some((dir) => file.startsWith(dir)) && !file.endsWith(".test.ts"))
+          void server.restart();
+      });
       server.watcher.add(contentDir);
       for (const event of ["add", "unlink", "addDir", "unlinkDir"] as const) {
         server.watcher.on(event, (file: string) => {
