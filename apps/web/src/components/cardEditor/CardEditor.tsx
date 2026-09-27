@@ -674,6 +674,16 @@ function GroupEditor({
           </button>
         )}
       </div>
+      <Field.Root className={styles.switchRow}>
+        <Field.Label className={styles.label}>Icons in one row</Field.Label>
+        <Switch.Root
+          className={styles.switch}
+          checked={group.inline}
+          onCheckedChange={(inline) => onChange({ ...group, inline })}
+        >
+          <Switch.Thumb className={styles.switchThumb} />
+        </Switch.Root>
+      </Field.Root>
       <ul
         ref={list.ref as RefObject<HTMLUListElement>}
         className={styles.linkList}

@@ -20,6 +20,11 @@ const profile = {
       links: [{ label: "GitHub", url: "https://github.test", icon: "simple-icons:github" }],
     },
     { title: "Writings", links: [{ label: "Posts", url: "/posts", icon: "lucide:pencil" }] },
+    {
+      title: "Social",
+      inline: true,
+      links: [{ label: "Bluesky", url: "https://bsky.test", icon: "simple-icons:npm" }],
+    },
   ],
   placeholder: true,
 } as unknown as Profile;
@@ -44,6 +49,16 @@ describe("SiteFooter", () => {
     expect(within(links).getByRole("link", { name: /GitHub/ })).toBeInTheDocument();
     expect(within(links).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
     expect(screen.getByText(/© \d{4} Name/)).toBeInTheDocument();
+  });
+
+  it("expanded, an inline group stays a row of icons while the others show labels", async () => {
+    renderFooter();
+    fireEvent.click(await screen.findByRole("button", { name: "Expand the footer" }));
+    const social = screen.getByRole("region", { name: "Social" });
+    const code = screen.getByRole("region", { name: "Code" });
+    expect(social).toHaveAttribute("data-icons");
+    expect(code).not.toHaveAttribute("data-icons");
+    expect(within(social).getByRole("link", { name: /Bluesky/ })).toBeInTheDocument();
   });
 
   it("expands and collapses, and keeps the choice when it remounts on the next page", async () => {

@@ -83,6 +83,11 @@
       justify-items: start;
       margin-inline-start: calc(-1 * var(--space-2));
     }
+
+    [data-expanded] [data-icons] > & {
+      display: flex;
+      flex-wrap: wrap;
+    }
   }
 
   .actions {
@@ -122,6 +127,10 @@
       text-decoration: underline;
       text-underline-offset: 0.2em;
     }
+
+    [data-expanded] [data-icons] &:hover {
+      background: var(--color-surface-hover);
+    }
   }
 
   .toggle {
@@ -143,8 +152,9 @@
     }
   }
 
-  /* Collapsed, titles and labels stay for screen readers only. */
-  .footer:not([data-expanded]) :is(.groupTitle, .label) {
+  /* Collapsed, titles and labels stay for screen readers only; an icon row's labels always do. */
+  .footer:not([data-expanded]) :is(.groupTitle, .label),
+  .group[data-icons] .label {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;

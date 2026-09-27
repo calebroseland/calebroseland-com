@@ -14,7 +14,7 @@ import { type IconName, iconLabel, icons } from "@crc/ui/icons";
 /** A focus area with every setting filled in (see resolveTag); written back in its shortest form. */
 export type EditTag = ResolvedTag & { key: string };
 export type EditLink = { key: string; label: string; url: string; icon: string };
-export type EditGroup = { key: string; title: string; links: EditLink[] };
+export type EditGroup = { key: string; title: string; inline: boolean; links: EditLink[] };
 /** The back of the card; empty fields are left out of the file. */
 type EditContact = { email: string; phone: string; location: string; locationUrl: string };
 export type EditState = {
@@ -38,6 +38,7 @@ export function fromProfile(p: Profile): EditState {
     groups: p.groups.map((g) => ({
       key: key(),
       title: g.title,
+      inline: g.inline ?? false,
       links: g.links.map((l) => ({ key: key(), ...l })),
     })),
     contact: {
@@ -73,6 +74,7 @@ export function toProfile(base: Profile, s: EditState): Profile {
     tags: s.tags.map(({ key: _key, ...t }) => compactTag({ ...t, label: t.label.trim() })),
     groups: s.groups.map((g) => ({
       title: g.title.trim(),
+      ...(g.inline && { inline: true }),
       links: g.links.map(({ key: _key, ...l }) => ({
         ...l,
         label: l.label.trim(),
@@ -88,7 +90,12 @@ export const newLink = (): EditLink => ({
   url: "https://",
   icon: "lucide:external-link",
 });
-export const newGroup = (): EditGroup => ({ key: key(), title: "", links: [newLink()] });
+export const newGroup = (): EditGroup => ({
+  key: key(),
+  title: "",
+  inline: false,
+  links: [newLink()],
+});
 
 /** Why a tag cannot be added, or null when it can. */
 export const newTag = (label: string): EditTag => ({

@@ -64,10 +64,12 @@ export function compactTag(tag: ResolvedTag): ProfileTag {
 
 export const tagLabel = (tag: ProfileTag): string => (typeof tag === "string" ? tag : tag.label);
 
-/** The first link is the group's face on the collapsed card; the rest appear when it is expanded. */
+/** The first link is the group's face on the collapsed card; the rest appear when it is expanded. An
+    inline group is one row of icons, each named by a tooltip, and shows all of them either way. */
 export const profileLinkGroup = z.object({
   title: z.string().min(1).max(40),
   links: z.array(profileLink).min(1),
+  inline: z.boolean().optional(),
 });
 
 /** The back of the card. Each field is optional so a profile can publish only what it wants to. */

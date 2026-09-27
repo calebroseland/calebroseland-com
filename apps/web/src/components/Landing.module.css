@@ -146,16 +146,15 @@
     }
   }
 
+  /* Collapsed, a column per group's face link, and each inline group a row of its own beneath them. */
   .links {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
+    grid-template-columns: repeat(var(--faces), 1fr);
     justify-items: center;
     gap: var(--space-4);
     padding-block: var(--space-6) var(--space-2);
 
     &[data-expanded] {
-      grid-auto-flow: row;
       grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
       justify-items: stretch;
       text-align: start;
@@ -165,6 +164,11 @@
   .group {
     position: relative;
     min-inline-size: 0;
+  }
+
+  .links:not([data-expanded]) > .group[data-inline] {
+    grid-column: 1 / -1;
+    order: 1;
   }
 
   /* Out of the layout; marks a heading's place for the transition. */
@@ -193,6 +197,30 @@
   .linkItem {
     position: relative;
     view-transition-class: card-link;
+  }
+
+  /* An inline group: icons in a row, each named by its tooltip and, for screen readers, its label. */
+  .iconRow {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    [data-expanded] & {
+      justify-content: start;
+    }
+
+    & .link {
+      padding-inline: var(--space-2);
+    }
+
+    & .label {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
   }
 
   /* Out of the layout; marks a hidden link's row for the transition. */

@@ -10,8 +10,16 @@ test.describe("landing", () => {
       "href",
       "https://github.com/calebroseland",
     );
-    // Collapsed, the card shows one link per group, like a business card.
-    await expect(nav.getByRole("link")).toHaveCount(3);
+    // Collapsed, the card shows one link per group, like a business card, and the inline Social group
+    // its whole row of icons, each named by a tooltip.
+    await expect(nav.getByRole("link")).toHaveCount(7);
+    if (!test.info().project.name.includes("mobile")) {
+      await nav.getByRole("link", { name: /LinkedIn/ }).hover();
+      // Base UI's popup takes no tooltip role: the link already has the label as its name.
+      await expect(
+        page.locator("[data-side][data-open]:not([role])").filter({ hasText: /^LinkedIn$/ }),
+      ).toBeVisible();
+    }
     await page.getByRole("button", { name: "show more" }).click();
     await expect(page.getByRole("button", { name: "show less" })).toHaveAttribute(
       "aria-expanded",

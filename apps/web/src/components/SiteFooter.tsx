@@ -12,7 +12,7 @@ import { footerHeadingName, footerLinkName, withViewTransition } from "./viewTra
 const LINKS_ID = "site-footer-links";
 
 /* The card's links, kept at hand past the card. Collapsed, one line of icons by group; expanded, a
-   column per group with labels. Each link shares a view-transition name with its place on the card. */
+   column per group with labels, except an inline group, which stays a row of icons. Each link shares a view-transition name with its place on the card. */
 export function SiteFooter({ profile }: { profile: Profile }) {
   const { expanded, toggle } = useDetailsExpanded();
   const reduce = useReduceMotion();
@@ -26,7 +26,7 @@ export function SiteFooter({ profile }: { profile: Profile }) {
             title={group.title}
             links={group.links}
             index={g}
-            iconOnly={iconOnly}
+            iconOnly={iconOnly || group.inline === true}
           />
         ))}
       </nav>
@@ -93,7 +93,7 @@ function FooterGroup({
 }) {
   const named = useSectionHeading();
   return (
-    <section {...named.region} className={styles.group}>
+    <section {...named.region} className={styles.group} data-icons={iconOnly || undefined}>
       <h2 {...named.heading} className={styles.groupTitle} style={footerHeadingName(index)}>
         {title}
       </h2>

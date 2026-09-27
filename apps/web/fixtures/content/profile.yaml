@@ -5,6 +5,7 @@ tagline: Software Engineer
 tags: [TypeScript, React, Web Platform]
 groups:
   - title: Projects
+    inline: true
     links:
       - { label: GitHub, url: https://github.com/calebroseland, icon: simple-icons:github }
       - { label: Gists, url: https://gist.github.com/calebroseland, icon: lucide:braces }
@@ -14,6 +15,7 @@ groups:
       - { label: Posts, url: /posts, icon: lucide:pencil }
       - { label: State Management in Vue, url: https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81, icon: lucide:file-text }
   - title: Social
+    inline: true
     links:
       - { label: LinkedIn, url: https://linkedin.com/in/calebroseland, icon: simple-icons:linkedin }
       - { label: Twitter, url: https://twitter.com/calebroseland, icon: simple-icons:x }

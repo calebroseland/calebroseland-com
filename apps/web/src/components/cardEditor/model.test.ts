@@ -112,8 +112,8 @@ describe("moving links", () => {
     icon: "lucide:link",
   });
   const groups = [
-    { key: "a", title: "A", links: [link("a1"), link("a2")] },
-    { key: "b", title: "B", links: [link("b1")] },
+    { key: "a", title: "A", inline: false, links: [link("a1"), link("a2")] },
+    { key: "b", title: "B", inline: false, links: [link("b1")] },
   ];
   const labels = (gs: readonly { links: { label: string }[] }[]) =>
     gs.map((g) => g.links.map((l) => l.label));

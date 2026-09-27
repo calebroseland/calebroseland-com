@@ -10,6 +10,7 @@ import { Icon } from "@crc/ui";
 import { Link, useMatch, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, m, type Transition } from "motion/react";
 import {
+  type ComponentProps,
   type CSSProperties,
   type ReactNode,
   type RefObject,
@@ -18,16 +19,17 @@ import {
   useRef,
   useState,
 } from "react";
-import { useSignedIn } from "../editor/auth/hooks.ts";
 import { hasContact } from "../content/profile.ts";
+import { useSignedIn } from "../editor/auth/hooks.ts";
 import type { ProfileSource } from "../editor/profile.ts";
 import { notify } from "../editor/Toast.tsx";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
-import { useDetailsExpanded } from "./detailsState.ts";
 import type { EditResult } from "./cardEditor/CardEditor.tsx";
+import { useDetailsExpanded } from "./detailsState.ts";
 import { FocusChip } from "./FocusChip.tsx";
 import styles from "./Landing.module.css";
+import { Tip } from "./Tip.tsx";
 import { UserMenu } from "./UserMenu.tsx";
 import { footerHeadingName, footerLinkName, vtName, withViewTransition } from "./viewTransition.ts";
 
@@ -68,9 +70,10 @@ function useFocusOnMount<T extends HTMLElement>(when: boolean): RefObject<T | nu
   return ref;
 }
 
-function ExternalLink({ href, children }: { href: string; children: ReactNode }) {
+/** Passes other props through, so it can be a tooltip's trigger. */
+function ExternalLink({ href, children, ...rest }: ComponentProps<"a"> & { href: string }) {
   return (
-    <a className={styles.link} href={href} target="_blank" rel="noopener noreferrer">
+    <a {...rest} className={styles.link} href={href} target="_blank" rel="noopener noreferrer">
       {children}
       <span className="visually-hidden"> (opens in new tab)</span>
     </a>
@@ -79,19 +82,37 @@ function ExternalLink({ href, children }: { href: string; children: ReactNode })
 
 /** A root-relative url is a page on this site, so it goes through the router (and its basepath). */
 /** Every link on the card wears the same icon, in the same slot, so labels line up down a column. */
-function CardLink({ link }: { link: ProfileLink }) {
+function CardLink({ link, iconOnly = false }: { link: ProfileLink; iconOnly?: boolean }) {
   const body = (
     <>
       <Icon name={link.icon} size="xl" className={styles.linkIcon} />
       <span className={styles.label}>{link.label}</span>
     </>
   );
-  return link.url.startsWith("/") ? (
+  const anchor = link.url.startsWith("/") ? (
     <Link to={link.url} className={styles.link}>
       {body}
     </Link>
   ) : (
     <ExternalLink href={link.url}>{body}</ExternalLink>
+  );
+  return iconOnly ? <Tip label={link.label}>{anchor}</Tip> : anchor;
+}
+
+/** An inline group: every link, one row of icons, in both states of the card. */
+function IconRow({ links, group }: { links: readonly ProfileLink[]; group: number }) {
+  return (
+    <ul className={`${styles.list} ${styles.iconRow}`} role="list">
+      {links.map((link, i) => (
+        <li
+          key={link.url}
+          className={`${styles.linkItem} ${styles.vt} ${styles.toFooter}`}
+          style={{ ...vtName(`card-link-${group}-${i}`), ...footerLinkName(group, i) }}
+        >
+          <CardLink link={link} iconOnly />
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -198,12 +219,17 @@ function Front({
         aria-label="Profiles and links"
         className={styles.links}
         data-expanded={expanded || undefined}
+        style={
+          {
+            "--faces": Math.max(1, profile.groups.filter((x) => !x.inline).length),
+          } as CSSProperties
+        }
       >
         {profile.groups.map((group, g) => {
           const [primary, ...rest] = group.links;
           if (!primary) return null;
           return (
-            <div key={group.title} className={styles.group}>
+            <div key={group.title} className={styles.group} data-inline={group.inline || undefined}>
               {expanded ? (
                 <h2
                   className={`${styles.groupTitle} ${styles.vt} ${styles.toFooter}`}
@@ -220,41 +246,45 @@ function Front({
                   style={footerHeadingName(g)}
                 />
               )}
-              <ul className={styles.list} role="list">
-                <li
-                  className={`${styles.linkItem} ${styles.vt} ${styles.toFooter}`}
-                  style={{ ...vtName(`card-link-${g}-0`), ...footerLinkName(g, 0) }}
-                >
-                  <CardLink link={primary} />
-                  {/* Where each hidden link would sit, so the footer's links flow out of the card. */}
-                  {!expanded &&
+              {group.inline ? (
+                <IconRow links={group.links} group={g} />
+              ) : (
+                <ul className={styles.list} role="list">
+                  <li
+                    className={`${styles.linkItem} ${styles.vt} ${styles.toFooter}`}
+                    style={{ ...vtName(`card-link-${g}-0`), ...footerLinkName(g, 0) }}
+                  >
+                    <CardLink link={primary} />
+                    {/* Where each hidden link would sit, so the footer's links flow out of the card. */}
+                    {!expanded &&
+                      rest.map((link, i) => (
+                        <span
+                          key={link.url}
+                          aria-hidden="true"
+                          inert
+                          className={`${styles.linkAnchor} ${styles.toFooter}`}
+                          style={{ ...footerLinkName(g, i + 1), "--row": i + 1 } as CSSProperties}
+                        >
+                          {/* Invisible; sizes the mark like the link so it does not stretch. */}
+                          <CardLink link={link} />
+                        </span>
+                      ))}
+                  </li>
+                  {expanded &&
                     rest.map((link, i) => (
-                      <span
+                      <li
                         key={link.url}
-                        aria-hidden="true"
-                        inert
-                        className={`${styles.linkAnchor} ${styles.toFooter}`}
-                        style={{ ...footerLinkName(g, i + 1), "--row": i + 1 } as CSSProperties}
+                        className={`${styles.linkItem} ${styles.vt} ${styles.toFooter}`}
+                        style={{
+                          ...vtName(`card-link-${g}-${i + 1}`),
+                          ...footerLinkName(g, i + 1),
+                        }}
                       >
-                        {/* Invisible; sizes the mark like the link so it does not stretch. */}
                         <CardLink link={link} />
-                      </span>
+                      </li>
                     ))}
-                </li>
-                {expanded &&
-                  rest.map((link, i) => (
-                    <li
-                      key={link.url}
-                      className={`${styles.linkItem} ${styles.vt} ${styles.toFooter}`}
-                      style={{
-                        ...vtName(`card-link-${g}-${i + 1}`),
-                        ...footerLinkName(g, i + 1),
-                      }}
-                    >
-                      <CardLink link={link} />
-                    </li>
-                  ))}
-              </ul>
+                </ul>
+              )}
             </div>
           );
         })}

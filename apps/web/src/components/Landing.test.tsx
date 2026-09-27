@@ -32,6 +32,14 @@ vi.mock("virtual:content/profile", () => ({
           { label: "Unknown icon", url: "https://example.com", icon: "lucide:does-not-exist" },
         ],
       },
+      {
+        title: "Elsewhere",
+        inline: true,
+        links: [
+          { label: "Mastodon", url: "https://mastodon.test/@x", icon: "simple-icons:x" },
+          { label: "Bluesky", url: "https://bsky.test/x", icon: "simple-icons:npm" },
+        ],
+      },
     ],
     contact: {
       email: "someone@example.com",
@@ -75,6 +83,9 @@ describe("Landing", () => {
       "https://github.com/x",
       "/posts",
       "https://linkedin.com/in/x",
+      // An inline group shows every link, as icons, collapsed or not.
+      "https://mastodon.test/@x",
+      "https://bsky.test/x",
     ]);
     expect(links[0]).toHaveAttribute("target", "_blank");
     expect(links[0]).toHaveAttribute("rel", expect.stringContaining("noopener"));
@@ -97,15 +108,22 @@ describe("Landing", () => {
       within(nav())
         .getAllByRole("heading", { level: 2 })
         .map((h) => h.textContent),
-    ).toEqual(["Code", "Writings", "Social"]);
-    expect(within(nav()).getAllByRole("link")).toHaveLength(4);
+    ).toEqual(["Code", "Writings", "Social", "Elsewhere"]);
+    expect(within(nav()).getAllByRole("link")).toHaveLength(6);
     expect(
       within(screen.getByRole("list", { name: "Focus areas" })).getAllByRole("listitem"),
     ).toHaveLength(6);
 
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
-    await vi.waitFor(() => expect(within(nav()).getAllByRole("link")).toHaveLength(3));
+    await vi.waitFor(() => expect(within(nav()).getAllByRole("link")).toHaveLength(5));
+  });
+
+  it("an inline group is a row of icons, each still named by its label", async () => {
+    await renderLanding();
+    const mastodon = within(nav()).getByRole("link", { name: /Mastodon/ });
+    expect(mastodon).toHaveAccessibleName(/^Mastodon.*opens in new tab/);
+    expect(mastodon.closest("ul")?.className).toMatch(/iconRow/);
   });
 
   it("shares show more with the site footer, both ways", async () => {
@@ -216,7 +234,7 @@ describe("Landing", () => {
       within(footer)
         .getAllByRole("heading", { level: 2 })
         .map((h) => h.textContent),
-    ).toEqual(["Code", "Writings", "Social"]);
+    ).toEqual(["Code", "Writings", "Social", "Elsewhere"]);
     expect(within(footer).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
     // The way into the editor is the account menu, not the footer.
     expect(
