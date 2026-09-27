@@ -1,4 +1,4 @@
-import Image from "@tiptap/extension-image";
+import Image, { type ImageOptions } from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Markdown } from "@tiptap/markdown";
 import { EditorContent, type Editor as TipTap, useEditor } from "@tiptap/react";
@@ -27,6 +27,8 @@ type EditorProps = {
   initialMarkdown: string;
   onChange: (markdown: string) => void;
   onImageFiles: (files: File[]) => void;
+  /** Where to load an image from; the document, and so the markdown, keeps the name as written. */
+  previewSrc?: (src: string) => string;
   apiRef?: RefObject<EditorApi | null>;
 };
 
@@ -41,9 +43,16 @@ export function Editor(props: EditorProps) {
 }
 
 /** The TipTap editor for one document: markdown in and out, pasted or dropped images handed back. */
-function useMarkdownEditor({ initialMarkdown, onChange, onImageFiles, apiRef }: EditorProps) {
+function useMarkdownEditor({
+  initialMarkdown,
+  onChange,
+  onImageFiles,
+  previewSrc,
+  apiRef,
+}: EditorProps) {
   const onChangeRef = useLatest(onChange);
   const onImageFilesRef = useLatest(onImageFiles);
+  const previewSrcRef = useLatest(previewSrc);
 
   const editor = useEditor({
     extensions: [
@@ -53,7 +62,11 @@ function useMarkdownEditor({ initialMarkdown, onChange, onImageFiles, apiRef }: 
         link: { openOnClick: false, autolink: true, defaultProtocol: "https" },
       }),
       Markdown,
-      Image.configure({ inline: false, allowBase64: true }),
+      PreviewImage.configure({
+        inline: false,
+        allowBase64: true,
+        previewSrc: (src) => previewSrcRef.current?.(src) ?? src,
+      }),
       Placeholder.configure({ placeholder: "Write. Type / for commands, paste or drop an image." }),
     ],
     content: initialMarkdown,
@@ -89,6 +102,28 @@ function useMarkdownEditor({ initialMarkdown, onChange, onImageFiles, apiRef }: 
   useApiBinding(editor, apiRef);
   return { editor, pickImages: (files: File[]) => onImageFilesRef.current(files) };
 }
+
+/* Relative names ("hero.png") would resolve against the editor's own URL, so the rendered src is the
+   preview while data-src keeps the name, which is what copy and paste inside the editor read back. */
+const PreviewImage = Image.extend<ImageOptions & { previewSrc: (src: string) => string }>({
+  addOptions() {
+    return { ...this.parent?.(), previewSrc: (src: string) => src } as ImageOptions & {
+      previewSrc: (src: string) => string;
+    };
+  },
+  addAttributes() {
+    const previewSrc = this.options.previewSrc;
+    return {
+      ...this.parent?.(),
+      src: {
+        default: null,
+        parseHTML: (el) => el.getAttribute("data-src") ?? el.getAttribute("src"),
+        renderHTML: (attrs) =>
+          attrs.src ? { src: previewSrc(attrs.src as string), "data-src": attrs.src } : {},
+      },
+    };
+  },
+});
 
 /** Exposes the editor's commands through `apiRef` for as long as the editor exists. */
 function useApiBinding(editor: TipTap | null, apiRef: RefObject<EditorApi | null> | undefined) {

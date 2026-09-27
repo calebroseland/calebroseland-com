@@ -1,6 +1,7 @@
 import type { Bundle } from "@crc/github-client";
 import { useStore } from "@tanstack/react-store";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useLatest } from "../../hooks/useLatest.ts";
 import {
   type Buffer,
   type BufferController,
@@ -9,6 +10,7 @@ import {
   readLocalBuffer,
   writeLocalBuffer,
 } from "./buffer.ts";
+import { previewSrc } from "./images.ts";
 import { bufferFromBundle } from "./load.ts";
 
 /** The working copy of one draft: built once per branch from the bundle, or from unsaved work kept on
@@ -27,7 +29,17 @@ export function useDraftBuffer(bundle: Bundle, slug: string) {
   useLocalAutosave(buffer);
   useFlushOnUnmount(controller);
   useFlushBeforeLeaving(controller, buffer.dirty);
-  return { buffer, controller };
+  return { buffer, controller, previewSrc: usePreviewSrc(bundle, controller) };
+}
+
+/** Resolves an image in the document to something the browser can show. Reads the store, not React
+    state, because an image is inserted in the same tick its file is added. */
+function usePreviewSrc(bundle: Bundle, controller: BufferController) {
+  const files = useLatest(bundle.files);
+  return useCallback(
+    (src: string) => previewSrc(src, controller.store.state, files.current),
+    [controller, files],
+  );
 }
 
 /** Keeps the working copy on this device, debounced; never commits. */

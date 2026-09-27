@@ -21,6 +21,15 @@ function postDir(slug: string): string {
   throw new Error(`no post directory for ${slug}`);
 }
 
+/** An image in the editor that the browser actually loaded, not a broken relative URL. */
+async function expectLoaded(page: import("@playwright/test").Page, alt: string) {
+  const img = page.getByRole("textbox", { name: "Post body" }).getByRole("img", { name: alt });
+  await expect(img).toBeVisible();
+  await expect
+    .poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth))
+    .toBeGreaterThan(0);
+}
+
 async function signInLocal(page: import("@playwright/test").Page) {
   await page.goto("/login");
   await page.evaluate(() => localStorage.clear());
@@ -53,6 +62,7 @@ test.describe("working-tree mode", () => {
       .click();
     await expect(page).toHaveURL(/\/editor\/hello-placeholder$/);
     await expect(page.getByRole("textbox", { name: "Post body" })).toContainText("Lorem ipsum");
+    await expectLoaded(page, "A teal placeholder hero");
     // No branch to publish from: the file is already on the branch.
     await expect(page.getByRole("button", { name: "Publish" })).toHaveCount(0);
 
@@ -146,6 +156,7 @@ test.describe("working-tree mode", () => {
       .setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: noisePng() });
     await expect(page.getByRole("tab", { name: /Images \(1\)/ })).toBeVisible();
     await page.getByLabel(/Alt text for photo\.png/).fill("Noise, for the size of it");
+    await expectLoaded(page, "Noise, for the size of it");
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "working tree" })).toBeVisible();
 
