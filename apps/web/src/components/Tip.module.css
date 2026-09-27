@@ -1,4 +1,12 @@
 @layer components {
+  /* Holding a trigger shows its tip, so the system's own long-press menu and text selection stay out. */
+  @media (hover: none) {
+    .trigger {
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+  }
+
   .positioner {
     z-index: var(--z-tooltip);
   }
