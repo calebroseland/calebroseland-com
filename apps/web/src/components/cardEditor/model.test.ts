@@ -4,8 +4,10 @@ import {
   fieldErrors,
   fromProfile,
   MAX_TAGS,
+  moveLink,
   newGroup,
   newTag,
+  nextLinkSlot,
   tagProblem,
   toProfile,
 } from "./model.ts";
@@ -99,5 +101,43 @@ describe("card editor model", () => {
     const tags = [newTag("One"), newTag("Two")];
     expect(tagProblem(tags, "one", tags[1]?.key)).toMatch(/already there/);
     expect(tagProblem(tags, "One", tags[0]?.key)).toBeNull();
+  });
+});
+
+describe("moving links", () => {
+  const link = (label: string) => ({
+    key: label,
+    label,
+    url: "https://x.test",
+    icon: "lucide:link",
+  });
+  const groups = [
+    { key: "a", title: "A", links: [link("a1"), link("a2")] },
+    { key: "b", title: "B", links: [link("b1")] },
+  ];
+  const labels = (gs: readonly { links: { label: string }[] }[]) =>
+    gs.map((g) => g.links.map((l) => l.label));
+
+  it("reorders within a group and moves into another at the given place", () => {
+    expect(labels(moveLink(groups, { group: 0, index: 0 }, { group: 0, index: 1 }))).toEqual([
+      ["a2", "a1"],
+      ["b1"],
+    ]);
+    expect(labels(moveLink(groups, { group: 0, index: 1 }, { group: 1, index: 0 }))).toEqual([
+      ["a1"],
+      ["a2", "b1"],
+    ]);
+    expect(labels(moveLink(groups, { group: 1, index: 0 }, { group: 0, index: 2 }))).toEqual([
+      ["a1", "a2", "b1"],
+      [],
+    ]);
+  });
+
+  it("steps over a group's edge with the arrow keys, and stops at the ends", () => {
+    expect(nextLinkSlot(groups, { group: 0, index: 0 }, 1)).toEqual({ group: 0, index: 1 });
+    expect(nextLinkSlot(groups, { group: 0, index: 1 }, 1)).toEqual({ group: 1, index: 0 });
+    expect(nextLinkSlot(groups, { group: 1, index: 0 }, -1)).toEqual({ group: 0, index: 2 });
+    expect(nextLinkSlot(groups, { group: 0, index: 0 }, -1)).toBeNull();
+    expect(nextLinkSlot(groups, { group: 1, index: 0 }, 1)).toBeNull();
   });
 });

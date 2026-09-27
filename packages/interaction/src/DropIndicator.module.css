@@ -37,3 +37,12 @@
     }
   }
 }
+
+@layer components {
+  /* The drag preview: a copy of the item, drawn away from its list, on a surface of its own. */
+  .preview {
+    border-radius: var(--radius-md);
+    background: var(--color-surface-raised);
+    box-shadow: var(--shadow-md);
+  }
+}

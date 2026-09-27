@@ -145,3 +145,36 @@ export function fieldErrors(p: Profile): Map<string, string> {
 export const ICON_CHOICES = (Object.keys(icons) as IconName[])
   .map((name) => ({ value: name, label: iconLabel(name) }))
   .sort((a, b) => a.label.localeCompare(b.label));
+
+/** A link's place: which group, and where in it. */
+export type LinkSlot = { group: number; index: number };
+
+/** Moves a link within its group or into another; `to.index` is where it ends up. */
+export function moveLink(groups: readonly EditGroup[], from: LinkSlot, to: LinkSlot): EditGroup[] {
+  const link = groups[from.group]?.links[from.index];
+  if (!link || !groups[to.group]) return [...groups];
+  const without = groups.map((g, i) =>
+    i === from.group ? { ...g, links: g.links.filter((_, j) => j !== from.index) } : g,
+  );
+  return without.map((g, i) => {
+    if (i !== to.group) return g;
+    const links = [...g.links];
+    links.splice(Math.max(0, Math.min(to.index, links.length)), 0, link);
+    return { ...g, links };
+  });
+}
+
+/** Where the arrow keys take a link: along its group, then over the edge into the next or previous. */
+export function nextLinkSlot(
+  groups: readonly EditGroup[],
+  from: LinkSlot,
+  delta: -1 | 1,
+): LinkSlot | null {
+  const length = groups[from.group]?.links.length ?? 0;
+  const index = from.index + delta;
+  if (index >= 0 && index < length) return { group: from.group, index };
+  const group = from.group + delta;
+  const target = groups[group];
+  if (!target) return null;
+  return { group, index: delta < 0 ? target.links.length : 0 };
+}

@@ -10,6 +10,9 @@ export {
 export {
   type ItemOptions,
   type ListOptions,
+  type Slot,
+  useDragMoves,
   useItemRegistration,
   useListReorder,
+  useListTarget,
 } from "./useListReorder.ts";

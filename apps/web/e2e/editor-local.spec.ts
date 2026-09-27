@@ -30,6 +30,25 @@ async function expectLoaded(page: import("@playwright/test").Page, alt: string) 
     .toBeGreaterThan(0);
 }
 
+/** A native drag in small steps, so the page sees the dragover events a real pointer sends. */
+async function drag(
+  page: import("@playwright/test").Page,
+  handle: import("@playwright/test").Locator,
+  target: import("@playwright/test").Locator,
+  edge: "top" | "right",
+) {
+  const from = await handle.boundingBox();
+  const to = await target.boundingBox();
+  if (!from || !to) throw new Error("drag: element not on screen");
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  // Near the top either way: the bottom of the form sits under its sticky save bar.
+  const [x, y] =
+    edge === "top" ? [to.x + to.width / 2, to.y + 6] : [to.x + to.width - 6, to.y + 24];
+  await page.mouse.move(x, y, { steps: 12 });
+  await page.mouse.up();
+}
+
 async function signInLocal(page: import("@playwright/test").Page) {
   await page.goto("/login");
   await page.evaluate(() => localStorage.clear());
@@ -185,6 +204,60 @@ test.describe("working-tree mode", () => {
     await expect(dialog).toContainText("from your working tree");
     await dialog.getByRole("button", { name: "Delete" }).click();
     await expect(page.getByRole("link", { name: "Temporary" })).toHaveCount(0);
+  });
+
+  test("the card editor moves links between groups and reorders groups, by drag and by keyboard", async ({
+    page,
+    browserName,
+  }) => {
+    await signInLocal(page);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Edit card" }).click();
+    const form = page.getByRole("form", { name: "Edit card" });
+    const group = (name: string) => form.getByRole("group", { name, exact: true });
+    const labels = (name: string) =>
+      group(name)
+        .getByRole("textbox", { name: /^Label for / })
+        .evaluateAll((els) => els.map((el) => (el as HTMLInputElement).value));
+    const groupOrder = () =>
+      form
+        .getByRole("textbox", { name: "Group name" })
+        .evaluateAll((els) => els.map((el) => (el as HTMLInputElement).value));
+
+    // The last link of Projects steps over the edge into Writings.
+    await form.getByRole("button", { name: /^Move vue-dom-portal\./ }).focus();
+    await page.keyboard.press("ArrowDown");
+    await expect
+      .poll(() => labels("Writings"))
+      .toEqual(["vue-dom-portal", "Posts", "State Management in Vue"]);
+    await expect(form.getByRole("button", { name: /^Move vue-dom-portal\./ })).toBeFocused();
+
+    await form.getByRole("button", { name: /^Move group Social\./ }).focus();
+    await page.keyboard.press("ArrowLeft");
+    await expect.poll(groupOrder).toEqual(["Projects", "Social", "Writings"]);
+
+    // Native drag and drop is only scripted reliably in Chromium.
+    if (browserName === "chromium" && !test.info().project.name.includes("mobile")) {
+      await drag(
+        page,
+        form.getByRole("button", { name: /^Move GitHub\./ }),
+        group("Social").getByRole("listitem").first(),
+        "top",
+      );
+      await expect
+        .poll(() => labels("Social"))
+        .toEqual(["GitHub", "LinkedIn", "Twitter", "npm", "Stack Overflow", "Pluralsight"]);
+      await expect.poll(() => labels("Projects")).toEqual(["Gists"]);
+
+      await drag(
+        page,
+        form.getByRole("button", { name: /^Move group Projects\./ }),
+        group("Writings"),
+        "right",
+      );
+      await expect.poll(groupOrder).toEqual(["Social", "Writings", "Projects"]);
+    }
+    await form.getByRole("button", { name: "Cancel" }).click();
   });
 
   test("the landing card edits in place and saves profile.yaml to the working tree", async ({

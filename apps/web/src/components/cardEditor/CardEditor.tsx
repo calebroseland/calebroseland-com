@@ -6,7 +6,14 @@ import { RadioGroup } from "@base-ui/react/radio-group";
 import { Select } from "@base-ui/react/select";
 import { Switch } from "@base-ui/react/switch";
 import type { Profile } from "@crc/content-schema";
-import { DropIndicator, reorder, useItemRegistration, useListReorder } from "@crc/interaction";
+import {
+  DropIndicator,
+  reorder,
+  useDragMoves,
+  useItemRegistration,
+  useListReorder,
+  useListTarget,
+} from "@crc/interaction";
 import { Icon } from "@crc/ui";
 import {
   type KeyboardEvent,
@@ -30,12 +37,19 @@ import {
   type EditLink,
   type EditTag,
   ICON_CHOICES,
+  type LinkSlot,
   MAX_TAGS,
+  moveLink,
   newGroup,
   newLink,
   newTag,
+  nextLinkSlot,
   tagProblem,
 } from "./model.ts";
+
+const LINKS = "links";
+const GROUPS = "groups";
+const linkListId = (group: EditGroup) => `links-${group.key}`;
 
 /** What a save produced; the card shows it when it is already the site's source (the working tree). */
 export type EditResult = { profile: Profile; workingTree: boolean } | null;
@@ -125,6 +139,33 @@ function CardEditorForm({
     return reorder(items, from, to);
   };
 
+  const groupName = (g: number) => state.groups[g]?.title.trim() || `Group ${g + 1}`;
+  const relocateLink = (from: LinkSlot, to: LinkSlot) => {
+    const link = state.groups[from.group]?.links[from.index];
+    if (!link) return;
+    const groups = moveLink(state.groups, from, to);
+    const length = groups[to.group]?.links.length ?? 0;
+    focusAfterMove(link.key);
+    announcer.announce(
+      from.group === to.group
+        ? `${link.label || "Link"} moved to position ${to.index + 1} of ${length}`
+        : `${link.label || "Link"} moved to ${groupName(to.group)}, position ${to.index + 1} of ${length}`,
+    );
+    update((s) => ({ ...s, groups }));
+  };
+  const moveGroup = (from: number, to: number) => {
+    const groups = move(state.groups, from, to, groupName(from), (g) => `group:${g.key}`);
+    update((s) => ({ ...s, groups }));
+  };
+  useDragMoves(LINKS, (from, to) => {
+    const at = (listId: string) => state.groups.findIndex((g) => linkListId(g) === listId);
+    relocateLink(
+      { group: at(from.listId), index: from.index },
+      { group: at(to.listId), index: to.index },
+    );
+  });
+  useDragMoves(GROUPS, (from, to) => moveGroup(from.index, to.index));
+
   return (
     <form
       className={styles.editor}
@@ -183,18 +224,10 @@ function CardEditorForm({
               update((s) => ({ ...s, groups: s.groups.map((x, i) => (i === g ? nextGroup : x)) }))
             }
             onRemove={() => update((s) => ({ ...s, groups: s.groups.filter((_, i) => i !== g) }))}
-            onMoveLink={(from, to) => {
-              const links = move(
-                group.links,
-                from,
-                to,
-                group.links[from]?.label || "Link",
-                (l) => l.key,
-              );
-              update((s) => ({
-                ...s,
-                groups: s.groups.map((x, i) => (i === g ? { ...x, links } : x)),
-              }));
+            onMove={(delta) => moveGroup(g, g + delta)}
+            onMoveLink={(index, delta) => {
+              const to = nextLinkSlot(state.groups, { group: g, index }, delta);
+              if (to) relocateLink({ group: g, index }, to);
             }}
           />
         ))}
@@ -317,13 +350,16 @@ function Handle({
 }: {
   label: string;
   reorderKey: string;
-  axis: "vertical" | "horizontal";
+  axis: "vertical" | "horizontal" | "grid";
   onMove: (delta: -1 | 1) => void;
   handleRef: RefObject<HTMLElement | null>;
   children: ReactNode;
 }) {
-  const [back, forward] =
-    axis === "vertical" ? ["ArrowUp", "ArrowDown"] : ["ArrowLeft", "ArrowRight"];
+  const keys = {
+    vertical: { back: ["ArrowUp"], forward: ["ArrowDown"] },
+    horizontal: { back: ["ArrowLeft"], forward: ["ArrowRight"] },
+    grid: { back: ["ArrowUp", "ArrowLeft"], forward: ["ArrowDown", "ArrowRight"] },
+  }[axis];
   return (
     <button
       type="button"
@@ -332,11 +368,12 @@ function Handle({
       data-reorder-key={reorderKey}
       aria-label={label}
       aria-roledescription="reorderable"
-      aria-keyshortcuts={axis === "vertical" ? "ArrowUp ArrowDown" : "ArrowLeft ArrowRight"}
+      aria-keyshortcuts={[...keys.back, ...keys.forward].join(" ")}
       onKeyDown={(e: KeyboardEvent) => {
-        if (e.key !== back && e.key !== forward) return;
+        const back = keys.back.includes(e.key);
+        if (!back && !keys.forward.includes(e.key)) return;
         e.preventDefault();
-        onMove(e.key === back ? -1 : 1);
+        onMove(back ? -1 : 1);
       }}
     >
       {children}
@@ -580,6 +617,7 @@ function GroupEditor({
   canRemove,
   onChange,
   onRemove,
+  onMove,
   onMoveLink,
 }: {
   group: EditGroup;
@@ -588,25 +626,36 @@ function GroupEditor({
   canRemove: boolean;
   onChange: (g: EditGroup) => void;
   onRemove: () => void;
-  onMoveLink: (from: number, to: number) => void;
+  onMove: (delta: -1 | 1) => void;
+  onMoveLink: (index: number, delta: -1 | 1) => void;
 }) {
-  const listId = `links-${group.key}`;
-  const items = group.links.map((l) => ({ ...l, id: l.key }));
-  useListReorder(
-    items,
-    (next) => onChange({ ...group, links: next.map(({ id: _id, ...l }) => l) }),
-    {
-      listId,
-    },
-  );
+  const listId = linkListId(group);
+  const { ref, handleRef, state } = useItemRegistration(group.key, index, {
+    listId: GROUPS,
+    axis: "grid",
+  });
+  const list = useListTarget({ listId, kind: LINKS, length: group.links.length });
   const name = group.title.trim() || `Group ${index + 1}`;
   const setLink = (i: number, link: EditLink) =>
     onChange({ ...group, links: group.links.map((l, j) => (j === i ? link : l)) });
 
   return (
-    <fieldset className={styles.group}>
+    <fieldset
+      ref={ref as RefObject<HTMLFieldSetElement>}
+      className={styles.group}
+      data-dragging={state.dragging}
+    >
       <legend className="visually-hidden">{name}</legend>
       <div className={styles.groupHead}>
+        <Handle
+          label={`Move group ${name}. Arrow keys move it.`}
+          reorderKey={`group:${group.key}`}
+          axis="grid"
+          onMove={onMove}
+          handleRef={handleRef}
+        >
+          <Icon name="lucide:grip-vertical" size="sm" />
+        </Handle>
         <TextField
           label="Group name"
           className={styles.groupTitle}
@@ -625,7 +674,12 @@ function GroupEditor({
           </button>
         )}
       </div>
-      <ul className={styles.linkList} role="list">
+      <ul
+        ref={list.ref as RefObject<HTMLUListElement>}
+        className={styles.linkList}
+        role="list"
+        data-over={list.over || undefined}
+      >
         {group.links.map((link, i) => (
           <LinkRow
             key={link.key}
@@ -637,7 +691,7 @@ function GroupEditor({
             canRemove={group.links.length > 1}
             onChange={(l) => setLink(i, l)}
             onRemove={() => onChange({ ...group, links: group.links.filter((_, j) => j !== i) })}
-            onMove={(delta) => onMoveLink(i, i + delta)}
+            onMove={(delta) => onMoveLink(i, delta)}
           />
         ))}
       </ul>
@@ -652,6 +706,7 @@ function GroupEditor({
         <Icon name="lucide:plus" size="sm" />
         Add link to {name}
       </button>
+      <DropIndicator edge={state.edge} />
     </fieldset>
   );
 }
@@ -677,7 +732,7 @@ function LinkRow({
   onRemove: () => void;
   onMove: (delta: -1 | 1) => void;
 }) {
-  const { ref, handleRef, state } = useItemRegistration(link.key, index, { listId });
+  const { ref, handleRef, state } = useItemRegistration(link.key, index, { listId, kind: LINKS });
   const name = link.label.trim() || "new link";
   return (
     <li
