@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("virtual:content/profile", () => ({
   default: {
@@ -45,6 +45,7 @@ vi.mock("virtual:content/index", () => ({ default: [], loaders: {} }));
 import { createMemoryHistory, createRouter, RouterProvider } from "@tanstack/react-router";
 import { session } from "../editor/auth/store.ts";
 import { routeTree } from "../routeTree.gen.ts";
+import { detailsExpanded } from "./detailsState.ts";
 
 async function renderLanding() {
   const router = createRouter({
@@ -53,11 +54,14 @@ async function renderLanding() {
   });
   render(<RouterProvider router={router} />);
   await screen.findByRole("heading", { level: 1 });
+  return router;
 }
 
 const nav = () => screen.getByRole("navigation", { name: "Profiles and links" });
 
 describe("Landing", () => {
+  beforeEach(() => detailsExpanded.setState(() => false));
+
   it("renders the name as the page heading and the tagline", async () => {
     await renderLanding();
     expect(screen.getByRole("heading", { level: 1, name: "Placeholder Name" })).toBeInTheDocument();
@@ -102,6 +106,18 @@ describe("Landing", () => {
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     await vi.waitFor(() => expect(within(nav()).getAllByRole("link")).toHaveLength(3));
+  });
+
+  it("shares show more with the site footer, both ways", async () => {
+    const router = await renderLanding();
+    fireEvent.click(screen.getByRole("button", { name: "show more" }));
+    await router.navigate({ to: "/home" });
+    fireEvent.click(await screen.findByRole("button", { name: "Collapse the footer" }));
+    await router.navigate({ to: "/" });
+    expect(await screen.findByRole("button", { name: "show more" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
   });
 
   it("links each focus area to its posts, and shows the rest behind +N more", async () => {

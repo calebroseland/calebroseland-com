@@ -6,7 +6,8 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { detailsExpanded } from "./detailsState.ts";
 import { SiteFooter } from "./SiteFooter.tsx";
 
 const profile = {
@@ -33,6 +34,8 @@ function renderFooter() {
 }
 
 describe("SiteFooter", () => {
+  beforeEach(() => detailsExpanded.setState(() => false));
+
   it("starts collapsed, one line of named links, and the copyright", async () => {
     renderFooter();
     const toggle = await screen.findByRole("button", { name: "Expand the footer" });

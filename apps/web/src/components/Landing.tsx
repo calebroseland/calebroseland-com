@@ -23,6 +23,7 @@ import type { ProfileSource } from "../editor/profile.ts";
 import { notify } from "../editor/Toast.tsx";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
+import { useDetailsExpanded } from "./detailsState.ts";
 import type { EditResult } from "./cardEditor/CardEditor.tsx";
 import { FocusChip } from "./FocusChip.tsx";
 import styles from "./Landing.module.css";
@@ -351,7 +352,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
   const reduce = useReduceMotion();
   const navigate = useNavigate();
   const [side, setSide] = useState<"front" | "back">("front");
-  const [expanded, setExpanded] = useState(false);
+  const { expanded, toggle: toggleDetails } = useDetailsExpanded();
   // Focus follows the card only after the visitor has turned it; the first paint leaves focus alone.
   const [turned, setTurned] = useState(false);
   const signedIn = useSignedIn();
@@ -443,7 +444,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
               <Front
                 profile={profile}
                 expanded={expanded}
-                onToggle={() => withViewTransition("expand", () => setExpanded((e) => !e), reduce)}
+                onToggle={() => withViewTransition("expand", toggleDetails, reduce)}
                 onFlip={hasContact ? flip : null}
                 onEdit={signedIn ? () => void openEditor() : null}
                 opening={opening}

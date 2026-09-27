@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import type { CSSProperties, ReactElement } from "react";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { useSectionHeading } from "../hooks/useSectionHeading.ts";
-import { useFooterExpanded } from "./footerState.ts";
+import { useDetailsExpanded } from "./detailsState.ts";
 import styles from "./SiteFooter.module.css";
 import { Tip } from "./Tip.tsx";
 import { footerHeadingName, footerLinkName, withViewTransition } from "./viewTransition.ts";
@@ -14,7 +14,7 @@ const LINKS_ID = "site-footer-links";
 /* The card's links, kept at hand past the card. Collapsed, one line of icons by group; expanded, a
    column per group with labels. Each link shares a view-transition name with its place on the card. */
 export function SiteFooter({ profile }: { profile: Profile }) {
-  const { expanded, toggle } = useFooterExpanded();
+  const { expanded, toggle } = useDetailsExpanded();
   const reduce = useReduceMotion();
   const iconOnly = !expanded;
   return (
