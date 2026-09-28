@@ -48,7 +48,7 @@ export function SiteFooter({ profile }: { profile: Profile }) {
             aria-expanded={expanded}
             aria-controls={LINKS_ID}
             aria-label={expanded ? "Collapse the footer" : "Expand the footer"}
-            onClick={() => void withViewTransition("footer", toggle, reduce)}
+            onClick={() => void withViewTransition("footer", () => toggleAtBottom(toggle), reduce)}
           >
             <Icon name={expanded ? "lucide:fold-vertical" : "lucide:unfold-vertical"} size="sm" />
           </button>
@@ -58,6 +58,16 @@ export function SiteFooter({ profile }: { profile: Profile }) {
         © {new Date().getFullYear()} {profile.name}
       </p>
     </footer>
+  );
+}
+
+/* The toggle sits at the foot of the page, so the page stays pinned to its bottom edge while the footer
+   grows or shrinks. The scroll lands before the new snapshot, so the transition morphs in place. */
+function toggleAtBottom(toggle: () => void): Promise<void> {
+  toggle();
+  // After the render the caller flushes, before the transition's new snapshot.
+  return Promise.resolve().then(() =>
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
   );
 }
 
