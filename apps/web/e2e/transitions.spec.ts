@@ -124,6 +124,20 @@ test.describe("page transitions", () => {
     expect(t?.names.filter((n) => /page-(in|out)/.test(n))).toEqual([]);
   });
 
+  test("the footer's contact card turns the page back into the card, as the brand does", async ({
+    page,
+  }) => {
+    await page.goto("/posts");
+    await page.getByRole("contentinfo").getByRole("link", { name: "Contact card" }).click();
+    await expect(page).toHaveURL(/\/contact$/);
+    await expect(page.getByRole("list", { name: "Contact" })).toBeVisible();
+    test.skip(!(await supported(page)), "no view transitions: the change is instant");
+    await expect.poll(() => transitions(page)).toHaveLength(1);
+    const [t] = await transitions(page);
+    expect(t?.vt).toBe("leave");
+    expect(t?.types).toBe(null);
+  });
+
   test("reduced motion swaps pages without animating", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/posts");

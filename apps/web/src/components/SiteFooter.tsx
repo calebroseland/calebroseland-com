@@ -5,6 +5,7 @@ import type { ReactElement } from "react";
 import { hasContact } from "../content/profile.ts";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { useSectionHeading } from "../hooks/useSectionHeading.ts";
+import { isPlainClick, useBackToCard } from "./backToCard.ts";
 import { useDetailsExpanded } from "./detailsState.ts";
 import styles from "./SiteFooter.module.css";
 import { Tip } from "./Tip.tsx";
@@ -17,6 +18,7 @@ const LINKS_ID = "site-footer-links";
 export function SiteFooter({ profile }: { profile: Profile }) {
   const { expanded, toggle } = useDetailsExpanded();
   const reduce = useReduceMotion();
+  const toCard = useBackToCard();
   const iconOnly = !expanded;
   return (
     <footer className={styles.footer} data-expanded={expanded || undefined}>
@@ -48,7 +50,17 @@ export function SiteFooter({ profile }: { profile: Profile }) {
       <div className={styles.copyright}>
         {hasContact(profile) && (
           <Tip label="Contact card">
-            <Link to="/contact" className={styles.link} aria-label="Contact card">
+            <Link
+              to="/contact"
+              className={styles.link}
+              aria-label="Contact card"
+              onClick={(e) => {
+                // The same morph as the brand's way back to the card, onto its contact side.
+                if (!isPlainClick(e)) return;
+                e.preventDefault();
+                void toCard("/contact");
+              }}
+            >
               <Icon name="lucide:id-card" size="sm" />
             </Link>
           </Tip>
