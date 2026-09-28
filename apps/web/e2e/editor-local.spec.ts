@@ -37,15 +37,28 @@ async function drag(
   target: import("@playwright/test").Locator,
   edge: "top" | "right",
 ) {
+  // Scrolled into view and holding still, so the press lands on the handle.
+  await handle.hover();
   const from = await handle.boundingBox();
-  const to = await target.boundingBox();
-  if (!from || !to) throw new Error("drag: element not on screen");
-  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  if (!from) throw new Error("drag: handle not on screen");
+  const [fx, fy] = [from.x + from.width / 2, from.y + from.height / 2];
+  await page.mouse.move(fx, fy);
   await page.mouse.down();
+  // A native drag starts only once the pointer has moved; wait until the item says it is dragging,
+  // rather than racing a busy browser to the target.
+  await page.mouse.move(fx + 4, fy + 4, { steps: 2 });
+  await expect(handle.locator("xpath=ancestor::*[@data-dragging][1]")).toHaveAttribute(
+    "data-dragging",
+    "true",
+  );
+  const to = await target.boundingBox();
+  if (!to) throw new Error("drag: target not on screen");
   // Near the top either way: the bottom of the form sits under its sticky save bar.
   const [x, y] =
     edge === "top" ? [to.x + to.width / 2, to.y + 6] : [to.x + to.width - 6, to.y + 24];
   await page.mouse.move(x, y, { steps: 12 });
+  // Settle on the target so it has seen a dragover at the final point before the drop.
+  await page.mouse.move(x + 1, y, { steps: 2 });
   await page.mouse.up();
 }
 
