@@ -78,9 +78,28 @@ export function SiteFooter({ profile }: { profile: Profile }) {
 function toggleAtBottom(toggle: () => void): Promise<void> {
   toggle();
   // After the render the caller flushes, before the transition's new snapshot.
-  return Promise.resolve().then(() =>
-    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
-  );
+  return Promise.resolve().then(latchToBottom);
+}
+
+const LATCH_MS = 1000;
+
+/* Pins now, and again whenever the page's height changes (a font the new layout uses arriving late),
+   until the reader scrolls, touches or types, or the layout has had a second to settle. */
+function latchToBottom() {
+  const root = document.documentElement;
+  const pin = () => window.scrollTo({ top: root.scrollHeight, behavior: "instant" });
+  pin();
+  if (typeof ResizeObserver === "undefined") return;
+  const resized = new ResizeObserver(pin);
+  resized.observe(root);
+  const release = () => {
+    resized.disconnect();
+    clearTimeout(timer);
+    for (const type of ["wheel", "touchstart", "keydown"]) removeEventListener(type, release);
+  };
+  const timer = setTimeout(release, LATCH_MS);
+  for (const type of ["wheel", "touchstart", "keydown"])
+    addEventListener(type, release, { passive: true, once: true });
 }
 
 /** An icon-only control gets its name as a tooltip; the control keeps its own accessible name. */
