@@ -22,11 +22,18 @@
     }
   }
 
+  /* The way to the contact side of the card, beside the name it belongs to. */
   .copyright {
     grid-area: copy;
-    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
     font-size: var(--font-size-xs);
     white-space: nowrap;
+
+    & p {
+      margin: 0;
+    }
   }
 
   .groups {

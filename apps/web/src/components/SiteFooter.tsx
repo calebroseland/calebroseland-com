@@ -2,6 +2,7 @@ import type { Profile, ProfileLink } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
 import { Link } from "@tanstack/react-router";
 import type { ReactElement } from "react";
+import { hasContact } from "../content/profile.ts";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { useSectionHeading } from "../hooks/useSectionHeading.ts";
 import { useDetailsExpanded } from "./detailsState.ts";
@@ -44,9 +45,18 @@ export function SiteFooter({ profile }: { profile: Profile }) {
           </button>
         </Tip>
       </div>
-      <p className={styles.copyright}>
-        © {new Date().getFullYear()} {profile.name}
-      </p>
+      <div className={styles.copyright}>
+        {hasContact(profile) && (
+          <Tip label="Contact card">
+            <Link to="/contact" className={styles.link} aria-label="Contact card">
+              <Icon name="lucide:id-card" size="sm" />
+            </Link>
+          </Tip>
+        )}
+        <p>
+          © {new Date().getFullYear()} {profile.name}
+        </p>
+      </div>
     </footer>
   );
 }

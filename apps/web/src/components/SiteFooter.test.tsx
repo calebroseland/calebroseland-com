@@ -26,6 +26,7 @@ const profile = {
       links: [{ label: "Bluesky", url: "https://bsky.test", icon: "simple-icons:npm" }],
     },
   ],
+  contact: { email: "name@example.com" },
   placeholder: true,
 } as unknown as Profile;
 
@@ -49,6 +50,7 @@ describe("SiteFooter", () => {
     expect(within(links).getByRole("link", { name: /GitHub/ })).toBeInTheDocument();
     expect(within(links).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
     expect(screen.getByText(/© \d{4} Name/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Contact card" })).toHaveAttribute("href", "/contact");
   });
 
   it("expanded, an inline group stays a row of icons while the others show labels", async () => {
