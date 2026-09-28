@@ -5,7 +5,6 @@ tagline: Software Engineer
 tags: [TypeScript, React, Web Platform]
 groups:
   - title: Projects
-    inline: true
     links:
       - { label: GitHub, url: https://github.com/calebroseland, icon: simple-icons:github }
       - { label: Gists, url: https://gist.github.com/calebroseland, icon: lucide:braces }
