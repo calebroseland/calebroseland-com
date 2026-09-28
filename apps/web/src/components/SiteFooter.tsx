@@ -1,7 +1,8 @@
 import type { Profile, ProfileLink } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
 import { Link } from "@tanstack/react-router";
-import type { ReactElement } from "react";
+import type { MouseEvent, ReactElement } from "react";
+import { pages } from "../content/entries.ts";
 import { hasContact } from "../content/profile.ts";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { useSectionHeading } from "../hooks/useSectionHeading.ts";
@@ -12,6 +13,8 @@ import { Tip } from "./Tip.tsx";
 import { footerHeadingName, footerLinkName, withViewTransition } from "./viewTransition.ts";
 
 const LINKS_ID = "site-footer-links";
+// Shown once each page exists in content/pages, so the footer never links to a missing page.
+const footerPages = ["privacy", "about"].flatMap((slug) => pages.filter((p) => p.slug === slug));
 
 /* The card's links, kept at hand past the card. Collapsed, one line of icons by group; expanded, a
    column per group with labels, except an inline group, which stays a row of icons. Each link shares a view-transition name with its place on the card. */
@@ -19,6 +22,12 @@ export function SiteFooter({ profile }: { profile: Profile }) {
   const { expanded, toggle } = useDetailsExpanded();
   const reduce = useReduceMotion();
   const toCard = useBackToCard();
+  // The same morph as the brand's way back to the card, onto its contact side.
+  const openContact = (e: MouseEvent) => {
+    if (!isPlainClick(e)) return;
+    e.preventDefault();
+    void toCard("/contact");
+  };
   const iconOnly = !expanded;
   return (
     <footer className={styles.footer} data-expanded={expanded || undefined}>
@@ -48,26 +57,23 @@ export function SiteFooter({ profile }: { profile: Profile }) {
         </Tip>
       </div>
       <div className={styles.copyright}>
-        {hasContact(profile) && (
-          <Tip label="Contact card">
-            <Link
-              to="/contact"
-              className={styles.link}
-              aria-label="Contact card"
-              onClick={(e) => {
-                // The same morph as the brand's way back to the card, onto its contact side.
-                if (!isPlainClick(e)) return;
-                e.preventDefault();
-                void toCard("/contact");
-              }}
-            >
-              <Icon name="lucide:id-card" size="sm" />
-            </Link>
-          </Tip>
-        )}
         <p>
           © {new Date().getFullYear()} {profile.name}
         </p>
+        {(footerPages.length > 0 || hasContact(profile)) && (
+          <nav aria-label="Fine print" className={styles.pages}>
+            {footerPages.map((p) => (
+              <Link key={p.slug} to="/$slug" params={{ slug: p.slug }}>
+                {p.title}
+              </Link>
+            ))}
+            {hasContact(profile) && (
+              <Link to="/contact" onClick={openContact}>
+                Contact
+              </Link>
+            )}
+          </nav>
+        )}
       </div>
     </footer>
   );

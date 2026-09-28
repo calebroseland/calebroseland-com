@@ -1,5 +1,6 @@
 @layer components {
-  /* Collapsed: one centred line, every section (groups, actions, copyright) a rule and one gap apart. */
+  /* Collapsed: the link groups and the toggle on one centred line, a rule and one gap apart.
+     Expanded: the groups, the toggle, then the copyright line, each centred on a row of its own. */
   .footer {
     --section-gap: var(--space-3);
     display: flex;
@@ -15,9 +16,9 @@
     &[data-expanded] {
       --section-gap: var(--space-6);
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: "links links" "actions copy";
-      gap: var(--space-8) var(--space-6);
+      grid-template-areas: "links" "actions" "copy";
+      justify-items: center;
+      gap: var(--space-6);
       padding-block: var(--space-10) var(--space-6);
     }
   }
@@ -58,7 +59,8 @@
     }
   }
 
-  .footer:not([data-expanded]) :is(.group + .group, .actions, .copyright),
+  /* Not before the copyright line, which wraps onto a row of its own once it carries its links. */
+  .footer:not([data-expanded]) :is(.group + .group, .actions),
   .footer[data-expanded] .group + .group {
     padding-inline-start: var(--section-gap);
     border-inline-start: var(--border-width) solid var(--color-border-subtle);
@@ -66,7 +68,7 @@
 
   /* Narrow, sections wrap; a rule would start a line, so the gap alone separates them. */
   @media (width < 48rem) {
-    .footer:not([data-expanded]) :is(.group + .group, .actions, .copyright),
+    .footer:not([data-expanded]) :is(.group + .group, .actions),
     .footer[data-expanded] .group + .group {
       padding-inline-start: 0;
       border-inline-start: 0;
@@ -102,9 +104,16 @@
     display: flex;
     align-items: center;
     gap: var(--space-1);
+  }
 
-    [data-expanded] > & {
-      justify-self: end;
+  /* The site's own pages, on the copyright line once the footer shows everything. */
+  .pages {
+    display: flex;
+    gap: var(--space-3);
+    margin-inline-start: var(--space-2);
+
+    & a {
+      color: inherit;
     }
   }
 

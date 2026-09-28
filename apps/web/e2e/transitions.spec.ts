@@ -124,11 +124,11 @@ test.describe("page transitions", () => {
     expect(t?.names.filter((n) => /page-(in|out)/.test(n))).toEqual([]);
   });
 
-  test("the footer's contact card turns the page back into the card, as the brand does", async ({
+  test("the footer's Contact link turns the page back into the card, as the brand does", async ({
     page,
   }) => {
     await page.goto("/posts");
-    await page.getByRole("contentinfo").getByRole("link", { name: "Contact card" }).click();
+    await page.getByRole("contentinfo").getByRole("link", { name: "Contact", exact: true }).click();
     await expect(page).toHaveURL(/\/contact$/);
     await expect(page.getByRole("list", { name: "Contact" })).toBeVisible();
     test.skip(!(await supported(page)), "no view transitions: the change is instant");

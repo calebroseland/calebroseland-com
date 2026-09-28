@@ -50,7 +50,7 @@ describe("SiteFooter", () => {
     expect(within(links).getByRole("link", { name: /GitHub/ })).toBeInTheDocument();
     expect(within(links).getByRole("link", { name: "Posts" })).toHaveAttribute("href", "/posts");
     expect(screen.getByText(/© \d{4} Name/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Contact card" })).toHaveAttribute("href", "/contact");
+    expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute("href", "/contact");
   });
 
   it("expanded, an inline group stays a row of icons while the others show labels", async () => {
@@ -61,6 +61,18 @@ describe("SiteFooter", () => {
     expect(social).toHaveAttribute("data-icons");
     expect(code).not.toHaveAttribute("data-icons");
     expect(within(social).getByRole("link", { name: /Bluesky/ })).toBeInTheDocument();
+  });
+
+  it("the copyright line links the site's own pages, the same collapsed or expanded", async () => {
+    renderFooter();
+    const names = async () =>
+      within(await screen.findByRole("navigation", { name: "Fine print" }))
+        .getAllByRole("link")
+        .map((l) => l.textContent);
+    // No privacy page in the fixture, so no link to one.
+    expect(await names()).toEqual(["About", "Contact"]);
+    fireEvent.click(await screen.findByRole("button", { name: "Expand the footer" }));
+    expect(await names()).toEqual(["About", "Contact"]);
   });
 
   it("expands and collapses, and keeps the choice when it remounts on the next page", async () => {
