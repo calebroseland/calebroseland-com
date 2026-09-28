@@ -15,6 +15,7 @@ import {
   type ThemePreference,
   themeController,
 } from "../theme/store.ts";
+import { Tip } from "./Tip.tsx";
 import styles from "./UserMenu.module.css";
 
 // The editor and its colour picker load only when someone opens it.
@@ -53,16 +54,18 @@ export function UserMenu() {
   return (
     <>
       <Menu.Root open={menu.open} onOpenChange={menu.setOpen}>
-        <Menu.Trigger
-          className={styles.button}
-          aria-label={
-            signedIn
-              ? `Account: signed in with ${capabilitiesOf(current.backend).label}. Theme: ${label}.`
-              : `Account: signed out. Theme: ${label}.`
-          }
-        >
-          <Icon name={signedIn ? "lucide:circle-user" : "lucide:user"} size="md" />
-        </Menu.Trigger>
+        <Tip label="Account and theme" side="bottom">
+          <Menu.Trigger
+            className={styles.button}
+            aria-label={
+              signedIn
+                ? `Account: signed in with ${capabilitiesOf(current.backend).label}. Theme: ${label}.`
+                : `Account: signed out. Theme: ${label}.`
+            }
+          >
+            <Icon name={signedIn ? "lucide:circle-user" : "lucide:user"} size="md" />
+          </Menu.Trigger>
+        </Tip>
         <Menu.Portal>
           <Menu.Positioner className={styles.positioner} side="bottom" align="end" sideOffset={6}>
             <Menu.Popup className={styles.menu}>

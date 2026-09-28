@@ -177,32 +177,36 @@ function Front({
             <UserMenu />
           </span>
           {onEdit && (
-            <button
-              ref={editRef}
-              type="button"
-              className={`${styles.cornerButton} ${styles.vt}`}
-              style={vtName("card-edit")}
-              aria-label="Edit card"
-              aria-busy={opening || undefined}
-              disabled={opening}
-              onClick={onEdit}
-            >
-              <Icon name="lucide:pencil" size="md" />
-            </button>
+            <Tip label="Edit card" side="bottom">
+              <button
+                ref={editRef}
+                type="button"
+                className={`${styles.cornerButton} ${styles.vt}`}
+                style={vtName("card-edit")}
+                aria-label="Edit card"
+                aria-busy={opening || undefined}
+                disabled={opening}
+                onClick={onEdit}
+              >
+                <Icon name="lucide:pencil" size="md" />
+              </button>
+            </Tip>
           )}
         </div>
         {onFlip && (
-          <button
-            ref={flipRef}
-            type="button"
-            className={`${styles.cornerButton} ${styles.vt}`}
-            style={vtName("card-flip")}
-            aria-label="Contact information"
-            onClick={onFlip}
-          >
-            <Icon name="lucide:id-card" size="lg" />
-            <Icon name="lucide:chevron-right" size="sm" />
-          </button>
+          <Tip label="Contact card" side="bottom">
+            <button
+              ref={flipRef}
+              type="button"
+              className={`${styles.cornerButton} ${styles.vt}`}
+              style={vtName("card-flip")}
+              aria-label="Contact information"
+              onClick={onFlip}
+            >
+              <Icon name="lucide:id-card" size="lg" />
+              <Icon name="lucide:chevron-right" size="sm" />
+            </button>
+          </Tip>
         )}
       </div>
 
@@ -364,15 +368,17 @@ function Back({
           )}
         </ul>
       </div>
-      <button
-        ref={closeRef}
-        type="button"
-        className={styles.cornerButton}
-        aria-label="Back to links"
-        onClick={onFlip}
-      >
-        <Icon name="lucide:x" size="lg" />
-      </button>
+      <Tip label="Back to links" side="bottom">
+        <button
+          ref={closeRef}
+          type="button"
+          className={styles.cornerButton}
+          aria-label="Back to links"
+          onClick={onFlip}
+        >
+          <Icon name="lucide:x" size="lg" />
+        </button>
+      </Tip>
     </div>
   );
 }
@@ -465,7 +471,8 @@ export function Landing({ profile: published }: { profile: Profile }) {
               key="back"
               aria-labelledby="site-name"
               className={`${styles.card} ${styles.cardBack}`}
-              onKeyDown={(e) => {
+              // Capture, so one press turns the card back before a tooltip takes the key to close itself.
+              onKeyDownCapture={(e) => {
                 if (e.key === "Escape") flip();
               }}
               {...faceMotion(reduce)}
