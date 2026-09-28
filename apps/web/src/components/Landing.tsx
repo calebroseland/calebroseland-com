@@ -29,6 +29,7 @@ import type { EditResult } from "./cardEditor/CardEditor.tsx";
 import { useDetailsExpanded } from "./detailsState.ts";
 import { FocusChip } from "./FocusChip.tsx";
 import styles from "./Landing.module.css";
+import { returnPage } from "./returnPage.ts";
 import { Tip } from "./Tip.tsx";
 import { UserMenu } from "./UserMenu.tsx";
 import { footerHeadingName, footerLinkName, vtName, withViewTransition } from "./viewTransition.ts";
@@ -433,7 +434,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
     withViewTransition(
       "enter",
       // The card runs its own transition; the router's would cut it short.
-      () => navigate({ to: "/home", viewTransition: false }),
+      () => navigate({ href: returnPage(), viewTransition: false }),
       reduce,
     );
 

@@ -27,6 +27,17 @@ test.describe("command palette", () => {
     await expect(page.getByRole("dialog", { name: "Command palette" })).toHaveCount(0);
   });
 
+  test("the card reached from a page enters back into that page", async ({ page }) => {
+    await page.goto("/about");
+    await openPalette(page);
+    await page.getByRole("combobox", { name: "Search commands" }).fill("business card");
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/$/);
+    await page.getByRole("button", { name: "Enter" }).click();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect(page.getByRole("heading", { level: 1, name: "About" })).toBeVisible();
+  });
+
   test("the bar's search button opens it, and Escape closes it", async ({ page }) => {
     await page.goto("/posts");
     await page.getByRole("button", { name: "Search and commands" }).click();

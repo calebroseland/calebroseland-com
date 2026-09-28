@@ -4,6 +4,7 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { installPageTransitions, pageViewTransition } from "./components/pageTransition.ts";
+import { trackReturnPage } from "./components/returnPage.ts";
 import { dropUnavailableSession } from "./editor/auth/methods.ts";
 import { installErrorReporting } from "./reportError.ts";
 import { routeTree } from "./routeTree.gen.ts";
@@ -16,6 +17,7 @@ const router = createRouter({
   defaultViewTransition: pageViewTransition,
 });
 installPageTransitions(router);
+trackReturnPage(router);
 
 declare module "@tanstack/react-router" {
   interface Register {

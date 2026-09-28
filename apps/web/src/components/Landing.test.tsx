@@ -54,12 +54,14 @@ import { createMemoryHistory, createRouter, RouterProvider } from "@tanstack/rea
 import { session } from "../editor/auth/store.ts";
 import { routeTree } from "../routeTree.gen.ts";
 import { detailsExpanded } from "./detailsState.ts";
+import { trackReturnPage } from "./returnPage.ts";
 
 async function renderLanding() {
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: ["/"] }),
   });
+  trackReturnPage(router);
   render(<RouterProvider router={router} />);
   await screen.findByRole("heading", { level: 1 });
   return router;
@@ -210,6 +212,17 @@ describe("Landing", () => {
     const posts = within(nav()).getByRole("link", { name: "Posts" });
     expect(posts).toHaveAttribute("href", "/posts");
     expect(posts).not.toHaveAttribute("target");
+  });
+
+  it("enter returns to the last page seen outside the card, whichever way the card was reached", async () => {
+    const router = await renderLanding();
+    await router.navigate({ to: "/posts" });
+    await screen.findByRole("heading", { level: 1, name: "Posts" });
+    await router.navigate({ to: "/" });
+    fireEvent.click(await screen.findByRole("button", { name: "Contact information" }));
+    await screen.findByRole("button", { name: "Back to links" });
+    fireEvent.click(screen.getByRole("button", { name: "Enter" }));
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe("/posts"));
   });
 
   it("enter leaves the card for the site, with its nav, and moves focus to the page heading", async () => {
