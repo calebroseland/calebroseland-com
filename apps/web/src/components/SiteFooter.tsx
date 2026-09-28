@@ -1,7 +1,7 @@
 import type { Profile, ProfileLink } from "@crc/content-schema";
 import { Icon } from "@crc/ui";
 import { Link } from "@tanstack/react-router";
-import type { CSSProperties, ReactElement } from "react";
+import type { ReactElement } from "react";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { useSectionHeading } from "../hooks/useSectionHeading.ts";
 import { useDetailsExpanded } from "./detailsState.ts";
@@ -31,16 +31,6 @@ export function SiteFooter({ profile }: { profile: Profile }) {
         ))}
       </nav>
       <div className={styles.actions}>
-        <Named label="RSS" when={iconOnly}>
-          <a
-            href="/feed.xml"
-            className={styles.link}
-            style={{ "--vt-footer": "footer-rss" } as CSSProperties}
-          >
-            <Icon name="lucide:rss" size="sm" />
-            <span className={styles.label}>RSS</span>
-          </a>
-        </Named>
         <Tip label={expanded ? "Fewer details" : "More details"}>
           <button
             type="button"

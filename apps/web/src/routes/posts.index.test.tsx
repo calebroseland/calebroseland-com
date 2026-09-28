@@ -76,6 +76,18 @@ describe("/posts", () => {
     expect(screen.getByText("September 19, 2026")).toBeInTheDocument();
   });
 
+  it("links the RSS feed, where the posts are, and not from the site footer", async () => {
+    await renderAt("/posts");
+    const main = screen.getByRole("main");
+    expect(within(main).getByRole("link", { name: "RSS feed" })).toHaveAttribute(
+      "href",
+      "/feed.xml",
+    );
+    expect(
+      within(screen.getByRole("contentinfo")).queryByRole("link", { name: /RSS/ }),
+    ).not.toBeInTheDocument();
+  });
+
   it("filters by the typed tag search param and offers to clear", async () => {
     const router = await renderAt("/posts?tag=two");
     expect(router.state.location.search).toEqual({ tag: "two" });

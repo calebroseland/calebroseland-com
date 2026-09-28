@@ -10,4 +10,17 @@
   .clear {
     font-size: var(--font-size-sm);
   }
+
+  .feed {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-inline-start: auto;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+
+    &:hover {
+      color: var(--color-text);
+    }
+  }
 }

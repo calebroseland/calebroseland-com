@@ -1,3 +1,4 @@
+import { Icon } from "@crc/ui";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import * as z from "zod/mini";
 import { EntryHeader, TagList } from "../components/Article.tsx";
@@ -15,6 +16,9 @@ export const Route = createFileRoute("/posts/")({
   component: PostsIndex,
   head: () => ({
     meta: [{ title: `Posts · ${siteProfile.name}` }, { name: "description", content: "Posts" }],
+    links: [
+      { rel: "alternate", type: "application/rss+xml", title: siteProfile.name, href: "/feed.xml" },
+    ],
   }),
 });
 
@@ -37,16 +41,18 @@ function PostsIndex() {
         }}
         showMeta={false}
       />
-      {allTags.length > 0 && (
-        <div className={styles.filters}>
-          <TagList tags={allTags} />
-          {tag && (
-            <Link to="/posts" search={{}} className={styles.clear}>
-              Clear filter
-            </Link>
-          )}
-        </div>
-      )}
+      <div className={styles.filters}>
+        {allTags.length > 0 && <TagList tags={allTags} />}
+        {tag && (
+          <Link to="/posts" search={{}} className={styles.clear}>
+            Clear filter
+          </Link>
+        )}
+        <a href="/feed.xml" className={styles.feed}>
+          <Icon name="lucide:rss" size="sm" />
+          RSS feed
+        </a>
+      </div>
       {shown.length === 0 ? (
         <p role="status">{tag ? `No posts tagged ‘${tag}’.` : "Nothing published yet."}</p>
       ) : (
