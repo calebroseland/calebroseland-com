@@ -26,6 +26,12 @@
     @media (width < 30rem) {
       column-gap: var(--space-2);
     }
+
+    /* A phone, upright or on its side, has too little room to give some of it to a bar that never
+       scrolls away; pinned only on larger screens. */
+    @media (width < 48rem) or (height < 30rem) {
+      position: static;
+    }
   }
 
   /* In-page links (headings, the skip link) land below the bar, not under it. */
