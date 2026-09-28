@@ -9,6 +9,8 @@ type Recorded = {
   vt: string | null;
   animated: string[];
   names: string[];
+  /** How the old footer snapshot is shown: `none` means the footer switches without blending. */
+  oldFooter: string;
 };
 
 async function record(page: Page) {
@@ -30,6 +32,10 @@ async function record(page: Page) {
             .map((a) => (a.effect as KeyframeEffect | null)?.pseudoElement ?? "")
             .filter(Boolean),
           names: document.getAnimations().map((a) => (a as CSSAnimation).animationName ?? ""),
+          oldFooter: getComputedStyle(
+            document.documentElement,
+            "::view-transition-old(site-footer)",
+          ).display,
         }),
       );
       return t;
@@ -88,8 +94,12 @@ test.describe("page transitions", () => {
     await expect
       .poll(async () => (await transitions(page)).map((t) => t.types?.[2]))
       .toEqual(["page-forward", "page-back"]);
-    for (const t of await transitions(page))
+    for (const t of await transitions(page)) {
       expect(t.names.join(" ")).toMatch(/page-out.*page-in|page-in.*page-out/);
+      // The footer is lifted out of the zooming page and switches in one frame, with nothing to blend.
+      expect(t.oldFooter).toBe("none");
+      expect(t.animated.filter((p) => p.includes("site-footer"))).toEqual([]);
+    }
   });
 
   test("a search change is not a page transition", async ({ page }) => {

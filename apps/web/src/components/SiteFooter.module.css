@@ -123,19 +123,23 @@
     border-radius: var(--radius-md);
     color: var(--color-text-muted);
     text-decoration: none;
+  }
 
-    &:hover {
+  /* Only where a pointer hovers: a tap would leave the link lit on the next page. */
+  @media (hover: hover) {
+    .link:hover,
+    .toggle:hover {
       color: var(--color-text);
       background: var(--color-surface-hover);
     }
 
-    [data-expanded] &:hover {
+    [data-expanded] .link:hover {
       background: none;
       text-decoration: underline;
       text-underline-offset: 0.2em;
     }
 
-    [data-expanded] [data-icons] &:hover {
+    [data-expanded] [data-icons] .link:hover {
       background: var(--color-surface-hover);
     }
   }
@@ -147,11 +151,6 @@
     block-size: 2rem;
     border-radius: var(--radius-md);
     color: var(--color-text-muted);
-
-    &:hover {
-      color: var(--color-text);
-      background: var(--color-surface-hover);
-    }
 
     &:active {
       background: var(--color-accent-subtle);
@@ -189,6 +188,21 @@
     object-position: left center;
   }
 
+  /* Page transitions move the page, not the footer: it is lifted out of the page's snapshot and switches
+     in one frame. A crossfade would show any difference between the two (a lit link) as a flash. */
+  :root:active-view-transition-type(page) .footer {
+    view-transition-name: site-footer;
+  }
+
+  :root:active-view-transition-type(page)::view-transition-group(site-footer),
+  :root:active-view-transition-type(page)::view-transition-new(site-footer) {
+    animation: none;
+  }
+
+  :root:active-view-transition-type(page)::view-transition-old(site-footer) {
+    display: none;
+  }
+
   /* Expanding and collapsing morph each link, heading and action between the two layouts. */
   :root[data-vt="footer"] :is(.link, .groupTitle) {
     view-transition-name: var(--vt-footer);
@@ -218,14 +232,5 @@
   :root[data-vt="footer"]::view-transition-old(root),
   :root[data-vt="footer"]::view-transition-new(root) {
     object-fit: fill;
-  }
-
-  /* Page transitions: the footer takes its new place at once; identical, its crossfade is invisible. */
-  :root:active-view-transition-type(page) .footer {
-    view-transition-name: site-footer;
-  }
-
-  :root:active-view-transition-type(page)::view-transition-group(site-footer) {
-    animation: none;
   }
 }
