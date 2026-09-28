@@ -12,15 +12,15 @@ const nav = (from: string | undefined, to: string, pathChanged = from !== to) =>
 describe("page transitions", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("slides forward going deeper, back coming up, and fades between siblings", () => {
+  it("zooms in going deeper, out coming up, and fades between siblings", () => {
     expect(pageTypes(undefined, nav("/posts", "/posts/hello"))).toEqual([
       "page",
-      "page-slide",
+      "page-zoom",
       "page-forward",
     ]);
     expect(pageTypes(undefined, nav("/posts/hello", "/posts"))).toEqual([
       "page",
-      "page-slide",
+      "page-zoom",
       "page-back",
     ]);
     expect(pageTypes(undefined, nav("/posts", "/about"))).toEqual([

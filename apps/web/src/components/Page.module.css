@@ -154,7 +154,7 @@
     padding-block: var(--space-16);
   }
 
-  /* Page transitions (pageTransition.ts): the page crossfades or slides; the bar holds still. */
+  /* Page transitions (pageTransition.ts): the page crossfades or zooms; the bar holds still. */
   :root:active-view-transition-type(page) .bar {
     view-transition-name: site-bar;
   }
@@ -166,22 +166,25 @@
     animation-timing-function: var(--ease-out);
   }
 
-  :root:active-view-transition-type(page-slide)::view-transition-old(root) {
+  :root:active-view-transition-type(page-zoom)::view-transition-old(root) {
     animation: var(--duration-slow) var(--ease-out) both page-out;
     mix-blend-mode: plus-lighter;
   }
 
-  :root:active-view-transition-type(page-slide)::view-transition-new(root) {
+  :root:active-view-transition-type(page-zoom)::view-transition-new(root) {
     animation: var(--duration-slow) var(--ease-out) both page-in;
     mix-blend-mode: plus-lighter;
   }
 
+  /* Deeper zooms in: the old page grows past you as the new one grows into place. Back up, the reverse. */
   :root:active-view-transition-type(page-forward) {
-    --page-travel: 1.5rem;
+    --page-leave: 1.04;
+    --page-arrive: 0.96;
   }
 
   :root:active-view-transition-type(page-back) {
-    --page-travel: -1.5rem;
+    --page-leave: 0.96;
+    --page-arrive: 1.04;
   }
 
   /* A safety net for any view transition: reduced motion swaps instantly. */
@@ -198,13 +201,13 @@
 @keyframes page-out {
   to {
     opacity: 0;
-    translate: calc(-1 * var(--page-travel, 0px)) 0;
+    scale: var(--page-leave, 1);
   }
 }
 
 @keyframes page-in {
   from {
     opacity: 0;
-    translate: var(--page-travel, 0px) 0;
+    scale: var(--page-arrive, 1);
   }
 }

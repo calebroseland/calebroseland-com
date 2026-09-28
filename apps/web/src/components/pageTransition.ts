@@ -4,12 +4,12 @@ import type { AnyRouter, ParsedLocation } from "@tanstack/react-router";
    navigation (`page`, the effect, the direction), a link overrides with `viewTransition={{ types }}`, and
    Page.module.css styles them with :active-view-transition-type(). Without type support, browsers crossfade. */
 
-/** How a page arrives: a crossfade, a short slide in the direction of travel, or nothing. */
-export type PageEffect = "fade" | "slide" | false;
+/** How a page arrives: a crossfade, a zoom in (deeper) or out (back up), or nothing. */
+export type PageEffect = "fade" | "zoom" | false;
 
 declare module "@tanstack/react-router" {
   interface StaticDataRouteOption {
-    /** How this page arrives. Unset: slide between levels, fade between siblings. */
+    /** How this page arrives. Unset: zoom between levels, fade between siblings. */
     transition?: PageEffect;
     /** Moves between this route's children are its own animation, never a page transition. */
     animatesChildren?: boolean;
@@ -35,7 +35,7 @@ export function pageTypes(declared: PageEffect | undefined, info: ChangeInfo): s
   const a = depth(from.pathname);
   const b = depth(info.toLocation.pathname);
   const direction = b > a ? "forward" : b < a ? "back" : "across";
-  const effect = declared ?? (direction === "across" ? "fade" : "slide");
+  const effect = declared ?? (direction === "across" ? "fade" : "zoom");
   return ["page", `page-${effect}`, `page-${direction}`];
 }
 

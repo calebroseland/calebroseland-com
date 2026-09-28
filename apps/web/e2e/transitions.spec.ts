@@ -71,7 +71,7 @@ test.describe("page transitions", () => {
     expect(await transitions(page)).toEqual([]);
   });
 
-  test("a post slides in forward, and the back button slides it back", async ({ page }) => {
+  test("a post zooms in going forward, and the back button zooms back out", async ({ page }) => {
     await page.goto("/posts");
     await page
       .getByRole("main")
@@ -88,6 +88,8 @@ test.describe("page transitions", () => {
     await expect
       .poll(async () => (await transitions(page)).map((t) => t.types?.[2]))
       .toEqual(["page-forward", "page-back"]);
+    for (const t of await transitions(page))
+      expect(t.names.join(" ")).toMatch(/page-out.*page-in|page-in.*page-out/);
   });
 
   test("a search change is not a page transition", async ({ page }) => {
@@ -98,7 +100,7 @@ test.describe("page transitions", () => {
     expect(pages).toEqual([]);
   });
 
-  test("entering from the card runs the card's own crossfade, not a page slide", async ({
+  test("entering from the card runs the card's own crossfade, not a page zoom", async ({
     page,
   }) => {
     await page.goto("/");
