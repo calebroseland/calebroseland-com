@@ -1,5 +1,6 @@
 import { useStore } from "@tanstack/react-store";
 import { useEffect, useState } from "react";
+import { ENTRY_PAGE } from "../../components/returnPage.ts";
 import { useCurrentHref } from "../../hooks/useCurrentHref.ts";
 import { useReturnTo } from "../navigation.ts";
 import { startGitHubLogin } from "./login.ts";
@@ -60,7 +61,7 @@ export function useDirectSignIn(returnTo: string) {
 export function useSignOut() {
   const go = useReturnTo();
   const onEditingRoute = useCurrentHref().startsWith("/editor");
-  return () => void go(onEditingRoute ? "/home" : ".").then(() => session.signOut());
+  return () => void go(onEditingRoute ? ENTRY_PAGE : ".").then(() => session.signOut());
 }
 
 /** The pasted personal access token, before it is used. */

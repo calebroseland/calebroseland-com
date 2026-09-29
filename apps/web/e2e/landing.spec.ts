@@ -69,22 +69,22 @@ test.describe("landing", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Posts" })).toBeVisible();
   });
 
-  test("enter opens /home, and the brand goes home from a page and back to the card from home", async ({
+  test("enter opens /posts, and the brand goes to Posts from a page and back to the card from Posts", async ({
     page,
   }) => {
     await page.goto("/");
     await page.getByRole("button", { name: "Enter" }).click();
     const site = page.getByRole("navigation", { name: "Site" });
     await expect(site).toBeVisible();
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(page).toHaveURL(/\/posts$/);
     await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
     await expect(page.getByRole("navigation", { name: "Profiles and links" })).toHaveCount(0);
 
-    // From a page the brand goes home; from home it turns back into the card.
+    // From a page the brand goes to Posts; from Posts it turns back into the card.
     await site.getByRole("link", { name: "About" }).click();
     const brand = page.getByRole("banner").getByRole("link", { name: /Caleb Roseland/ });
     await brand.click();
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(page).toHaveURL(/\/posts$/);
     await brand.click();
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole("button", { name: "Enter" })).toBeVisible();
@@ -102,7 +102,7 @@ test.describe("landing", () => {
     const box = await page.getByRole("main").boundingBox();
     if (!box) throw new Error("main has no box");
     await page.mouse.click(box.x + box.width / 2, box.y + box.height - 8);
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(page).toHaveURL(/\/posts$/);
   });
 
   test("uses the Adobe Fonts kit for the name and the text", async ({ page }) => {

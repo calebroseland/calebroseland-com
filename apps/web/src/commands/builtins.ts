@@ -1,5 +1,6 @@
 import type { IconName } from "@crc/ui/icons";
 import { useEffect } from "react";
+import { ENTRY_PAGE } from "../components/returnPage.ts";
 import { allTags, formatDate, pages, posts } from "../content/entries.ts";
 import { hasContact, siteProfile } from "../content/profile.ts";
 import { canSignIn, signInMethods } from "../editor/auth/methods.ts";
@@ -124,7 +125,7 @@ function accountCommands(offerSignIn: boolean): Command[] {
       icon: "lucide:log-out",
       // Leave the editing routes first, so their guard never redirects a page mid-render.
       run: async (ctx) => {
-        if (ctx.href.startsWith("/editor")) await ctx.go("/home");
+        if (ctx.href.startsWith("/editor")) await ctx.go(ENTRY_PAGE);
         else ctx.close();
         session.signOut();
       },

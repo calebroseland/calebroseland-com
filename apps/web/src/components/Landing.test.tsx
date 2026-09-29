@@ -229,7 +229,7 @@ describe("Landing", () => {
     expect(screen.queryByRole("navigation", { name: "Site" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Enter" }));
 
-    const heading = await screen.findByRole("heading", { level: 1, name: "Latest writing" });
+    const heading = await screen.findByRole("heading", { level: 1, name: "Posts" });
     await vi.waitFor(() => expect(heading).toHaveFocus());
     expect(
       screen.queryByRole("navigation", { name: "Profiles and links" }),
@@ -264,28 +264,26 @@ describe("Landing", () => {
     expect(screen.getByRole("button", { name: "Enter" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("main"));
-    await screen.findByRole("heading", { level: 1, name: "Latest writing" });
+    await screen.findByRole("heading", { level: 1, name: "Posts" });
     // Past the card the background is just background.
     fireEvent.click(screen.getByRole("main"));
     expect(screen.getByRole("navigation", { name: "Site" })).toBeInTheDocument();
   });
 
-  it("the brand returns home from a page, and turns home back into the card", async () => {
-    await renderLanding();
+  it("enters on Posts; the brand leads back to Posts from a page, and from Posts to the card", async () => {
+    const router = await renderLanding();
     fireEvent.click(screen.getByRole("button", { name: "Enter" }));
-    await screen.findByRole("heading", { level: 1, name: "Latest writing" });
-
-    // From a page, the brand is an ordinary link home.
-    fireEvent.click(
-      within(screen.getByRole("navigation", { name: "Site" })).getByRole("link", { name: "Posts" }),
-    );
     await screen.findByRole("heading", { level: 1, name: "Posts" });
-    const brand = screen.getByRole("link", { name: "Placeholder Name" });
-    expect(brand).toHaveAttribute("href", "/home");
-    fireEvent.click(brand);
-    await screen.findByRole("heading", { level: 1, name: "Latest writing" });
 
-    // From home it goes back to the card.
+    // From another page, the brand is an ordinary link to Posts.
+    await router.navigate({ to: "/home" });
+    await screen.findByRole("heading", { level: 1, name: "Latest writing" });
+    const brand = screen.getByRole("link", { name: "Placeholder Name" });
+    expect(brand).toHaveAttribute("href", "/posts");
+    fireEvent.click(brand);
+    await screen.findByRole("heading", { level: 1, name: "Posts" });
+
+    // From Posts it goes back to the card.
     fireEvent.click(screen.getByRole("link", { name: /Back to the business card/ }));
     await screen.findByRole("heading", { level: 1, name: "Placeholder Name" });
     expect(screen.getByRole("navigation", { name: "Profiles and links" })).toBeInTheDocument();

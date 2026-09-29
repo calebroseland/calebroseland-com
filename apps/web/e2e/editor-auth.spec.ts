@@ -26,7 +26,7 @@ test.describe("editor auth", () => {
     // Signing out leaves the editing routes for the site, and they are guarded again afterwards.
     await page.getByRole("button", { name: /^Account:/ }).click();
     await page.getByRole("menuitem", { name: "Sign out" }).click();
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(page).toHaveURL(/\/posts$/);
     // Wait for the session to be gone, not just the redirect to start.
     await expect(page.getByRole("button", { name: /^Account: signed out/ })).toBeVisible();
     await page.goto("/editor");

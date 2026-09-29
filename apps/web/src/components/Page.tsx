@@ -4,17 +4,20 @@ import type { MouseEvent, ReactNode } from "react";
 import { siteProfile } from "../content/profile.ts";
 import { isPlainClick, useBackToCard } from "./backToCard.ts";
 import styles from "./Page.module.css";
+import { ENTRY_PAGE } from "./returnPage.ts";
 import { SearchButton } from "./SearchButton.tsx";
 import { SiteFooter } from "./SiteFooter.tsx";
 import { UserMenu } from "./UserMenu.tsx";
 
 function useAtHome(): boolean {
-  return useRouterState({ select: (s) => s.location.pathname.replace(/\/$/, "") === "/home" });
+  return useRouterState({
+    select: (s) => s.location.pathname.replace(/\/$/, "") === ENTRY_PAGE,
+  });
 }
 
 /* Chrome for every page past the landing card: header with the brand + nav, main, footer. The brand is
-   the way back: from any page it goes home, and from home it turns back into the card, which it shares
-   view-transition names with (Landing.module.css). */
+   the way back: from any page it goes to the entry page (Posts), and from there it turns back into the
+   card, which it shares view-transition names with (Landing.module.css). */
 export function Page({
   children,
   width = "measure-wide",
@@ -38,7 +41,7 @@ export function Page({
       <header className={styles.bar}>
         <div className={styles.brand}>
           <Link
-            to={atHome ? "/" : "/home"}
+            to={atHome ? "/" : ENTRY_PAGE}
             className={styles.home}
             aria-label={atHome ? `${siteProfile.name}. Back to the business card.` : undefined}
             onClick={onBrandClick}

@@ -1,9 +1,11 @@
 import type { AnyRouter } from "@tanstack/react-router";
 
 /* Where the card's Enter goes: back to the last page seen outside the card (it can be reached from
-   anywhere, through the palette or the brand), or home when the visit started on the card. */
+   anywhere, through the palette or the brand), or the site's entry page when the visit started on the
+   card. */
 
-const HOME = "/home";
+/** The page the site opens on past the card, and the brand's way home. */
+export const ENTRY_PAGE = "/posts";
 let last: string | undefined;
 
 /** Call once, right after creating the router. */
@@ -17,4 +19,4 @@ export function trackReturnPage(router: AnyRouter): () => void {
 }
 
 /** The page Enter returns to. */
-export const returnPage = (): string => last ?? HOME;
+export const returnPage = (): string => last ?? ENTRY_PAGE;

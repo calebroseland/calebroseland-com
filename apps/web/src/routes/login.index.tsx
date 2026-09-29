@@ -2,6 +2,7 @@ import { Stack } from "@crc/ui";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import * as z from "zod/mini";
 import { CenteredMessage, Page } from "../components/Page.tsx";
+import { ENTRY_PAGE } from "../components/returnPage.ts";
 import {
   useDirectSignIn,
   useGitHubSignIn,
@@ -46,7 +47,7 @@ function LoginRoute() {
         <CenteredMessage title="Sign in">
           <p className={styles.muted}>Editing isn't available on this site.</p>
           <p>
-            <Link to="/home">Back to the site</Link>
+            <Link to={ENTRY_PAGE}>Back to the site</Link>
           </p>
         </CenteredMessage>
       </Page>

@@ -115,7 +115,7 @@ test.describe("page transitions", () => {
   }) => {
     await page.goto("/");
     await page.getByRole("button", { name: "Enter" }).click();
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(page).toHaveURL(/\/posts$/);
     test.skip(!(await supported(page)), "no view transitions: the change is instant");
     await expect.poll(() => transitions(page)).toHaveLength(1);
     const [t] = await transitions(page);
