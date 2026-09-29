@@ -342,7 +342,13 @@ describe("Landing", () => {
       const form = await openEditor();
       const address = within(form).getByRole("textbox", { name: "Address for GitHub" });
       expect(address).toHaveValue("https://github.com/x");
-      expect(within(form).getByRole("combobox", { name: "Icon for GitHub" })).toBeInTheDocument();
+      // The icon leads the label's own field; the address runs the full width underneath.
+      const labelField = within(form).getByRole("textbox", { name: "Label for GitHub" });
+      expect(
+        within(labelField.parentElement as HTMLElement).getByRole("combobox", {
+          name: "Icon for GitHub",
+        }),
+      ).toBeInTheDocument();
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 

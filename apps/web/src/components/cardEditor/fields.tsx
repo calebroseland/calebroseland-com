@@ -49,7 +49,8 @@ export function TextField({
 }
 
 /* Text on the card, editable where it stands: it keeps the type of whatever holds it, and shows a
-   field's edge only on hover, focus, or when something is wrong. */
+   field's edge only on hover, focus, or when something is wrong. Leading and trailing content (a
+   link's icon) sits inside that edge, beside the text. */
 export function InlineText({
   label,
   value,
@@ -57,6 +58,8 @@ export function InlineText({
   onChange,
   className,
   focusKey,
+  leading,
+  trailing,
 }: {
   label: string;
   value: string;
@@ -65,6 +68,8 @@ export function InlineText({
   className?: string | undefined;
   /** Lets a newly added item's text take focus (see useFocusByKey). */
   focusKey?: string;
+  leading?: ReactNode;
+  trailing?: ReactNode;
 }) {
   const id = useId();
   return (
@@ -72,17 +77,21 @@ export function InlineText({
       <label htmlFor={id} className="visually-hidden">
         {label}
       </label>
-      <input
-        id={id}
-        type="text"
-        className={styles.inline}
-        value={value}
-        placeholder={label}
-        data-focus-key={focusKey}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <span className={styles.inlineControl}>
+        {leading}
+        <input
+          id={id}
+          type="text"
+          className={styles.inline}
+          value={value}
+          placeholder={label}
+          data-focus-key={focusKey}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        {trailing}
+      </span>
       {error && (
         <span id={`${id}-error`} className={styles.error}>
           {error}

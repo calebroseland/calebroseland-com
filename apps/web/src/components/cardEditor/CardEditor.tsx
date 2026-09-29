@@ -423,13 +423,6 @@ function EditLinkRow({
       >
         <Icon name="lucide:grip-vertical" size="sm" />
       </Handle>
-      <IconSelect
-        value={link.icon}
-        label={`Icon for ${name}`}
-        size="xl"
-        className={styles.cardIcon}
-        onChange={(icon) => icon && onChange({ ...link, icon })}
-      />
       <span className={styles.linkFields}>
         <InlineText
           label={`Label for ${name}`}
@@ -437,6 +430,15 @@ function EditLinkRow({
           focusKey={`label:${link.key}`}
           error={s.errors.get(`${path}.label`)}
           onChange={(label) => onChange({ ...link, label })}
+          leading={
+            <IconSelect
+              value={link.icon}
+              label={`Icon for ${name}`}
+              size="xl"
+              className={styles.cardIcon}
+              onChange={(icon) => icon && onChange({ ...link, icon })}
+            />
+          }
         />
         <InlineText
           label={`Address for ${name}`}
