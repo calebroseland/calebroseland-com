@@ -53,14 +53,17 @@ function Board() {
   // Without branches there is nothing to throw away but the entry's files.
   const runDiscard = async (row: Discarding) => {
     const outcome = await discard.run(row);
-    if (outcome.ok) notify(local ? "Deleted from your working tree" : "Discarded the draft branch");
-    else notify("Couldn't discard that.", { kind: "alert" });
+    if (outcome.ok)
+      notify(local ? "Deleted from your working tree" : "Discarded the draft branch", {
+        kind: "success",
+      });
+    else notify("Couldn't discard that.", { kind: "error" });
   };
 
   const startEditing = async (slug: string) => {
     const outcome = await edit.run(slug);
     if (outcome.ok) await openInEditor(slug);
-    else notify("Couldn't start editing that entry.", { kind: "alert" });
+    else notify("Couldn't start editing that entry.", { kind: "error" });
   };
 
   const ready = board.status === "ready" ? board : null;

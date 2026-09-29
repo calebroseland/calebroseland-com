@@ -437,7 +437,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
         reduce,
       );
     } catch {
-      notify("Couldn't open the editor. Check the connection and try again.", { kind: "alert" });
+      notify("Couldn't open the editor. Check the connection and try again.", { kind: "error" });
     } finally {
       setOpening(false);
     }

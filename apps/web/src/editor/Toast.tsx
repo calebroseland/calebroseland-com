@@ -1,29 +1,44 @@
+import { Icon, type IconName } from "@crc/ui";
 import { useStore } from "@tanstack/react-store";
 import { Store } from "@tanstack/store";
 import styles from "./editor.module.css";
 
-/* One polite status region and one alert region, mounted once in the shell. Alerts persist until dismissed. */
+/* One polite status region and one alert region, mounted once in the shell. Info and success fade on
+   their own; a warning (something to fix) or an error (something failed) interrupts, and stays until
+   dismissed. Each kind has its colour and icon, so the kind reads before the words do. */
+type Kind = "info" | "success" | "warning" | "error";
+
 type Toast = {
   id: number;
-  kind: "status" | "alert";
+  kind: Kind;
   message: string;
   action?: { label: string; onClick: () => void };
 };
+
+const ICONS: Record<Kind, IconName> = {
+  info: "lucide:info",
+  success: "lucide:circle-check",
+  warning: "lucide:triangle-alert",
+  error: "lucide:circle-x",
+};
+
+const urgent = (kind: Kind) => kind === "warning" || kind === "error";
 
 const toasts = new Store<Toast[]>([]);
 let nextId = 1;
 
 export function notify(
   message: string,
-  opts: { kind?: Toast["kind"]; action?: Toast["action"]; ttl?: number } = {},
+  opts: { kind?: Kind; action?: Toast["action"]; ttl?: number } = {},
 ) {
   const id = nextId++;
-  const kind = opts.kind ?? "status";
+  const kind = opts.kind ?? "info";
   toasts.setState((t) => [
-    ...t.filter((x) => x.kind !== "alert" || kind !== "alert"),
+    // One urgent toast at a time: a newer problem replaces the last.
+    ...t.filter((x) => !urgent(x.kind) || !urgent(kind)),
     { id, kind, message, ...(opts.action ? { action: opts.action } : {}) },
   ]);
-  if (kind === "status") setTimeout(() => dismiss(id), opts.ttl ?? 4000);
+  if (!urgent(kind)) setTimeout(() => dismiss(id), opts.ttl ?? 4000);
   return id;
 }
 function dismiss(id: number) {
@@ -36,42 +51,47 @@ function useToasts(): Toast[] {
 
 export function Toasts() {
   const items = useToasts();
-  const status = items.filter((t) => t.kind === "status");
-  const alerts = items.filter((t) => t.kind === "alert");
+  // One stack for both regions, so news and problems never land on top of each other.
   return (
-    <>
+    <div className={styles.toastStack}>
       <div role="status" aria-live="polite" className={styles.toasts}>
-        {status.map((t) => (
-          <div key={t.id} className={styles.toast}>
-            <span>{t.message}</span>
-            {t.action && (
-              <button type="button" className={styles.toastAction} onClick={t.action.onClick}>
-                {t.action.label}
-              </button>
-            )}
-          </div>
-        ))}
+        {items
+          .filter((t) => !urgent(t.kind))
+          .map((t) => (
+            <ToastItem key={t.id} toast={t} />
+          ))}
       </div>
       <div role="alert" className={styles.toasts}>
-        {alerts.map((t) => (
-          <div key={t.id} className={`${styles.toast} ${styles.toastAlert}`}>
-            <span>{t.message}</span>
-            {t.action && (
-              <button type="button" className={styles.toastAction} onClick={t.action.onClick}>
-                {t.action.label}
-              </button>
-            )}
-            <button
-              type="button"
-              className={styles.toastAction}
-              onClick={() => dismiss(t.id)}
-              aria-label="Dismiss"
-            >
-              ×
-            </button>
-          </div>
-        ))}
+        {items
+          .filter((t) => urgent(t.kind))
+          .map((t) => (
+            <ToastItem key={t.id} toast={t} dismissible />
+          ))}
       </div>
-    </>
+    </div>
+  );
+}
+
+function ToastItem({ toast, dismissible = false }: { toast: Toast; dismissible?: boolean }) {
+  return (
+    <div className={styles.toast} data-kind={toast.kind}>
+      <Icon name={ICONS[toast.kind]} size="sm" className={styles.toastIcon} />
+      <span>{toast.message}</span>
+      {toast.action && (
+        <button type="button" className={styles.toastAction} onClick={toast.action.onClick}>
+          {toast.action.label}
+        </button>
+      )}
+      {dismissible && (
+        <button
+          type="button"
+          className={styles.toastAction}
+          onClick={() => dismiss(toast.id)}
+          aria-label="Dismiss"
+        >
+          <Icon name="lucide:x" size="sm" />
+        </button>
+      )}
+    </div>
   );
 }

@@ -115,15 +115,16 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
         working
           ? "Saved content/profile.yaml."
           : `Saved to ${PROFILE_REF}. Publish it from the editor to update the site.`,
+        { kind: "success" },
       );
       onDone({ profile: outcome.value.profile, workingTree: working });
     } else if (outcome.reason === "expired")
-      notify("Your sign-in expired. Sign in again to save.", { kind: "alert" });
+      notify("Your sign-in expired. Sign in again to save.", { kind: "error" });
     else if (outcome.reason === "conflict")
       notify("The profile changed since you opened it. Close the editor and open it again.", {
-        kind: "alert",
+        kind: "error",
       });
-    else notify("Couldn't save the profile.", { kind: "alert" });
+    else notify("Couldn't save the profile.", { kind: "error" });
   };
 
   const groupName = (g: number) => state.groups[g]?.title.trim() || `Group ${g + 1}`;

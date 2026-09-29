@@ -84,7 +84,7 @@ function StartEditing({ slug }: { slug: string }) {
   const begin = useBeginEditing();
   const start = async () => {
     const outcome = await begin.run(slug);
-    if (!outcome.ok) notify("Couldn't start editing this entry.", { kind: "alert" });
+    if (!outcome.ok) notify("Couldn't start editing this entry.", { kind: "error" });
   };
   return (
     <EditorShell title={slug}>
@@ -121,10 +121,11 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   const runSave = async (mode: "save" | "overwrite") => {
     const outcome = await save.run(mode);
     if (outcome.ok) {
-      if (!branches) notify(`Saved ${buffer.dir} to your working tree`);
+      if (!branches) notify(`Saved ${buffer.dir} to your working tree`, { kind: "success" });
       else {
         const { commitUrl } = outcome.value;
         notify(`Committed to ${buffer.ref}`, {
+          kind: "success",
           action: {
             label: "View commit",
             onClick: () => window.open(commitUrl, "_blank", "noopener"),
@@ -134,14 +135,14 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
     } else if (outcome.reason === "conflict") conflict.open(outcome.error);
     else if (outcome.reason === "expired")
       notify("Your sign-in expired. Sign in again; your changes are kept on this device.", {
-        kind: "alert",
+        kind: "error",
       });
     else
       notify(
         branches
           ? "Couldn't save to GitHub. Your changes are still here."
           : "Couldn't write to your working tree. Your changes are still here.",
-        { kind: "alert", action: { label: "Retry", onClick: () => void runSave("save") } },
+        { kind: "error", action: { label: "Retry", onClick: () => void runSave("save") } },
       );
   };
 
@@ -149,13 +150,13 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
     const missing = missingAlt(buffer);
     if (missing.length > 0) {
       notify(`Add alt text for ${missing.length} image${missing.length > 1 ? "s" : ""}.`, {
-        kind: "alert",
+        kind: "warning",
       });
       void show("media");
       return;
     }
     if (!buffer.meta.title.trim()) {
-      notify("Add a title before saving.", { kind: "alert" });
+      notify("Add a title before saving.", { kind: "warning" });
       void show("meta");
       return;
     }
@@ -165,7 +166,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   const reloadFromSource = async () => {
     conflict.close();
     const outcome = await reload.run();
-    if (!outcome.ok) notify("Couldn't load the current version.", { kind: "alert" });
+    if (!outcome.ok) notify("Couldn't load the current version.", { kind: "error" });
   };
 
   /* Alt text lives in two places by necessity: the buffer, which enforces it before a save, and the
@@ -181,9 +182,11 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
       if (added.ok) {
         api.current?.insertImage(added.asset.name, "");
         void show("media");
-      } else
+      }
+      // A file the editor cannot take is for the writer to fix; a failure to process it is ours.
+      else
         notify(added.reason === "rejected" ? added.message : "Couldn't process that image.", {
-          kind: "alert",
+          kind: added.reason === "rejected" ? "warning" : "error",
         });
     }
   };

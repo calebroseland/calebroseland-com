@@ -444,8 +444,8 @@
   }
 
   /* Toasts */
-  .toasts {
-    /* The regions are always mounted; only their children should take pointer events. */
+  /* The regions are always mounted; only their toasts should take pointer events. */
+  .toastStack {
     pointer-events: none;
     position: fixed;
     inset-block-end: var(--space-4);
@@ -454,6 +454,11 @@
     gap: var(--space-2);
     z-index: var(--z-toast);
     max-inline-size: min(24rem, calc(100vw - 2 * var(--space-4)));
+  }
+
+  .toasts {
+    display: grid;
+    gap: var(--space-2);
   }
 
   .toast {
@@ -469,9 +474,35 @@
     font-size: var(--font-size-sm);
   }
 
-  .toastAlert {
+  /* Each kind: a tinted surface, a coloured edge on the leading side, and its icon in that colour. The
+     text keeps the body colour, which holds its contrast on every tint. */
+  .toast[data-kind] {
+    --toast-accent: var(--color-accent);
+    border-inline-start: var(--border-width-thick) solid var(--toast-accent);
+  }
+
+  .toast[data-kind="info"] {
+    background: var(--color-surface-raised);
+  }
+
+  .toast[data-kind="success"] {
+    --toast-accent: var(--color-success);
+    background: var(--color-success-subtle);
+  }
+
+  .toast[data-kind="warning"] {
+    --toast-accent: var(--color-warning);
+    background: var(--color-warning-subtle);
+  }
+
+  .toast[data-kind="error"] {
+    --toast-accent: var(--color-danger);
     background: var(--color-danger-subtle);
-    color: var(--color-danger);
+  }
+
+  .toastIcon {
+    flex: none;
+    color: var(--toast-accent);
   }
 
   .toastAction {
