@@ -179,6 +179,54 @@ test.describe("editor drafts", () => {
     await expect(form).toHaveCount(0);
   });
 
+  test("the card edits in place: a label, an address and a removal right on the links", async ({
+    page,
+  }) => {
+    await signInFake(page);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Edit card" }).click();
+    const form = page.getByRole("form", { name: "Edit card" });
+    // In place: the name is a field on the card, not a form on a turned-over face.
+    await expect(form.getByRole("textbox", { name: "Name", exact: true })).toHaveValue(/\S/);
+
+    await form.getByRole("textbox", { name: "Label for Gists" }).fill("Snippets");
+    await form
+      .getByRole("textbox", { name: "Address for Snippets" })
+      .fill("https://gist.github.com/someone");
+    await form.getByRole("button", { name: "Remove vue-dom-portal" }).click();
+    await expect(page.getByText("Removed vue-dom-portal")).toBeAttached();
+    await expect(form.getByRole("textbox", { name: "Label for vue-dom-portal" })).toHaveCount(0);
+
+    await form.getByRole("button", { name: "Save card" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Saved to" })).toBeVisible();
+    await expect(form).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Edit card" })).toBeFocused();
+  });
+
+  test("the card in edit mode has no serious or critical accessibility violations, on either side", async ({
+    page,
+  }) => {
+    // Steady state only: mid-animation opacity would make axe sample blended colours.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await signInFake(page);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Edit card" }).click();
+    const form = page.getByRole("form", { name: "Edit card" });
+    await expect(form.getByRole("textbox", { name: "Tagline" })).toBeVisible();
+    const audit = async (state: string) => {
+      const results = await new AxeBuilder({ page }).analyze();
+      const serious = results.violations.filter(
+        (v) => v.impact === "serious" || v.impact === "critical",
+      );
+      expect(serious, `${state}: ${JSON.stringify(serious, null, 2)}`).toEqual([]);
+    };
+    await audit("front");
+    await form.getByRole("button", { name: "Contact details" }).click();
+    await expect(page.getByRole("textbox", { name: "Email" })).toBeVisible();
+    await audit("contact side");
+    await page.getByRole("button", { name: "Cancel" }).click();
+  });
+
   test("the user menu opens the editor, whose Pages filter lists the site's pages", async ({
     page,
   }) => {

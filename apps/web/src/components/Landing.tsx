@@ -25,7 +25,7 @@ import type { ProfileSource } from "../editor/profile.ts";
 import { notify } from "../editor/Toast.tsx";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
-import type { EditResult } from "./cardEditor/CardEditor.tsx";
+import type { EditFaces, EditResult } from "./cardEditor/CardEditor.tsx";
 import { useDetailsExpanded } from "./detailsState.ts";
 import { FocusChip } from "./FocusChip.tsx";
 import styles from "./Landing.module.css";
@@ -36,7 +36,12 @@ import { footerHeadingName, footerLinkName, vtName, withViewTransition } from ".
 
 type OpenEditor = {
   source: ProfileSource;
-  Editor: (props: { source: ProfileSource; onDone: (r: EditResult) => void }) => ReactNode;
+  Session: (props: {
+    source: ProfileSource;
+    onFlip: () => void;
+    onDone: (r: EditResult) => void;
+    children: (faces: EditFaces) => ReactNode;
+  }) => ReactNode;
 };
 
 /* The landing is a business card, after the 2019 site. Flipping to the contact side carries over from
@@ -400,6 +405,10 @@ export function Landing({ profile: published }: { profile: Profile }) {
   const [turned, setTurned] = useState(false);
   const signedIn = useSignedIn();
   const [editing, setEditing] = useState<OpenEditor | null>(null);
+  // While editing, the face is the session's own: /contact would redirect a card with no contact yet.
+  const [editSide, setEditSide] = useState<"front" | "back">("front");
+  // Signing out (the palette can, mid-edit) ends the edit: its backend is gone.
+  if (editing && !signedIn) setEditing(null);
   const [opening, setOpening] = useState(false);
   // After the editor closes, focus goes back to the Edit button once the front face has turned back.
   const [returnToEdit, setReturnToEdit] = useState(false);
@@ -412,26 +421,73 @@ export function Landing({ profile: published }: { profile: Profile }) {
     setReturnToEdit(false);
   }
 
-  /* The editor's code and the profile both load before the card turns, so it turns over straight into
-     a complete editor, the same motion as flipping to the contact side. Readers never load either. */
+  /* The editor's code and the profile both load first, so the card turns editable in one step, where it
+     stands: an in-place morph, like "show more". Readers never load either. */
   const openEditor = async () => {
     setOpening(true);
     try {
       const mod = await import("./cardEditor/CardEditor.tsx");
-      setEditing({ source: await mod.prepareEdit(profile), Editor: mod.default });
+      const source = await mod.prepareEdit(profile);
+      await withViewTransition(
+        "edit",
+        () => {
+          setEditSide("front");
+          setEditing({ source, Session: mod.default });
+        },
+        reduce,
+      );
     } catch {
       notify("Couldn't open the editor. Check the connection and try again.", { kind: "alert" });
     } finally {
       setOpening(false);
     }
   };
-  const closeEditor = (result: EditResult) => {
-    if (result?.workingTree) setSaved(result.profile);
-    setReturnToEdit(true);
-    setEditing(null);
-  };
+  const closeEditor = (result: EditResult) =>
+    void withViewTransition(
+      "edit",
+      () => {
+        if (result?.workingTree) setSaved(result.profile);
+        setReturnToEdit(true);
+        setEditing(null);
+      },
+      reduce,
+    );
 
   const flip = () => void navigate({ to: side === "front" ? "/contact" : "/" });
+
+  /* The card's two faces, read-only or the edit session's, turned by the same flip. */
+  const faces = ({ front, back }: { front: ReactNode; back: ReactNode | null }) => {
+    const showBack = back !== null && (editing ? editSide : side) === "back";
+    return (
+      <AnimatePresence mode="wait" initial={false}>
+        {showBack ? (
+          <m.section
+            key="back"
+            aria-labelledby={editing ? undefined : "site-name"}
+            className={`${styles.card} ${styles.cardBack}`}
+            // Capture, so one press turns the card back before a tooltip takes the key to close itself.
+            onKeyDownCapture={(e) => {
+              if (!editing && e.key === "Escape") flip();
+            }}
+            {...faceMotion(reduce)}
+          >
+            {back}
+          </m.section>
+        ) : (
+          <m.section
+            key="front"
+            aria-labelledby={editing ? undefined : "site-name"}
+            className={styles.card}
+            data-expanded={editing || expanded || undefined}
+            data-editing={editing ? true : undefined}
+            {...faceMotion(reduce)}
+          >
+            {front}
+          </m.section>
+        )}
+      </AnimatePresence>
+    );
+  };
 
   /* The router's own viewTransition option is not used because it renders the new state after its
      transition callback resolves, which can leave the card in the new snapshot. Focus follows the
@@ -454,39 +510,17 @@ export function Landing({ profile: published }: { profile: Profile }) {
       }}
     >
       <main id="main" className={styles.stage} {...backdrop}>
-        <AnimatePresence mode="wait" initial={false}>
-          {editing ? (
-            <m.section
-              key="edit"
-              aria-label="Edit card"
-              className={styles.card}
-              data-expanded
-              data-editing
-              {...faceMotion(reduce)}
-            >
-              <editing.Editor source={editing.source} onDone={closeEditor} />
-            </m.section>
-          ) : side === "back" && contact ? (
-            <m.section
-              key="back"
-              aria-labelledby="site-name"
-              className={`${styles.card} ${styles.cardBack}`}
-              // Capture, so one press turns the card back before a tooltip takes the key to close itself.
-              onKeyDownCapture={(e) => {
-                if (e.key === "Escape") flip();
-              }}
-              {...faceMotion(reduce)}
-            >
-              <Back profile={profile} contact={contact} onFlip={flip} focusOnMount={turned} />
-            </m.section>
-          ) : (
-            <m.section
-              key="front"
-              aria-labelledby="site-name"
-              className={styles.card}
-              data-expanded={expanded || undefined}
-              {...faceMotion(reduce)}
-            >
+        {editing ? (
+          <editing.Session
+            source={editing.source}
+            onFlip={() => setEditSide((f) => (f === "front" ? "back" : "front"))}
+            onDone={closeEditor}
+          >
+            {faces}
+          </editing.Session>
+        ) : (
+          faces({
+            front: (
               <Front
                 profile={profile}
                 expanded={expanded}
@@ -496,18 +530,24 @@ export function Landing({ profile: published }: { profile: Profile }) {
                 opening={opening}
                 focusOnMount={returnToEdit ? "edit" : turned ? "flip" : null}
               />
-            </m.section>
-          )}
-        </AnimatePresence>
-        <button
-          type="button"
-          className={`${styles.enter} ${styles.vt}`}
-          style={vtName("card-enter")}
-          onClick={enter}
-        >
-          Enter
-          <Icon name="lucide:arrow-right" size="md" />
-        </button>
+            ),
+            back: contact ? (
+              <Back profile={profile} contact={contact} onFlip={flip} focusOnMount={turned} />
+            ) : null,
+          })
+        )}
+        {/* Leaving mid-edit would throw the edit away. */}
+        {!editing && (
+          <button
+            type="button"
+            className={`${styles.enter} ${styles.vt}`}
+            style={vtName("card-enter")}
+            onClick={enter}
+          >
+            Enter
+            <Icon name="lucide:arrow-right" size="md" />
+          </button>
+        )}
       </main>
     </div>
   );

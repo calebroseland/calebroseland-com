@@ -53,6 +53,7 @@ export { default as "lucide:rotate-ccw" } from "@iconify-icons/lucide/rotate-ccw
 export { default as "lucide:rss" } from "@iconify-icons/lucide/rss";
 export { default as "lucide:search" } from "@iconify-icons/lucide/search";
 export { default as "lucide:server" } from "@iconify-icons/lucide/server";
+export { default as "lucide:settings-2" } from "@iconify-icons/lucide/settings-2";
 export { default as "lucide:strikethrough" } from "@iconify-icons/lucide/strikethrough";
 export { default as "lucide:sun" } from "@iconify-icons/lucide/sun";
 export { default as "lucide:sun-moon" } from "@iconify-icons/lucide/sun-moon";

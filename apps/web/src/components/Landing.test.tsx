@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("virtual:content/profile", () => ({
   default: {
@@ -297,6 +297,156 @@ describe("Landing", () => {
     expect(screen.queryByRole("button", { name: "Edit card" })).not.toBeInTheDocument();
   });
 
+  describe("editing in place", () => {
+    const openEditor = async () => {
+      await renderLanding();
+      fireEvent.click(screen.getByRole("button", { name: "Edit card" }));
+      return screen.findByRole("form", { name: "Edit card" }, { timeout: 5000 });
+    };
+    const savedYaml = (): string | undefined => {
+      const fake = JSON.parse(localStorage.getItem("crc:fake-github") ?? "{}");
+      return fake.branches?.["drafts/profile"]?.files?.["content/profile.yaml"]?.content;
+    };
+
+    beforeEach(() => {
+      localStorage.clear();
+      session.signIn({ status: "authenticated", backend: "fake", token: "fake" });
+    });
+    afterEach(() => {
+      session.signOut();
+      localStorage.clear();
+    });
+
+    it("turns the card itself editable, with every link of every group, and nothing to save yet", async () => {
+      const form = await openEditor();
+      expect(within(form).getByRole("textbox", { name: "Name" })).toHaveValue("Placeholder Name");
+      expect(within(form).getByRole("textbox", { name: "Tagline" })).toHaveValue(
+        "Placeholder tagline",
+      );
+      expect(
+        within(form)
+          .getAllByRole("textbox", { name: /^Label for / })
+          .map((l) => (l as HTMLInputElement).value),
+      ).toEqual(["GitHub", "Posts", "LinkedIn", "Unknown icon", "Mastodon", "Bluesky"]);
+      expect(
+        within(form)
+          .getAllByRole("textbox", { name: "Group name" })
+          .map((l) => (l as HTMLInputElement).value),
+      ).toEqual(["Code", "Writings", "Social", "Elsewhere"]);
+      expect(within(form).getByRole("button", { name: "Save card" })).toBeDisabled();
+      // In place: the card has not turned over to a separate face.
+      expect(screen.queryByRole("list", { name: "Contact" })).not.toBeInTheDocument();
+    });
+
+    it("edits each link's address and icon on the card itself", async () => {
+      const form = await openEditor();
+      const address = within(form).getByRole("textbox", { name: "Address for GitHub" });
+      expect(address).toHaveValue("https://github.com/x");
+      expect(within(form).getByRole("combobox", { name: "Icon for GitHub" })).toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("moves a link from its grip's arrow keys, across into the next group, and announces it", async () => {
+      const form = await openEditor();
+      fireEvent.keyDown(within(form).getByRole("button", { name: /^Move GitHub\./ }), {
+        key: "ArrowDown",
+      });
+      await waitFor(() =>
+        expect(screen.getByText("GitHub moved to Writings, position 1 of 2")).toBeInTheDocument(),
+      );
+      expect(
+        within(form)
+          .getAllByRole("textbox", { name: /^Label for / })
+          .map((l) => (l as HTMLInputElement).value)
+          .slice(0, 2),
+      ).toEqual(["GitHub", "Posts"]);
+    });
+
+    it("adds and removes links and groups", async () => {
+      const form = await openEditor();
+      fireEvent.click(within(form).getByRole("button", { name: "Add link to Social" }));
+      await waitFor(() =>
+        expect(within(form).getByRole("textbox", { name: "Label for new link" })).toHaveFocus(),
+      );
+      fireEvent.click(within(form).getByRole("button", { name: "Add group" }));
+      expect(within(form).getAllByRole("textbox", { name: "Group name" })).toHaveLength(5);
+
+      fireEvent.click(within(form).getByRole("button", { name: "Remove Unknown icon" }));
+      expect(within(form).queryByRole("textbox", { name: "Label for Unknown icon" })).toBeNull();
+
+      fireEvent.click(within(form).getByRole("button", { name: "Options for group Elsewhere" }));
+      fireEvent.click(
+        within(await screen.findByRole("dialog", { name: "Elsewhere" })).getByRole("button", {
+          name: "Remove group",
+        }),
+      );
+      expect(within(form).getAllByRole("textbox", { name: "Group name" })).toHaveLength(4);
+    });
+
+    it("edits the contact side in place by turning the card, and saves both sides at once", async () => {
+      const form = await openEditor();
+      fireEvent.change(within(form).getByRole("textbox", { name: "Tagline" }), {
+        target: { value: "Turned over" },
+      });
+      fireEvent.click(within(form).getByRole("button", { name: "Contact details" }));
+      // The front face leaves before the contact side arrives.
+      const email = await screen.findByRole("textbox", { name: "Email" });
+      expect(email).toHaveValue("someone@example.com");
+      fireEvent.change(email, { target: { value: "new@example.com" } });
+      fireEvent.click(screen.getByRole("button", { name: "Back to links" }));
+      const front = await screen.findByRole("textbox", { name: "Tagline" });
+      // The session survives the turn.
+      expect(front).toHaveValue("Turned over");
+
+      fireEvent.click(screen.getByRole("button", { name: "Save card" }));
+      await waitFor(() => expect(savedYaml()).toContain("email: new@example.com"), {
+        timeout: 5000,
+      });
+      expect(savedYaml()).toContain("tagline: Turned over");
+    });
+
+    it("edits in the card's own layout: headings and links keep the read card's classes", async () => {
+      await renderLanding();
+      fireEvent.click(screen.getByRole("button", { name: "show more" }));
+      const readHeading = within(nav()).getByRole("heading", { level: 2, name: /Code/ });
+      const readLink = within(nav())
+        .getByRole("link", { name: /GitHub/ })
+        .closest("li");
+      const headingClass = readHeading.classList[0] ?? "";
+      const linkClass = readLink?.classList[0] ?? "";
+      fireEvent.click(screen.getByRole("button", { name: "Edit card" }));
+      const form = await screen.findByRole("form", { name: "Edit card" }, { timeout: 5000 });
+      const title = within(form).getAllByRole("textbox", { name: "Group name" })[0];
+      const label = within(form).getByRole("textbox", { name: "Label for GitHub" });
+      expect(title?.closest(`.${CSS.escape(headingClass)}`)).not.toBeNull();
+      expect(label.closest(`.${CSS.escape(linkClass)}`)).not.toBeNull();
+    });
+
+    it("signing out mid-edit puts the card back, read-only", async () => {
+      await openEditor();
+      act(() => session.signOut());
+      await waitFor(() =>
+        expect(screen.queryByRole("form", { name: "Edit card" })).not.toBeInTheDocument(),
+      );
+      expect(screen.getByText("Placeholder tagline")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Edit card" })).not.toBeInTheDocument();
+    });
+
+    it("cancel puts the card back as it was and saves nothing", async () => {
+      const form = await openEditor();
+      fireEvent.change(within(form).getByRole("textbox", { name: "Tagline" }), {
+        target: { value: "Never saved" },
+      });
+      fireEvent.click(within(form).getByRole("button", { name: "Cancel" }));
+      await waitFor(() =>
+        expect(screen.queryByRole("form", { name: "Edit card" })).not.toBeInTheDocument(),
+      );
+      expect(screen.getByText("Placeholder tagline")).toBeInTheDocument();
+      expect(savedYaml()).toBeUndefined();
+      await waitFor(() => expect(screen.getByRole("button", { name: "Edit card" })).toHaveFocus());
+    });
+  });
+
   it("lets a signed-in editor change the card and save it as profile.yaml on drafts/profile", async () => {
     localStorage.clear();
     session.signIn({ status: "authenticated", backend: "fake", token: "fake" });
@@ -320,8 +470,8 @@ describe("Landing", () => {
       const settings = await screen.findByRole("dialog", { name: "Focus area" });
       fireEvent.click(within(settings).getByRole("switch", { name: "Links to its posts" }));
 
-      // An invalid address blocks saving and says why, on the field.
-      const address = within(form).getByRole("textbox", { name: /Address for GitHub/ });
+      // An invalid address blocks saving and says why, under the address on the card.
+      const address = within(form).getByRole("textbox", { name: "Address for GitHub" });
       fireEvent.change(address, { target: { value: "not a url" } });
       expect(address).toHaveAttribute("aria-invalid", "true");
       expect(address).toHaveAccessibleDescription(/full address/);

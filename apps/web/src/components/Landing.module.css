@@ -37,6 +37,11 @@
     &[data-expanded] {
       --card-width: 54rem;
     }
+
+    /* Editing, each column holds a grip, a label field and its options: room for a whole label. */
+    &[data-editing] {
+      --card-width: 80rem;
+    }
   }
 
   .cardBack {
@@ -155,7 +160,7 @@
     padding-block: var(--space-6) var(--space-2);
 
     &[data-expanded] {
-      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(var(--link-column, 13rem), 1fr));
       justify-items: stretch;
       text-align: start;
     }
@@ -376,50 +381,50 @@
     }
   }
 
-  /* Named only during "show more", so each row travels on its own and the card's snapshot is just its
+  /* Named only during "show more" and turning editable, so each row travels on its own and the card's snapshot is just its
      surface, which can stretch. During "enter" they stay part of the card and shrink with it. */
-  :root[data-vt="expand"] .vt {
+  :root:is([data-vt="expand"], [data-vt="edit"]) .vt {
     view-transition-name: var(--vt-name);
   }
 
-  :root[data-vt="expand"]::view-transition-group(*) {
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-group(*) {
     animation-duration: 0.6s;
     animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   /* Snapshots keep their natural size, so a row whose box widens (the tagline, the toggle bar) moves
      without its text scaling. Only the card's own surface stretches. */
-  :root[data-vt="expand"]::view-transition-old(*),
-  :root[data-vt="expand"]::view-transition-new(*) {
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-old(*),
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-new(*) {
     block-size: 100%;
     object-fit: none;
   }
 
   /* Expanded, a link fills its column, so its snapshot widens; keep the icon and label on the start
      edge, where they stay, instead of re-centring them. */
-  :root[data-vt="expand"]::view-transition-old(*:global(.card-link)),
-  :root[data-vt="expand"]::view-transition-new(*:global(.card-link)) {
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-old(*:global(.card-link)),
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-new(*:global(.card-link)) {
     object-position: left center;
   }
 
   /* The expanded toggle is a full-width bar; clipped to its growing box, it widens with the card. */
-  :root[data-vt="expand"]::view-transition-group(card-more) {
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-group(card-more) {
     overflow: clip;
     border-radius: var(--radius-md);
   }
 
-  :root[data-vt="expand"]::view-transition-old(site-card),
-  :root[data-vt="expand"]::view-transition-new(site-card) {
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-old(site-card),
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-new(site-card) {
     object-fit: fill;
   }
 
   /* Rows only one state has: arrivals fade in once the card has made room; departures leave at once, so
      they are gone before the card shrinks past them. */
-  :root[data-vt="expand"]::view-transition-new(*):only-child {
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-new(*):only-child {
     animation: vt-fade-in 0.3s 0.3s both;
   }
 
-  :root[data-vt="expand"]::view-transition-old(*):only-child {
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-old(*):only-child {
     animation: vt-fade-out 0.15s both;
   }
 

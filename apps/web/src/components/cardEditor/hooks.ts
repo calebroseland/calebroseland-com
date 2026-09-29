@@ -1,5 +1,5 @@
 import type { Profile } from "@crc/content-schema";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type EditState, fieldErrors, fromProfile, tagProblem, toProfile } from "./model.ts";
 
 /** The card being edited: its state, whether it has changed, the profile it would save, and what is
@@ -30,4 +30,26 @@ export function useProfileDraft(profile: Profile) {
 export function useAnnouncer() {
   const [message, announce] = useState("");
   return { message, announce };
+}
+
+/** Moves focus to the element marked `data-focus-key`, once React has put it where it now belongs:
+    a moved item's handle, or a new item's text. */
+export function useFocusByKey() {
+  const [pending, setPending] = useState<string | null>(null);
+  useEffect(() => {
+    if (!pending) return;
+    document.querySelector<HTMLElement>(`[data-focus-key="${CSS.escape(pending)}"]`)?.focus();
+    setPending(null);
+  }, [pending]);
+  return setPending;
+}
+
+/** Asks before the page unloads while there are unsaved edits. */
+export function useUnsavedGuard(dirty: boolean) {
+  useEffect(() => {
+    if (!dirty) return;
+    const guard = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", guard);
+    return () => window.removeEventListener("beforeunload", guard);
+  }, [dirty]);
 }
