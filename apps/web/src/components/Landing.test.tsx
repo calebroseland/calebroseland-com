@@ -422,6 +422,54 @@ describe("Landing", () => {
       expect(label.closest(`.${CSS.escape(linkClass)}`)).not.toBeNull();
     });
 
+    it("a focus area shows its icon, its label, or both, as its settings choose, and saves the choice", async () => {
+      const form = await openEditor();
+      const chipOf = (name: RegExp) =>
+        within(form).getByRole("button", { name }).closest("li") as HTMLElement;
+      const shows = (name: RegExp) => {
+        const handle = within(chipOf(name)).getByRole("button", { name });
+        // The chip's own icon; the link mark beside it is not the focus area's icon.
+        const all = handle.querySelectorAll("svg").length;
+        return { icons: all - handle.querySelectorAll("[data-link-mark] svg").length };
+      };
+      fireEvent.click(within(form).getByRole("button", { name: "Settings for Two" }));
+      const settings = await screen.findByRole("dialog", { name: "Focus area" });
+      const option = (label: string) => within(settings).getByRole("radio", { name: label });
+      expect(option("Icon")).toHaveAttribute("aria-checked", "true");
+
+      fireEvent.click(option("Label"));
+      await waitFor(() => expect(option("Label")).toHaveAttribute("aria-checked", "true"));
+      expect(shows(/^Two\./).icons).toBe(0);
+      expect(chipOf(/^Two\./)).toHaveTextContent("Two");
+
+      fireEvent.click(option("Both"));
+      await waitFor(() => expect(option("Both")).toHaveAttribute("aria-checked", "true"));
+      expect(shows(/^Two\./).icons).toBe(1);
+
+      fireEvent.click(option("Label"));
+      fireEvent.click(within(form).getByRole("button", { name: "Save card" }));
+      await waitFor(
+        () => expect(savedYaml()).toMatch(/label: Two, icon: simple-icons:react, show: label/),
+        {
+          timeout: 5000,
+        },
+      );
+
+      // The fake backend outlives each test: put Two back as the other tests expect it.
+      fireEvent.click(await screen.findByRole("button", { name: "Edit card" }, { timeout: 5000 }));
+      const again = await screen.findByRole("form", { name: "Edit card" }, { timeout: 5000 });
+      fireEvent.click(within(again).getByRole("button", { name: "Settings for Two" }));
+      const reset = await screen.findByRole("dialog", { name: "Focus area" });
+      fireEvent.click(within(reset).getByRole("radio", { name: "Icon" }));
+      fireEvent.click(within(again).getByRole("button", { name: "Save card" }));
+      await waitFor(
+        () => expect(savedYaml()).toMatch(/label: Two, icon: simple-icons:react, show: icon/),
+        {
+          timeout: 5000,
+        },
+      );
+    });
+
     it("signing out mid-edit puts the card back, read-only", async () => {
       await openEditor();
       act(() => session.signOut());

@@ -13,10 +13,11 @@ const chipIcon = (name: string) => (isIconName(name) ? name : "lucide:code");
    mark on hover or focus, so the difference is found by reaching for it. */
 export function FocusChip({ tag }: { tag: ResolvedTag }) {
   const iconOnly = tag.icon !== null && tag.show === "icon";
+  const withIcon = tag.icon !== null && tag.show !== "label";
   const className = [styles.chip, iconOnly && styles.tile].filter(Boolean).join(" ");
   const body = (
     <>
-      {tag.icon && <Icon name={chipIcon(tag.icon)} size={iconOnly ? "lg" : "sm"} />}
+      {withIcon && tag.icon && <Icon name={chipIcon(tag.icon)} size={iconOnly ? "lg" : "sm"} />}
       {!iconOnly && tag.label}
       {tag.link && (
         <span className={styles.linkCue} aria-hidden="true">

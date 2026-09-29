@@ -113,6 +113,7 @@ function TagChip({
   });
   const name = tag.label.trim() || "Untitled focus area";
   const iconOnly = tag.icon !== null && tag.show === "icon";
+  const withIcon = tag.icon !== null && tag.show !== "label";
   return (
     <li
       ref={ref as RefObject<HTMLLIElement>}
@@ -127,11 +128,11 @@ function TagChip({
         onMove={onMove}
         handleRef={handleRef}
       >
-        {tag.icon && <Icon name={tag.icon} size={iconOnly ? "md" : "sm"} />}
+        {withIcon && tag.icon && <Icon name={tag.icon} size={iconOnly ? "md" : "sm"} />}
         {!iconOnly && name}
         {tag.link && (
           <Tip label="Links to its posts">
-            <span className={styles.linkMark}>
+            <span className={styles.linkMark} data-link-mark>
               <Icon name="lucide:link" size="xs" />
             </span>
           </Tip>
