@@ -1,8 +1,8 @@
 @layer components {
-  /* Collapsed: the link groups and the toggle on one centred line, a rule and one gap apart.
-     Expanded: the groups, the toggle, then the copyright line, each centred on a row of its own. */
+  /* Collapsed: the link groups and the toggle on one centred line, one gap apart with a rule in its
+     middle. Expanded: the groups, the toggle, then the copyright line, each centred on its own row. */
   .footer {
-    --section-gap: var(--space-3);
+    --section-gap: var(--space-4);
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -14,7 +14,7 @@
     font-size: var(--font-size-sm);
 
     &[data-expanded] {
-      --section-gap: var(--space-6);
+      --section-gap: var(--space-12);
       display: grid;
       grid-template-areas: "links" "actions" "copy";
       justify-items: center;
@@ -59,19 +59,28 @@
     }
   }
 
-  /* Not before the copyright line, which wraps onto a row of its own once it carries its links. */
+  /* The gap alone spaces the sections; the rule before each is drawn in the middle of it. Not before
+     the copyright line, which may wrap onto a row of its own. */
   .footer:not([data-expanded]) :is(.group + .group, .actions),
   .footer[data-expanded] .group + .group {
-    padding-inline-start: var(--section-gap);
-    border-inline-start: var(--border-width) solid var(--color-border-subtle);
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: calc((var(--section-gap) + var(--border-width)) / -2);
+      border-inline-start: var(--border-width) solid var(--color-border-subtle);
+    }
   }
 
   /* Narrow, sections wrap; a rule would start a line, so the gap alone separates them. */
   @media (width < 48rem) {
     .footer:not([data-expanded]) :is(.group + .group, .actions),
     .footer[data-expanded] .group + .group {
-      padding-inline-start: 0;
-      border-inline-start: 0;
+      &::before {
+        content: none;
+      }
     }
   }
 
