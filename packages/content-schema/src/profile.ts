@@ -89,8 +89,6 @@ export const profile = z.object({
   tags: z.array(profileTag).max(12).default([]),
   groups: z.array(profileLinkGroup).min(1),
   contact: profileContact.optional(),
-  /** Marks copy that is scaffolding, not real content. Removed when real copy lands. */
-  placeholder: z.boolean().default(false),
 });
 
 export type Profile = z.infer<typeof profile>;

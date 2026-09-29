@@ -68,6 +68,16 @@ describe("renderMarkdown", () => {
   });
 });
 
+describe("retired frontmatter", () => {
+  it("still loads a file with the old placeholder flag, and saving it drops the flag", () => {
+    const old =
+      "---\nkind: page\ntitle: About\nslug: about\ndate: 2026-09-18\ndraft: false\nplaceholder: true\n---\n\nHello\n";
+    const parsed = parseEntry(old);
+    expect(parsed.meta.title).toBe("About");
+    expect(serializeEntry(parsed)).not.toContain("placeholder");
+  });
+});
+
 describe("serializeEntry output", () => {
   it("writes a fenced YAML block GitHub renders, with the date as YYYY-MM-DD", () => {
     const out = serializeEntry({
@@ -78,7 +88,6 @@ describe("serializeEntry output", () => {
         date: new Date("2026-09-18T00:00:00Z"),
         draft: true,
         tags: ["a"],
-        placeholder: false,
       },
       body: "\n\n# Body",
     });

@@ -23,7 +23,6 @@ const base: Profile = {
     },
   ],
   contact: { email: "a@b.co", location: { label: "Here", url: "https://maps.example.com" } },
-  placeholder: false,
 };
 
 describe("card editor model", () => {

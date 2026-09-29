@@ -4,7 +4,6 @@ title: Privacy
 slug: privacy
 date: 2026-09-28
 draft: false
-placeholder: false
 ---
 
 _Last updated September 28, 2026._

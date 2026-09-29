@@ -6,7 +6,6 @@ date: 2026-09-18
 draft: false
 tags: [fixture]
 summary: Every construct the renderer supports.
-placeholder: true
 ---
 
 # Heading one

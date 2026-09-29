@@ -30,7 +30,6 @@ const base: Buffer = {
     date: "2026-09-18",
     draft: true,
     tags: [],
-    placeholder: false,
   },
   assets: [],
   existingAssets: [],

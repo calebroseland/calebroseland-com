@@ -6,7 +6,6 @@ date: 2026-09-18
 draft: false
 tags: [placeholder, meta]
 summary: A fixture post exercising every construct the renderer supports. Replace with real writing.
-placeholder: true
 ---
 
 ![A teal placeholder hero](hero.png)

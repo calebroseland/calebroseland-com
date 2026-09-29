@@ -40,7 +40,6 @@ export async function createEntryDraft(
     date: input.date,
     draft: true,
     tags: [],
-    placeholder: false,
   } as Entry;
   const { headSha } = await gh.saveBundle({
     ref: draft.ref,

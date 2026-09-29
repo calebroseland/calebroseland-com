@@ -14,7 +14,6 @@ vi.mock("virtual:content/index", () => ({
       draft: false,
       tags: ["one"],
       summary: "First",
-      placeholder: true,
     },
     {
       id: "b",
@@ -25,7 +24,6 @@ vi.mock("virtual:content/index", () => ({
       date: "2026-09-18T00:00:00.000Z",
       draft: false,
       tags: ["two"],
-      placeholder: true,
     },
     {
       id: "p",
@@ -36,7 +34,6 @@ vi.mock("virtual:content/index", () => ({
       date: "2026-09-18T00:00:00.000Z",
       draft: false,
       tags: [],
-      placeholder: true,
     },
   ],
 }));
@@ -48,7 +45,6 @@ vi.mock("virtual:content/profile", () => ({
     groups: [
       { title: "g", links: [{ label: "L", url: "https://x.test", icon: "simple-icons:github" }] },
     ],
-    placeholder: true,
   },
 }));
 

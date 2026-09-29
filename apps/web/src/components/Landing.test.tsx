@@ -15,7 +15,6 @@ vi.mock("virtual:content/profile", () => ({
       "Seven",
       "Eight",
     ],
-    placeholder: true,
     groups: [
       {
         title: "Code",

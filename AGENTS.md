@@ -21,7 +21,7 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 - `apps/web` — the one deployable. `src/routes` (TanStack file routes; `routeTree.gen.ts` is generated), `src/components`, `src/theme`, `worker/` (Cloudflare Worker: `/api/*` only, everything else is static assets), `vite/` (build plugins), `e2e/`.
 - `packages/ui` — design system: tokens (`src/tokens`), base CSS, layout primitives (Stack, Cluster, Grid, Center), `Icon`, icon registry (`icons.ts`: the only import of icon data, Lucide and Simple Icons through Iconify, named `lucide:…` / `simple-icons:…` in code and content), motion tokens.
 - `packages/content-schema` — Zod schemas for everything in `content/`.
-- `content/` — data the site renders. `placeholder: true` marks scaffolding copy.
+- `content/` — data the site renders.
 
 ## Conventions
 

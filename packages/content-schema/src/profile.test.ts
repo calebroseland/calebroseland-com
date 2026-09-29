@@ -45,10 +45,10 @@ describe("profile", () => {
     groups: [{ title: "Code", links: [validLink] }],
   };
 
-  it("applies defaults for tags and placeholder", () => {
-    const parsed = profile.parse(validProfile);
+  it("defaults tags to none, and drops the retired placeholder flag", () => {
+    const parsed = profile.parse({ ...validProfile, placeholder: true });
     expect(parsed.tags).toEqual([]);
-    expect(parsed.placeholder).toBe(false);
+    expect(parsed).not.toHaveProperty("placeholder");
   });
 
   it("requires at least one group with one link", () => {

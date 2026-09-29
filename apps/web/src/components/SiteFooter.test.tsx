@@ -27,7 +27,6 @@ const profile = {
     },
   ],
   contact: { email: "name@example.com" },
-  placeholder: true,
 } as unknown as Profile;
 
 function renderFooter() {

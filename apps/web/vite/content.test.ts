@@ -12,7 +12,6 @@ const post: EntryMeta = {
   draft: false,
   tags: [],
   summary: 'Quotes "here"',
-  placeholder: true,
 };
 const page: EntryMeta = {
   ...post,

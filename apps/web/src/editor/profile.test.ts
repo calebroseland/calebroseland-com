@@ -16,7 +16,6 @@ describe("serializeProfile", () => {
   // style comes back byte for byte; content/profile.yaml's tags line adopts it on its first save.
   it("round-trips a file byte for byte when nothing changed", () => {
     const file = `# Heading comment.
-placeholder: false
 name: Someone
 tagline: Does things
 tags: [ One, Two ]

@@ -13,7 +13,6 @@ const base = z.object({
   draft: z.boolean().default(true),
   tags: z.array(z.string()).default([]),
   summary: z.string().optional(),
-  placeholder: z.boolean().default(false),
 });
 
 export const post = base.extend({ kind: z.literal("post") });

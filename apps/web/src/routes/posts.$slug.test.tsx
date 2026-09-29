@@ -11,7 +11,6 @@ const { meta } = vi.hoisted(() => ({
     date: "2026-09-19T00:00:00.000Z",
     draft: false,
     tags: ["one"],
-    placeholder: true,
   },
 }));
 vi.mock("virtual:content/index", () => ({ default: [meta], loaders: {} }));
@@ -23,7 +22,6 @@ vi.mock("virtual:content/profile", () => ({
     groups: [
       { title: "g", links: [{ label: "L", url: "https://x.test", icon: "simple-icons:github" }] },
     ],
-    placeholder: true,
   },
 }));
 vi.mock("../content/entries.ts", async (importOriginal) => {

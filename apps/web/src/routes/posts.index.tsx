@@ -37,7 +37,6 @@ function PostsIndex() {
           date: "",
           draft: false,
           tags: [],
-          placeholder: false,
         }}
         showMeta={false}
       />
