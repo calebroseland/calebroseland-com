@@ -27,7 +27,8 @@ function PostsIndex() {
   const { tag } = Route.useSearch();
   const shown = tag ? posts.filter((p) => p.tags.includes(tag)) : posts;
   return (
-    <Page>
+    // The measure, like the header and list inside it, so the column sits on the page's axis.
+    <Page width="measure">
       <EntryHeader
         meta={{
           id: "",
