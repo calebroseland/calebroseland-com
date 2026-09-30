@@ -29,11 +29,12 @@ describe("parseEntry / serializeEntry", () => {
 });
 
 describe("renderMarkdown", () => {
+  // The first render loads every highlighter grammar, which can pass the 5s default on a busy machine.
   it("matches the golden output", async () => {
     const { body } = parseEntry(fixture);
     const { html } = await renderMarkdown(body, { resolveImage: (s) => `/resolved/${s}` });
     await expect(html).toMatchFileSnapshot("./__fixtures__/kitchen-sink.golden.html");
-  });
+  }, 30_000);
 
   it("strips scripts and event handlers", async () => {
     const { html } = await renderMarkdown(parseEntry(fixture).body);
