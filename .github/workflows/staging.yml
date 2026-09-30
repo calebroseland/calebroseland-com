@@ -17,14 +17,14 @@ permissions:
 jobs:
   worker:
     name: deploy staging worker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment:
       name: staging
       url: https://next.calebroseland.com
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad4ec120d5209a95 # v4.3.1
-      - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with: { cache: true }
       - run: npm ci
       - run: mise run build
