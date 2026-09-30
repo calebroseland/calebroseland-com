@@ -14,7 +14,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { dirname, extname, join, relative, resolve } from "node:path";
 import { pipeline } from "node:stream/promises";
 import type { Plugin } from "vite";
-import { contentDirFor, recordEditorTree } from "./content-dir.ts";
+import { contentDirFor, recordEditorTree, sameOrigin, within } from "./content-dir.ts";
 
 /* Working-tree editing. The editor can read and write the real content files on whatever branch is
    checked out, so an edit made in the browser is an ordinary unstaged change you commit alongside any
@@ -107,12 +107,13 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
       const inside = (path: string): string | null => {
         const rel = path.startsWith(`${prefix}/`) ? path.slice(prefix.length + 1) : path;
         const abs = resolve(contentDir, rel);
-        return abs.startsWith(contentDir) ? abs : null;
+        return within(contentDir, abs) ? abs : null;
       };
 
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split("?")[0];
         if (!url?.startsWith("/@local/")) return next();
+        if (!sameOrigin(req)) return json(res, 403, { error: "cross-origin request" });
 
         void (async () => {
           try {
@@ -131,9 +132,15 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
               if (payload.expectedHeadSha && payload.expectedHeadSha !== current.headSha) {
                 return json(res, 409, { error: "stale", headSha: current.headSha });
               }
-              for (const file of payload.files ?? []) {
-                const abs = inside(file.path);
-                if (!abs) continue;
+              const files = payload.files ?? [];
+              const outside = files.find((f) => !inside(f.path));
+              if (outside) {
+                return json(res, 400, {
+                  error: `path outside the content directory: ${outside.path}`,
+                });
+              }
+              for (const file of files) {
+                const abs = inside(file.path) as string;
                 mkdirSync(dirname(abs), { recursive: true });
                 writeFileSync(
                   abs,

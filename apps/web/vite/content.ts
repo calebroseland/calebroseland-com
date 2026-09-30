@@ -4,7 +4,7 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { type Entry, type EntryMeta, parseYaml, profile } from "@crc/content-schema";
 import { parseEntry, renderMarkdown } from "@crc/markdown";
 import type { Plugin } from "vite";
-import { contentDirFor, isEditorTree } from "./content-dir.ts";
+import { contentDirFor, isEditorTree, sameOrigin, within } from "./content-dir.ts";
 import { readTree } from "./local-store.ts";
 
 /* Parses, validates, and renders everything under content/ at build time.
@@ -90,7 +90,7 @@ export function content(opts: {
 
   function assetUrl(dir: string, src: string): string {
     const abs = resolve(dir, src);
-    if (!abs.startsWith(contentDir) || !existsSync(abs))
+    if (!within(contentDir, abs) || !existsSync(abs))
       throw new Error(`missing asset ${src} referenced from ${relative(opts.root, dir)}`);
     if (!isBuild) return `/@content/${relative(contentDir, abs).replaceAll("\\", "/")}`;
     const cached = emitted.get(abs);
@@ -131,7 +131,13 @@ export function content(opts: {
         if (!req.url?.startsWith("/@content/")) return next();
         const rel = decodeURIComponent(req.url.slice("/@content/".length).split("?")[0] ?? "");
         const abs = resolve(contentDir, rel);
-        if (!abs.startsWith(contentDir) || !existsSync(abs)) return next();
+        if (
+          !sameOrigin(req) ||
+          !within(contentDir, abs) ||
+          !existsSync(abs) ||
+          statSync(abs).isDirectory()
+        )
+          return next();
         const type = {
           ".png": "image/png",
           ".jpg": "image/jpeg",
