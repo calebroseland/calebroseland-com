@@ -7,7 +7,10 @@
   },
   {
     "name": "landing route chunk (gzip)",
-    "path": ["apps/web/dist/client/assets/routes-*.js"],
+    "path": [
+      "apps/web/dist/client/assets/_card-*.js",
+      "apps/web/dist/client/assets/Landing.module-*.js"
+    ],
     "limit": "15 kB",
     "gzip": true
   },
