@@ -1,17 +1,27 @@
 import { Icon } from "@crc/ui";
 import { Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import type { EntryMeta, LoadedEntry } from "../content/entries.ts";
 import { formatDate } from "../content/entries.ts";
 import { useSignedIn } from "../editor/auth/hooks.ts";
 import { useCurrentHref } from "../hooks/useCurrentHref.ts";
 import styles from "./Article.module.css";
 
-export function EntryHeader({ meta, showMeta = true }: { meta: EntryMeta; showMeta?: boolean }) {
+/** An entry's title and meta; `action` takes the Edit link's place on a page that is not an entry. */
+export function EntryHeader({
+  meta,
+  showMeta = true,
+  action,
+}: {
+  meta: EntryMeta;
+  showMeta?: boolean;
+  action?: ReactNode;
+}) {
   return (
     <header className={styles.header}>
       <div className={styles.titleRow}>
         <h1 className={styles.title}>{meta.title}</h1>
-        {meta.slug && <EditEntry slug={meta.slug} title={meta.title} />}
+        {action ?? (meta.id && meta.slug && <EditEntry slug={meta.slug} title={meta.title} />)}
       </div>
       {showMeta && (
         <div className={styles.meta}>
@@ -42,9 +52,26 @@ function EditEntry({ slug, title }: { slug: string; title: string }) {
   );
 }
 
-export function TagList({ tags }: { tags: readonly string[] }) {
+/** Tags as chips linking to the posts they filter; `all` leads with a chip for every post. */
+export function TagList({
+  tags,
+  all = false,
+  className,
+}: {
+  tags: readonly string[];
+  all?: boolean;
+  className?: string | undefined;
+}) {
   return (
-    <ul className={styles.tags} aria-label="Tags">
+    <ul role="list" className={`${styles.tags} ${className ?? ""}`} aria-label="Tags">
+      {all && (
+        <li>
+          {/* Exact, so All is current only while no tag is chosen. */}
+          <Link to="/posts" search={{}} activeOptions={{ exact: true }} className={styles.tag}>
+            All
+          </Link>
+        </li>
+      )}
       {tags.map((tag) => (
         <li key={tag}>
           {/* Link sets data-status="active" and aria-current="page" itself, matching path and search. */}

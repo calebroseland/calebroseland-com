@@ -72,6 +72,13 @@ describe("/posts", () => {
     expect(screen.getByText("September 19, 2026")).toBeInTheDocument();
   });
 
+  it("marks All current with no tag chosen", async () => {
+    await renderAt("/posts");
+    const tags = within(screen.getByRole("list", { name: "Tags" }));
+    expect(tags.getByRole("link", { name: "All" })).toHaveAttribute("aria-current", "page");
+    expect(tags.getByRole("link", { name: "one" })).not.toHaveAttribute("aria-current");
+  });
+
   it("links the RSS feed, where the posts are, and not from the site footer", async () => {
     await renderAt("/posts");
     const main = screen.getByRole("main");
@@ -84,7 +91,7 @@ describe("/posts", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("filters by the typed tag search param and offers to clear", async () => {
+  it("filters by the typed tag search param, with All to clear it", async () => {
     const router = await renderAt("/posts?tag=two");
     expect(router.state.location.search).toEqual({ tag: "two" });
     expect(
@@ -92,10 +99,10 @@ describe("/posts", () => {
         .getAllByRole("heading", { level: 2 })
         .map((h) => h.textContent),
     ).toEqual(["Beta"]);
-    expect(screen.getByRole("link", { name: "Clear filter" })).toBeInTheDocument();
-    expect(
-      within(screen.getByRole("list", { name: "Tags" })).getByRole("link", { name: "two" }),
-    ).toHaveAttribute("aria-current", "page");
+    const tags = within(screen.getByRole("list", { name: "Tags" }));
+    expect(tags.getByRole("link", { name: "two" })).toHaveAttribute("aria-current", "page");
+    expect(tags.getByRole("link", { name: "All" })).not.toHaveAttribute("aria-current");
+    expect(tags.getByRole("link", { name: "All" })).toHaveAttribute("href", "/posts");
   });
 
   it("shows the filtered-empty state", async () => {

@@ -21,12 +21,12 @@ test.describe("posts", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Posts" })).toBeVisible();
   });
 
-  test("tag filter is a search param and can be cleared", async ({ page }) => {
+  test("tag filter is a search param, and All clears it", async ({ page }) => {
     await page.goto("/posts");
     await page.getByRole("list", { name: "Tags" }).getByRole("link", { name: "meta" }).click();
     await expect(page).toHaveURL(/\?tag=meta$/);
     await expect(page.getByRole("main").getByRole("heading", { level: 2 })).toHaveCount(1);
-    await page.getByRole("link", { name: "Clear filter" }).click();
+    await page.getByRole("list", { name: "Tags" }).getByRole("link", { name: "All" }).click();
     await expect(page).toHaveURL(/\/posts$/);
     expect(await page.getByRole("main").getByRole("heading", { level: 2 }).count()).toBeGreaterThan(
       1,

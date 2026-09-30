@@ -57,9 +57,15 @@
     border: var(--border-width) solid var(--color-accent-border);
     text-decoration: none;
 
-    &:hover,
+    /* The fill stays light on hover, where the text keeps its contrast; the current tag is solid. */
+    &:hover {
+      border-color: var(--color-accent);
+    }
+
     &[data-status="active"] {
-      background: var(--color-accent-border);
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-text-on-accent);
     }
   }
 

@@ -1,9 +1,10 @@
 import { Icon } from "@crc/ui";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import * as z from "zod/mini";
 import { EntryHeader, TagList } from "../components/Article.tsx";
 import { Page } from "../components/Page.tsx";
 import { PostList } from "../components/PostList.tsx";
+import { Tip } from "../components/Tip.tsx";
 import { allTags, posts } from "../content/entries.ts";
 import { siteProfile } from "../content/profile.ts";
 import styles from "./posts.module.css";
@@ -39,19 +40,15 @@ function PostsIndex() {
           tags: [],
         }}
         showMeta={false}
+        action={
+          <Tip label="RSS feed">
+            <a href="/feed.xml" className={styles.feed} aria-label="RSS feed">
+              <Icon name="lucide:rss" size="sm" />
+            </a>
+          </Tip>
+        }
       />
-      <div className={styles.filters}>
-        {allTags.length > 0 && <TagList tags={allTags} />}
-        {tag && (
-          <Link to="/posts" search={{}} className={styles.clear}>
-            Clear filter
-          </Link>
-        )}
-        <a href="/feed.xml" className={styles.feed}>
-          <Icon name="lucide:rss" size="sm" />
-          RSS feed
-        </a>
-      </div>
+      {allTags.length > 0 && <TagList tags={allTags} all className={styles.filters} />}
       {shown.length === 0 ? (
         <p role="status">{tag ? `No posts tagged ‘${tag}’.` : "Nothing published yet."}</p>
       ) : (
