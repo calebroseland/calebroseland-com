@@ -50,6 +50,21 @@ test.describe("pages", () => {
     ).toBeVisible();
   });
 
+  test("the formatting toolbar sticks below the site's pinned bar, not under it", async ({
+    page,
+  }) => {
+    await signInFake(page);
+    await createEntry(page, "page", "Long read");
+    await page.getByRole("textbox", { name: "Post body" }).click();
+    for (let i = 0; i < 60; i++) await page.keyboard.press("Enter");
+    await page.mouse.wheel(0, 1500);
+    const bar = await page.getByRole("banner").boundingBox();
+    test.skip(!bar || bar.y + bar.height <= 0, "the bar scrolls away on this screen");
+    await expect
+      .poll(async () => (await page.getByRole("button", { name: "Bold" }).boundingBox())?.y ?? 0)
+      .toBeGreaterThanOrEqual((bar?.y ?? 0) + (bar?.height ?? 0));
+  });
+
   test("a published page is reachable from the board and renders on the site", async ({ page }) => {
     await signInFake(page);
     await createEntry(page, "page", "Colophon");

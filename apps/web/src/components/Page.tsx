@@ -2,6 +2,7 @@ import { Center } from "@crc/ui";
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { MouseEvent, ReactNode } from "react";
 import { siteProfile } from "../content/profile.ts";
+import { useStickyTop } from "../hooks/useStickyTop.ts";
 import { isPlainClick, useBackToCard } from "./backToCard.ts";
 import styles from "./Page.module.css";
 import { ENTRY_PAGE } from "./returnPage.ts";
@@ -26,6 +27,7 @@ export function Page({
   width?: "measure" | "measure-wide";
 }) {
   const atHome = useAtHome();
+  const barRef = useStickyTop<HTMLElement>();
   const toCard = useBackToCard();
 
   // A plain click on the brand at home runs the reverse morph; modified clicks open the card in a new
@@ -38,7 +40,7 @@ export function Page({
 
   return (
     <div className={styles.page}>
-      <header className={styles.bar}>
+      <header ref={barRef} className={styles.bar}>
         <div className={styles.brand}>
           <Link
             to={atHome ? "/" : ENTRY_PAGE}

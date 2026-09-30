@@ -36,7 +36,7 @@
 
   /* In-page links (headings, the skip link) land below the bar, not under it. */
   :root:has(.bar) {
-    scroll-padding-block-start: 5rem;
+    scroll-padding-block-start: calc(var(--sticky-top, 0px) + var(--space-4));
   }
 
   .brand {

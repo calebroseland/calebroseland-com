@@ -14,8 +14,9 @@
     gap: var(--space-1);
     padding: var(--space-2);
     border-block-end: var(--border-width) solid var(--color-border);
+    /* Below the site's bar while that is pinned (--sticky-top, set by Page). */
     position: sticky;
-    inset-block-start: 0;
+    inset-block-start: var(--sticky-top, 0px);
     background: var(--color-surface);
     z-index: var(--z-sticky);
     border-start-start-radius: var(--radius-lg);
