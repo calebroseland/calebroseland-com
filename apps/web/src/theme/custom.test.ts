@@ -60,6 +60,14 @@ describe("themeVars", () => {
     expect(t["--font-brand"]).toBe(t["--font-sans"]);
     expect(t["--font-sans"]).toMatch(/^"IBM Plex Serif"/);
   });
+
+  it("sets the reading face for body text: serif by default, the text face, or its own", () => {
+    const base = defaultTheme("light", "t", "x");
+    expect(themeVars(base)["--font-prose"]).toMatch(/^"IBM Plex Serif"/);
+    const same = themeVars({ ...base, fontText: "system", fontReading: "text" });
+    expect(same["--font-prose"]).toBe(same["--font-sans"]);
+    expect(themeVars({ ...base, fontReading: "mono" })["--font-prose"]).toMatch(/^"IBM Plex Mono"/);
+  });
 });
 
 describe("customTheme schema", () => {
@@ -70,6 +78,11 @@ describe("customTheme schema", () => {
     expect(parsed.textScale).toBe(RANGES.textScale.max);
     expect(parsed.neutralTint).toBe(RANGES.neutralTint.min);
     expect(parsed.neutralHue).toBe(10);
+  });
+
+  it("reads a theme saved before the reading font in serif", () => {
+    const { fontReading: _, ...older } = valid;
+    expect(customTheme.parse(older).fontReading).toBe("serif");
   });
 
   it.each([

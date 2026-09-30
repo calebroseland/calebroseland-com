@@ -18,6 +18,7 @@ import {
   FONTS,
   NAME_FONTS,
   RANGES,
+  READING_FONTS,
   TEXT_FONTS,
 } from "../theme/custom.ts";
 import { themeController } from "../theme/store.ts";
@@ -292,6 +293,16 @@ export default function ThemeEditor({
       : { value: id, label: FONTS[id].label, font: FONTS[id].stack },
   );
 
+  const readingFonts = READING_FONTS.map((id) =>
+    id === "text"
+      ? {
+          value: id,
+          label: `Same as text (${FONTS[theme.fontText].label})`,
+          font: FONTS[theme.fontText].stack,
+        }
+      : { value: id, label: FONTS[id].label, font: FONTS[id].stack },
+  );
+
   const save = () => {
     themeController.saveCustom(
       customTheme.parse({ ...theme, name: theme.name.trim() || initial.name }),
@@ -354,7 +365,7 @@ export default function ThemeEditor({
               ))}
             </Fieldset.Root>
 
-            <Section title="Colour">
+            <Section title="Color">
               <ColorField label="Accent" value={theme.accent} onChange={(v) => set("accent", v)} />
               <p className={styles.hint}>
                 Sets the accent's hue and vividness. Each shade keeps the lightness that holds its
@@ -405,6 +416,12 @@ export default function ThemeEditor({
                 value={theme.fontText}
                 options={textFonts}
                 onChange={(v) => set("fontText", v)}
+              />
+              <SelectField
+                label="Reading font"
+                value={theme.fontReading}
+                options={readingFonts}
+                onChange={(v) => set("fontReading", v)}
               />
               <SelectField
                 label="Name font"

@@ -1,7 +1,7 @@
 /* Rendered-markdown styles. The one file worth writing carefully: it is where posts are read. */
 @layer base {
   .prose {
-    font-family: var(--font-serif);
+    font-family: var(--font-prose);
     font-size: var(--font-size-md);
     line-height: var(--leading-relaxed);
     max-inline-size: var(--measure);

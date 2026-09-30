@@ -182,11 +182,21 @@ test.describe("landing", () => {
     const previewed = await accent();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
+    // Body text has its own face, so the choice reaches posts and pages.
+    await editor.getByRole("combobox", { name: "Reading font" }).click();
+    await page.getByRole("option", { name: "IBM Plex Mono" }).click();
+    const prose = () =>
+      page.evaluate(() =>
+        getComputedStyle(document.documentElement).getPropertyValue("--font-prose"),
+      );
+    await expect.poll(prose).toMatch(/IBM Plex Mono/);
+
     await editor.getByRole("button", { name: "Save theme" }).click();
     await expect(editor).toHaveCount(0);
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     expect(await accent()).toBe(previewed);
+    expect(await prose()).toMatch(/IBM Plex Mono/);
     await expect(page.getByRole("button", { name: /Theme: Ember/ })).toBeVisible();
   });
 

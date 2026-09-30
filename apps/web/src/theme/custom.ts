@@ -28,6 +28,8 @@ export const TEXT_FONTS = [
   "mono",
 ] as const satisfies readonly FontId[];
 export const NAME_FONTS = ["cortado", "text", "serif"] as const;
+/** Post and page body text: serif by default, the text font, or any text face. */
+export const READING_FONTS = ["serif", "text", "proxima", "system", "mono"] as const;
 
 export const RANGES = {
   neutralTint: { min: 0, max: 0.04, step: 0.002 },
@@ -61,6 +63,8 @@ export const customTheme = z.object({
   backdrop: z.nullable(hex),
   fontText: z.enum(TEXT_FONTS),
   fontName: z.enum(NAME_FONTS),
+  // Added after themes were first saved; one without it reads in serif, as it always did.
+  fontReading: z._default(z.enum(READING_FONTS), "serif"),
   textScale: ranged("textScale"),
   leading: ranged("leading"),
   spaceScale: ranged("spaceScale"),
@@ -82,6 +86,7 @@ export function defaultTheme(base: "light" | "dark", id: string, name: string): 
     backdrop: null,
     fontText: "proxima",
     fontName: "cortado",
+    fontReading: "serif",
     textScale: 1,
     leading: 1.5,
     spaceScale: 1,
@@ -185,6 +190,8 @@ export function themeVars(t: CustomTheme): Record<string, string> {
 
   vars["--font-sans"] = FONTS[t.fontText].stack;
   vars["--font-brand"] = t.fontName === "text" ? FONTS[t.fontText].stack : FONTS[t.fontName].stack;
+  vars["--font-prose"] =
+    t.fontReading === "text" ? FONTS[t.fontText].stack : FONTS[t.fontReading].stack;
 
   for (const [name, size] of Object.entries(FONT_SIZES))
     vars[`--font-size-${name}`] = t.textScale === 1 ? size : `calc(${size} * ${t.textScale})`;

@@ -80,6 +80,8 @@
     --font-brand: "cortado", "Brush Script MT", cursive;
     --font-serif: "IBM Plex Serif", ui-serif, Georgia, serif;
     --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+    /* Post and page body text; a custom theme re-points it (its reading font). */
+    --font-prose: var(--font-serif);
 
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
