@@ -142,7 +142,7 @@ function FooterGroup({
   return (
     <section {...named.region} className={styles.group} data-icons={iconOnly || undefined}>
       <h2 {...named.heading} className={styles.groupTitle} style={footerHeadingName(index)}>
-        {title}
+        <span className={styles.headingText}>{title}</span>
       </h2>
       <ul role="list" className={styles.list}>
         {links.map((link, i) => (
@@ -161,7 +161,7 @@ function FooterLink({ link, group, index }: { link: ProfileLink; group: number; 
   const props = { className: styles.link, style: footerLinkName(group, index) };
   const body = (
     <>
-      <Icon name={link.icon} size="sm" />
+      <Icon name={link.icon} size="sm" className={styles.icon} />
       <span className={styles.label}>{link.label}</span>
     </>
   );

@@ -25,6 +25,7 @@ import type { ProfileSource } from "../editor/profile.ts";
 import { notify } from "../editor/Toast.tsx";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
+import { useSiteGo } from "./backToCard.ts";
 import type { EditFaces, EditResult } from "./cardEditor/CardEditor.tsx";
 import { useDetailsExpanded } from "./detailsState.ts";
 import { FocusChip } from "./FocusChip.tsx";
@@ -245,8 +246,11 @@ function Front({
                   className={`${styles.groupTitle} ${styles.vt} ${styles.toFooter}`}
                   style={{ ...vtName(`card-group-${g}`), ...footerHeadingName(g) }}
                 >
-                  {group.title}
-                  <Icon name="lucide:external-link" size="xs" />
+                  {/* The icon rides with the words, so it fades beside them between card and footer. */}
+                  <span className={styles.headingText}>
+                    {group.title}
+                    <Icon name="lucide:external-link" size="xs" />
+                  </span>
                 </h2>
               ) : (
                 // Where the heading would be, so the footer's heading grows out of the collapsed card.
@@ -399,6 +403,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
   const profile = saved ?? published;
   const reduce = useReduceMotion();
   const navigate = useNavigate();
+  const go = useSiteGo();
   const side = useCardSide();
   const { expanded, toggle: toggleDetails } = useDetailsExpanded();
   // Focus follows the card only after the visitor has turned it; the first paint leaves focus alone.
@@ -489,16 +494,8 @@ export function Landing({ profile: published }: { profile: Profile }) {
     );
   };
 
-  /* The router's own viewTransition option is not used because it renders the new state after its
-     transition callback resolves, which can leave the card in the new snapshot. Focus follows the
-     path change through the root layout's focus-on-navigate. */
-  const enter = () =>
-    withViewTransition(
-      "enter",
-      // The card runs its own transition; the router's would cut it short.
-      () => navigate({ href: returnPage(), viewTransition: false }),
-      reduce,
-    );
+  // Focus follows the path change through the root layout's focus-on-navigate.
+  const enter = () => go(returnPage());
 
   return (
     <div

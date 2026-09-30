@@ -29,11 +29,22 @@ export function withViewTransition(
 /** Style that gives an element a view-transition name while a scoped transition runs (see `.vt`). */
 export const vtName = (name: string): CSSProperties => ({ "--vt-name": name }) as CSSProperties;
 
-/** Pairs a card link with the same link in the site footer, so entering and leaving move it between
-    the two (see `.toFooter` in Landing.module.css and `.footerLink` in SiteFooter.module.css). */
+/** Pairs a card link's icon and label with the same link's in the site footer, so entering and leaving
+    move each on its own: icons match at every size, and a label the footer hides shrinks into it (see
+    `.toFooter` in Landing.module.css and `.link` in SiteFooter.module.css). */
 export const footerLinkName = (group: number, index: number): CSSProperties =>
-  ({ "--vt-footer": `footer-link-${group}-${index}` }) as CSSProperties;
+  ({
+    // The whole link, for the footer's own expand and collapse.
+    "--vt-footer-link": `footer-link-${group}-${index}`,
+    "--vt-footer-icon": `footer-icon-${group}-${index}`,
+    "--vt-footer-label": `footer-label-${group}-${index}`,
+  }) as CSSProperties;
 
 /** Pairs a link group's heading on the card with its heading in the site footer, the same way. */
 export const footerHeadingName = (group: number): CSSProperties =>
-  ({ "--vt-footer": `footer-heading-${group}` }) as CSSProperties;
+  ({
+    // The whole heading, for the footer's own expand and collapse.
+    "--vt-footer": `footer-heading-${group}`,
+    // Its words alone, between card and footer, so the text matches at every size.
+    "--vt-footer-heading": `footer-heading-text-${group}`,
+  }) as CSSProperties;

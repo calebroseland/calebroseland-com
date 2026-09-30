@@ -138,6 +138,35 @@ test.describe("page transitions", () => {
     expect(t?.types).toBe(null);
   });
 
+  test("the palette turns a page back into the card by the same morph as the footer", async ({
+    page,
+  }) => {
+    const palette = async (query: string) => {
+      await expect(page.getByRole("button", { name: "Search and commands" })).toBeVisible();
+      await page.getByRole("button", { name: "Search and commands" }).click();
+      await page.getByRole("combobox", { name: "Search commands" }).fill(query);
+      await page.keyboard.press("Enter");
+    };
+    await page.goto("/posts");
+    await palette("Contact");
+    await expect(page).toHaveURL(/\/contact$/);
+    await expect(page.getByRole("list", { name: "Contact" })).toBeVisible();
+    test.skip(!(await supported(page)), "no view transitions: the change is instant");
+    await expect.poll(() => transitions(page)).toHaveLength(1);
+    expect((await transitions(page))[0]?.vt).toBe("leave");
+  });
+
+  test("expanding the footer morphs each link, not just the page", async ({ page }) => {
+    await page.goto("/posts");
+    await page.getByRole("button", { name: "Expand the footer" }).click();
+    await expect(page.getByRole("button", { name: "Collapse the footer" })).toBeVisible();
+    test.skip(!(await supported(page)), "no view transitions: the change is instant");
+    await expect.poll(() => transitions(page)).toHaveLength(1);
+    const [t] = await transitions(page);
+    expect(t?.vt).toBe("footer");
+    expect(t?.animated).toContain("::view-transition-group(footer-link-0-0)");
+  });
+
   test("reduced motion swaps pages without animating", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/posts");

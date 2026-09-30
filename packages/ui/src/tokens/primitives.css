@@ -149,6 +149,8 @@
     --duration-normal: 200ms;
     --duration-slow: 320ms;
     --duration-slower: 500ms;
+    /* The card's morph into a page and back (enter, leave), wherever it starts. */
+    --duration-morph: 550ms;
 
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
@@ -162,6 +164,7 @@
       --duration-normal: 0.01ms;
       --duration-slow: 0.01ms;
       --duration-slower: 0.01ms;
+      --duration-morph: 0.01ms;
     }
   }
 }

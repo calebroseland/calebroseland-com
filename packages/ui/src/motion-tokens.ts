@@ -5,6 +5,7 @@ export const durations = {
   normal: 0.2,
   slow: 0.32,
   slower: 0.5,
+  morph: 0.55,
 } as const;
 
 export const eases = {

@@ -86,8 +86,12 @@
     }
   }
 
+  /* The script's swashes run past the glyph box, and some browsers clip a snapshot to it. Room on each
+     side, in em so both ends of the morph keep the same proportions, taken back by the margin. */
   .siteName {
     display: inline-block;
+    padding-inline: 0.15em;
+    margin-inline: -0.15em;
     view-transition-name: site-name;
   }
 
@@ -122,9 +126,9 @@
   }
 
   /* Arriving from the card, the nav slides in over the second part of the flight and lands with the
-     name. --vt-page is set in Landing.module.css. */
+     name. */
   :root[data-vt="enter"]::view-transition-new(site-nav):only-child {
-    animation: nav-in calc(var(--vt-page, 0.55s) * 0.6) calc(var(--vt-page, 0.55s) * 0.4)
+    animation: nav-in calc(var(--duration-morph) * 0.6) calc(var(--duration-morph) * 0.4)
       var(--ease-out) both;
   }
 

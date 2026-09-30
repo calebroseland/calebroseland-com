@@ -105,8 +105,12 @@
 
   /* Shrink-wrapped so its snapshot has the text's own proportions, and scales cleanly into the bar's
      brand when the visitor enters. */
+  /* The script's swashes run past the glyph box, and some browsers clip a snapshot to it. Room on each
+     side, in em so both ends of the morph keep the same proportions, taken back by the margin. */
   .siteName {
     display: inline-block;
+    padding-inline: 0.15em;
+    margin-inline: -0.15em;
     view-transition-name: site-name;
   }
 
@@ -193,6 +197,12 @@
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--color-text-muted);
+  }
+
+  .headingText {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
   }
 
   .list {
@@ -431,22 +441,18 @@
   /* Enter: the card flies to the brand in the bar and dissolves on the way, and the name lands in its
      place in the bar. Only the name travels on its own; everything else goes with the card or the nav.
      Leave (the bar's card button) runs the same morph back. */
-  /* One duration and curve for the flight, the page cross-fade and the card's fade, so the name lands as
-     the new page settles. Page.module.css times the nav against the same value. */
-  :root {
-    --vt-page: 0.55s;
-  }
-
+  /* One duration (--duration-morph) and curve for the flight, the page cross-fade and the card's fade, so
+     the name lands as the new page settles. Page.module.css times the nav against the same value. */
   :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-group(site-card),
   :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-group(site-name),
   :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-old(root),
   :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-new(root) {
-    animation-duration: var(--vt-page);
+    animation-duration: var(--duration-morph);
     animation-timing-function: var(--ease-in-out);
   }
 
   :root[data-vt="enter"]::view-transition-old(site-card) {
-    animation: vt-fade-out var(--vt-page) var(--ease-in) both;
+    animation: vt-fade-out var(--duration-morph) var(--ease-in) both;
   }
 
   /* Groups stack in the old page's order, where the brand (the card) is above the links; flip it. */
@@ -461,21 +467,61 @@
 
   /* Leave: the reverse, with the card gathering itself as it grows out of the brand. */
   :root[data-vt="leave"]::view-transition-new(site-card) {
-    animation: vt-fade-in calc(var(--vt-page) * 0.6) calc(var(--vt-page) * 0.4) var(--ease-out) both;
+    animation: vt-fade-in calc(var(--duration-morph) * 0.6) calc(var(--duration-morph) * 0.4)
+      var(--ease-out) both;
   }
 
   /* Enter and leave also carry each card link to (and from) its place in the site footer, on the same
      clock as the card and the name. */
-  :root:is([data-vt="enter"], [data-vt="leave"]) .toFooter {
-    view-transition-name: var(--vt-footer);
+  :root:is([data-vt="enter"], [data-vt="leave"]) :is(.headingText, .headingAnchor) {
+    view-transition-name: var(--vt-footer-heading);
+    view-transition-class: footer-link footer-label footer-heading;
+  }
+
+  :root:is([data-vt="enter"], [data-vt="leave"]) .toFooter .linkIcon {
+    view-transition-name: var(--vt-footer-icon);
     view-transition-class: footer-link;
+  }
+
+  :root:is([data-vt="enter"], [data-vt="leave"]) .toFooter .label {
+    view-transition-name: var(--vt-footer-label);
+    view-transition-class: footer-link footer-label;
   }
 
   :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-group(*:global(.footer-link)),
   :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-old(*:global(.footer-link)),
   :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-new(*:global(.footer-link)) {
-    animation-duration: var(--vt-page);
+    animation-duration: var(--duration-morph);
     animation-timing-function: var(--ease-in-out);
+  }
+
+  /* Words (a label, a heading) differ in size, width and wrapping between card and footer, so two copies
+     never overlap exactly. They hand over at the midpoint instead, the old holding until the new is nearly there,
+     each fitted to its box on the start edge, while the icon beside them travels solid. Into an icon-only
+     footer the new words are its hidden ones, so a label shrinks into its icon. After the timing above,
+     which it overrides. */
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-old(*:global(.footer-label)),
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-new(*:global(.footer-label)) {
+    block-size: 100%;
+    object-fit: contain;
+    object-position: left center;
+  }
+
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-old(*:global(.footer-label)) {
+    animation: vt-fade-out calc(var(--duration-morph) * 0.55) var(--ease-in) both;
+  }
+
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-new(*:global(.footer-label)) {
+    animation: vt-fade-in calc(var(--duration-morph) * 0.55) calc(var(--duration-morph) * 0.45)
+      var(--ease-out) both;
+  }
+
+  /* A heading's words keep their height, and the card's icon, which the footer lacks, stays beside
+     them past the box's end, fading with them rather than squeezed into it. */
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-old(*:global(.footer-heading)),
+  :root:is([data-vt="enter"], [data-vt="leave"])::view-transition-new(*:global(.footer-heading)) {
+    inline-size: auto;
+    object-fit: fill;
   }
 
   @keyframes vt-fade-in {

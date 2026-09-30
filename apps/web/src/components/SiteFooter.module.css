@@ -188,22 +188,22 @@
     white-space: nowrap;
   }
 
-  /* Named only while entering or leaving, like the card side; headings only when they show. */
-  :root:is([data-vt="enter"], [data-vt="leave"]) :is(.link, [data-expanded] .groupTitle) {
-    view-transition-name: var(--vt-footer);
+  /* Named only while entering or leaving, like the card side. A shown heading pairs its words; a hidden
+     one pairs itself, whose snapshot is clipped away, so the card's heading shrinks into it as a label does. */
+  :root:is([data-vt="enter"], [data-vt="leave"])
+  :is([data-expanded] .headingText, .footer:not([data-expanded]) .groupTitle) {
+    view-transition-name: var(--vt-footer-heading);
+    view-transition-class: footer-link footer-label footer-heading;
+  }
+
+  :root:is([data-vt="enter"], [data-vt="leave"]) .icon {
+    view-transition-name: var(--vt-footer-icon);
     view-transition-class: footer-link;
   }
 
-  /* Into icon-only links, snapshots keep their size: a card link's label fades as its icon lands. */
-  :root[data-footer="collapsed"]:is([data-vt="enter"], [data-vt="leave"])::view-transition-old(
-    *:global(.footer-link)
-  ),
-  :root[data-footer="collapsed"]:is([data-vt="enter"], [data-vt="leave"])::view-transition-new(
-    *:global(.footer-link)
-  ) {
-    block-size: 100%;
-    object-fit: none;
-    object-position: left center;
+  :root:is([data-vt="enter"], [data-vt="leave"]) .label {
+    view-transition-name: var(--vt-footer-label);
+    view-transition-class: footer-link footer-label;
   }
 
   /* Page transitions move the page, not the footer: it is lifted out of the page's snapshot and switches
@@ -222,7 +222,11 @@
   }
 
   /* Expanding and collapsing morph each link, heading and action between the two layouts. */
-  :root[data-vt="footer"] :is(.link, .groupTitle) {
+  :root[data-vt="footer"] .link {
+    view-transition-name: var(--vt-footer-link);
+  }
+
+  :root[data-vt="footer"] .groupTitle {
     view-transition-name: var(--vt-footer);
   }
 
