@@ -9,8 +9,10 @@ import {
 import { Icon } from "@crc/ui";
 import { type FormEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
 import { session } from "../../editor/auth/store.ts";
+import { ConfirmDialog } from "../../editor/Dialogs.tsx";
 import { useSaveProfile } from "../../editor/data/hooks.ts";
 import { EditorProvider, useCapabilities } from "../../editor/EditorProvider.tsx";
+import editor from "../../editor/editor.module.css";
 import { clientFor } from "../../editor/github/client.ts";
 import { loadProfile, PROFILE_REF, type ProfileSource } from "../../editor/profile.ts";
 import { notify } from "../../editor/Toast.tsx";
@@ -91,10 +93,37 @@ function Session({
     setTurned(true);
     onFlip();
   };
-  return children({
-    front: <EditFront s={s} onFlip={flip} focusFlip={turned} />,
-    back: <EditBack s={s} onFlip={flip} focusFlip={turned} />,
-  });
+  const { leaving } = s;
+  return (
+    <>
+      {children({
+        front: <EditFront s={s} onFlip={flip} focusFlip={turned} />,
+        back: <EditBack s={s} onFlip={flip} focusFlip={turned} />,
+      })}
+      <ConfirmDialog
+        open={leaving.status === "blocked"}
+        onOpenChange={(open) => {
+          if (!open) leaving.reset?.();
+        }}
+        title="Discard your changes to the card?"
+        description="You have edits you haven't saved. Leaving this page throws them away."
+        actions={
+          <>
+            <button type="button" className={editor.secondary} onClick={() => leaving.reset?.()}>
+              Keep editing
+            </button>
+            <button
+              type="button"
+              className={`${editor.primary} ${editor.danger}`}
+              onClick={() => leaving.proceed?.()}
+            >
+              Discard
+            </button>
+          </>
+        }
+      />
+    </>
+  );
 }
 
 type EditSession = ReturnType<typeof useEditSession>;
@@ -106,7 +135,7 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
   const announcer = useAnnouncer();
   const focusByKey = useFocusByKey();
   const save = useSaveProfile(source);
-  useUnsavedGuard(dirty);
+  const leaving = useUnsavedGuard(dirty);
 
   const submit = async () => {
     const outcome = await save.run(next);
@@ -213,6 +242,7 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
       if (dirty && errors.size === 0 && !save.pending) void submit();
     },
     cancel: () => onDone(null),
+    leaving,
     groupName,
     setGroup,
     moveTag,

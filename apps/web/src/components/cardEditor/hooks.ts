@@ -1,4 +1,5 @@
 import type { Profile } from "@crc/content-schema";
+import { useBlocker } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { type EditState, fieldErrors, fromProfile, tagProblem, toProfile } from "./model.ts";
 
@@ -44,12 +45,12 @@ export function useFocusByKey() {
   return setPending;
 }
 
-/** Asks before the page unloads while there are unsaved edits. */
+/** Holds a navigation away while there are unsaved edits, for the card to ask about; a tab closing or
+    reloading gets the browser's own prompt. */
 export function useUnsavedGuard(dirty: boolean) {
-  useEffect(() => {
-    if (!dirty) return;
-    const guard = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener("beforeunload", guard);
-    return () => window.removeEventListener("beforeunload", guard);
-  }, [dirty]);
+  return useBlocker({
+    shouldBlockFn: () => dirty,
+    enableBeforeUnload: () => dirty,
+    withResolver: true,
+  });
 }

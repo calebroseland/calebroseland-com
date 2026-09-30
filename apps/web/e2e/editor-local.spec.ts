@@ -308,6 +308,40 @@ test.describe("working-tree mode", () => {
     await expect(page.getByText("Builds calm software")).toBeVisible();
   });
 
+  test("leaving the card with unsaved edits asks first", async ({ page }) => {
+    await signInLocal(page);
+    // In-app steps, so Back stays inside the app: the brand goes to Posts, and from Posts to the card.
+    await page.getByRole("link", { name: "Caleb Roseland" }).click();
+    await expect(page).toHaveURL(/\/posts$/);
+    await page.getByRole("link", { name: "Caleb Roseland" }).click();
+    await page.getByRole("button", { name: "Edit card" }).click();
+    const form = page.getByRole("form", { name: "Edit card" });
+    await form.getByRole("textbox", { name: "Tagline" }).fill("Half-typed");
+
+    await page.goBack();
+    const ask = page.getByRole("alertdialog", { name: "Discard your changes to the card?" });
+    await ask.getByRole("button", { name: "Keep editing" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(form.getByRole("textbox", { name: "Tagline" })).toHaveValue("Half-typed");
+
+    await page.goBack();
+    await ask.getByRole("button", { name: "Discard" }).click();
+    await expect(page).toHaveURL(/\/posts$/);
+    expect(onDisk("profile.yaml")).not.toContain("Half-typed");
+  });
+
+  test("the working-tree routes refuse another site's page", async ({ page }) => {
+    const write = await page.request.post("/@local/write", {
+      headers: { origin: "https://elsewhere.test" },
+      data: { files: [{ path: "content/pages/x/index.md", content: "x", encoding: "utf-8" }] },
+    });
+    expect(write.status()).toBe(403);
+    const climbing = await page.request.post("/@local/write", {
+      data: { files: [{ path: "../content-x/index.md", content: "x", encoding: "utf-8" }] },
+    });
+    expect(climbing.status()).toBe(400);
+  });
+
   test("the Pages filter shows only the site's pages and opens one in the editor", async ({
     page,
   }) => {
