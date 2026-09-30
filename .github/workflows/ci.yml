@@ -1,9 +1,10 @@
 name: ci
 
+# Pull requests run it here; pushes to next and master run it from staging.yml and deploy.yml, which
+# deploy only once it passes.
 on:
   pull_request:
-  push:
-    branches: [next, master]
+  workflow_call:
 
 concurrency:
   group: ci-${{ github.ref }}

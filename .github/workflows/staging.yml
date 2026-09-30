@@ -15,7 +15,12 @@ permissions:
   id-token: write
 
 jobs:
+  ci:
+    name: ci
+    uses: ./.github/workflows/ci.yml
+
   worker:
+    needs: ci
     name: deploy staging worker
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -41,6 +46,7 @@ jobs:
           EXPECTED_SHA: ${{ github.sha }}
 
   pages:
+    needs: ci
     # Pre-cutover the backup tracks `next` so it can be verified early; deploy.yml takes over on master.
     name: deploy pages backup
     uses: ./.github/workflows/pages.yml
