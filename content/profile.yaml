@@ -1,24 +1,17 @@
-# Placeholder copy carried over from the 2019 Vue card. Links are real; prose is not final.
 name: Caleb Roseland
 tagline: Software Engineer
-tags: [TypeScript, React, Web Platform]
+tags: [ { label: React, icon: simple-icons:react, link: false }, { label: TS, icon: simple-icons:typescript, link: false }, { label: Go, icon: simple-icons:go, link: false } ]
 groups:
   - title: Projects
     links:
       - { label: GitHub, url: https://github.com/calebroseland, icon: simple-icons:github }
-      - { label: Gists, url: https://gist.github.com/calebroseland, icon: lucide:braces }
-      - { label: vue-dom-portal, url: https://github.com/calebroseland/vue-dom-portal, icon: lucide:git-branch }
-  - title: Writings
-    links:
-      - { label: Posts, url: /posts, icon: lucide:pencil }
-      - { label: State Management in Vue, url: https://medium.com/@calebroseland/state-management-in-vue-525ffe12ad81, icon: lucide:file-text }
+      - { label: this, url: https://github.com/calebroseland/calebroseland-com, icon: lucide:braces }
+      - { label: House Status, url: https://github.com/calebroseland/floorplan-status, icon: lucide:braces }
   - title: Social
     links:
       - { label: LinkedIn, url: https://linkedin.com/in/calebroseland, icon: simple-icons:linkedin }
-      - { label: Twitter, url: https://twitter.com/calebroseland, icon: simple-icons:x }
-      - { label: npm, url: https://npmjs.com/~calebroseland, icon: simple-icons:npm }
       - { label: Stack Overflow, url: https://stackoverflow.com/users/1352410, icon: simple-icons:stackoverflow }
-      - { label: Pluralsight, url: https://pluralsight.com/profile/caleb-roseland, icon: lucide:graduation-cap }
+      - { label: npm, url: https://npmjs.com/~calebroseland, icon: simple-icons:npm }
 contact:
   email: caleb@calebroseland.com
   phone: +1 507 476 1225
