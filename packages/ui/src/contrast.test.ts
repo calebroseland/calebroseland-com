@@ -47,6 +47,8 @@ const bodyPairs: Array<[string, string]> = [
   ["--color-text-on-accent", "--color-accent"],
   ["--color-accent-text", "--color-accent-subtle"],
   ["--color-danger", "--color-danger-subtle"],
+  ["--color-text-inverted", "--color-danger"],
+  ["--color-text-inverted", "--color-danger-hover"],
   ["--color-success", "--color-success-subtle"],
   ["--color-warning", "--color-warning-subtle"],
 ];

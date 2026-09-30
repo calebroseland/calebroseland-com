@@ -35,6 +35,7 @@
 
     --color-danger: var(--danger-700);
     --color-danger-subtle: var(--danger-100);
+    --color-danger-hover: var(--danger-900);
     --color-warning: var(--warning-700);
     --color-warning-subtle: var(--warning-100);
     --color-success: var(--success-700);

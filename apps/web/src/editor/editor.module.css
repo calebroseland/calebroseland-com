@@ -87,9 +87,10 @@
     margin-block-end: var(--space-6);
   }
 
+  /* The head spaces itself; a margin here would sit the title above its actions' centre line. */
   .title {
     font-size: var(--font-size-2xl);
-    margin-block-end: var(--space-6);
+    margin: 0;
   }
 
   .primary,
@@ -102,6 +103,7 @@
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-md);
     font-weight: var(--font-weight-medium);
+    text-decoration: none;
     transition: background-color var(--duration-fast) var(--ease-out);
 
     &:disabled {
@@ -132,6 +134,10 @@
   .danger {
     background: var(--color-danger);
     color: var(--color-text-inverted);
+
+    &:hover:not(:disabled) {
+      background: var(--color-danger-hover);
+    }
   }
 
   .muted {
