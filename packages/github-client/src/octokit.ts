@@ -165,7 +165,14 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
           tree: tree.sha,
           parents: [head.object.sha],
         });
-        await octokit.rest.git.updateRef({ ...base, ref: `heads/${ref}`, sha: commit.sha });
+        try {
+          await octokit.rest.git.updateRef({ ...base, ref: `heads/${ref}`, sha: commit.sha });
+        } catch (err) {
+          // 422 is a non-fast-forward: another save moved the branch after the check above.
+          if ((err as { status?: number }).status !== 422) throw err;
+          const { data: now } = await octokit.rest.git.getRef({ ...base, ref: `heads/${ref}` });
+          throw new StaleRefError(ref, expectedHeadSha, now.object.sha);
+        }
         return { headSha: commit.sha, commitUrl: commit.html_url };
       }),
 
