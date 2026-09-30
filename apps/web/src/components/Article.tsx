@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import type { EntryMeta, LoadedEntry } from "../content/entries.ts";
 import { formatDate } from "../content/entries.ts";
 import { useSignedIn } from "../editor/auth/hooks.ts";
+import { useCurrentHref } from "../hooks/useCurrentHref.ts";
 import styles from "./Article.module.css";
 
 export function EntryHeader({ meta, showMeta = true }: { meta: EntryMeta; showMeta?: boolean }) {
@@ -25,9 +26,16 @@ export function EntryHeader({ meta, showMeta = true }: { meta: EntryMeta; showMe
 /** Signed in, an editor can open this entry in the editor from the page itself. */
 function EditEntry({ slug, title }: { slug: string; title: string }) {
   const signedIn = useSignedIn();
+  const here = useCurrentHref();
   if (!signedIn) return null;
   return (
-    <Link to="/editor/$slug" params={{ slug }} className={styles.edit} aria-label={`Edit ${title}`}>
+    <Link
+      to="/editor/$slug"
+      params={{ slug }}
+      search={{ from: here }}
+      className={styles.edit}
+      aria-label={`Edit ${title}`}
+    >
       <Icon name="lucide:pencil-line" size="sm" />
       Edit
     </Link>

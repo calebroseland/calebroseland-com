@@ -13,6 +13,7 @@ import { addImage } from "../editor/drafts/images.ts";
 import { useCapabilities, useGitHub } from "../editor/EditorProvider.tsx";
 import { EditorShell } from "../editor/EditorShell.tsx";
 import styles from "../editor/editor.module.css";
+import { isAppHref } from "../editor/navigation.ts";
 import { PublishDialog } from "../editor/publish/PublishDialog.tsx";
 import { notify } from "../editor/Toast.tsx";
 import { useDialogState } from "../hooks/useDialogState.ts";
@@ -20,7 +21,11 @@ import { useDialogState } from "../hooks/useDialogState.ts";
 type Panel = "meta" | "media";
 
 export const Route = createFileRoute("/editor/$slug")({
-  validateSearch: z.object({ panel: z.optional(z.enum(["meta", "media"])) }),
+  validateSearch: z.object({
+    panel: z.optional(z.enum(["meta", "media"])),
+    // The page an edit was opened from, which Close returns to.
+    from: z.optional(z.string()),
+  }),
   head: ({ params }) => ({ meta: [{ title: `${params.slug} · Editor` }] }),
   component: DraftRoute,
 });
@@ -33,7 +38,15 @@ function useSlug(): string {
 function usePanel() {
   const { panel = "meta" } = Route.useSearch();
   const navigate = Route.useNavigate();
-  return { panel, show: (next: Panel) => navigate({ search: { panel: next } }) };
+  return { panel, show: (next: Panel) => navigate({ search: (s) => ({ ...s, panel: next }) }) };
+}
+
+/** Where Close goes: back to the page the edit was opened from, or to the editor's list. */
+function useClose() {
+  const { from } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const href = isAppHref(from) ? from : "/editor";
+  return { href, go: () => void navigate({ href }) };
 }
 
 function DraftRoute() {
@@ -112,6 +125,7 @@ function StartEditing({ slug }: { slug: string }) {
 function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   const { branches, publishes } = useCapabilities();
   const { panel, show } = usePanel();
+  const close = useClose();
   const { buffer, controller, previewSrc } = useDraftBuffer(bundle, slug);
   const save = useSaveDraft(controller);
   const reload = useReloadDraft(controller, slug);
@@ -211,15 +225,19 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
           {/* Nothing to publish in working-tree mode: the file is already on your branch. */}
           {publishes && <PublishDialog buffer={buffer} disabled={save.pending} />}
           {/* Unsaved work stays on this device and is restored when the entry is opened again. */}
-          <Link
-            to="/editor"
+          <a
+            href={close.href}
             className={styles.secondary}
-            onClick={() => {
+            onClick={(e) => {
+              // A modified click opens a new tab as any link does.
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
               if (buffer.dirty) notify("Unsaved changes are kept on this device.");
+              close.go();
             }}
           >
             Close
-          </Link>
+          </a>
         </div>
       }
     >

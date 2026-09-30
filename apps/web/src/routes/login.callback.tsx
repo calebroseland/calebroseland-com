@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import * as z from "zod/mini";
 import { CenteredMessage, Page } from "../components/Page.tsx";
 import { exchangeCode } from "../editor/auth/api.ts";
-import { callbackUrl } from "../editor/auth/login.ts";
+import { afterSignIn, callbackUrl } from "../editor/auth/login.ts";
 import { session, takeHandshake } from "../editor/auth/store.ts";
 
 /* GitHub lands here with ?code&state. The handshake is single-use; any mismatch goes back to login with a message. */
@@ -34,9 +34,7 @@ export const Route = createFileRoute("/login/callback")({
     } catch (e) {
       throw fail(e instanceof Error ? e.message : "Sign-in didn't complete. Try again.");
     }
-    throw redirect({
-      href: handshake.returnTo.startsWith("/editor") ? handshake.returnTo : "/editor",
-    });
+    throw redirect({ href: afterSignIn(handshake.returnTo) });
   },
   component: () => (
     <Page>

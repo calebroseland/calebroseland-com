@@ -1,3 +1,4 @@
+import { isAppHref } from "../navigation.ts";
 import { fetchAuthConfig } from "./api.ts";
 import { authorizeUrl, createChallenge, createState, createVerifier } from "./pkce.ts";
 import { saveHandshake } from "./store.ts";
@@ -27,4 +28,10 @@ export async function startGitHubLogin(
       challenge: await createChallenge(verifier),
     }),
   );
+}
+
+/** Where a sign-in returns: the page it started from, if it is one of this app's own, else the editor. */
+export function afterSignIn(returnTo: string | undefined): string {
+  if (!isAppHref(returnTo)) return "/editor";
+  return /^\/login(?:[/?#]|$)/.test(returnTo) ? "/editor" : returnTo;
 }

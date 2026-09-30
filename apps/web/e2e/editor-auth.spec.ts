@@ -33,6 +33,26 @@ test.describe("editor auth", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
+  test("signing in from a page returns to it, and Close in its editor comes back to it", async ({
+    page,
+  }) => {
+    await page.goto("/about");
+    await expect(page.getByRole("heading", { level: 1, name: "About" })).toBeVisible();
+    await page.getByRole("button", { name: /^Account:/ }).click();
+    await expect(page.getByRole("menu")).toBeVisible();
+    await page.getByRole("menuitem", { name: "Sign in" }).click();
+    await page.getByRole("group").getByText("Developer options").click();
+    await page.getByRole("button", { name: "Use local fake GitHub" }).click();
+    await expect(page).toHaveURL(/\/about$/);
+    await page.getByRole("link", { name: "Edit About" }).click();
+    await expect(page).toHaveURL(/\/editor\/about\?from=/);
+    await page.getByRole("button", { name: "Edit this entry" }).click();
+    // Switching panels keeps where the edit came from.
+    await page.getByRole("tab", { name: /Images/ }).click();
+    await page.getByRole("link", { name: "Close" }).click();
+    await expect(page).toHaveURL(/\/about$/);
+  });
+
   test("callback without a handshake fails closed", async ({ page }) => {
     await page.goto("/login/callback?code=abc&state=xyz");
     await expect(page).toHaveURL(/\/login\?error=/);

@@ -4,6 +4,10 @@ import type { EntryKind } from "./drafts/paths.ts";
 
 /* Where the editor sends people next, as small hooks returning the move. */
 
+/** An address inside this app: a path, never another origin written as `//host` or `/\host`. */
+export const isAppHref = (href: string | undefined): href is string =>
+  href?.startsWith("/") === true && !/^\/[/\\]/.test(href);
+
 export function useOpenInEditor() {
   const navigate = useNavigate();
   return (slug: string) => navigate({ to: "/editor/$slug", params: { slug } });

@@ -9,6 +9,7 @@ import {
   useSignInMethods,
   useTokenField,
 } from "../editor/auth/hooks.ts";
+import { afterSignIn } from "../editor/auth/login.ts";
 import { canSignIn, type SignInMethods } from "../editor/auth/methods.ts";
 import styles from "../editor/editor.module.css";
 
@@ -18,11 +19,11 @@ export const Route = createFileRoute("/login/")({
   component: LoginRoute,
 });
 
-/** Where to go once signed in: back to an editing page, or to the editor. */
+/** Where to go once signed in: back to the page that asked, or to the editor. */
 function useLoginSearch() {
   const { returnTo, error } = Route.useSearch();
   return {
-    target: returnTo?.startsWith("/editor") ? returnTo : "/editor",
+    target: afterSignIn(returnTo),
     error: error ? decodeURIComponent(error) : null,
   };
 }
