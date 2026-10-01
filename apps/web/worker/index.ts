@@ -13,7 +13,9 @@ export default {
     const url = new URL(request.url);
     if (url.pathname.startsWith("/api/")) {
       const res = await api(request, url, env);
-      return securityHeaders(withCors(res, request, env));
+      // HEAD answers as GET does, without the body (uptime checks and curl -I use it).
+      const out = request.method === "HEAD" ? new Response(null, res) : res;
+      return securityHeaders(withCors(out, request, env));
     }
     return securityHeaders(await env.ASSETS.fetch(request));
   },
@@ -27,7 +29,8 @@ async function api(request: Request, url: URL, env: Env): Promise<Response> {
   }
   if (!originAllowed(request, env)) return problem(403, "Origin not allowed");
 
-  switch (`${request.method} ${url.pathname}`) {
+  const method = request.method === "HEAD" ? "GET" : request.method;
+  switch (`${method} ${url.pathname}`) {
     case "GET /api/health":
       return health(env);
     case "GET /api/auth/config":
