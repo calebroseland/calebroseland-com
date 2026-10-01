@@ -2,6 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Cascade layer order, before any stylesheet: a build loads shared CSS chunks ahead of
+         @crc/ui/index.css, and the first layer a page sees is the lowest. Keep in step with index.css. -->
+    <style>@layer reset, tokens, base, layout, components, utilities;</style>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>Caleb Roseland</title>

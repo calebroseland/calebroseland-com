@@ -1,4 +1,5 @@
-/* Single entry. Layer order is the override order; nothing else declares layers. */
+/* Single entry. Layer order is the override order. apps/web/index.html repeats it inline, first in the
+   head, since a build can load component CSS before this file (a test keeps the two in step). */
 @layer reset, tokens, base, layout, components, utilities;
 
 @import "./tokens/primitives.css";
