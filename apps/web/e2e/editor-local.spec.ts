@@ -2,12 +2,12 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
 import { expect, test } from "./fixtures.ts";
-import { scratchContentDir } from "./global-setup.ts";
 import { noisePng } from "./png.ts";
+import { scratchContentDir } from "./scratch-content.ts";
 
 /* Working-tree mode: the editor edits the real files on the checked-out branch. These tests read the
    files back from disk, because "it wrote the file" is the whole claim. The dev server points at a
-   scratch copy of content/ (see global-setup), so nothing here touches the repository. */
+   scratch copy of content/ (see scratch-content.ts), so nothing here touches the repository. */
 
 const onDisk = (rel: string) => readFileSync(join(scratchContentDir, rel), "utf8");
 
