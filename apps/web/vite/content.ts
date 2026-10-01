@@ -1,7 +1,17 @@
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
-import { type Entry, type EntryMeta, parseYaml, profile } from "@crc/content-schema";
+import {
+  ADOBE_KIT,
+  type Entry,
+  type EntryMeta,
+  fontVars,
+  parseYaml,
+  profile,
+  type SiteTheme,
+  siteTheme,
+  usesAdobeFonts,
+} from "@crc/content-schema";
 import { parseEntry, renderMarkdown } from "@crc/markdown";
 import type { Plugin } from "vite";
 import { contentDirFor, isEditorTree, sameOrigin, within } from "./content-dir.ts";
@@ -16,6 +26,7 @@ import { readTree } from "./local-store.ts";
 
 const PROFILE = "virtual:content/profile";
 const INDEX = "virtual:content/index";
+const THEME = "virtual:content/theme";
 const ENTRY = "virtual:content/entry/";
 const NULL = "\0";
 
@@ -42,9 +53,21 @@ export function content(opts: {
 }): Plugin {
   const contentDir = opts.contentDir ?? contentDirFor(opts.root);
   const profilePath = join(contentDir, "profile.yaml");
+  const themePath = join(contentDir, "theme.yaml");
   let includeDrafts = opts.includeDrafts ?? false;
   let isBuild = false;
   const emitted = new Map<string, string>(); // absolute asset path → public url
+
+  /** content/theme.yaml, optional: without it the site keeps today's faces. */
+  function loadTheme(): SiteTheme {
+    try {
+      return parseYaml(siteTheme, existsSync(themePath) ? readFileSync(themePath, "utf8") : "{}");
+    } catch (err) {
+      throw new Error(
+        `content/theme.yaml is invalid:\n${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
 
   function loadEntries(): Loaded[] {
     const files = [...walk(join(contentDir, "posts")), ...walk(join(contentDir, "pages"))];
@@ -168,7 +191,7 @@ export function content(opts: {
       }
     },
     resolveId(id) {
-      if (id === PROFILE || id === INDEX || id.startsWith(ENTRY)) return NULL + id;
+      if (id === PROFILE || id === INDEX || id === THEME || id.startsWith(ENTRY)) return NULL + id;
       return null;
     },
     async load(id) {
@@ -183,6 +206,10 @@ export function content(opts: {
             `content/profile.yaml is invalid:\n${err instanceof Error ? err.message : String(err)}`,
           );
         }
+      }
+      if (bare === THEME) {
+        this.addWatchFile(themePath);
+        return `export default ${JSON.stringify(loadTheme())};`;
       }
       if (bare === INDEX) {
         const entries = loadEntries();
@@ -212,6 +239,31 @@ export function content(opts: {
       for (const a of pendingAssets)
         this.emitFile({ type: "asset", fileName: a.fileName, source: a.source });
       pendingAssets.length = 0;
+    },
+    /* The default theme's faces, before any script runs, and where theme-init.js finds the Adobe kit
+       and whether the default theme needs it; a custom theme decides for itself. */
+    transformIndexHtml() {
+      const { fonts } = loadTheme();
+      const vars = Object.entries(fontVars(fonts))
+        .map(([name, value]) => `${name}: ${value};`)
+        .join(" ");
+      return [
+        {
+          tag: "style",
+          attrs: { id: "site-fonts" },
+          children: `:root { ${vars} }`,
+          injectTo: "head-prepend",
+        },
+        {
+          tag: "meta",
+          attrs: {
+            name: "adobe-fonts",
+            content: ADOBE_KIT,
+            "data-default": usesAdobeFonts(fonts) ? "on" : "off",
+          },
+          injectTo: "head-prepend",
+        },
+      ];
     },
     handleHotUpdate({ file, server }) {
       if (!file.startsWith(contentDir)) return;

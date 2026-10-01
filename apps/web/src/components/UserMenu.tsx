@@ -1,6 +1,7 @@
 import { Menu } from "@base-ui/react/menu";
 import { Icon } from "@crc/ui";
 import { lazy, Suspense } from "react";
+import { siteFonts } from "../content/theme.ts";
 import { useSession, useSignInMethods, useSignOut } from "../editor/auth/hooks.ts";
 import { canSignIn } from "../editor/auth/methods.ts";
 import { capabilitiesOf } from "../editor/data/backend.ts";
@@ -48,7 +49,10 @@ export function UserMenu() {
 
   const startNew = () => {
     const n = customThemes.length + 1;
-    editing.open({ theme: defaultTheme(resolved, newThemeId(), `Custom ${n}`), isNew: true });
+    editing.open({
+      theme: defaultTheme(resolved, newThemeId(), `Custom ${n}`, siteFonts),
+      isNew: true,
+    });
   };
 
   return (

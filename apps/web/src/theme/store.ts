@@ -1,5 +1,5 @@
 import { Store } from "@tanstack/store";
-import { type CustomTheme, customTheme, themeVars } from "./custom.ts";
+import { type CustomTheme, customTheme, needsAdobeFonts, themeVars } from "./custom.ts";
 
 const builtInThemes = ["auto", "light", "dark"] as const;
 type BuiltInTheme = (typeof builtInThemes)[number];
@@ -65,6 +65,8 @@ export type ThemeEnv = {
     dataset: DOMStringMap;
     style: Pick<CSSStyleDeclaration, "setProperty" | "removeProperty">;
   };
+  /** The Adobe Fonts kit: whether the default theme needs it, and how to load it once one does. */
+  adobeFonts?: { byDefault: boolean; load: () => void };
 };
 
 type ThemeState = {
@@ -105,8 +107,10 @@ export function createThemeStore(env: ThemeEnv) {
       for (const [name, value] of Object.entries(vars)) env.root.style.setProperty(name, value);
     }
     applied = Object.keys(vars);
+    const adobe = custom ? needsAdobeFonts(custom) : (env.adobeFonts?.byDefault ?? false);
+    if (adobe) env.adobeFonts?.load();
     if (!preview)
-      write(env.storage, VARS_KEY, custom ? JSON.stringify({ base: resolved, vars }) : null);
+      write(env.storage, VARS_KEY, custom ? JSON.stringify({ base: resolved, vars, adobe }) : null);
   };
   apply();
 
@@ -171,6 +175,21 @@ function browserEnv(): ThemeEnv {
   } catch {
     // access can throw under strict privacy settings; theme then lives for the session only
   }
+  // Written by the content plugin into index.html; theme-init.js has linked the kit already if needed.
+  const kit = document.querySelector<HTMLMetaElement>('meta[name="adobe-fonts"]');
+  if (kit)
+    env.adobeFonts = {
+      byDefault: kit.dataset.default === "on",
+      load: () => {
+        if (document.getElementById("adobe-fonts")) return;
+        const link = Object.assign(document.createElement("link"), {
+          id: "adobe-fonts",
+          rel: "stylesheet",
+          href: kit.content,
+        });
+        document.head.append(link);
+      },
+    };
   // jsdom and very old browsers lack matchMedia; auto then resolves to light
   if (typeof window.matchMedia === "function")
     env.media = window.matchMedia("(prefers-color-scheme: dark)");

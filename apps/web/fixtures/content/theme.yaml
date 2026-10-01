@@ -1,0 +1,6 @@
+# The site's default theme. Tests use faces that load nothing from a third party: the Adobe Fonts kit
+# (Proxima Nova, Cortado) stays out of the suite unless a test asks for it.
+fonts:
+  text: system
+  name: text
+  reading: serif

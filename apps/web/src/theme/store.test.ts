@@ -175,3 +175,27 @@ describe("custom themes", () => {
     expect(t.store.state.customThemes.map((c) => c.id)).toEqual(["abc"]);
   });
 });
+
+describe("the Adobe Fonts kit", () => {
+  const withKit = (byDefault: boolean, stored: Record<string, string> = {}) => {
+    const env = { ...fakeEnv({ stored }), adobeFonts: { byDefault, load: vi.fn() } };
+    return { env, t: createThemeStore(env) };
+  };
+  const plain = { ...ocean, fontText: "system" as const, fontName: "text" as const };
+
+  it("loads only when the default theme names one of its faces", () => {
+    expect(withKit(true).env.adobeFonts.load).toHaveBeenCalled();
+    expect(withKit(false).env.adobeFonts.load).not.toHaveBeenCalled();
+  });
+
+  it("follows a custom theme's faces, and records the answer for theme-init.js", () => {
+    const { env, t } = withKit(true, { "theme-custom": JSON.stringify([plain]) });
+    env.adobeFonts.load.mockClear();
+    t.setPreference("custom:abc");
+    expect(env.adobeFonts.load).not.toHaveBeenCalled();
+    expect(JSON.parse(env.data.get("theme-vars") ?? "{}").adobe).toBe(false);
+
+    t.preview({ ...plain, fontText: "proxima" });
+    expect(env.adobeFonts.load).toHaveBeenCalled();
+  });
+});

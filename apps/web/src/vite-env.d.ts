@@ -11,6 +11,10 @@ declare module "virtual:content/profile" {
   const data: import("@crc/content-schema").Profile;
   export default data;
 }
+declare module "virtual:content/theme" {
+  const data: import("@crc/content-schema").SiteTheme;
+  export default data;
+}
 declare module "virtual:content/index" {
   const data: import("@crc/content-schema").EntryMeta[];
   export default data;

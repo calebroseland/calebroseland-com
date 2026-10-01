@@ -10,6 +10,7 @@ import { Switch } from "@base-ui/react/switch";
 import { Icon } from "@crc/ui";
 import { type CSSProperties, type ReactNode, useEffect, useId, useState } from "react";
 import { HexColorInput, HexColorPicker } from "react-colorful";
+import { siteFonts } from "../content/theme.ts";
 import { contrastRatio, parseColor } from "../theme/contrast.ts";
 import {
   type CustomTheme,
@@ -273,7 +274,7 @@ export default function ThemeEditor({
 }) {
   const [theme, setTheme] = useState(initial);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const defaults = defaultTheme(theme.base, theme.id, theme.name);
+  const defaults = defaultTheme(theme.base, theme.id, theme.name, siteFonts);
   const set = <K extends keyof CustomTheme>(key: K, value: CustomTheme[K]) =>
     setTheme((t) => ({ ...t, [key]: value }));
 

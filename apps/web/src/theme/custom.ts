@@ -1,35 +1,20 @@
+import {
+  DEFAULT_FONTS,
+  FONTS,
+  fontVars,
+  NAME_FONTS,
+  READING_FONTS,
+  TEXT_FONTS,
+  type ThemeFonts,
+  usesAdobeFonts,
+} from "@crc/content-schema/fonts";
 import * as z from "zod/mini";
 
 /* A custom theme re-points primitives over the light or dark semantic layer, so the contrast structure
    of the built-in themes (which step carries text, which carries surfaces) still holds. Each control is
    clamped to the range where the design system stays coherent; see RANGES. */
 
-export const FONTS = {
-  proxima: {
-    label: "Proxima Nova",
-    stack: '"proxima-nova", "Helvetica Neue", Helvetica, ui-sans-serif, system-ui, sans-serif',
-  },
-  system: {
-    label: "System",
-    stack: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-  },
-  serif: { label: "IBM Plex Serif", stack: '"IBM Plex Serif", ui-serif, Georgia, serif' },
-  mono: {
-    label: "IBM Plex Mono",
-    stack: '"IBM Plex Mono", ui-monospace, SFMono-Regular, monospace',
-  },
-  cortado: { label: "Cortado", stack: '"cortado", "Brush Script MT", cursive' },
-} as const;
-export type FontId = keyof typeof FONTS;
-export const TEXT_FONTS = [
-  "proxima",
-  "system",
-  "serif",
-  "mono",
-] as const satisfies readonly FontId[];
-export const NAME_FONTS = ["cortado", "text", "serif"] as const;
-/** Post and page body text: serif by default, the text font, or any text face. */
-export const READING_FONTS = ["serif", "text", "proxima", "system", "mono"] as const;
+export { FONTS, NAME_FONTS, READING_FONTS, TEXT_FONTS };
 
 export const RANGES = {
   neutralTint: { min: 0, max: 0.04, step: 0.002 },
@@ -74,8 +59,13 @@ export const customTheme = z.object({
 });
 export type CustomTheme = z.infer<typeof customTheme>;
 
-/** Today's look: Open Color blue and gray, the built-in faces, every scale at 1. */
-export function defaultTheme(base: "light" | "dark", id: string, name: string): CustomTheme {
+/** Today's look: Open Color blue and gray, the site's faces, every scale at 1. */
+export function defaultTheme(
+  base: "light" | "dark",
+  id: string,
+  name: string,
+  fonts: ThemeFonts = DEFAULT_FONTS,
+): CustomTheme {
   return {
     id,
     name,
@@ -84,9 +74,9 @@ export function defaultTheme(base: "light" | "dark", id: string, name: string): 
     neutralHue: 248,
     neutralTint: 0.015,
     backdrop: null,
-    fontText: "proxima",
-    fontName: "cortado",
-    fontReading: "serif",
+    fontText: fonts.text,
+    fontName: fonts.name,
+    fontReading: fonts.reading,
     textScale: 1,
     leading: 1.5,
     spaceScale: 1,
@@ -178,6 +168,15 @@ function shadows(base: "light" | "dark", s: number): Record<string, string> {
       };
 }
 
+const themeFonts = (t: CustomTheme): ThemeFonts => ({
+  text: t.fontText,
+  name: t.fontName,
+  reading: t.fontReading,
+});
+
+/** Whether a custom theme needs the Adobe Fonts kit. */
+export const needsAdobeFonts = (t: CustomTheme): boolean => usesAdobeFonts(themeFonts(t));
+
 /** The CSS custom properties a theme sets on <html>, on top of its base's semantic layer. */
 export function themeVars(t: CustomTheme): Record<string, string> {
   const vars: Record<string, string> = {};
@@ -188,10 +187,7 @@ export function themeVars(t: CustomTheme): Record<string, string> {
     vars[`--gray-${step}`] = `oklch(${l} ${round(t.neutralTint * k)} ${round(t.neutralHue, 1)})`;
   if (t.backdrop) vars["--color-backdrop"] = t.backdrop;
 
-  vars["--font-sans"] = FONTS[t.fontText].stack;
-  vars["--font-brand"] = t.fontName === "text" ? FONTS[t.fontText].stack : FONTS[t.fontName].stack;
-  vars["--font-prose"] =
-    t.fontReading === "text" ? FONTS[t.fontText].stack : FONTS[t.fontReading].stack;
+  Object.assign(vars, fontVars(themeFonts(t)));
 
   for (const [name, size] of Object.entries(FONT_SIZES))
     vars[`--font-size-${name}`] = t.textScale === 1 ? size : `calc(${size} * ${t.textScale})`;

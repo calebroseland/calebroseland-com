@@ -1,0 +1,6 @@
+# The site's default theme. Proxima Nova and Cortado come from the Adobe Fonts kit, which loads only
+# while the theme in use names one of them. Faces: packages/content-schema/src/fonts.ts.
+fonts:
+  text: proxima    # proxima, system, serif, mono
+  name: cortado    # cortado, text (same as text), serif
+  reading: serif   # serif, text, proxima, system, mono

@@ -105,10 +105,39 @@ test.describe("landing", () => {
     await expect(page).toHaveURL(/\/posts$/);
   });
 
-  test("uses the Adobe Fonts kit for the name and the text", async ({ page }) => {
+  test("loads the Adobe Fonts kit only for a theme that names one of its faces", async ({
+    page,
+  }) => {
+    // Answered here, so the suite never depends on Adobe's CDN.
+    const kit: string[] = [];
+    await page.route(/typekit\.net/, (route) => {
+      kit.push(route.request().url());
+      return route.fulfill({ contentType: "text/css", body: "" });
+    });
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("font-family", /^cortado/);
-    await expect(page.locator("body")).toHaveCSS("font-family", /^proxima-nova/);
+    // The fixture's default theme (fixtures/content/theme.yaml) names system faces only.
+    await expect(page.locator("body")).toHaveCSS("font-family", /^ui-sans-serif/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCSS(
+      "font-family",
+      /^ui-sans-serif/,
+    );
+    await expect(page.locator("#adobe-fonts")).toHaveCount(0);
+
+    await page.getByRole("button", { name: /Theme: Auto/ }).click();
+    await page.getByRole("menuitem", { name: /New custom theme/ }).click();
+    const editor = page.getByRole("dialog", { name: "New theme" });
+    await editor.getByRole("combobox", { name: "Text font" }).click();
+    await page.getByRole("option", { name: "Proxima Nova" }).click();
+    await expect(page.locator("#adobe-fonts")).toHaveCount(1);
+    await editor.getByRole("button", { name: "Save theme" }).click();
+
+    // theme-init.js links it before the app loads, from what the theme recorded.
+    kit.length = 0;
+    await page.reload();
+    await expect(page.locator("#adobe-fonts")).toHaveCount(1);
+    expect(kit.length).toBeGreaterThan(0);
+    await expect(page.locator("body")).toHaveCSS("font-family", /^"?proxima-nova/);
   });
 
   test("has no serious or critical accessibility violations on any face of the card", async ({
