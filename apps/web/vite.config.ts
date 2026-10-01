@@ -4,6 +4,7 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { content } from "./vite/content.ts";
+import { securityHeadersFile } from "./vite/headers-file.ts";
 import { localStore } from "./vite/local-store.ts";
 
 const isPages = process.env.VITE_TARGET === "pages";
@@ -32,7 +33,7 @@ export default defineConfig({
       routeFileIgnorePattern: "\\.(test|spec)\\.[jt]sx?$",
     }),
     react(),
-    ...(isPages ? [] : [cloudflare()]),
+    ...(isPages ? [] : [cloudflare(), securityHeadersFile()]),
   ],
   server: {
     port: 5173,
