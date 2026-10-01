@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
+  copyFileSync,
   createWriteStream,
   existsSync,
   mkdirSync,
@@ -11,6 +12,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { tmpdir } from "node:os";
 import { dirname, extname, join, relative, resolve } from "node:path";
 import { pipeline } from "node:stream/promises";
 import type { Plugin } from "vite";
@@ -165,8 +167,16 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
               if (expected && expected !== current.headSha) {
                 return json(res, 409, { error: "stale", headSha: current.headSha });
               }
-              mkdirSync(dirname(abs), { recursive: true });
-              await pipeline(req, createWriteStream(abs));
+              // Streamed outside the watched tree, then copied in synchronously: the watcher never sees
+              // a half-written file, which would not match the recorded tree and reload the editor.
+              const staged = join(tmpdir(), `crc-upload-${process.pid}-${Date.now()}`);
+              try {
+                await pipeline(req, createWriteStream(staged));
+                mkdirSync(dirname(abs), { recursive: true });
+                copyFileSync(staged, abs);
+              } finally {
+                rmSync(staged, { force: true });
+              }
               const afterUpload = readTree(contentDir, prefix).headSha;
               recordEditorTree(afterUpload);
               return json(res, 200, { headSha: afterUpload });
