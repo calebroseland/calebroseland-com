@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-import { scratchContentDir } from "./e2e/global-setup.ts";
+import { scratchContentDir } from "./e2e/scratch-content.ts";
 
 /** Specs that mutate the shared content directory, and so cannot run beside anything else. */
 const WRITES_FILES = /editor-local\.spec\.ts/;
@@ -10,7 +10,6 @@ const port = 5199;
 
 export default defineConfig({
   testDir: "./e2e",
-  globalSetup: "./e2e/global-setup.ts",
   testIgnore: ["**/smoke/**"],
   fullyParallel: true,
   // Four projects share one dev server, and the emulated phone is the slowest of them. The default
@@ -24,7 +23,8 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: `npm run dev -- --port ${port} --strictPort`,
+    // The scratch copy is made here, before Vite starts (see e2e/scratch-content.ts).
+    command: `node e2e/scratch-content.ts && npm run dev -- --port ${port} --strictPort`,
     env: {
       // Backends that write files do so here, never in the repository's content/.
       CRC_CONTENT_DIR: scratchContentDir,

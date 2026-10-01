@@ -7,5 +7,12 @@
     "jsx": "preserve",
     "module": "ESNext"
   },
-  "include": ["vite.config.ts", "vite", "playwright.config.ts", "playwright.smoke.config.ts", "e2e"]
+  "include": [
+    "vite.config.ts",
+    "vite",
+    "playwright.config.ts",
+    "playwright.smoke.config.ts",
+    "e2e",
+    "worker/headers.ts"
+  ]
 }

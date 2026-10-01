@@ -1,4 +1,6 @@
-/* Applied to every response. CSP is intentionally tight; loosen per-directive with a reason when a phase needs it. */
+/* One list of security headers for every response: the Worker sets them on /api/*, and the build writes
+   them to _headers for the static assets, which Cloudflare serves without running the Worker.
+   CSP is intentionally tight; loosen per-directive with a reason when a phase needs it. */
 const csp = [
   "default-src 'self'",
   "script-src 'self'",
@@ -12,15 +14,24 @@ const csp = [
   "form-action 'self'",
 ].join("; ");
 
+export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "permissions-policy": "camera=(), microphone=(), geolocation=()",
+  "strict-transport-security": "max-age=31536000; includeSubDomains",
+  // Report-only until Phase 6 confirms zero violations across a week (spec §13).
+  "content-security-policy-report-only": csp,
+};
+
 export function securityHeaders(res: Response): Response {
   const out = new Response(res.body, res);
-  out.headers.set("x-content-type-options", "nosniff");
-  out.headers.set("referrer-policy", "strict-origin-when-cross-origin");
-  out.headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
-  out.headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
-  if (!out.headers.has("content-security-policy-report-only")) {
-    // Report-only until Phase 6 confirms zero violations across a week (spec §13).
-    out.headers.set("content-security-policy-report-only", csp);
-  }
+  for (const [name, value] of Object.entries(SECURITY_HEADERS))
+    if (!out.headers.has(name)) out.headers.set(name, value);
   return out;
+}
+
+/** The same headers in Cloudflare's static-assets `_headers` format, for every path. */
+export function headersFile(): string {
+  const lines = Object.entries(SECURITY_HEADERS).map(([name, value]) => `  ${name}: ${value}`);
+  return `/*\n${lines.join("\n")}\n`;
 }

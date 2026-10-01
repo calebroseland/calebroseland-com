@@ -20,6 +20,15 @@ describe("/api/health", () => {
   });
 });
 
+describe("HEAD on an /api route", () => {
+  it("answers as GET does, with headers and no body", async () => {
+    const res = await SELF.fetch("https://example.com/api/health", { method: "HEAD" });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("strict-transport-security")).toMatch(/^max-age=/);
+    expect(await res.text()).toBe("");
+  });
+});
+
 describe("unknown /api route", () => {
   it("returns an RFC 9457 problem", async () => {
     const res = await SELF.fetch("https://example.com/api/nope");
