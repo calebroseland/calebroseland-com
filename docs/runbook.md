@@ -15,7 +15,7 @@ Operational procedures for calebroseland.com. Mirrors the cutover and rollback s
 
 ## Cutover to Cloudflare
 
-Preconditions: the rollback below has been rehearsed on staging and timed; staging passes its checks; Netlify is locked to its current deploy; the Cloudflare zone has been active for at least 48 hours with every record verified against the export taken from Google Cloud DNS.
+Preconditions: the rollback below has been rehearsed on staging and timed; staging passes its checks; Netlify is locked to its current deploy; the Cloudflare zone has been active for at least 48 hours with every record verified against the list taken from Squarespace Domains.
 
 1. Set the apex record's TTL to 300 seconds at least an hour ahead, so a rollback propagates quickly.
 2. Merge `next` into `master` by pull request. The deploy workflow publishes the production Worker, still reachable only on its `workers.dev` hostname.
@@ -53,11 +53,11 @@ After Netlify is gone, the standing fallback is the GitHub Pages backup, which s
 
 ## Secrets
 
-Set per environment and never committed:
+Set per Worker and never committed. Name the Worker: after a build, wrangler reads the generated deploy config and ignores `--env`, so `--env staging` would set the production secret.
 
 ```bash
-npx wrangler secret put GITHUB_CLIENT_SECRET            # production
-npx wrangler secret put GITHUB_CLIENT_SECRET --env staging
+npx wrangler secret put GITHUB_CLIENT_SECRET --name calebroseland-com            # production
+npx wrangler secret put GITHUB_CLIENT_SECRET --name calebroseland-com-staging    # staging
 ```
 
 Locally they live in `apps/web/.dev.vars`, which is git-ignored. `apps/web/.dev.vars.example` documents the names. No `VITE_`-prefixed variable may ever hold a credential, because those are inlined into the client bundle.

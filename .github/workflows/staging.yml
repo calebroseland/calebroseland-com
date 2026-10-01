@@ -32,9 +32,11 @@ jobs:
       - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with: { cache: true }
       - run: npm ci
+      # The Cloudflare Vite plugin fixes the environment at build time (CLOUDFLARE_ENV) and writes the
+      # deploy config; `wrangler deploy --env` is ignored for that config and would deploy production.
       - run: mise run build
-        env: { GITHUB_SHA: "${{ github.sha }}", CONTENT_BRANCH: next }
-      - run: npx wrangler deploy --env staging
+        env: { GITHUB_SHA: "${{ github.sha }}", CONTENT_BRANCH: next, CLOUDFLARE_ENV: staging }
+      - run: npx wrangler deploy
         working-directory: apps/web
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
