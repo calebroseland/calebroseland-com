@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": { "entry": ["vitest.setup*.ts"] },
+    "apps/web": {
+      "entry": [
+        "src/routes/**/*.tsx",
+        "src/**/*.test.{ts,tsx}",
+        "worker/**/*.test.ts",
+        "vite/**/*.ts",
+        "e2e/**/*.ts"
+      ]
+    },
+    "packages/*": { "entry": ["src/*.ts", "src/**/*.test.{ts,tsx}"] }
+  },
+  "ignoreDependencies": ["@fontsource/ibm-plex-mono", "@fontsource/ibm-plex-serif", "cloudflare"]
+}

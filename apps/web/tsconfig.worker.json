@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist/tsc-worker",
+    "rootDir": "worker",
+    "lib": ["ES2023"],
+    "types": ["./worker-configuration.d.ts", "@cloudflare/vitest-pool-workers/types"],
+    "jsx": "preserve"
+  },
+  "include": ["worker", "worker-configuration.d.ts"],
+  "exclude": ["worker/**/*.test.ts"]
+}

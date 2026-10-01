@@ -1,0 +1,55 @@
+name: preview
+
+# Draft branches get a Version URL (Cloudflare's name for what were preview URLs) via `wrangler versions
+# upload`; the URL is posted once per PR and kept current. Version URLs are public unless Cloudflare Access
+# protects them, and drafts/** branches exist only while the experimental GitHub editing is on.
+on:
+  push:
+    branches: ["drafts/**"]
+
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with: { cache: true }
+      - run: npm ci
+      - run: mise run build
+        env: { GITHUB_SHA: "${{ github.sha }}" }
+      - id: upload
+        run: |
+          out=$(npx wrangler versions upload --message "${GITHUB_REF_NAME}" 2>&1)
+          echo "$out"
+          url=$(echo "$out" | grep -Eo 'https://[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev' | head -1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Comment the Version URL on the PR (idempotent)
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PREVIEW_URL: ${{ steps.upload.outputs.url }}
+        with:
+          script: |
+            const marker = "<!-- crc-preview -->";
+            const url = process.env.PREVIEW_URL;
+            if (!url) { core.warning("no Version URL"); return; }
+            const { data: prs } = await github.rest.pulls.list({ ...context.repo, state: "open", head: `${context.repo.owner}:${context.ref.replace("refs/heads/", "")}` });
+            for (const pr of prs) {
+              const body = `${marker}\nPreview: ${url}\n\nBuilt from ${context.sha.slice(0, 7)}.`;
+              const { data: comments } = await github.rest.issues.listComments({ ...context.repo, issue_number: pr.number });
+              const mine = comments.find((c) => c.body?.startsWith(marker));
+              if (mine) await github.rest.issues.updateComment({ ...context.repo, comment_id: mine.id, body });
+              else await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body });
+            }

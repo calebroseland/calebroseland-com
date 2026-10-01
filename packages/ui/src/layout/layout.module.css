@@ -1,0 +1,33 @@
+@layer layout {
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    align-items: var(--align, stretch);
+  }
+
+  .cluster {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap);
+    align-items: var(--align, center);
+    justify-content: var(--justify, flex-start);
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--min), 100%), 1fr));
+  }
+
+  .center {
+    box-sizing: content-box;
+    /* margin-inline: auto disables grid/flex stretch, which would leave the content box sized by its
+       children. A child that is a size container (container-type: inline-size) then contributes almost
+       nothing and the column collapses, so the width is stated explicitly. */
+    inline-size: calc(100% - 2 * var(--gutter, var(--space-4)));
+    max-inline-size: var(--max);
+    margin-inline: auto;
+    padding-inline: var(--gutter, var(--space-4));
+  }
+}

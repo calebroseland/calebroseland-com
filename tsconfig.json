@@ -1,40 +1,29 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "strict": true,
-    "jsx": "preserve",
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "types": [
-      "webpack-env",
-      "jest"
-    ],
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
+  "files": [],
+  "references": [
+    {
+      "path": "packages/content-schema"
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
+    {
+      "path": "packages/markdown"
+    },
+    {
+      "path": "packages/github-client"
+    },
+    {
+      "path": "packages/interaction"
+    },
+    {
+      "path": "packages/ui"
+    },
+    {
+      "path": "apps/web"
+    },
+    {
+      "path": "apps/web/tsconfig.worker.json"
+    },
+    {
+      "path": "apps/web/tsconfig.node.json"
+    }
   ]
 }

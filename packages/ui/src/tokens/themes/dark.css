@@ -1,0 +1,50 @@
+/* Semantic layer, dark theme. Note the accent step inverts relative to light. */
+@layer tokens {
+  [data-theme="dark"] {
+    color-scheme: dark;
+
+    --color-bg: var(--gray-950);
+    --color-bg-subtle: var(--gray-900);
+    --color-surface: var(--gray-900);
+    --color-surface-raised: var(--gray-800);
+    --color-surface-sunken: var(--gray-950);
+    --color-surface-hover: var(--gray-800);
+    --color-surface-active: var(--gray-700);
+    --color-overlay: oklch(from var(--black) l c h / 0.6);
+
+    --color-text: var(--gray-100);
+    --color-text-muted: var(--gray-400);
+    --color-text-subtle: var(--gray-500);
+    --color-text-inverted: var(--gray-950);
+    --color-text-on-accent: var(--gray-950);
+
+    --color-border: var(--gray-800);
+    --color-border-subtle: var(--gray-900);
+    --color-border-strong: var(--gray-700);
+
+    --color-accent: var(--accent-400);
+    --color-accent-hover: var(--accent-300);
+    --color-accent-active: var(--accent-200);
+    --color-accent-subtle: var(--accent-950);
+    --color-accent-border: var(--accent-800);
+    --color-accent-text: var(--accent-300);
+    --color-link: var(--accent-400);
+    --color-link-hover: var(--accent-300);
+
+    --color-danger: var(--danger-300);
+    --color-danger-subtle: var(--danger-900);
+    --color-danger-hover: var(--danger-100);
+    --color-warning: var(--warning-300);
+    --color-warning-subtle: var(--warning-900);
+    --color-success: var(--success-300);
+    --color-success-subtle: var(--success-900);
+
+    --color-focus-ring: var(--accent-400);
+
+    --color-backdrop: var(--accent-1000);
+
+    --shadow-sm: 0 1px 2px oklch(from var(--black) l c h / 0.3);
+    --shadow-md: 0 2px 8px oklch(from var(--black) l c h / 0.4);
+    --shadow-lg: 0 8px 24px oklch(from var(--black) l c h / 0.5);
+  }
+}

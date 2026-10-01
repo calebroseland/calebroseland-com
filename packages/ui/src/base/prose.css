@@ -1,0 +1,184 @@
+/* Rendered-markdown styles. The one file worth writing carefully: it is where posts are read. */
+@layer base {
+  .prose {
+    font-family: var(--font-prose);
+    font-size: var(--font-size-md);
+    line-height: var(--leading-relaxed);
+    max-inline-size: var(--measure);
+    color: var(--color-text);
+
+    & > * + * {
+      margin-block-start: var(--space-5);
+    }
+
+    & h1,
+    & h2,
+    & h3,
+    & h4 {
+      font-family: var(--font-sans);
+      color: var(--color-text);
+    }
+
+    & h2 {
+      font-size: var(--font-size-2xl);
+      margin-block-start: var(--space-12);
+    }
+
+    & h3 {
+      font-size: var(--font-size-xl);
+      margin-block-start: var(--space-10);
+    }
+
+    & h4 {
+      font-size: var(--font-size-lg);
+      margin-block-start: var(--space-8);
+    }
+
+    & h2 + *,
+    & h3 + *,
+    & h4 + * {
+      margin-block-start: var(--space-3);
+    }
+
+    & a {
+      text-decoration: underline;
+    }
+
+    & strong {
+      font-weight: var(--font-weight-semibold);
+    }
+
+    & ul,
+    & ol {
+      padding-inline-start: var(--space-6);
+    }
+
+    & li + li {
+      margin-block-start: var(--space-1);
+    }
+
+    & li > ul,
+    & li > ol {
+      margin-block-start: var(--space-1);
+    }
+
+    & .contains-task-list {
+      list-style: none;
+      padding-inline-start: var(--space-1);
+    }
+
+    & .task-list-item input {
+      margin-inline-end: var(--space-2);
+      vertical-align: middle;
+    }
+
+    & blockquote {
+      padding-inline-start: var(--space-5);
+      border-inline-start: var(--border-width-thick) solid var(--color-accent-border);
+      color: var(--color-text-muted);
+      font-style: italic;
+    }
+
+    & hr {
+      border: 0;
+      border-block-start: var(--border-width) solid var(--color-border);
+      margin-block: var(--space-10);
+    }
+
+    & img,
+    & picture {
+      inline-size: 100%;
+      block-size: auto;
+      border-radius: var(--radius-lg);
+    }
+
+    & figure {
+      margin-inline: 0;
+    }
+
+    & figcaption {
+      margin-block-start: var(--space-2);
+      font-family: var(--font-sans);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+
+    & code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+    }
+
+    & :not(pre) > code {
+      padding: 0.1em 0.35em;
+      border-radius: var(--radius-sm);
+      background: var(--color-surface-sunken);
+    }
+
+    & pre code {
+      font-size: inherit;
+      background: none;
+      padding: 0;
+    }
+
+    & pre {
+      position: relative;
+      padding: var(--space-4);
+      border-radius: var(--radius-md);
+      border: var(--border-width) solid var(--color-border);
+      overflow-x: auto;
+      line-height: var(--leading-normal);
+      font-size: var(--font-size-sm);
+      background: var(--color-surface-sunken);
+    }
+
+    /* Shiki dual themes: colours and backgrounds come from --shiki-light(-bg) / --shiki-dark(-bg) set inline.
+       Token colours are only AA-contrast-checked against the theme's own background, so use it. */
+    & pre.shiki {
+      background: var(--shiki-light-bg);
+    }
+
+    & pre.shiki,
+    & pre.shiki span {
+      color: var(--shiki-light);
+    }
+
+    & table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-sans);
+      font-size: var(--font-size-sm);
+    }
+
+    & th,
+    & td {
+      padding: var(--space-2) var(--space-3);
+      border-block-end: var(--border-width) solid var(--color-border);
+      text-align: start;
+      vertical-align: top;
+    }
+
+    & th {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-muted);
+    }
+
+    & kbd {
+      font-family: var(--font-mono);
+      font-size: 0.8em;
+      padding: 0.1em 0.4em;
+      border: var(--border-width) solid var(--color-border-strong);
+      border-block-end-width: var(--border-width-thick);
+      border-radius: var(--radius-sm);
+    }
+  }
+
+  [data-theme="dark"] .prose pre.shiki {
+    background: var(--shiki-dark-bg);
+  }
+
+  [data-theme="dark"] .prose pre.shiki,
+  [data-theme="dark"] .prose pre.shiki span {
+    color: var(--shiki-dark);
+  }
+}

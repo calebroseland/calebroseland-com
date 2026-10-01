@@ -1,0 +1,7 @@
+@layer components {
+  .icon {
+    inline-size: var(--size);
+    block-size: var(--size);
+    flex: none;
+  }
+}

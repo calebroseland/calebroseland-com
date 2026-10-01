@@ -1,0 +1,28 @@
+{
+  "name": "@crc/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./icons": "./src/icons.ts",
+    "./motion-tokens": "./src/motion-tokens.ts",
+    "./index.css": "./src/index.css",
+    "./fonts.css": "./src/fonts.css"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-serif": "^5.3.0",
+    "@iconify-icons/lucide": "2.0.12",
+    "@iconify-icons/simple-icons": "2.0.4",
+    "@iconify/react": "^6.0.2"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "culori": "^4.0.2",
+    "react": "^19.3.0"
+  }
+}

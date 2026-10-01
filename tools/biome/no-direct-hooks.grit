@@ -1,0 +1,14 @@
+language js
+
+// Components call small, purpose-named custom hooks; built-in and library hooks are called only
+// from inside those hooks. A component is a function or arrow function with a PascalCase name.
+or {
+  `function $name($params) { $body }`,
+  `const $name = ($params) => { $body }`
+} where {
+  $name <: r"^[A-Z].*",
+  $body <: contains bubble `$hook($args)` as $call where {
+    $hook <: r"^(?:React\.|Route\.)?use(?:State|Effect|LayoutEffect|InsertionEffect|Reducer|Memo|Callback|Ref|Context|SyncExternalStore|Transition|DeferredValue|ActionState|Optimistic|Id|ImperativeHandle|Query|SuspenseQuery|Queries|Mutation|QueryClient|Store|Navigate|Router|RouterState|Location|Search|Params|LoaderData|Match|Form|Editor|ReducedMotion)$",
+    register_diagnostic(span=$call, message="Components call a purpose-named custom hook; move this hook call into one.", severity="error")
+  }
+}

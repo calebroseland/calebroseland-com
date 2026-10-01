@@ -1,0 +1,258 @@
+@layer components {
+  /* Collapsed: the link groups and the toggle on one centred line, one gap apart with a rule in its
+     middle. Expanded: the groups, the toggle, then the copyright line, each centred on its own row. */
+  .footer {
+    --section-gap: var(--space-4);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2) var(--section-gap);
+    padding: var(--space-3) max(var(--space-4), (100% - var(--measure-wide)) / 2);
+    border-block-start: var(--border-width) solid var(--color-border-subtle);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+
+    &[data-expanded] {
+      --section-gap: var(--space-12);
+      display: grid;
+      grid-template-areas: "links" "actions" "copy";
+      justify-items: center;
+      gap: var(--space-6);
+      padding-block: var(--space-10) var(--space-6);
+    }
+  }
+
+  /* The way to the contact side of the card, beside the name it belongs to. */
+  .copyright {
+    grid-area: copy;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+
+    & p {
+      margin: 0;
+    }
+  }
+
+  .groups {
+    grid-area: links;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--section-gap);
+
+    [data-expanded] > & {
+      justify-content: center;
+      align-items: start;
+      gap: var(--space-6) var(--section-gap);
+    }
+  }
+
+  .group {
+    display: flex;
+    align-items: center;
+
+    [data-expanded] & {
+      display: block;
+    }
+  }
+
+  /* The gap alone spaces the sections; the rule before each is drawn in the middle of it. Not before
+     the copyright line, which may wrap onto a row of its own. */
+  .footer:not([data-expanded]) :is(.group + .group, .actions),
+  .footer[data-expanded] .group + .group {
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: calc((var(--section-gap) + var(--border-width)) / -2);
+      border-inline-start: var(--border-width) solid var(--color-border-subtle);
+    }
+  }
+
+  /* Narrow, sections wrap; a rule would start a line, so the gap alone separates them. */
+  @media (width < 48rem) {
+    .footer:not([data-expanded]) :is(.group + .group, .actions),
+    .footer[data-expanded] .group + .group {
+      &::before {
+        content: none;
+      }
+    }
+  }
+
+  .groupTitle {
+    margin-block-end: var(--space-2);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-normal);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .list {
+    display: flex;
+    gap: var(--space-1);
+
+    [data-expanded] & {
+      display: grid;
+      justify-items: start;
+      margin-inline-start: calc(-1 * var(--space-2));
+    }
+
+    [data-expanded] [data-icons] > & {
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+
+  .actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  /* The site's own pages, on the copyright line once the footer shows everything. */
+  .pages {
+    display: flex;
+    gap: var(--space-3);
+    margin-inline-start: var(--space-2);
+
+    & a {
+      color: inherit;
+    }
+  }
+
+  .tipTarget {
+    display: inline-flex;
+  }
+
+  /* Content-sized, so its snapshot matches the card link it pairs with and only moves and scales. */
+  /* Same padding in both layouts, so the icon stays put when the label comes and goes. */
+  .link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: 2rem;
+    padding-inline: var(--space-2);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  /* Only where a pointer hovers: a tap would leave the link lit on the next page. */
+  @media (hover: hover) {
+    .link:hover,
+    .toggle:hover {
+      color: var(--color-text);
+      background: var(--color-surface-hover);
+    }
+
+    [data-expanded] .link:hover {
+      background: none;
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+    }
+
+    [data-expanded] [data-icons] .link:hover {
+      background: var(--color-surface-hover);
+    }
+  }
+
+  .toggle {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
+  }
+
+  /* Collapsed, titles and labels stay for screen readers only; an icon row's labels always do. */
+  .footer:not([data-expanded]) :is(.groupTitle, .label),
+  .group[data-icons] .label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Named only while entering or leaving, like the card side. A shown heading pairs its words; a hidden
+     one pairs itself, whose snapshot is clipped away, so the card's heading shrinks into it as a label does. */
+  :root:is([data-vt="enter"], [data-vt="leave"])
+  :is([data-expanded] .headingText, .footer:not([data-expanded]) .groupTitle) {
+    view-transition-name: var(--vt-footer-heading);
+    view-transition-class: footer-link footer-label footer-heading;
+  }
+
+  :root:is([data-vt="enter"], [data-vt="leave"]) .icon {
+    view-transition-name: var(--vt-footer-icon);
+    view-transition-class: footer-link;
+  }
+
+  :root:is([data-vt="enter"], [data-vt="leave"]) .label {
+    view-transition-name: var(--vt-footer-label);
+    view-transition-class: footer-link footer-label;
+  }
+
+  /* Page transitions move the page, not the footer: it is lifted out of the page's snapshot and switches
+     in one frame. A crossfade would show any difference between the two (a lit link) as a flash. */
+  :root:active-view-transition-type(page) .footer {
+    view-transition-name: site-footer;
+  }
+
+  :root:active-view-transition-type(page)::view-transition-group(site-footer),
+  :root:active-view-transition-type(page)::view-transition-new(site-footer) {
+    animation: none;
+  }
+
+  :root:active-view-transition-type(page)::view-transition-old(site-footer) {
+    display: none;
+  }
+
+  /* Expanding and collapsing morph each link, heading and action between the two layouts. */
+  :root[data-vt="footer"] .link {
+    view-transition-name: var(--vt-footer-link);
+  }
+
+  :root[data-vt="footer"] .groupTitle {
+    view-transition-name: var(--vt-footer);
+  }
+
+  :root[data-vt="footer"] .copyright {
+    view-transition-name: footer-copy;
+  }
+
+  :root[data-vt="footer"] .toggle {
+    view-transition-name: footer-toggle;
+  }
+
+  :root[data-vt="footer"]::view-transition-group(*) {
+    animation-duration: var(--duration-slow);
+    animation-timing-function: var(--ease-in-out);
+  }
+
+  /* Natural size, so a link that gains its label reveals it rather than stretching. */
+  :root[data-vt="footer"]::view-transition-old(*),
+  :root[data-vt="footer"]::view-transition-new(*) {
+    block-size: 100%;
+    object-fit: none;
+    object-position: left center;
+  }
+
+  :root[data-vt="footer"]::view-transition-old(root),
+  :root[data-vt="footer"]::view-transition-new(root) {
+    object-fit: fill;
+  }
+}

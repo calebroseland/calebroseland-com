@@ -1,0 +1,55 @@
+name: staging
+
+on:
+  push:
+    branches: [next]
+  workflow_dispatch:
+
+concurrency:
+  group: staging
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  ci:
+    name: ci
+    uses: ./.github/workflows/ci.yml
+
+  worker:
+    needs: ci
+    name: deploy staging worker
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: staging
+      url: https://next.calebroseland.com
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with: { cache: true }
+      - run: npm ci
+      # The Cloudflare Vite plugin fixes the environment at build time (CLOUDFLARE_ENV) and writes the
+      # deploy config; `wrangler deploy --env` is ignored for that config and would deploy production.
+      - run: mise run build
+        env: { GITHUB_SHA: "${{ github.sha }}", CONTENT_BRANCH: next, CLOUDFLARE_ENV: staging }
+      - run: npx wrangler deploy
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - run: npx playwright install --with-deps chromium
+      - run: mise run smoke
+        env:
+          BASE_URL: https://next.calebroseland.com
+          EXPECTED_SHA: ${{ github.sha }}
+
+  pages:
+    needs: ci
+    # Pre-cutover the backup tracks `next` so it can be verified early; deploy.yml takes over on master.
+    name: deploy pages backup
+    uses: ./.github/workflows/pages.yml
+    secrets: inherit

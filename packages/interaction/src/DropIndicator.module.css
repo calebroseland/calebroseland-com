@@ -1,0 +1,48 @@
+@layer components {
+  /* Drawn in the middle of the gap between two items, so "after this one" and "before the next" put
+     the line in the same place. A list declares its gap as --drop-gap (0 when items touch). */
+  .indicator {
+    --drop-offset: calc(-0.5 * (var(--drop-gap, 0px) + var(--border-width-thick)));
+    position: absolute;
+    background: var(--color-accent);
+    pointer-events: none;
+    z-index: var(--z-drag);
+
+    &[data-edge="top"],
+    &[data-edge="bottom"] {
+      inset-inline: 0;
+      block-size: var(--border-width-thick);
+    }
+
+    &[data-edge="left"],
+    &[data-edge="right"] {
+      inset-block: 0;
+      inline-size: var(--border-width-thick);
+    }
+
+    &[data-edge="top"] {
+      inset-block-start: var(--drop-offset);
+    }
+
+    &[data-edge="bottom"] {
+      inset-block-end: var(--drop-offset);
+    }
+
+    &[data-edge="left"] {
+      inset-inline-start: var(--drop-offset);
+    }
+
+    &[data-edge="right"] {
+      inset-inline-end: var(--drop-offset);
+    }
+  }
+}
+
+@layer components {
+  /* The drag preview: a copy of the item, drawn away from its list, on a surface of its own. */
+  .preview {
+    border-radius: var(--radius-md);
+    background: var(--color-surface-raised);
+    box-shadow: var(--shadow-md);
+  }
+}

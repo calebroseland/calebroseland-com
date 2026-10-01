@@ -1,0 +1,9 @@
+@layer components {
+  .title {
+    margin-block-end: var(--space-8);
+  }
+
+  .all {
+    margin-block-start: var(--space-8);
+  }
+}

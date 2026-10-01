@@ -1,0 +1,59 @@
+/* Semantic layer, light theme. Also the fallback when data-theme is missing. */
+@layer tokens {
+  :root,
+  [data-theme="light"] {
+    color-scheme: light;
+
+    --color-bg: var(--gray-50);
+    --color-bg-subtle: var(--gray-100);
+    --color-surface: var(--white);
+    --color-surface-raised: var(--white);
+    --color-surface-sunken: var(--gray-100);
+    --color-surface-hover: var(--gray-100);
+    --color-surface-active: var(--gray-200);
+    --color-overlay: oklch(from var(--gray-950) l c h / 0.4);
+
+    --color-text: var(--gray-900);
+    --color-text-muted: var(--gray-700);
+    --color-text-subtle: var(--gray-600);
+    --color-text-inverted: var(--gray-50);
+    --color-text-on-accent: var(--white);
+
+    --color-border: var(--gray-200);
+    --color-border-subtle: var(--gray-100);
+    --color-border-strong: var(--gray-300);
+
+    /* oc-blue-6 is the brand blue but only 3.6:1 against white, so text-bearing accents use 8. */
+    --color-accent: var(--accent-800);
+    --color-accent-hover: var(--accent-900);
+    --color-accent-active: var(--accent-950);
+    --color-accent-subtle: var(--accent-50);
+    --color-accent-border: var(--accent-200);
+    --color-accent-text: var(--accent-900);
+    --color-link: var(--accent-800);
+    --color-link-hover: var(--accent-900);
+
+    --color-danger: var(--danger-700);
+    --color-danger-subtle: var(--danger-100);
+    --color-danger-hover: var(--danger-900);
+    --color-warning: var(--warning-700);
+    --color-warning-subtle: var(--warning-100);
+    --color-success: var(--success-700);
+    --color-success-subtle: var(--success-100);
+
+    --color-focus-ring: var(--accent-600);
+
+    /* The field behind the landing card; decorative, never carries text. */
+    --color-backdrop: var(--accent-600);
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 2px;
+
+    --shadow-sm: 0 1px 2px oklch(from var(--gray-950) l c h / 0.06);
+    --shadow-md:
+      0 2px 4px oklch(from var(--gray-950) l c h / 0.06),
+      0 4px 12px oklch(from var(--gray-950) l c h / 0.08);
+    --shadow-lg:
+      0 4px 8px oklch(from var(--gray-950) l c h / 0.08),
+      0 12px 32px oklch(from var(--gray-950) l c h / 0.12);
+  }
+}

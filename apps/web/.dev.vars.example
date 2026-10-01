@@ -1,0 +1,8 @@
+# Copy to .dev.vars (git-ignored). The working tree is always offered in dev. FEATURE_GITHUB_EDITING=on adds
+# the experimental GitHub editing: the fake GitHub, pasted tokens, and OAuth once GITHUB_CLIENT_ID/SECRET
+# are set. GITHUB_OAUTH_ORIGIN is only for tests that stub GitHub.
+FEATURE_GITHUB_EDITING=off
+SITE_ORIGIN=http://localhost:5173
+ALLOWED_ORIGINS=http://localhost:5173
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=

@@ -1,0 +1,64 @@
+@layer components {
+  .frame {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    min-block-size: 24rem;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    border-block-end: var(--border-width) solid var(--color-border);
+    /* Below the site's bar while that is pinned (--sticky-top, set by Page). */
+    position: sticky;
+    inset-block-start: var(--sticky-top, 0px);
+    background: var(--color-surface);
+    z-index: var(--z-sticky);
+    border-start-start-radius: var(--radius-lg);
+    border-start-end-radius: var(--radius-lg);
+  }
+
+  .tool {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+
+    &:hover {
+      background: var(--color-surface-hover);
+      color: var(--color-text);
+    }
+
+    &[aria-pressed="true"] {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
+  }
+
+  .content {
+    padding: var(--space-6);
+    min-block-size: 20rem;
+    outline: none;
+    font-size: var(--font-size-base);
+
+    & p.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      color: var(--color-text-subtle);
+      float: inline-start;
+      pointer-events: none;
+      block-size: 0;
+    }
+
+    & img.ProseMirror-selectednode {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    }
+  }
+}

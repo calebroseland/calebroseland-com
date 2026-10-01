@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+        exclude-patterns: ["@iconify-icons/*"]
+      # Icon sets can drop icons in any release; each update is reviewed on its own.
+      icon-data:
+        patterns: ["@iconify-icons/*"]
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday }

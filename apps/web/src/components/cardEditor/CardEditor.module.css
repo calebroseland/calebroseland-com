@@ -1,0 +1,678 @@
+@layer components {
+  /* The card itself, editable: its own layout and type (Landing.module.css), with the bar at its foot. */
+  .editFace {
+    display: grid;
+  }
+
+  .field {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+
+  .label,
+  .legend {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  .legend {
+    margin-block-end: var(--space-2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .input {
+    inline-size: 100%;
+    min-block-size: 2.5rem;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-md);
+    border: var(--border-width) solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: 1px;
+    }
+
+    &[aria-invalid] {
+      border-color: var(--color-danger);
+    }
+  }
+
+  /* Inline text keeps the type of its container; its edge shows on hover, focus, or an error. */
+  .inlineField {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+
+  /* The field's edge, around its text and any leading or trailing content. */
+  .inlineControl {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-inline-size: 0;
+    border: var(--border-width) dashed transparent;
+    border-radius: var(--radius-sm);
+
+    &:hover {
+      border-color: var(--color-border-strong);
+    }
+
+    &:has(> .inline:focus-visible) {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: 1px;
+    }
+
+    &:has(> [aria-invalid]) {
+      border-style: solid;
+      border-color: var(--color-danger);
+    }
+  }
+
+  .inline {
+    inline-size: 100%;
+    min-block-size: 2.25rem;
+    padding: 0 var(--space-1);
+    border: var(--border-width) dashed transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    text-transform: inherit;
+
+    &::placeholder {
+      color: var(--color-text-muted);
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    &:hover {
+      border-color: var(--color-border-strong);
+    }
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: 1px;
+    }
+
+    &[aria-invalid] {
+      border-style: solid;
+      border-color: var(--color-danger);
+    }
+  }
+
+  /* Inside a control, only the control draws an edge and a focus ring: one outline, not two. After
+     .inline, whose own hover, focus and error states it must beat. */
+  .inlineControl > .inline {
+    flex: 1;
+    min-inline-size: 0;
+    border: 0;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .error {
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+  }
+
+  .tagEditor,
+  .group {
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  /* --drop-gap: the drop line sits midway between items (see @crc/interaction's DropIndicator). */
+  .chips {
+    --drop-gap: var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--drop-gap);
+  }
+
+  .chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-sm);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+
+    &[data-dragging="true"] {
+      opacity: 0.5;
+    }
+
+    & .handle {
+      padding-inline: var(--space-3) var(--space-1);
+      color: inherit;
+      cursor: grab;
+    }
+
+    & .remove {
+      color: inherit;
+    }
+  }
+
+  .linkMark {
+    display: inline-flex;
+    opacity: 0.8;
+  }
+
+  .chip[data-invalid] {
+    outline: var(--border-width-thick) solid var(--color-danger);
+    outline-offset: 1px;
+  }
+
+  .popup {
+    display: grid;
+    gap: var(--space-3);
+    inline-size: 17rem;
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-raised);
+    border: var(--border-width) solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    color: var(--color-text);
+    outline: none;
+  }
+
+  .iconRow,
+  .switchRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .noIcon {
+    inline-size: var(--icon-sm);
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+
+  .showGroup {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-1);
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    & > :first-child {
+      grid-column: 1 / -1;
+    }
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  .segment {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: 2.25rem;
+    padding-inline: var(--space-2);
+    border-radius: var(--radius-md);
+    border: var(--border-width) solid var(--color-border-strong);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+
+    &:has([data-checked]) {
+      border-color: var(--color-accent);
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
+  }
+
+  .radio {
+    display: grid;
+    place-items: center;
+    inline-size: 1rem;
+    block-size: 1rem;
+    border-radius: var(--radius-full);
+    border: var(--border-width) solid var(--color-border-strong);
+    background: var(--color-surface);
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: 2px;
+    }
+  }
+
+  .radioDot {
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+  }
+
+  .switch {
+    position: relative;
+    flex: none;
+    inline-size: 2.5rem;
+    block-size: 1.5rem;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-active);
+    transition: background-color var(--duration-fast) var(--ease-out);
+
+    &[data-checked] {
+      background: var(--color-accent);
+    }
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: 2px;
+    }
+  }
+
+  .switchThumb {
+    position: absolute;
+    inset-block-start: 0.1875rem;
+    inset-inline-start: 0.1875rem;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    transition: translate var(--duration-fast) var(--ease-out);
+
+    &[data-checked] {
+      translate: 1rem 0;
+    }
+  }
+
+  .handle {
+    display: inline-flex;
+    gap: var(--space-1);
+    align-items: center;
+    min-block-size: 2rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    cursor: grab;
+    touch-action: none;
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: 1px;
+    }
+  }
+
+  .remove {
+    display: grid;
+    place-items: center;
+    min-inline-size: 2rem;
+    min-block-size: 2rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+
+    &:hover {
+      background: oklch(from currentColor l c h / 0.12);
+    }
+
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
+  }
+
+  .addTag {
+    inline-size: 9rem;
+    font-size: var(--font-size-base);
+  }
+
+  /* The card's expanded grid of groups (Landing .links), with room to drop between columns. */
+  .editGroups {
+    --drop-gap: var(--space-4);
+    --link-column: 20rem;
+    gap: var(--drop-gap);
+  }
+
+  .group {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+
+    &[data-dragging="true"] {
+      opacity: 0.5;
+    }
+  }
+
+  /* The card's group heading (Landing .groupTitle), with a grip before it and its options after. */
+  .groupHead {
+    gap: var(--space-1);
+    padding-inline: 0;
+
+    & > .inlineField {
+      flex: 1;
+    }
+  }
+
+  /* A link's options and a group's: where the card would show nothing, the one way in. */
+  .options {
+    display: grid;
+    flex: none;
+    place-items: center;
+    min-inline-size: 2.25rem;
+    min-block-size: 2.25rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+
+    &:hover {
+      background: var(--color-surface-hover);
+      color: var(--color-text);
+    }
+
+    &:active,
+    &[data-popup-open] {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
+
+    &[data-invalid] {
+      color: var(--color-danger);
+      box-shadow: inset 0 0 0 var(--border-width-thick) var(--color-danger);
+    }
+  }
+
+  .popupActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding-block-start: var(--space-2);
+    border-block-start: var(--border-width) solid var(--color-border);
+  }
+
+  /* Tall enough to drop into once a group's last link has moved out, and saying so. */
+  .linkList {
+    --drop-gap: var(--space-1);
+    gap: var(--drop-gap);
+    min-block-size: 2.75rem;
+    border-radius: var(--radius-md);
+
+    &[data-empty] {
+      border: var(--border-width) dashed var(--color-border-strong);
+    }
+
+    &[data-empty]::after {
+      content: "Drop a link here";
+      align-self: center;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+      text-align: center;
+    }
+
+    &[data-over] {
+      outline: var(--border-width-thick) dashed var(--color-accent);
+      outline-offset: 2px;
+    }
+  }
+
+  /* A card link, editable: grip, its icon (which opens the icon list), its label in the card's type
+     with its address in small type underneath, and a remove button. */
+  .linkRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: 2.75rem;
+    padding-block: var(--space-1);
+    font-size: var(--font-size-xl);
+    line-height: var(--leading-tight);
+
+    &[data-dragging="true"] {
+      opacity: 0.5;
+    }
+  }
+
+  .linkFields {
+    display: grid;
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  .address {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+
+    & .inline {
+      min-block-size: 1.75rem;
+    }
+  }
+
+  /* The icon as it sits on the card, a button that opens the icon list. */
+  .cardIcon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    min-inline-size: 2.75rem;
+    min-block-size: 2.75rem;
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+
+    &:hover,
+    &[data-popup-open] {
+      background: var(--color-surface-hover);
+    }
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: 1px;
+    }
+  }
+
+  /* Touch-sized controls where the card is phone-width. */
+  @container (inline-size < 30rem) {
+    .handle,
+    .options {
+      min-inline-size: 2.75rem;
+      min-block-size: 2.75rem;
+      justify-content: center;
+    }
+  }
+
+  .iconTrigger {
+    display: grid;
+    place-items: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: var(--radius-md);
+    border: var(--border-width) solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text);
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: 1px;
+    }
+  }
+
+  .floating {
+    z-index: var(--z-popover);
+    outline: none;
+  }
+
+  .iconPopup {
+    max-block-size: min(20rem, var(--available-height));
+    overflow-y: auto;
+    padding: var(--space-1);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-raised);
+    border: var(--border-width) solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    outline: none;
+  }
+
+  .iconItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: 2.25rem;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    cursor: pointer;
+    outline: none;
+
+    &[data-highlighted] {
+      background: var(--color-surface-hover);
+    }
+  }
+
+  .iconCheck {
+    display: inline-flex;
+    margin-inline-start: auto;
+    color: var(--color-accent-text);
+  }
+
+  .addLink,
+  .addGroup {
+    font-size: var(--font-size-base);
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: 2.5rem;
+    padding-inline: var(--space-2);
+    border-radius: var(--radius-md);
+    color: var(--color-link);
+
+    &:hover {
+      background: var(--color-surface-hover);
+    }
+
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
+  }
+
+  .addGroup {
+    align-self: start;
+    justify-content: center;
+    border: var(--border-width) dashed var(--color-border-strong);
+  }
+
+  .backBody {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  /* The contact side's details, each value editable beside its icon. */
+  .contactFields {
+    margin-inline-start: 0;
+
+    & > li {
+      display: flex;
+      inline-size: 100%;
+    }
+
+    & .inlineField {
+      flex: 1;
+    }
+  }
+
+  /* Save bar: where "show more" is; sticks to the bottom of the viewport while the card is taller. */
+  .bar {
+    position: sticky;
+    inset-block-end: 0;
+    margin-block-start: var(--space-3);
+    text-align: start;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-inline: calc(-1 * var(--space-4));
+    padding: var(--space-3) var(--space-4);
+    border-block-start: var(--border-width) solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .where {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  .problems {
+    color: var(--color-danger);
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .primary,
+  .secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-block-size: 2.5rem;
+    padding-inline: var(--space-4);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+
+  .primary {
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+
+    &:hover:not(:disabled) {
+      background: var(--color-accent-hover);
+    }
+
+    &:active:not(:disabled) {
+      background: var(--color-accent-active);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+
+  .danger {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.5rem;
+    padding-inline: var(--space-4);
+    border-radius: var(--radius-md);
+    color: var(--color-danger);
+
+    &:hover {
+      background: var(--color-surface-hover);
+    }
+  }
+
+  .secondary {
+    border: var(--border-width) solid var(--color-border-strong);
+
+    &:hover {
+      background: var(--color-surface-hover);
+    }
+
+    &:active {
+      background: var(--color-accent-subtle);
+      color: var(--color-accent-text);
+    }
+  }
+}

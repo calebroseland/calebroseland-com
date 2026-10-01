@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "calebroseland-com",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-08-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS"
+  },
+  "observability": { "enabled": true },
+  "vars": {
+    "ENVIRONMENT": "production",
+    "SITE_ORIGIN": "https://calebroseland.com",
+    "ALLOWED_ORIGINS": "https://calebroseland.com,https://calebroseland.github.io",
+    // Public. Set per environment once the GitHub App exists; the secret is set with `wrangler secret put`.
+    "GITHUB_CLIENT_ID": "",
+    // Feature flags: "on" enables. Editing through GitHub (OAuth, pasted tokens, the fake GitHub) is
+    // experimental; the working tree in dev is the editor until it is not.
+    "FEATURE_GITHUB_EDITING": "off"
+  },
+  // The apex custom domain is added here at cutover (spec §10.3). Until then production is workers.dev only.
+  "env": {
+    "staging": {
+      "name": "calebroseland-com-staging",
+      "routes": [{ "pattern": "next.calebroseland.com", "custom_domain": true }],
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "SITE_ORIGIN": "https://next.calebroseland.com",
+        "ALLOWED_ORIGINS": "https://next.calebroseland.com,https://calebroseland.github.io",
+        "GITHUB_CLIENT_ID": "",
+        "FEATURE_GITHUB_EDITING": "off"
+      }
+    }
+  }
+}

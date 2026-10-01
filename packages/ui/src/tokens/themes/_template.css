@@ -1,0 +1,8 @@
+/* Copy to <name>.css, rename the selector, and reassign only semantic tokens.
+   The ramps are fixed Open Color values, so a variant theme re-points tokens rather than shifting hues. */
+@layer tokens {
+  [data-theme="template"] {
+    --color-accent: var(--accent-800);
+    --color-backdrop: var(--accent-600);
+  }
+}

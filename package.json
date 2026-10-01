@@ -1,133 +1,33 @@
 {
   "name": "calebroseland-com",
-  "version": "0.3.0",
-  "private": false,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit --ci --reporters=default --reporters=jest-junit",
-    "lint": "vue-cli-service lint"
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
   },
-  "dependencies": {
-    "animate.css": "3.7.2",
-    "axios": "0.19.0",
-    "bulma": "0.8.0",
-    "core-js": "^3.4.8",
-    "element-ui": "2.13.0",
-    "lodash": "4.17.15",
-    "open-color": "1.7.0",
-    "register-service-worker": "1.6.2",
-    "vue": "2.6.10",
-    "vue-awesome": "4.0.2",
-    "vue-class-component": "7.1.0",
-    "vue-meta": "2.3.1",
-    "vue-property-decorator": "8.3.0",
-    "vue-router": "3.1.3",
-    "vuex": "3.1.2",
-    "vuex-persistedstate": "2.7.0"
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.7.4",
-    "@babel/plugin-proposal-optional-chaining": "^7.7.5",
-    "@types/jest": "^24.0.23",
-    "@types/lodash": "^4.14.149",
-    "@types/webpack": "^4.41.0",
-    "@typescript-eslint/eslint-plugin": "^2.10.0",
-    "@typescript-eslint/parser": "^2.10.0",
-    "@vue/cli-plugin-babel": "^4.1.1",
-    "@vue/cli-plugin-eslint": "^4.1.1",
-    "@vue/cli-plugin-pwa": "^4.1.1",
-    "@vue/cli-plugin-typescript": "^4.1.1",
-    "@vue/cli-plugin-unit-jest": "^4.1.1",
-    "@vue/cli-service": "4.1.1",
-    "@vue/eslint-config-prettier": "6.0.0",
-    "@vue/eslint-config-standard": "5.0.1",
-    "@vue/eslint-config-typescript": "5.0.1",
-    "@vue/test-utils": "1.0.0-beta.30",
-    "@babel/core": "7.7.5",
-    "babel-eslint": "10.0.3",
-    "babel-jest": "24.9.0",
-    "babel-plugin-component": "1.1.1",
-    "babel-plugin-lodash": "3.3.4",
-    "eslint": "6.7.2",
-    "eslint-plugin-import": "2.18.2",
-    "eslint-plugin-node": "10.0.0",
-    "eslint-plugin-prettier": "3.1.1",
-    "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-standard": "4.0.1",
-    "eslint-plugin-vue": "6.0.1",
-    "fibers": "^4.0.2",
-    "jest-junit": "^10.0.0",
-    "node-sass": "4.13.0",
-    "pug": "2.0.4",
-    "pug-plain-loader": "1.0.0",
-    "sass": "1.23.7",
-    "sass-loader": "8.0.0",
-    "stylus": "0.54.7",
-    "stylus-loader": "3.0.2",
-    "ts-jest": "^24.2.0",
-    "typescript": "3.7.5",
-    "vue-template-compiler": "2.6.10"
-  },
-  "eslintConfig": {
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "@vue/standard",
-      "@vue/typescript"
-    ],
-    "rules": {
-      "space-before-function-paren": 0
-    },
-    "parserOptions": {
-      "parser": "@typescript-eslint/parser"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
+  "workspaces": [
+    "apps/*",
+    "packages/*"
   ],
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "jsx",
-      "json",
-      "vue",
-      "ts",
-      "tsx"
-    ],
-    "transform": {
-      "^.+\\.vue$": "vue-jest",
-      ".+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$": "jest-transform-stub",
-      "^.+\\.jsx?$": "babel-jest",
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "snapshotSerializers": [
-      "jest-serializer-vue"
-    ],
-    "testMatch": [
-      "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)"
-    ],
-    "testURL": "http://localhost/",
-    "globals": {
-      "ts-jest": {
-        "babelConfig": true
-      }
-    }
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@size-limit/file": "^14.0.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "fast-check": "^4.10.1",
+    "jsdom": "^30.1.0",
+    "knip": "^6.37.0",
+    "size-limit": "^14.0.0",
+    "typescript": "~7.0.2",
+    "vitest": "^4.1.11"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/calebroseland/calebroseland-com.git"
+  "allowScripts": {
+    "workerd@1.20260815.1": true,
+    "workerd@1.20260918.1": true,
+    "esbuild@0.28.1": true
   }
 }

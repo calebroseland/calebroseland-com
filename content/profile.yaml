@@ -1,0 +1,18 @@
+name: Caleb Roseland
+tagline: Software Engineer
+tags: [ { label: React, icon: simple-icons:react, link: false }, { label: TS, icon: simple-icons:typescript, link: false }, { label: Go, icon: simple-icons:go, link: false } ]
+groups:
+  - title: Projects
+    links:
+      - { label: GitHub, url: https://github.com/calebroseland, icon: simple-icons:github }
+      - { label: this, url: https://github.com/calebroseland/calebroseland-com, icon: lucide:braces }
+      - { label: House Status, url: https://github.com/calebroseland/floorplan-status, icon: lucide:braces }
+  - title: Social
+    links:
+      - { label: LinkedIn, url: https://linkedin.com/in/calebroseland, icon: simple-icons:linkedin }
+      - { label: Stack Overflow, url: https://stackoverflow.com/users/1352410, icon: simple-icons:stackoverflow }
+      - { label: npm, url: https://npmjs.com/~calebroseland, icon: simple-icons:npm }
+contact:
+  email: caleb@calebroseland.com
+  phone: +1 507 476 1225
+  location: { label: "Minnesota, USA", url: "https://maps.google.com/?q=Minnesota,+USA" }
