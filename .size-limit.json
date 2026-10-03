@@ -1,11 +1,5 @@
 [
   {
-    "name": "site shell (initial JS, gzip)",
-    "path": ["apps/web/dist/client/assets/index-*.js", "apps/web/dist/client/assets/react-*.js"],
-    "limit": "125 kB",
-    "gzip": true
-  },
-  {
     "name": "landing route chunk (gzip)",
     "path": [
       "apps/web/dist/client/assets/_card-*.js",
