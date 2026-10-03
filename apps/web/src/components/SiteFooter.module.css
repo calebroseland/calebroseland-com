@@ -130,6 +130,16 @@
     display: inline-flex;
   }
 
+  /* Wrappers that take the hover's zoom; the label grows away from its icon (motion/presets.ts). */
+  .icon {
+    display: inline-flex;
+  }
+
+  .link .label {
+    display: inline-block;
+    transform-origin: left center;
+  }
+
   /* Content-sized, so its snapshot matches the card link it pairs with and only moves and scales. */
   /* Same padding in both layouts, so the icon stays put when the label comes and goes. */
   .link {

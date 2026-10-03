@@ -19,21 +19,8 @@
     color: var(--color-bg);
     font-size: var(--font-size-sm);
     line-height: var(--leading-tight);
+    /* Motion pops it from the arrow (motion/presets.ts). */
     transform-origin: var(--transform-origin);
-    transition:
-      opacity var(--duration-fast) var(--ease-out),
-      scale var(--duration-fast) var(--ease-out);
-
-    &[data-starting-style],
-    &[data-ending-style] {
-      opacity: 0;
-      scale: 0.96;
-    }
-
-    /* Moving between tooltips in the group: swap, no fade. */
-    &[data-instant] {
-      transition: none;
-    }
   }
 
   /* A small triangle on the side facing the trigger. */

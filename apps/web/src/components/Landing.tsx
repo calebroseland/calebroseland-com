@@ -23,6 +23,7 @@ import { hasContact } from "../content/profile.ts";
 import { useSignedIn } from "../editor/auth/hooks.ts";
 import type { ProfileSource } from "../editor/profile.ts";
 import { notify } from "../editor/Toast.tsx";
+import { useLinkHover } from "../hooks/useLinkHover.ts";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
 import { useSiteGo } from "./backToCard.ts";
@@ -87,21 +88,28 @@ function ExternalLink({ href, children, ...rest }: ComponentProps<"a"> & { href:
   );
 }
 
-/** A root-relative url is a page on this site, so it goes through the router (and its basepath). */
-/** Every link on the card wears the same icon, in the same slot, so labels line up down a column. */
+/** Every link on the card wears the same icon, in the same slot, so labels line up down a column.
+    A root-relative url is a page on this site, so it goes through the router (and its basepath). */
 function CardLink({ link, iconOnly = false }: { link: ProfileLink; iconOnly?: boolean }) {
+  const hoverRef = useLinkHover("icon");
   const body = (
     <>
-      <Icon name={link.icon} size="xl" className={styles.linkIcon} />
-      <span className={styles.label}>{link.label}</span>
+      <span className={styles.linkIcon} data-hover="icon">
+        <Icon name={link.icon} size="xl" />
+      </span>
+      <span className={styles.label} data-hover="label">
+        {link.label}
+      </span>
     </>
   );
   const anchor = link.url.startsWith("/") ? (
-    <Link to={link.url} className={styles.link}>
+    <Link ref={hoverRef} to={link.url} className={styles.link}>
       {body}
     </Link>
   ) : (
-    <ExternalLink href={link.url}>{body}</ExternalLink>
+    <ExternalLink ref={hoverRef} href={link.url}>
+      {body}
+    </ExternalLink>
   );
   return iconOnly ? <Tip label={link.label}>{anchor}</Tip> : anchor;
 }

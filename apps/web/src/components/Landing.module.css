@@ -270,7 +270,14 @@
   /* A fixed slot keeps every label on the same line down a column, whatever the icon's shape. */
   .linkIcon {
     flex: none;
+    display: inline-flex;
     inline-size: var(--icon-xl);
+  }
+
+  /* Inline-block so the hover's zoom applies, growing away from the icon (motion/presets.ts). */
+  .link .label {
+    display: inline-block;
+    transform-origin: left center;
   }
 
   .link {

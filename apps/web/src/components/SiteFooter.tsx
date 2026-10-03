@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import type { MouseEvent, ReactElement } from "react";
 import { pages } from "../content/entries.ts";
 import { hasContact } from "../content/profile.ts";
+import { useLinkHover } from "../hooks/useLinkHover.ts";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { useSectionHeading } from "../hooks/useSectionHeading.ts";
 import { isPlainClick, useBackToCard } from "./backToCard.ts";
@@ -158,11 +159,16 @@ function FooterGroup({
 }
 
 function FooterLink({ link, group, index }: { link: ProfileLink; group: number; index: number }) {
-  const props = { className: styles.link, style: footerLinkName(group, index) };
+  const hoverRef = useLinkHover("icon");
+  const props = { ref: hoverRef, className: styles.link, style: footerLinkName(group, index) };
   const body = (
     <>
-      <Icon name={link.icon} size="sm" className={styles.icon} />
-      <span className={styles.label}>{link.label}</span>
+      <span className={styles.icon} data-hover="icon">
+        <Icon name={link.icon} size="sm" />
+      </span>
+      <span className={styles.label} data-hover="label">
+        {link.label}
+      </span>
     </>
   );
   return link.url.startsWith("/") ? (

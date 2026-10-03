@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { usePopupMotion } from "../hooks/usePopupMotion.ts";
 import styles from "./Tip.module.css";
 
 /* One delay group for the whole site: a tooltip opens quickly, and once one is showing, moving to the
@@ -31,12 +32,19 @@ export function Tip({
   children: ReactElement;
 }) {
   const hold = useTouchHold();
+  const motion = usePopupMotion("tip");
   return (
-    <Tooltip.Root open={hold.open} onOpenChange={hold.onOpenChange}>
+    <Tooltip.Root
+      open={hold.open}
+      onOpenChange={(open) => {
+        motion.onOpenChange(open);
+        hold.onOpenChange(open);
+      }}
+    >
       <Tooltip.Trigger render={children} className={styles.trigger} {...hold.trigger} />
       <Tooltip.Portal>
         <Tooltip.Positioner className={styles.positioner} side={side} sideOffset={8}>
-          <Tooltip.Popup className={styles.popup}>
+          <Tooltip.Popup ref={motion.ref} className={styles.popup}>
             {label}
             <Tooltip.Arrow className={styles.arrow} />
           </Tooltip.Popup>
