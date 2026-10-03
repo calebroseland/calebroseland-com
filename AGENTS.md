@@ -53,4 +53,4 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 | local | http://localhost:5173 | `mise run dev` |
 | staging | https://next.calebroseland.com | push to `next` |
 | production | https://calebroseland.com | push to `master` (after cutover) |
-| backup | https://calebroseland.github.io/calebroseland-com/ | every deploy, GitHub Pages, static only |
+| backup | https://calebroseland.dev | every deploy, GitHub Pages, static only |

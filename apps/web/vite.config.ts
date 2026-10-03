@@ -13,7 +13,7 @@ const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 /* Two build targets from one config:
    - default: SPA + Worker via the Cloudflare plugin (production, staging, local dev)
-   - pages:   SPA only, path-prefixed, for the GitHub Pages backup. No Worker. */
+   - pages:   SPA only, for the GitHub Pages backup at calebroseland.dev. No Worker. */
 export default defineConfig({
   base,
   define: {

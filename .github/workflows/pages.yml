@@ -1,6 +1,6 @@
 name: pages
 
-# Reusable: builds the path-prefixed static variant and publishes it to GitHub Pages.
+# Reusable: builds the static variant and publishes it to GitHub Pages, served at calebroseland.dev.
 # Fully independent of Cloudflare; the site works here even if Workers or Cloudflare DNS are down.
 on:
   workflow_call:

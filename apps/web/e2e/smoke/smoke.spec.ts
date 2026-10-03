@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 /* Post-deploy checks against a live URL. Kept tiny and fast; @smoke tag for filtering. Paths are
-   relative, so a base with a path (the GitHub Pages backup, /calebroseland-com/) is kept. */
+   relative, so a base with a path is kept if a deploy ever has one. */
 test.describe("@smoke", () => {
   test("landing renders", async ({ page }) => {
     await page.goto("./");
