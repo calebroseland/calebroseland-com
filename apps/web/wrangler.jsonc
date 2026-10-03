@@ -12,7 +12,7 @@
   "vars": {
     "ENVIRONMENT": "production",
     "SITE_ORIGIN": "https://calebroseland.com",
-    "ALLOWED_ORIGINS": "https://calebroseland.com,https://calebroseland.github.io",
+    "ALLOWED_ORIGINS": "https://calebroseland.com,https://calebroseland.dev",
     // Public. Set per environment once the GitHub App exists; the secret is set with `wrangler secret put`.
     "GITHUB_CLIENT_ID": "",
     // Feature flags: "on" enables. Editing through GitHub (OAuth, pasted tokens, the fake GitHub) is
@@ -27,7 +27,7 @@
       "vars": {
         "ENVIRONMENT": "staging",
         "SITE_ORIGIN": "https://next.calebroseland.com",
-        "ALLOWED_ORIGINS": "https://next.calebroseland.com,https://calebroseland.github.io",
+        "ALLOWED_ORIGINS": "https://next.calebroseland.com,https://calebroseland.dev",
         "GITHUB_CLIENT_ID": "",
         "FEATURE_GITHUB_EDITING": "off"
       }

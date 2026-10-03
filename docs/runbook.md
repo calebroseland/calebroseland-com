@@ -9,7 +9,7 @@ Operational procedures for calebroseland.com. Mirrors the cutover and rollback s
 | local | `http://localhost:5173` | `mise run dev` |
 | staging | `https://next.calebroseland.com` | push to `next`, or `workflow_dispatch` |
 | production | `https://calebroseland.com` | push to `master` |
-| backup | `https://calebroseland.github.io/calebroseland-com/` | every deploy, GitHub Pages, static only |
+| backup | `https://calebroseland.dev` | every deploy, GitHub Pages (custom domain), static only |
 
 `GET /api/health` returns the deployed commit sha, the environment name, and the time. It is the fastest way to tell which build is live.
 
@@ -37,7 +37,7 @@ Valid until the Netlify site is deleted at step 6 above.
 2. Recreate `A calebroseland.com → 104.198.14.52` in Cloudflare, DNS only, grey cloud.
 3. Recovery is bound by the apex TTL, which is why step 1 of the cutover lowers it first.
 
-After Netlify is gone, the standing fallback is the GitHub Pages backup, which shares no runtime or DNS with Cloudflare. It is always live and smoke-tested on every deploy. In a Workers outage, link people to the `github.io` URL; pointing the apex at Pages is possible but takes about ten minutes for a certificate.
+After Netlify is gone, the standing fallback is the GitHub Pages backup at `calebroseland.dev`, which shares no runtime with Cloudflare, and no DNS as long as the `.dev` zone is hosted elsewhere. It is always live and smoke-tested on every deploy. In a Workers outage, link people to `calebroseland.dev` (the old `github.io` address redirects there); pointing the apex at Pages is possible but takes about ten minutes for a certificate.
 
 ## A bad deploy
 
