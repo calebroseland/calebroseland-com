@@ -329,8 +329,9 @@
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
 
+    /* Resting on sunken, which hover matches in light, so hover steps one further. */
     &:hover {
-      background: var(--color-surface-hover);
+      background: var(--color-surface-active);
     }
 
     &:active {
