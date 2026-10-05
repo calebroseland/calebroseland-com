@@ -31,13 +31,13 @@ export function Tip({
   side?: "top" | "bottom" | "left" | "right";
   children: ReactElement;
 }) {
-  const hold = useTouchHold();
   const motion = usePopupMotion("tip");
+  const hold = useTouchHold(() => motion.onOpenChange(false));
   return (
     <Tooltip.Root
       open={hold.open}
-      onOpenChange={(open) => {
-        motion.onOpenChange(open);
+      onOpenChange={(open, details) => {
+        motion.onOpenChange(open, details);
         hold.onOpenChange(open);
       }}
     >
@@ -59,7 +59,7 @@ const SHOWN_MS = 1500;
 
 /* Touch has no hover, so holding a control shows its tip, as native tooltips do on Android. The press
    that ends the hold is spent on the tip: it neither follows the link nor opens a context menu. */
-function useTouchHold() {
+function useTouchHold(onHide: () => void) {
   const [open, setOpen] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const held = useRef(false);
@@ -88,7 +88,12 @@ function useTouchHold() {
       },
       onPointerUp: () => {
         cancel();
-        if (held.current) timer.current = setTimeout(() => setOpen(false), SHOWN_MS);
+        if (!held.current) return;
+        timer.current = setTimeout(() => {
+          // Closed here rather than by Base UI, so the tip's exit is played from here too.
+          onHide();
+          setOpen(false);
+        }, SHOWN_MS);
       },
       onPointerCancel: cancel,
       onContextMenu: swallow,

@@ -21,9 +21,11 @@ export function usePopupMotion(kind: PopupKind) {
   const node = useRef<HTMLElement | null>(null);
   const entered = useRef<WeakSet<HTMLElement>>(new WeakSet());
   const running = useRef<Running>([]);
+  const retrying = useRef(0);
 
   const play = useCallback(
     (start: Start, retry = true) => {
+      cancelAnimationFrame(retrying.current);
       const el = node.current;
       // Moving along a tooltip group swaps at once; menus wear data-instant too, so only tips skip.
       const instant = kind === "tip" && el?.hasAttribute("data-instant");
@@ -32,7 +34,7 @@ export function usePopupMotion(kind: PopupKind) {
         if (start !== enterPopup) return;
         // An opening popup may become visible a frame after its open state changes; past that, it
         // opens without the entrance, and must not keep the faded-out end of its last exit.
-        if (retry) requestAnimationFrame(() => play(start, false));
+        if (retry) retrying.current = requestAnimationFrame(() => play(start, false));
         else resetPopup(el);
         return;
       }
@@ -57,6 +59,15 @@ export function usePopupMotion(kind: PopupKind) {
   return {
     ref,
     /** Call from the root's onOpenChange; reopening a kept-mounted popup springs it in again. */
-    onOpenChange: (open: boolean) => play(open ? enterPopup : leavePopup),
+    onOpenChange: (open: boolean, details?: { reason?: string }) => {
+      // A tip closed because a sibling in its group opened (reason "none") swaps out at once; Base UI
+      // marks it data-instant only after this call.
+      if (!open && kind === "tip" && details?.reason === "none") {
+        for (const a of running.current) a.cancel();
+        running.current = [];
+        return;
+      }
+      play(open ? enterPopup : leavePopup);
+    },
   };
 }

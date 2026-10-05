@@ -49,6 +49,17 @@ describe("usePopupMotion", () => {
     expect(enterPopup).not.toHaveBeenCalled();
   });
 
+  it("drops a tooltip at once when a sibling in its group opens, without its exit", () => {
+    const { result } = renderHook(() => usePopupMotion("tip"));
+    act(() => result.current.ref(popup().el));
+    const [entrance] = vi.mocked(enterPopup).mock.results[0]?.value ?? [];
+    act(() => result.current.onOpenChange(false, { reason: "none" }));
+    expect(leavePopup).not.toHaveBeenCalled();
+    expect(entrance?.cancel).toHaveBeenCalled();
+    act(() => result.current.onOpenChange(false, { reason: "trigger-hover" }));
+    expect(leavePopup).toHaveBeenCalledTimes(1);
+  });
+
   it("does nothing with reduced motion", () => {
     vi.mocked(useReduceMotion).mockReturnValue(true);
     const { result } = renderHook(() => usePopupMotion("tip"));
@@ -87,6 +98,20 @@ describe("usePopupMotion", () => {
     state.shown = true;
     act(() => vi.advanceTimersToNextFrame());
     expect(enterPopup).toHaveBeenCalledWith(el, "dropdown");
+    vi.useRealTimers();
+  });
+
+  it("drops a pending entrance when the popup closes within the frame", () => {
+    vi.useFakeTimers({ toFake: ["requestAnimationFrame", "cancelAnimationFrame"] });
+    const { result } = renderHook(() => usePopupMotion("dropdown"));
+    const { el, state } = popup({}, false);
+    act(() => result.current.ref(el));
+    act(() => vi.advanceTimersToNextFrame());
+    act(() => result.current.onOpenChange(true));
+    act(() => result.current.onOpenChange(false));
+    state.shown = true;
+    act(() => vi.advanceTimersToNextFrame());
+    expect(enterPopup).not.toHaveBeenCalled();
     vi.useRealTimers();
   });
 

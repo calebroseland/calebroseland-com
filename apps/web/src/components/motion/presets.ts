@@ -43,14 +43,25 @@ const leaveFrames: Record<PopupKind, DOMKeyframesDefinition> = {
   tip: { opacity: 0, scale: 0.9 },
 };
 
-/** Lifts a popup out of its trigger; menu items and select options follow one after another. */
+// Past this many rows the cascade would leave a long list blank for seconds; the rest arrive with the popup.
+const STAGGERED_ROWS = 12;
+
+/** Lifts a popup out of its trigger; its first menu items or select options follow one after another. */
 export function enterPopup(node: HTMLElement, kind: PopupKind): Animation[] {
-  const running = [
-    animate(node, enterFrames[kind](node.dataset.side), kind === "dropdown" ? pop : tipPop),
-  ];
+  const entrance = animate(
+    node,
+    enterFrames[kind](node.dataset.side),
+    kind === "dropdown" ? pop : tipPop,
+  );
+  // A settled entrance leaves its last frame inline; a filter there would trap fixed-position children.
+  void entrance.then(() => resetPopup(node));
+  const running = [entrance];
   const rows =
     kind === "dropdown"
-      ? node.querySelectorAll<HTMLElement>('[role^="menuitem"], [role="option"]')
+      ? [...node.querySelectorAll<HTMLElement>('[role^="menuitem"], [role="option"]')].slice(
+          0,
+          STAGGERED_ROWS,
+        )
       : [];
   if (rows.length > 0) {
     running.push(
