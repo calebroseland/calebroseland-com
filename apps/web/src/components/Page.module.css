@@ -113,15 +113,27 @@
     min-block-size: 2.75rem;
     display: inline-flex;
     align-items: center;
+    position: relative;
+    transition: color var(--duration-fast) var(--ease-out);
 
     &:hover,
     &[data-status="active"] {
       color: var(--color-text);
     }
+  }
 
-    &[data-status="active"] {
-      text-decoration: underline;
-      text-underline-offset: 0.3em;
+  /* Hidden at rest and drawn under the current page; hover springs it in (motion/presets.ts). A border,
+     not a background, so forced-colors mode still shows which page is current. */
+  .underline {
+    position: absolute;
+    inset-inline: var(--space-1);
+    inset-block-end: 0.55rem;
+    border-block-end: 2px solid currentColor;
+    transform-origin: left center;
+    scale: 0 1;
+
+    [data-status="active"] > & {
+      scale: 1 1;
     }
   }
 

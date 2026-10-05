@@ -43,17 +43,9 @@
     color: var(--color-text);
     font-size: var(--font-size-base);
     text-align: start;
+    /* Motion lifts it out of the trigger and staggers the rows (motion/presets.ts). */
     transform-origin: var(--transform-origin);
-    transition:
-      opacity var(--duration-fast) var(--ease-out),
-      scale var(--duration-fast) var(--ease-out);
     outline: none;
-
-    &[data-starting-style],
-    &[data-ending-style] {
-      opacity: 0;
-      scale: 0.96;
-    }
   }
 
   .groupLabel {
@@ -74,9 +66,13 @@
     color: var(--color-text-muted);
     cursor: pointer;
     outline: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
 
+    /* The menu is already a raised surface (the same tone as hover in dark), so rows step up once more. */
     &[data-highlighted] {
-      background: var(--color-surface-hover);
+      background: var(--color-surface-active);
       color: var(--color-text);
     }
 

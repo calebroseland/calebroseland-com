@@ -8,6 +8,7 @@ import { capabilitiesOf } from "../editor/data/backend.ts";
 import { useAccountLinks } from "../editor/navigation.ts";
 import { useDialogState } from "../hooks/useDialogState.ts";
 import { useDisclosure } from "../hooks/useDisclosure.ts";
+import { usePopupMotion } from "../hooks/usePopupMotion.ts";
 import { type CustomTheme, defaultTheme } from "../theme/custom.ts";
 import { useThemeState } from "../theme/hooks.ts";
 import {
@@ -38,6 +39,7 @@ export function UserMenu() {
   const links = useAccountLinks();
   const signOut = useSignOut();
   const menu = useDisclosure();
+  const motion = usePopupMotion("dropdown");
   const signedIn = current.status === "authenticated";
   // Asked only once the menu opens, so readers who never open it never call the Worker for it.
   const methods = useSignInMethods(menu.open && !signedIn);
@@ -57,7 +59,13 @@ export function UserMenu() {
 
   return (
     <>
-      <Menu.Root open={menu.open} onOpenChange={menu.setOpen}>
+      <Menu.Root
+        open={menu.open}
+        onOpenChange={(open) => {
+          motion.onOpenChange(open);
+          menu.setOpen(open);
+        }}
+      >
         <Tip label="Account and theme" side="bottom">
           <Menu.Trigger
             className={styles.button}
@@ -72,7 +80,7 @@ export function UserMenu() {
         </Tip>
         <Menu.Portal>
           <Menu.Positioner className={styles.positioner} side="bottom" align="end" sideOffset={6}>
-            <Menu.Popup className={styles.menu}>
+            <Menu.Popup className={styles.menu} ref={motion.ref}>
               <Menu.RadioGroup
                 value={preference}
                 onValueChange={(v: ThemePreference) => themeController.setPreference(v)}

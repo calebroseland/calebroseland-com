@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import { flushSync } from "react-dom";
 
+let current: ViewTransition | null = null;
+
 /* Same-document view transitions for changes that reflow the card. The browser snapshots the page
    before and after and morphs each named element between them, so a layout change (a column count, an
    alignment, the card's width) animates instead of snapping. `data-vt` on <html> names the transition
@@ -20,8 +22,12 @@ export function withViewTransition(
   const root = document.documentElement;
   root.dataset.vt = kind;
   const transition = document.startViewTransition(run);
+  current = transition;
+  // A transition started over this one skips it; clearing then would strip the new one's timings.
   void transition.finished.finally(() => {
-    if (root.dataset.vt === kind) delete root.dataset.vt;
+    if (current !== transition) return;
+    current = null;
+    delete root.dataset.vt;
   });
   return transition.updateCallbackDone;
 }

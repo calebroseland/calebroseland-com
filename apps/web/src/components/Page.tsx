@@ -2,6 +2,7 @@ import { Center } from "@crc/ui";
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { MouseEvent, ReactNode } from "react";
 import { siteProfile } from "../content/profile.ts";
+import { useLinkHover } from "../hooks/useLinkHover.ts";
 import { useStickyTop } from "../hooks/useStickyTop.ts";
 import { isPlainClick, useBackToCard } from "./backToCard.ts";
 import styles from "./Page.module.css";
@@ -29,6 +30,7 @@ export function Page({
   const atHome = useAtHome();
   const barRef = useStickyTop<HTMLElement>();
   const toCard = useBackToCard();
+  const underline = useLinkHover("underline");
 
   // A plain click on the brand at home runs the reverse morph; modified clicks open the card in a new
   // tab, and everywhere else the brand is an ordinary link home.
@@ -52,11 +54,13 @@ export function Page({
           </Link>
         </div>
         <nav className={styles.nav} aria-label="Site">
-          <Link to="/posts" className={styles.navLink}>
+          <Link ref={underline} to="/posts" className={styles.navLink}>
             Posts
+            <span className={styles.underline} data-hover="underline" aria-hidden="true" />
           </Link>
-          <Link to="/$slug" params={{ slug: "about" }} className={styles.navLink}>
+          <Link ref={underline} to="/$slug" params={{ slug: "about" }} className={styles.navLink}>
             About
+            <span className={styles.underline} data-hover="underline" aria-hidden="true" />
           </Link>
           <SearchButton />
           <UserMenu />

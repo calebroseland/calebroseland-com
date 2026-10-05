@@ -253,44 +253,42 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
       <p className={styles.muted}>
         <Link to="/editor">← Editor</Link>
       </p>
-      <div className={styles.editorContainer}>
-        <div className={styles.editorLayout}>
-          <Editor
-            key={reload.generation}
-            initialMarkdown={buffer.markdown}
-            onChange={controller.setMarkdown}
-            onImageFiles={onImageFiles}
-            previewSrc={previewSrc}
-            apiRef={api}
-          />
-          <aside aria-label="Post details and images">
-            <div className={styles.tabs} role="tablist" aria-label="Panel">
-              {(["meta", "media"] as const).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  role="tab"
-                  id={`tab-${p}`}
-                  aria-selected={panel === p}
-                  aria-controls={`panel-${p}`}
-                  className={styles.tab}
-                  onClick={() => show(p)}
-                >
-                  {p === "meta"
-                    ? "Details"
-                    : `Images${buffer.assets.length ? ` (${buffer.assets.length})` : ""}`}
-                </button>
-              ))}
-            </div>
-            <div id={`panel-${panel}`} role="tabpanel" aria-labelledby={`tab-${panel}`}>
-              {panel === "meta" ? (
-                <MetaPanel buffer={buffer} controller={controller} />
-              ) : (
-                <AssetsPanel buffer={buffer} controller={controller} onAltChange={onAltChange} />
-              )}
-            </div>
-          </aside>
-        </div>
+      <div className={styles.editorLayout}>
+        <Editor
+          key={reload.generation}
+          initialMarkdown={buffer.markdown}
+          onChange={controller.setMarkdown}
+          onImageFiles={onImageFiles}
+          previewSrc={previewSrc}
+          apiRef={api}
+        />
+        <aside aria-label="Post details and images">
+          <div className={styles.tabs} role="tablist" aria-label="Panel">
+            {(["meta", "media"] as const).map((p) => (
+              <button
+                key={p}
+                type="button"
+                role="tab"
+                id={`tab-${p}`}
+                aria-selected={panel === p}
+                aria-controls={`panel-${p}`}
+                className={styles.tab}
+                onClick={() => show(p)}
+              >
+                {p === "meta"
+                  ? "Details"
+                  : `Images${buffer.assets.length ? ` (${buffer.assets.length})` : ""}`}
+              </button>
+            ))}
+          </div>
+          <div id={`panel-${panel}`} role="tabpanel" aria-labelledby={`tab-${panel}`}>
+            {panel === "meta" ? (
+              <MetaPanel buffer={buffer} controller={controller} />
+            ) : (
+              <AssetsPanel buffer={buffer} controller={controller} onAltChange={onAltChange} />
+            )}
+          </div>
+        </aside>
       </div>
       <ConfirmDialog
         open={conflict.isOpen}

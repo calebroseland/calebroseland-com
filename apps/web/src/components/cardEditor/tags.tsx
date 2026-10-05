@@ -7,6 +7,7 @@ import { Switch } from "@base-ui/react/switch";
 import { DropIndicator, useItemRegistration, useListReorder } from "@crc/interaction";
 import { Icon } from "@crc/ui";
 import { type RefObject, useId, useState } from "react";
+import { usePopupMotion } from "../../hooks/usePopupMotion.ts";
 import { Tip } from "../Tip.tsx";
 import styles from "./CardEditor.module.css";
 import { Handle, IconSelect, TextField } from "./fields.tsx";
@@ -169,14 +170,15 @@ function TagSettings({
   error: string | undefined;
   onChange: (tag: EditTag) => void;
 }) {
+  const motion = usePopupMotion("dropdown");
   return (
-    <Popover.Root>
+    <Popover.Root onOpenChange={motion.onOpenChange}>
       <Popover.Trigger className={styles.remove} aria-label={`Settings for ${name}`}>
         <Icon name="lucide:pencil" size="xs" />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner className={styles.floating} side="bottom" align="start" sideOffset={6}>
-          <Popover.Popup className={styles.popup}>
+          <Popover.Popup ref={motion.ref} className={styles.popup}>
             <Popover.Title className={styles.legend}>Focus area</Popover.Title>
             <TextField
               label="Label"

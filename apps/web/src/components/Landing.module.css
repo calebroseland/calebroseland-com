@@ -270,7 +270,14 @@
   /* A fixed slot keeps every label on the same line down a column, whatever the icon's shape. */
   .linkIcon {
     flex: none;
+    display: inline-flex;
     inline-size: var(--icon-xl);
+  }
+
+  /* Inline-block so the hover's zoom applies, growing away from the icon (motion/presets.ts). */
+  .link .label {
+    display: inline-block;
+    transform-origin: left center;
   }
 
   .link {
@@ -310,32 +317,35 @@
 
   .more {
     display: block;
-    margin: var(--space-2) auto 0;
+    inline-size: 100%;
+    margin-block-start: var(--space-2);
     min-block-size: 2.75rem;
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-md);
+    background: var(--color-surface-sunken);
     color: var(--color-text);
     font-size: var(--font-size-lg);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
     transition:
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
 
+    /* Resting on sunken, which hover matches in light, so hover steps one further. */
     &:hover {
-      background: var(--color-surface-hover);
+      background: var(--color-surface-active);
     }
 
-    [data-expanded] > & {
-      inline-size: 100%;
-      background: var(--color-surface-sunken);
-    }
-
-    /* After the expanded rule, which it must beat at equal specificity. */
     &:active {
       background: var(--color-accent-subtle);
       color: var(--color-accent-text);
     }
+  }
+
+  /* Its own snapshot, so the words swap in place while the bar stretches; inline-block, which also
+     keeps the button's underline from reaching it, so it underlines itself. */
+  .moreLabel {
+    display: inline-block;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   .back {
@@ -417,12 +427,10 @@
     object-position: left center;
   }
 
-  /* The expanded toggle is a full-width bar; clipped to its growing box, it widens with the card. */
-  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-group(card-more) {
-    overflow: clip;
-    border-radius: var(--radius-md);
-  }
-
+  /* The toggle bar is one plain surface in both states, so it stretches with the card like the card's
+     own; its label travels apart at its natural size. */
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-old(card-more),
+  :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-new(card-more),
   :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-old(site-card),
   :root:is([data-vt="expand"], [data-vt="edit"])::view-transition-new(site-card) {
     object-fit: fill;

@@ -52,6 +52,14 @@ describe("SiteFooter", () => {
     expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute("href", "/contact");
   });
 
+  it("a held Enter toggles the footer once, as Space does", async () => {
+    renderFooter();
+    const toggle = await screen.findByRole("button", { name: "Expand the footer" });
+    // fireEvent returns false when the handler prevented the default, here the button's click.
+    expect(fireEvent.keyDown(toggle, { key: "Enter" })).toBe(true);
+    expect(fireEvent.keyDown(toggle, { key: "Enter", repeat: true })).toBe(false);
+  });
+
   it("expanded, an inline group stays a row of icons while the others show labels", async () => {
     renderFooter();
     fireEvent.click(await screen.findByRole("button", { name: "Expand the footer" }));

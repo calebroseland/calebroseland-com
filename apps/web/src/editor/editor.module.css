@@ -295,14 +295,6 @@
     display: grid;
     gap: var(--space-6);
     grid-template-columns: minmax(0, 1fr);
-
-    @container (min-width: 56rem) {
-      grid-template-columns: minmax(0, 1fr) 20rem;
-    }
-  }
-
-  .editorContainer {
-    container-type: inline-size;
   }
 
   .panel {
@@ -529,6 +521,8 @@
     box-shadow: var(--shadow-md);
     z-index: var(--z-popover);
     outline: none;
+    /* Motion grows it out of its trigger (motion/presets.ts). */
+    transform-origin: var(--transform-origin);
   }
 
   .menuItem {
@@ -540,8 +534,9 @@
     min-block-size: 2.5rem;
     cursor: pointer;
 
+    /* Raised popup: hover would match its own surface in dark, so rows step up once more. */
     &[data-highlighted] {
-      background: var(--color-surface-hover);
+      background: var(--color-surface-active);
     }
 
     &[data-disabled] {

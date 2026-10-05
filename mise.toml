@@ -50,7 +50,7 @@ run = "npm run smoke -w apps/web"
 run = "knip"
 
 [tasks.size]
-run = "size-limit"
+run = ["size-limit", "node tools/first-load-size.ts"]
 
 [tasks.check]
 description = "The gate: lint, typecheck, unit tests"

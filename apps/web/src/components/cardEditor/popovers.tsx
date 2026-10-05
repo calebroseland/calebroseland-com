@@ -2,6 +2,7 @@ import { Field } from "@base-ui/react/field";
 import { Popover } from "@base-ui/react/popover";
 import { Switch } from "@base-ui/react/switch";
 import { Icon } from "@crc/ui";
+import { usePopupMotion } from "../../hooks/usePopupMotion.ts";
 import styles from "./CardEditor.module.css";
 import type { EditGroup } from "./model.ts";
 
@@ -21,14 +22,15 @@ export function GroupPopover({
   onMove: (delta: -1 | 1) => void;
   onRemove: () => void;
 }) {
+  const motion = usePopupMotion("dropdown");
   return (
-    <Popover.Root>
+    <Popover.Root onOpenChange={motion.onOpenChange}>
       <Popover.Trigger className={styles.options} aria-label={`Options for group ${name}`}>
         <Icon name="lucide:settings-2" size="sm" />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner className={styles.floating} side="bottom" align="end" sideOffset={6}>
-          <Popover.Popup className={styles.popup}>
+          <Popover.Popup ref={motion.ref} className={styles.popup}>
             <Popover.Title className={styles.legend}>{name}</Popover.Title>
             <Field.Root className={styles.switchRow}>
               <Field.Label className={styles.label}>Icons in one row</Field.Label>
