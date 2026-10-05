@@ -39,7 +39,7 @@ export function UserMenu() {
   const links = useAccountLinks();
   const signOut = useSignOut();
   const menu = useDisclosure();
-  const motion = usePopupMotion("menu");
+  const motion = usePopupMotion("dropdown");
   const signedIn = current.status === "authenticated";
   // Asked only once the menu opens, so readers who never open it never call the Worker for it.
   const methods = useSignInMethods(menu.open && !signedIn);

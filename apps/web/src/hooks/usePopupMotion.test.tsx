@@ -1,20 +1,24 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { enterPopup, leavePopup } from "../components/motion/presets.ts";
+import { enterPopup, leavePopup, resetPopup } from "../components/motion/presets.ts";
 import { usePopupMotion } from "./usePopupMotion.ts";
 import { useReduceMotion } from "./useReduceMotion.ts";
 
 vi.mock("../components/motion/presets.ts", () => ({
   canAnimate: true,
-  enterPopup: vi.fn(() => [{ stop: vi.fn() }]),
-  leavePopup: vi.fn(() => [{ stop: vi.fn() }]),
+  enterPopup: vi.fn(() => [{ cancel: vi.fn() }]),
+  leavePopup: vi.fn(() => [{ cancel: vi.fn() }]),
+  resetPopup: vi.fn(),
 }));
 vi.mock("./useReduceMotion.ts", () => ({ useReduceMotion: vi.fn(() => false) }));
 
-function popup(attrs: Record<string, string> = {}) {
+/** A popup element; `shown` stands in for layout, which jsdom does not do. */
+function popup(attrs: Record<string, string> = {}, shown = true) {
   const el = document.createElement("div");
   for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-  return el;
+  const state = { shown };
+  el.checkVisibility = () => state.shown;
+  return { el, state };
 }
 
 describe("usePopupMotion", () => {
@@ -25,39 +29,76 @@ describe("usePopupMotion", () => {
   });
 
   it("springs a popup in on mount and out on close", () => {
-    const { result } = renderHook(() => usePopupMotion("menu"));
-    const el = popup();
+    const { result } = renderHook(() => usePopupMotion("dropdown"));
+    const { el } = popup();
     act(() => result.current.ref(el));
-    expect(enterPopup).toHaveBeenCalledWith(el, "menu");
+    expect(enterPopup).toHaveBeenCalledWith(el, "dropdown");
     act(() => result.current.onOpenChange(false));
-    expect(leavePopup).toHaveBeenCalledWith(el, "menu");
+    expect(leavePopup).toHaveBeenCalledWith(el, "dropdown");
   });
 
   it("animates a click-opened menu, which Base UI also marks data-instant", () => {
-    const { result } = renderHook(() => usePopupMotion("menu"));
-    act(() => result.current.ref(popup({ "data-instant": "click" })));
+    const { result } = renderHook(() => usePopupMotion("dropdown"));
+    act(() => result.current.ref(popup({ "data-instant": "click" }).el));
     expect(enterPopup).toHaveBeenCalledTimes(1);
   });
 
   it("swaps a tooltip at once when moving along a group", () => {
     const { result } = renderHook(() => usePopupMotion("tip"));
-    act(() => result.current.ref(popup({ "data-instant": "delay" })));
+    act(() => result.current.ref(popup({ "data-instant": "delay" }).el));
     expect(enterPopup).not.toHaveBeenCalled();
   });
 
   it("does nothing with reduced motion", () => {
     vi.mocked(useReduceMotion).mockReturnValue(true);
     const { result } = renderHook(() => usePopupMotion("tip"));
-    act(() => result.current.ref(popup()));
+    act(() => result.current.ref(popup().el));
     act(() => result.current.onOpenChange(false));
     expect(enterPopup).not.toHaveBeenCalled();
     expect(leavePopup).not.toHaveBeenCalled();
   });
 
   it("keeps one ref across renders, so an open popup never replays its entrance", () => {
-    const { result, rerender } = renderHook(() => usePopupMotion("menu"));
+    const { result, rerender } = renderHook(() => usePopupMotion("dropdown"));
     const first = result.current.ref;
     rerender();
     expect(result.current.ref).toBe(first);
+  });
+
+  it("does not replay the entrance when Base UI re-attaches the same element", () => {
+    const { result } = renderHook(() => usePopupMotion("dropdown"));
+    const { el } = popup();
+    act(() => result.current.ref(el));
+    act(() => result.current.ref(null));
+    act(() => result.current.ref(el));
+    expect(enterPopup).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves a hidden, kept-mounted popup alone, and springs it in once it shows", () => {
+    vi.useFakeTimers({ toFake: ["requestAnimationFrame"] });
+    const { result } = renderHook(() => usePopupMotion("dropdown"));
+    const { el, state } = popup({}, false);
+    act(() => result.current.ref(el));
+    act(() => result.current.onOpenChange(false));
+    expect(enterPopup).not.toHaveBeenCalled();
+    expect(leavePopup).not.toHaveBeenCalled();
+
+    act(() => result.current.onOpenChange(true));
+    state.shown = true;
+    act(() => vi.advanceTimersToNextFrame());
+    expect(enterPopup).toHaveBeenCalledWith(el, "dropdown");
+    vi.useRealTimers();
+  });
+
+  it("shows a popup that stays hidden past a frame plainly, without its last exit's fade", () => {
+    vi.useFakeTimers({ toFake: ["requestAnimationFrame"] });
+    vi.mocked(resetPopup).mockClear();
+    const { result } = renderHook(() => usePopupMotion("dropdown"));
+    const { el } = popup({}, false);
+    act(() => result.current.ref(el));
+    act(() => vi.advanceTimersToNextFrame());
+    expect(enterPopup).not.toHaveBeenCalled();
+    expect(resetPopup).toHaveBeenCalledWith(el);
+    vi.useRealTimers();
   });
 });

@@ -1,6 +1,7 @@
 import { Select } from "@base-ui/react/select";
 import { Icon } from "@crc/ui";
 import { type KeyboardEvent, type ReactNode, type RefObject, useId } from "react";
+import { usePopupMotion } from "../../hooks/usePopupMotion.ts";
 import styles from "./CardEditor.module.css";
 import { ICON_CHOICES } from "./model.ts";
 
@@ -169,8 +170,10 @@ export function IconSelect({
     ...(known || value === null ? [] : [{ value, label: value }]),
     ...ICON_CHOICES,
   ];
+  const motion = usePopupMotion("dropdown");
   return (
     <Select.Root
+      onOpenChange={motion.onOpenChange}
       value={value ?? NO_ICON}
       items={choices}
       onValueChange={(v) => v && onChange(v === NO_ICON ? null : (v as string))}
@@ -184,7 +187,7 @@ export function IconSelect({
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner className={styles.floating} sideOffset={4} alignItemWithTrigger={false}>
-          <Select.Popup className={styles.iconPopup}>
+          <Select.Popup ref={motion.ref} className={styles.iconPopup}>
             <Select.List>
               {choices.map((c) => (
                 <Select.Item key={c.value} value={c.value} className={styles.iconItem}>

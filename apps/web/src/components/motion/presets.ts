@@ -22,10 +22,10 @@ function fromTrigger(side: string | undefined, px: number): string {
   return `${-px}px 0`;
 }
 
-export type PopupKind = "menu" | "tip";
+export type PopupKind = "dropdown" | "tip";
 
 const enterFrames: Record<PopupKind, (side: string | undefined) => DOMKeyframesDefinition> = {
-  menu: (side) => ({
+  dropdown: (side) => ({
     opacity: [0, 1],
     scale: [0.92, 1],
     filter: ["blur(6px)", "blur(0px)"],
@@ -39,16 +39,19 @@ const enterFrames: Record<PopupKind, (side: string | undefined) => DOMKeyframesD
 };
 
 const leaveFrames: Record<PopupKind, DOMKeyframesDefinition> = {
-  menu: { opacity: 0, scale: 0.96, filter: "blur(4px)" },
+  dropdown: { opacity: 0, scale: 0.96, filter: "blur(4px)" },
   tip: { opacity: 0, scale: 0.9 },
 };
 
-/** Lifts a popup out of its trigger; a menu's rows follow one after another. */
+/** Lifts a popup out of its trigger; menu items and select options follow one after another. */
 export function enterPopup(node: HTMLElement, kind: PopupKind): Animation[] {
   const running = [
-    animate(node, enterFrames[kind](node.dataset.side), kind === "menu" ? pop : tipPop),
+    animate(node, enterFrames[kind](node.dataset.side), kind === "dropdown" ? pop : tipPop),
   ];
-  const rows = kind === "menu" ? node.querySelectorAll<HTMLElement>('[role^="menuitem"]') : [];
+  const rows =
+    kind === "dropdown"
+      ? node.querySelectorAll<HTMLElement>('[role^="menuitem"], [role="option"]')
+      : [];
   if (rows.length > 0) {
     running.push(
       animate(
@@ -63,6 +66,11 @@ export function enterPopup(node: HTMLElement, kind: PopupKind): Animation[] {
 
 export function leavePopup(node: HTMLElement, kind: PopupKind): Animation[] {
   return [animate(node, leaveFrames[kind], leave)];
+}
+
+/** Drops what a finished exit left on the element, so a popup shown without its entrance is visible. */
+export function resetPopup(node: HTMLElement): void {
+  for (const prop of ["opacity", "scale", "filter", "translate"]) node.style.removeProperty(prop);
 }
 
 /** A link that leads with an icon: the icon zooms slightly, and the label grows with it. */

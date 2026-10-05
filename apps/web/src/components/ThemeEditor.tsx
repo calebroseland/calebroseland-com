@@ -11,6 +11,7 @@ import { Icon } from "@crc/ui";
 import { type CSSProperties, type ReactNode, useEffect, useId, useState } from "react";
 import { HexColorInput, HexColorPicker } from "react-colorful";
 import { siteFonts } from "../content/theme.ts";
+import { usePopupMotion } from "../hooks/usePopupMotion.ts";
 import { contrastRatio, parseColor } from "../theme/contrast.ts";
 import {
   type CustomTheme,
@@ -109,12 +110,13 @@ function ColorField({
   onChange: (hex: string) => void;
 }) {
   const labelId = useId();
+  const motion = usePopupMotion("dropdown");
   return (
     <div className={styles.colorField}>
       <span id={labelId} className={styles.label}>
         {label}
       </span>
-      <Popover.Root>
+      <Popover.Root onOpenChange={motion.onOpenChange}>
         <Popover.Trigger className={styles.swatchButton} aria-label={`Pick ${label.toLowerCase()}`}>
           <span className={styles.swatch} style={{ background: value }} />
         </Popover.Trigger>
@@ -125,7 +127,7 @@ function ColorField({
             align="start"
             sideOffset={8}
           >
-            <Popover.Popup className={styles.pickerPopup} aria-label={label}>
+            <Popover.Popup ref={motion.ref} className={styles.pickerPopup} aria-label={label}>
               <HexColorPicker color={value} onChange={(hex) => onChange(sixDigit(hex))} />
             </Popover.Popup>
           </Popover.Positioner>
@@ -153,9 +155,11 @@ function SelectField<V extends string>({
   options: ReadonlyArray<{ value: V; label: string; font: string }>;
   onChange: (v: V) => void;
 }) {
+  const motion = usePopupMotion("dropdown");
   return (
     <Field.Root className={styles.field}>
       <Select.Root
+        onOpenChange={motion.onOpenChange}
         value={value}
         items={options.map((o) => ({ value: o.value, label: o.label }))}
         onValueChange={(v) => v && onChange(v as V)}
@@ -173,7 +177,7 @@ function SelectField<V extends string>({
             sideOffset={4}
             alignItemWithTrigger={false}
           >
-            <Select.Popup className={styles.selectPopup}>
+            <Select.Popup ref={motion.ref} className={styles.selectPopup}>
               <Select.List>
                 {options.map((o) => (
                   <Select.Item key={o.value} value={o.value} className={styles.selectItem}>

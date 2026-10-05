@@ -529,6 +529,8 @@
     box-shadow: var(--shadow-md);
     z-index: var(--z-popover);
     outline: none;
+    /* Motion grows it out of its trigger (motion/presets.ts). */
+    transform-origin: var(--transform-origin);
   }
 
   .menuItem {
@@ -540,8 +542,9 @@
     min-block-size: 2.5rem;
     cursor: pointer;
 
+    /* Raised popup: hover would match its own surface in dark, so rows step up once more. */
     &[data-highlighted] {
-      background: var(--color-surface-hover);
+      background: var(--color-surface-active);
     }
 
     &[data-disabled] {
