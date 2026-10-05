@@ -60,6 +60,22 @@ describe("usePopupMotion", () => {
     expect(leavePopup).toHaveBeenCalledTimes(1);
   });
 
+  it("follows an open flag for a popup closed from outside its root, entering once", () => {
+    const { result, rerender } = renderHook(({ open }) => usePopupMotion("dialog", open), {
+      initialProps: { open: false },
+    });
+    const { el } = popup();
+    rerender({ open: true });
+    act(() => result.current.ref(el));
+    rerender({ open: true });
+    expect(enterPopup).toHaveBeenCalledTimes(1);
+    rerender({ open: false });
+    expect(leavePopup).toHaveBeenCalledWith(el, "dialog");
+    // Reopened while its exit still runs, the same element springs back in.
+    rerender({ open: true });
+    expect(enterPopup).toHaveBeenCalledTimes(2);
+  });
+
   it("does nothing with reduced motion", () => {
     vi.mocked(useReduceMotion).mockReturnValue(true);
     const { result } = renderHook(() => usePopupMotion("tip"));

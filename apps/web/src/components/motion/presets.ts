@@ -22,7 +22,7 @@ function fromTrigger(side: string | undefined, px: number): string {
   return `${-px}px 0`;
 }
 
-export type PopupKind = "dropdown" | "tip";
+export type PopupKind = "dropdown" | "tip" | "dialog";
 
 const enterFrames: Record<PopupKind, (side: string | undefined) => DOMKeyframesDefinition> = {
   dropdown: (side) => ({
@@ -36,28 +36,36 @@ const enterFrames: Record<PopupKind, (side: string | undefined) => DOMKeyframesD
     scale: [0.7, 1],
     translate: [fromTrigger(side, 6), "0 0"],
   }),
+  // No trigger to grow from: it settles down from above, where the eye already is.
+  dialog: () => ({
+    opacity: [0, 1],
+    scale: [0.96, 1],
+    filter: ["blur(6px)", "blur(0px)"],
+    translate: ["0 -12px", "0 0"],
+  }),
 };
 
 const leaveFrames: Record<PopupKind, DOMKeyframesDefinition> = {
   dropdown: { opacity: 0, scale: 0.96, filter: "blur(4px)" },
   tip: { opacity: 0, scale: 0.9 },
+  dialog: { opacity: 0, scale: 0.98, filter: "blur(4px)", translate: "0 -8px" },
 };
 
 // Past this many rows the cascade would leave a long list blank for seconds; the rest arrive with the popup.
 const STAGGERED_ROWS = 12;
 
-/** Lifts a popup out of its trigger; its first menu items or select options follow one after another. */
+/** Lifts a popup out of its trigger (a dialog from above); its first menu items or options follow one after another. */
 export function enterPopup(node: HTMLElement, kind: PopupKind): Animation[] {
   const entrance = animate(
     node,
     enterFrames[kind](node.dataset.side),
-    kind === "dropdown" ? pop : tipPop,
+    kind === "tip" ? tipPop : pop,
   );
   // A settled entrance leaves its last frame inline; a filter there would trap fixed-position children.
   void entrance.then(() => resetPopup(node));
   const running = [entrance];
   const rows =
-    kind === "dropdown"
+    kind !== "tip"
       ? [...node.querySelectorAll<HTMLElement>('[role^="menuitem"], [role="option"]')].slice(
           0,
           STAGGERED_ROWS,

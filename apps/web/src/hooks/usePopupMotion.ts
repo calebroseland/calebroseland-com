@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import {
   canAnimate,
   enterPopup,
@@ -15,13 +15,15 @@ type Start = (el: HTMLElement, kind: PopupKind) => Running;
 const rendered = (el: HTMLElement) =>
   typeof el.checkVisibility === "function" ? el.checkVisibility() : el.getClientRects().length > 0;
 
-/** Springs a Base UI popup in when it mounts or reopens, and out when it closes. */
-export function usePopupMotion(kind: PopupKind) {
+/** Springs a Base UI popup in when it mounts or reopens, and out when it closes. Pass `open` for a popup
+    that also closes from outside its root's onOpenChange (a shortcut, a store), and skip onOpenChange. */
+export function usePopupMotion(kind: PopupKind, open?: boolean) {
   const reduce = useReduceMotion();
   const node = useRef<HTMLElement | null>(null);
   const entered = useRef<WeakSet<HTMLElement>>(new WeakSet());
   const running = useRef<Running>([]);
   const retrying = useRef(0);
+  const mounted = useRef(false);
 
   const play = useCallback(
     (start: Start, retry = true) => {
@@ -51,10 +53,23 @@ export function usePopupMotion(kind: PopupKind) {
       node.current = el;
       if (!el || entered.current.has(el)) return;
       entered.current.add(el);
+      mounted.current = true;
       play(enterPopup);
     },
     [play],
   );
+
+  // A layout effect runs before Base UI looks for exit animations, so it waits for this one.
+  const was = useRef(open);
+  useLayoutEffect(() => {
+    if (open === undefined || open === was.current) return;
+    was.current = open;
+    // Mounting in this same commit already played the entrance.
+    const justMounted = mounted.current;
+    mounted.current = false;
+    if (open && justMounted) return;
+    play(open ? enterPopup : leavePopup);
+  }, [open, play]);
 
   return {
     ref,

@@ -6,6 +6,7 @@ import type { KeyboardEvent } from "react";
 import { type CommandGroup, usePaletteView, useRunCommand } from "../commands/hooks.ts";
 import { palette } from "../commands/palette.ts";
 import { type Command, searchText } from "../commands/registry.ts";
+import { usePopupMotion } from "../hooks/usePopupMotion.ts";
 import styles from "./CommandPaletteDialog.module.css";
 
 /* Base UI's command palette pattern: a Dialog around an inline Autocomplete. A command either runs,
@@ -13,6 +14,7 @@ import styles from "./CommandPaletteDialog.module.css";
 export default function CommandPaletteDialog({ open }: { open: boolean }) {
   const view = usePaletteView(open);
   const run = useRunCommand();
+  const motion = usePopupMotion("dialog", open);
 
   const activate = (c: Command) => {
     if (c.page) view.enter(c);
@@ -30,7 +32,7 @@ export default function CommandPaletteDialog({ open }: { open: boolean }) {
       <Dialog.Portal>
         <Dialog.Backdrop className={styles.backdrop} />
         <Dialog.Viewport className={styles.viewport}>
-          <Dialog.Popup className={styles.popup} aria-label="Command palette">
+          <Dialog.Popup ref={motion.ref} className={styles.popup} aria-label="Command palette">
             <Autocomplete.Root
               open
               inline
