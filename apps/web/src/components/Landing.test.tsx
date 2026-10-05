@@ -120,6 +120,15 @@ describe("Landing", () => {
     await vi.waitFor(() => expect(within(nav()).getAllByRole("link")).toHaveLength(5));
   });
 
+  it("a held Enter toggles show more once, as Space does", async () => {
+    await renderLanding();
+    const toggle = screen.getByRole("button", { name: "show more" });
+    // fireEvent returns false when the handler prevented the default, here the button's click.
+    expect(fireEvent.keyDown(toggle, { key: "Enter" })).toBe(true);
+    expect(fireEvent.keyDown(toggle, { key: "Enter", repeat: true })).toBe(false);
+    expect(fireEvent.keyDown(toggle, { key: " ", repeat: true })).toBe(true);
+  });
+
   it("an inline group is a row of icons, each still named by its label", async () => {
     await renderLanding();
     const mastodon = within(nav()).getByRole("link", { name: /Mastodon/ });

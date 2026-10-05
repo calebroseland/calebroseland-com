@@ -1,5 +1,6 @@
 import { useStore } from "@tanstack/react-store";
 import { Store } from "@tanstack/store";
+import type { KeyboardEvent } from "react";
 
 // One choice for the card and the footer, which show the same links; held outside both, which remount
 // with every page, so it survives navigation.
@@ -20,4 +21,10 @@ export function useDetailsExpanded() {
     expanded: useStore(detailsExpanded),
     toggle: () => detailsExpanded.setState((e) => !e),
   };
+}
+
+/** For a details toggle's onKeyDown: a held Enter clicks a button on every repeat, where Space waits for
+    release; dropping the repeats makes either key one toggle per press. */
+export function oncePerPress(event: KeyboardEvent) {
+  if (event.key === "Enter" && event.repeat) event.preventDefault();
 }

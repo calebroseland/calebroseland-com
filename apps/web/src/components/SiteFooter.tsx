@@ -8,7 +8,7 @@ import { useLinkHover } from "../hooks/useLinkHover.ts";
 import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { useSectionHeading } from "../hooks/useSectionHeading.ts";
 import { isPlainClick, useBackToCard } from "./backToCard.ts";
-import { useDetailsExpanded } from "./detailsState.ts";
+import { oncePerPress, useDetailsExpanded } from "./detailsState.ts";
 import styles from "./SiteFooter.module.css";
 import { Tip } from "./Tip.tsx";
 import { footerHeadingName, footerLinkName, withViewTransition } from "./viewTransition.ts";
@@ -51,6 +51,7 @@ export function SiteFooter({ profile }: { profile: Profile }) {
             aria-expanded={expanded}
             aria-controls={LINKS_ID}
             aria-label={expanded ? "Collapse the footer" : "Expand the footer"}
+            onKeyDown={oncePerPress}
             onClick={() => void withViewTransition("footer", () => toggleAtBottom(toggle), reduce)}
           >
             <Icon name={expanded ? "lucide:fold-vertical" : "lucide:unfold-vertical"} size="sm" />

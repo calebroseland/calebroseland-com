@@ -28,7 +28,7 @@ import { useReduceMotion } from "../hooks/useReduceMotion.ts";
 import { backdrop, isBackdropClick } from "./backdrop.ts";
 import { useSiteGo } from "./backToCard.ts";
 import type { EditFaces, EditResult } from "./cardEditor/CardEditor.tsx";
-import { useDetailsExpanded } from "./detailsState.ts";
+import { oncePerPress, useDetailsExpanded } from "./detailsState.ts";
 import { FocusChip } from "./FocusChip.tsx";
 import styles from "./Landing.module.css";
 import { returnPage } from "./returnPage.ts";
@@ -318,6 +318,7 @@ function Front({
         style={vtName("card-more")}
         aria-expanded={expanded}
         aria-controls={linksId}
+        onKeyDown={oncePerPress}
         onClick={onToggle}
       >
         <span className={`${styles.moreLabel} ${styles.vt}`} style={vtName("card-more-label")}>
