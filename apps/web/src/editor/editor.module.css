@@ -295,14 +295,6 @@
     display: grid;
     gap: var(--space-6);
     grid-template-columns: minmax(0, 1fr);
-
-    @container (min-width: 56rem) {
-      grid-template-columns: minmax(0, 1fr) 20rem;
-    }
-  }
-
-  .editorContainer {
-    container-type: inline-size;
   }
 
   .panel {
