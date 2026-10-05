@@ -320,7 +320,9 @@ function Front({
         aria-controls={linksId}
         onClick={onToggle}
       >
-        show {expanded ? "less" : "more"}
+        <span className={`${styles.moreLabel} ${styles.vt}`} style={vtName("card-more-label")}>
+          show {expanded ? "less" : "more"}
+        </span>
       </button>
     </>
   );
