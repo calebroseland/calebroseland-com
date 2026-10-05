@@ -10,6 +10,8 @@ import { flushSync } from "react-dom";
    `update` runs inside flushSync, so a state change is on screen before the new snapshot. An update that
    returns a promise (a navigation) holds the new snapshot until it settles. Resolves once the update is
    done, not when the animation ends. */
+let current: ViewTransition | null = null;
+
 export function withViewTransition(
   kind: string,
   update: () => unknown,
@@ -20,8 +22,12 @@ export function withViewTransition(
   const root = document.documentElement;
   root.dataset.vt = kind;
   const transition = document.startViewTransition(run);
+  current = transition;
+  // A transition started over this one skips it; clearing then would strip the new one's timings.
   void transition.finished.finally(() => {
-    if (root.dataset.vt === kind) delete root.dataset.vt;
+    if (current !== transition) return;
+    current = null;
+    delete root.dataset.vt;
   });
   return transition.updateCallbackDone;
 }
