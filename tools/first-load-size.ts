@@ -14,6 +14,12 @@ const scripts = new Set(
   [...html.matchAll(/(?:src|href)="\/(assets\/[^"]+\.js)"/g)].flatMap((m) => (m[1] ? [m[1]] : [])),
 );
 
+// Nothing matched means the pattern no longer fits index.html, not that the page loads no JS.
+if (scripts.size === 0) {
+  process.stderr.write("first-load JS: no scripts found in index.html\n");
+  process.exit(1);
+}
+
 let bytes = 0;
 for (const path of scripts) bytes += gzipSync(readFileSync(resolve(client, path))).length;
 
