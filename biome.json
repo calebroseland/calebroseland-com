@@ -77,7 +77,8 @@
         },
         "useExplicitLengthCheck": "error",
         "noNegationElse": "error",
-        "noNestedTernary": "error"
+        "noNestedTernary": "error",
+        "noDefaultExport": "error"
       },
       "nursery": {
         "useConsistentFunctionStyle": {
@@ -93,6 +94,16 @@
     {
       "includes": ["apps/web/src/**/*.tsx", "!**/*.test.tsx"],
       "plugins": ["./tools/biome/no-direct-hooks.grit"]
+    },
+    {
+      "includes": ["**/*.config.ts", "**/*.d.ts", "apps/web/worker/index.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
     }
   ],
   "assist": {

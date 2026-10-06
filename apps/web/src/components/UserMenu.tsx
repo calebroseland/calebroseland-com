@@ -21,7 +21,9 @@ import { Tip } from './Tip.tsx';
 import styles from './UserMenu.module.css';
 
 // The editor and its colour picker load only when someone opens it.
-const ThemeEditor = lazy(() => import('./ThemeEditor.tsx'));
+const ThemeEditor = lazy(() =>
+  import('./ThemeEditor.tsx').then((m) => ({ default: m.ThemeEditor })),
+);
 
 const builtIns = [
   { value: 'auto', label: 'Auto', icon: 'lucide:sun-moon' },

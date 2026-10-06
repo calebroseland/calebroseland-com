@@ -495,7 +495,7 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
         'edit',
         () => {
           setEditSide('front');
-          setEditing({ source, Session: mod.default });
+          setEditing({ source, Session: mod.CardEditSession });
         },
         reduce,
       );

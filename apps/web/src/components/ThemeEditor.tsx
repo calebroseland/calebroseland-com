@@ -294,7 +294,7 @@ const useDeleteConfirm = () => {
 /* The page behind the sheet is the preview: every change applies to it at once, Save keeps it, and
    Cancel, Escape or the close button put back what was showing. Clicks on the page do not dismiss the
    sheet, so a stray click cannot throw away an edit. */
-export default function ThemeEditor({
+export const ThemeEditor = ({
   initial,
   isNew,
   onClose,
@@ -302,7 +302,7 @@ export default function ThemeEditor({
   initial: CustomTheme;
   isNew: boolean;
   onClose: () => void;
-}) {
+}) => {
   const { theme, set } = useThemeDraft(initial);
   const { confirmDelete, setConfirmDelete } = useDeleteConfirm();
   const defaults = defaultTheme(theme.base, theme.id, theme.name, siteFonts);
@@ -539,4 +539,4 @@ export default function ThemeEditor({
       </Dialog.Portal>
     </Dialog.Root>
   );
-}
+};

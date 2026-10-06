@@ -69,7 +69,7 @@ export const prepareEdit = (published: Profile): Promise<ProfileSource> => {
 
 /** One edit session across both faces of the card; brings its own editor context, since the landing
     sits outside /editor. The landing places the faces, so the flip between them stays its own. */
-export default function CardEditSession({
+export const CardEditSession = ({
   source,
   onFlip,
   onDone,
@@ -79,7 +79,7 @@ export default function CardEditSession({
   onFlip: () => void;
   onDone: (result: EditResult) => void;
   children: (faces: EditFaces) => ReactNode;
-}) {
+}) => {
   return (
     <EditorProvider>
       <Session source={source} onFlip={onFlip} onDone={onDone}>
@@ -87,7 +87,7 @@ export default function CardEditSession({
       </Session>
     </EditorProvider>
   );
-}
+};
 
 const Session = ({
   source,

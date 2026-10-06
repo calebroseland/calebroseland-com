@@ -11,7 +11,7 @@ import styles from './CommandPaletteDialog.module.css';
 
 /* Base UI's command palette pattern: a Dialog around an inline Autocomplete. A command either runs,
    or opens a page of its own commands; Backspace in an empty search, or the back button, returns. */
-export default function CommandPaletteDialog({ open }: { open: boolean }) {
+export const CommandPaletteDialog = ({ open }: { open: boolean }) => {
   const view = usePaletteView(open);
   const run = useRunCommand();
   const motion = usePopupMotion('dialog', open);
@@ -121,4 +121,4 @@ export default function CommandPaletteDialog({ open }: { open: boolean }) {
       </Dialog.Portal>
     </Dialog.Root>
   );
-}
+};
