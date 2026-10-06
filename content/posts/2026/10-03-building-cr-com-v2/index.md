@@ -2,8 +2,8 @@
 kind: post
 title: Building CR-COM v2
 slug: building-cr-com-v2
-date: 2026-10-03
-draft: true
+date: 2026-10-06
+draft: false
 tags:
   - React
   - Architecture
