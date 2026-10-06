@@ -21,7 +21,7 @@ export default {
   },
 } satisfies ExportedHandler<Env>;
 
-async function api(request: Request, url: URL, env: Env): Promise<Response> {
+const api = async (request: Request, url: URL, env: Env): Promise<Response> => {
   const requestId = crypto.randomUUID();
   if (request.method === 'OPTIONS') {
     const headers = corsHeaders(request, env);
@@ -44,4 +44,4 @@ async function api(request: Request, url: URL, env: Env): Promise<Response> {
     default:
       return problem(404, 'Not Found', `No route for ${request.method} ${url.pathname}`);
   }
-}
+};

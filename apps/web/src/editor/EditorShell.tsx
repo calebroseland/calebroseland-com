@@ -4,7 +4,7 @@ import styles from './editor.module.css';
 
 /* Editing screens wear the site's own chrome; only the page's title and its actions differ. Signing in
    and out, and the links into editing, live in the user menu in the site bar. */
-export function EditorShell({
+export const EditorShell = ({
   children,
   title = 'Editor',
   actions,
@@ -12,7 +12,7 @@ export function EditorShell({
   children: ReactNode;
   title?: string;
   actions?: ReactNode;
-}) {
+}) => {
   return (
     <Page>
       <div className={styles.pageHead}>
@@ -22,4 +22,4 @@ export function EditorShell({
       {children}
     </Page>
   );
-}
+};

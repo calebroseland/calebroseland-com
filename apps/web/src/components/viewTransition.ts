@@ -12,11 +12,11 @@ let current: ViewTransition | null = null;
    `update` runs inside flushSync, so a state change is on screen before the new snapshot. An update that
    returns a promise (a navigation) holds the new snapshot until it settles. Resolves once the update is
    done, not when the animation ends. */
-export function withViewTransition(
+export const withViewTransition = (
   kind: string,
   update: () => unknown,
   reduce: boolean,
-): Promise<void> {
+): Promise<void> => {
   const run = () => Promise.resolve(flushSync(update)).then(() => undefined);
   if (reduce || typeof document.startViewTransition !== 'function') {
     return run();
@@ -34,7 +34,7 @@ export function withViewTransition(
     delete root.dataset.vt;
   });
   return transition.updateCallbackDone;
-}
+};
 
 /** Style that gives an element a view-transition name while a scoped transition runs (see `.vt`). */
 export const vtName = (name: string): CSSProperties => ({ '--vt-name': name }) as CSSProperties;

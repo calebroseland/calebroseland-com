@@ -3,7 +3,7 @@ import { useCallback, useRef } from 'react';
 /** Publishes how much of the viewport's top a sticky element covers as `--sticky-top` on <html>, so
     other sticky things (the editor's toolbar) sit below it; 0 while it scrolls away (phones). Its
     height follows the theme's text and spacing scales, hence measured rather than a constant. */
-export function useStickyTop<T extends HTMLElement>() {
+export const useStickyTop = <T extends HTMLElement>() => {
   const observer = useRef<ResizeObserver | null>(null);
   return useCallback((el: T | null) => {
     observer.current?.disconnect();
@@ -24,4 +24,4 @@ export function useStickyTop<T extends HTMLElement>() {
     observer.current = new ResizeObserver(publish);
     observer.current.observe(el);
   }, []);
-}
+};

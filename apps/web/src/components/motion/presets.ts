@@ -15,7 +15,7 @@ const hoverSpring: AnimationOptions = { type: spring, visualDuration: 0.3, bounc
 const leave: AnimationOptions = { duration: durations.fast, ease: [...eases.in] };
 
 /** A starting offset pointing away from the trigger, from the popup's `data-side`. */
-function fromTrigger(side: string | undefined, px: number): string {
+const fromTrigger = (side: string | undefined, px: number): string => {
   if (side === 'top') {
     return `0 ${px}px`;
   }
@@ -26,7 +26,7 @@ function fromTrigger(side: string | undefined, px: number): string {
     return `${px}px 0`;
   }
   return `${-px}px 0`;
-}
+};
 
 export type PopupKind = 'dropdown' | 'tip' | 'dialog';
 
@@ -61,7 +61,7 @@ const leaveFrames: Record<PopupKind, DOMKeyframesDefinition> = {
 const STAGGERED_ROWS = 12;
 
 /** Lifts a popup out of its trigger (a dialog from above); its first menu items or options follow one after another. */
-export function enterPopup(node: HTMLElement, kind: PopupKind): Animation[] {
+export const enterPopup = (node: HTMLElement, kind: PopupKind): Animation[] => {
   const entrance = animate(
     node,
     enterFrames[kind](node.dataset.side),
@@ -87,21 +87,21 @@ export function enterPopup(node: HTMLElement, kind: PopupKind): Animation[] {
     );
   }
   return running;
-}
+};
 
-export function leavePopup(node: HTMLElement, kind: PopupKind): Animation[] {
+export const leavePopup = (node: HTMLElement, kind: PopupKind): Animation[] => {
   return [animate(node, leaveFrames[kind], leave)];
-}
+};
 
 /** Drops what a finished exit left on the element, so a popup shown without its entrance is visible. */
-export function resetPopup(node: HTMLElement): void {
+export const resetPopup = (node: HTMLElement): void => {
   for (const prop of ['opacity', 'scale', 'filter', 'translate']) {
     node.style.removeProperty(prop);
   }
-}
+};
 
 /** A link that leads with an icon: the icon zooms slightly, and the label grows with it. */
-export function hoverIcon(link: HTMLElement, on: boolean): Animation[] {
+export const hoverIcon = (link: HTMLElement, on: boolean): Animation[] => {
   const icon = link.querySelector<HTMLElement>('[data-hover="icon"]');
   const label = link.querySelector<HTMLElement>('[data-hover="label"]');
   const running: Animation[] = [];
@@ -112,10 +112,10 @@ export function hoverIcon(link: HTMLElement, on: boolean): Animation[] {
     running.push(animate(label, { scale: on ? 1.04 : 1 }, hoverSpring));
   }
   return running;
-}
+};
 
 /** A text link: its underline draws in from the start edge, and rests drawn on the current page. */
-export function hoverUnderline(link: HTMLElement, on: boolean): Animation[] {
+export const hoverUnderline = (link: HTMLElement, on: boolean): Animation[] => {
   const line = link.querySelector<HTMLElement>('[data-hover="underline"]');
   if (!line) {
     return [];
@@ -127,4 +127,4 @@ export function hoverUnderline(link: HTMLElement, on: boolean): Animation[] {
     void run.then(() => line.style.removeProperty('scale'));
   }
   return [run];
-}
+};

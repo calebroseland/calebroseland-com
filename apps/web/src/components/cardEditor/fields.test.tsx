@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 import { InlineText } from './fields.tsx';
 
-function Harness({ error }: { error?: string }) {
+const Harness = ({ error }: { error?: string }) => {
   const [value, setValue] = useState('GitHub');
   return <InlineText label="Label for GitHub" value={value} error={error} onChange={setValue} />;
-}
+};
 
 describe('InlineText', () => {
   it('edits its text in place, named by its label', () => {

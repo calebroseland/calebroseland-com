@@ -33,9 +33,9 @@ import {
 type Loadable<T> = { status: 'loading' } | { status: 'error'; retry: () => void } | T;
 
 /** The signed-in account's name, or the checked-out branch in working-tree mode. */
-export function useViewerLogin(): string | undefined {
+export const useViewerLogin = (): string | undefined => {
   return useQuery(viewerQuery(useGitHub())).data?.login;
-}
+};
 
 export type Board = Loadable<{
   status: 'ready';
@@ -45,7 +45,7 @@ export type Board = Loadable<{
 }>;
 
 /** Everything the editor can open, draft branches over published entries, narrowed to one kind. */
-export function useBoard(kind: EntryKind | undefined): Board {
+export const useBoard = (kind: EntryKind | undefined): Board => {
   const gh = useGitHub();
   const { branches } = useCapabilities();
   // Without branches the entries on disk are the whole story; there are no drafts to lay over them.
@@ -75,7 +75,7 @@ export function useBoard(kind: EntryKind | undefined): Board {
       page: all.filter((r) => r.kind === 'page').length,
     },
   };
-}
+};
 
 export type EntryView = Loadable<
   | { status: 'missing'; ref: string }
@@ -85,7 +85,7 @@ export type EntryView = Loadable<
 >;
 
 /** One entry by slug: read from its draft branch when it has one, otherwise from the target branch. */
-export function useEntry(slug: string): EntryView {
+export const useEntry = (slug: string): EntryView => {
   const gh = useGitHub();
   const drafts = useQuery(draftsQuery(gh));
   const draft = drafts.data?.find((d) => d.slug === slug);
@@ -108,7 +108,7 @@ export function useEntry(slug: string): EntryView {
     return { status: 'missing', ref };
   }
   return draft ? { status: 'draft', ref, bundle: tree.data } : { status: 'published', ref };
-}
+};
 
 export const useCreateEntry = () => useCommand(createEntryMutation(useGitHub()));
 
@@ -117,7 +117,7 @@ export const useBeginEditing = () => useCommand(beginEditingMutation(useGitHub()
 export const useDiscardEntry = () => useCommand(discardEntryMutation(useGitHub()));
 
 /** Commits the buffer; on success the buffer takes the new head and its local copy is cleared. */
-export function useSaveDraft(controller: BufferController) {
+export const useSaveDraft = (controller: BufferController) => {
   return useCommand({
     ...saveDraftMutation(useGitHub(), controller),
     onSuccess: ({ headSha }) => {
@@ -125,34 +125,34 @@ export function useSaveDraft(controller: BufferController) {
       writeLocalBuffer(controller.store.state, browserStorage());
     },
   });
-}
+};
 
 /** Replaces the buffer with the branch's current version. `generation` changes with each reload, for
     views that read the buffer only once (the document editor). */
-export function useReloadDraft(controller: BufferController, slug: string) {
+export const useReloadDraft = (controller: BufferController, slug: string) => {
   const [generation, setGeneration] = useState(0);
   const command = useCommand({
     ...reloadDraftMutation(useGitHub(), controller, slug),
     onSuccess: () => setGeneration((g) => g + 1),
   });
   return { ...command, generation };
-}
+};
 
 /** Where a draft stands on the way to publication; polls while `watching`. */
-export function usePublishState(
+export const usePublishState = (
   ref: string,
   watching: boolean,
-): PublishState & { checking: boolean } {
+): PublishState & { checking: boolean } => {
   const pull = useQuery({ ...pullQuery(useGitHub(), ref, { poll: watching }), enabled: watching });
   return { ...publishState(pull.data ?? null), checking: watching && pull.isPending };
-}
+};
 
 export const useOpenPullRequest = (ref: string) =>
   useCommand(openPullRequestMutation(useGitHub(), ref));
 
 /** Merges the pull request and waits for the deploy. `stage` is "deploying" while it waits and "slow"
     when the deploy did not show up in time. */
-export function useMergeAndDeploy(ref: string) {
+export const useMergeAndDeploy = (ref: string) => {
   const [stage, setStage] = useState<'idle' | 'deploying' | 'slow'>('idle');
   const command = useCommand({
     ...mergeMutation(useGitHub(), ref, () => setStage('deploying')),
@@ -160,7 +160,7 @@ export function useMergeAndDeploy(ref: string) {
     onError: () => setStage('idle'),
   });
   return { ...command, stage };
-}
+};
 
 export const useSaveProfile = (source: ProfileSource) =>
   useCommand(saveProfileMutation(useGitHub(), source));

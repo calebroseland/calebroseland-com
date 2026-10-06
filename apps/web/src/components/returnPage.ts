@@ -9,7 +9,7 @@ export const ENTRY_PAGE = '/posts';
 let last: string | undefined;
 
 /** Call once, right after creating the router. */
-export function trackReturnPage(router: AnyRouter): () => void {
+export const trackReturnPage = (router: AnyRouter): (() => void) => {
   last = undefined;
   return router.subscribe('onResolved', ({ toLocation }) => {
     const ids = router.state.matches.map((m) => m.routeId as string);
@@ -18,7 +18,7 @@ export function trackReturnPage(router: AnyRouter): () => void {
       last = toLocation.href;
     }
   });
-}
+};
 
 /** The page Enter returns to. */
 export const returnPage = (): string => last ?? ENTRY_PAGE;

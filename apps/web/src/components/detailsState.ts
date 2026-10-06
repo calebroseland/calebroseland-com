@@ -16,17 +16,17 @@ if (typeof document !== 'undefined') {
 }
 
 /** Whether the card and the site footer show every link with its label, and the toggle for it. */
-export function useDetailsExpanded() {
+export const useDetailsExpanded = () => {
   return {
     expanded: useStore(detailsExpanded),
     toggle: () => detailsExpanded.setState((e) => !e),
   };
-}
+};
 
 /** For a details toggle's onKeyDown: a held Enter clicks a button on every repeat, where Space waits for
     release; dropping the repeats makes either key one toggle per press. */
-export function oncePerPress(event: KeyboardEvent): void {
+export const oncePerPress = (event: KeyboardEvent): void => {
   if (event.key === 'Enter' && event.repeat) {
     event.preventDefault();
   }
-}
+};

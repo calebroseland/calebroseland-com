@@ -43,7 +43,7 @@ const EDGES: Record<NonNullable<ItemOptions['axis']>, Edge[]> = {
 };
 
 /** Calls `onMove` for every drop of a `kind` item; `to.index` is where the item ends up. */
-export function useDragMoves(kind: string, onMove: (from: Slot, to: Slot) => void) {
+export const useDragMoves = (kind: string, onMove: (from: Slot, to: Slot) => void) => {
   const onMoveRef = useRef(onMove);
   onMoveRef.current = onMove;
   useEffect(
@@ -79,14 +79,14 @@ export function useDragMoves(kind: string, onMove: (from: Slot, to: Slot) => voi
       }),
     [kind],
   );
-}
+};
 
 /** One list reordered within itself. */
-export function useListReorder<T extends Item>(
+export const useListReorder = <T extends Item>(
   items: readonly T[],
   onReorder: (next: T[]) => void,
   { listId = DEFAULT_LIST }: ListOptions = {},
-) {
+) => {
   const itemsRef = useRef(items);
   itemsRef.current = items;
   useDragMoves(listId, (from, to) => {
@@ -95,14 +95,14 @@ export function useListReorder<T extends Item>(
     }
   });
   return { registerItem: useItemRegistration };
-}
+};
 
 /** Attach to one row or chip: `const { ref, handleRef, state } = useItemRegistration(id, index)`. */
-export function useItemRegistration(
+export const useItemRegistration = (
   id: string,
   index: number,
   { listId = DEFAULT_LIST, kind = listId, axis = 'vertical' }: ItemOptions = {},
-) {
+) => {
   const ref = useRef<HTMLElement | null>(null);
   const handleRef = useRef<HTMLElement | null>(null);
   const [state, setState] = useState<{ dragging: boolean; edge: Edge | null }>({
@@ -155,10 +155,10 @@ export function useItemRegistration(
   }, [id, index, listId, kind, axis]);
 
   return { ref, handleRef, state };
-}
+};
 
 /** Attach to a list's container so a drop past its items, or into an empty list, lands at its end. */
-export function useListTarget({
+export const useListTarget = ({
   listId,
   kind = listId,
   length,
@@ -166,7 +166,7 @@ export function useListTarget({
   listId: string;
   kind?: string;
   length: number;
-}) {
+}) => {
   const ref = useRef<HTMLElement | null>(null);
   const [over, setOver] = useState(false);
   useEffect(() => {
@@ -187,4 +187,4 @@ export function useListTarget({
     });
   }, [listId, kind, length]);
   return { ref, over };
-}
+};

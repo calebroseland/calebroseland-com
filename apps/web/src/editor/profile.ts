@@ -24,7 +24,7 @@ export type ProfileSource = {
 /** Reads the profile from the draft branch if one exists, otherwise from what is published. When the
     target branch has no profile yet, `fallback` (the profile this build was made from) stands in until
     the first save. */
-export async function loadProfile(gh: GitHubClient, fallback: Profile): Promise<ProfileSource> {
+export const loadProfile = async (gh: GitHubClient, fallback: Profile): Promise<ProfileSource> => {
   const { branches } = capabilitiesOf(gh.kind);
   const draft = branches
     ? ((await gh.listDrafts()).find((d) => d.ref === PROFILE_REF) ?? null)
@@ -38,12 +38,12 @@ export async function loadProfile(gh: GitHubClient, fallback: Profile): Promise<
     headSha: !branches || draft ? bundle.headSha : '',
     branchExists: !branches || draft !== null,
   };
-}
+};
 
 /* Edits the document rather than regenerating it: only keys whose values changed are replaced, so the
    leading comment, key order and untouched lines stay as written, and a new or changed link is written
    on one line like the hand-written ones. */
-export function serializeProfile(sourceYaml: string, next: Profile): string {
+export const serializeProfile = (sourceYaml: string, next: Profile): string => {
   const doc: Document = sourceYaml.trim() ? parseDocument(sourceYaml) : new Document({});
   const before = (doc.toJS() ?? {}) as Record<string, unknown>;
   const after = next as Record<string, unknown>;
@@ -78,16 +78,16 @@ export function serializeProfile(sourceYaml: string, next: Profile): string {
     },
   });
   return doc.toString({ lineWidth: 0 });
-}
+};
 
 /** Validates and writes the profile; throws StaleRefError when the target moved since it was read
     (in working-tree mode, when any content file changed on disk). */
-export async function saveProfile(
+export const saveProfile = async (
   gh: GitHubClient,
   source: ProfileSource,
   next: Profile,
   message: string,
-): Promise<ProfileSource> {
+): Promise<ProfileSource> => {
   const valid = profileSchema.parse(next);
   let { ref, headSha } = source;
   if (!source.branchExists) {
@@ -104,4 +104,4 @@ export async function saveProfile(
     expectedHeadSha: headSha,
   });
   return { profile: valid, yaml, ref, headSha: saved.headSha, branchExists: true };
-}
+};

@@ -34,7 +34,7 @@ export type { EntryMeta };
 
 type Loaded = { id: string; dir: string; meta: Entry; body: string };
 
-function walk(dir: string, out: string[] = []): string[] {
+const walk = (dir: string, out: string[] = []): string[] => {
   if (!existsSync(dir)) {
     return out;
   }
@@ -47,15 +47,15 @@ function walk(dir: string, out: string[] = []): string[] {
     }
   }
   return out;
-}
+};
 
-export function content(opts: {
+export const content = (opts: {
   root: string;
   includeDrafts?: boolean;
   siteOrigin?: string;
   /** Read from here instead of the repository's content/ (tests use a fixture). */
   contentDir?: string;
-}): Plugin {
+}): Plugin => {
   const contentDir = opts.contentDir ?? contentDirFor(opts.root);
   const profilePath = join(contentDir, 'profile.yaml');
   const themePath = join(contentDir, 'theme.yaml');
@@ -64,7 +64,7 @@ export function content(opts: {
   const emitted = new Map<string, string>(); // absolute asset path → public url
 
   /** content/theme.yaml, optional: without it the site keeps today's faces. */
-  function loadTheme(): SiteTheme {
+  const loadTheme = (): SiteTheme => {
     try {
       return parseYaml(siteTheme, existsSync(themePath) ? readFileSync(themePath, 'utf8') : '{}');
     } catch (err) {
@@ -72,9 +72,9 @@ export function content(opts: {
         `content/theme.yaml is invalid:\n${err instanceof Error ? err.message : String(err)}`,
       );
     }
-  }
+  };
 
-  function loadEntries(): Loaded[] {
+  const loadEntries = (): Loaded[] => {
     const files = [...walk(join(contentDir, 'posts')), ...walk(join(contentDir, 'pages'))];
     const entries = files.map((file) => {
       let parsed: ReturnType<typeof parseEntry>;
@@ -100,7 +100,7 @@ export function content(opts: {
     return entries
       .filter((e) => includeDrafts || !e.meta.draft)
       .sort((a, b) => +b.meta.date - +a.meta.date);
-  }
+  };
 
   const toMeta = (e: Loaded): EntryMeta => {
     const heroMatch = e.body.match(/!\[[^\]]*\]\(([^)\s]+)\)/);
@@ -117,7 +117,7 @@ export function content(opts: {
     };
   };
 
-  function assetUrl(dir: string, src: string): string {
+  const assetUrl = (dir: string, src: string): string => {
     const abs = resolve(dir, src);
     if (!within(contentDir, abs) || !existsSync(abs)) {
       throw new Error(`missing asset ${src} referenced from ${relative(opts.root, dir)}`);
@@ -135,7 +135,7 @@ export function content(opts: {
     emitted.set(abs, `/${name}`);
     pendingAssets.push({ fileName: name, source: buf });
     return `/${name}`;
-  }
+  };
   const pendingAssets: Array<{ fileName: string; source: Buffer }> = [];
 
   return {
@@ -316,9 +316,9 @@ export function content(opts: {
       });
     },
   };
-}
+};
 
-function invalidateContent(server: import('vite').ViteDevServer, contentDir: string) {
+const invalidateContent = (server: import('vite').ViteDevServer, contentDir: string) => {
   for (const mod of server.moduleGraph.idToModuleMap.values()) {
     if (mod.id?.includes('virtual:content/')) {
       server.moduleGraph.invalidateModule(mod);
@@ -329,7 +329,7 @@ function invalidateContent(server: import('vite').ViteDevServer, contentDir: str
   if (!isEditorTree(readTree(contentDir, 'content').headSha)) {
     server.ws.send({ type: 'full-reload' });
   }
-}
+};
 
 const esc = (s: string) =>
   s.replace(
@@ -337,11 +337,11 @@ const esc = (s: string) =>
     (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' })[c] ?? c,
   );
 
-export function entryUrl(origin: string, e: EntryMeta): string {
+export const entryUrl = (origin: string, e: EntryMeta): string => {
   return e.kind === 'post' ? `${origin}/posts/${e.slug}` : `${origin}/${e.slug}`;
-}
+};
 
-export function feedXml(origin: string, posts: EntryMeta[]): string {
+export const feedXml = (origin: string, posts: EntryMeta[]): string => {
   const items = posts
     .map(
       (p) => `  <item>
@@ -366,13 +366,13 @@ ${items}
 </channel>
 </rss>
 `;
-}
+};
 
-export function sitemapXml(origin: string, entries: EntryMeta[]): string {
+export const sitemapXml = (origin: string, entries: EntryMeta[]): string => {
   const urls = [`${origin}/`, `${origin}/posts`, ...entries.map((e) => entryUrl(origin, e))];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}
 </urlset>
 `;
-}
+};

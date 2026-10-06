@@ -6,7 +6,7 @@ import { useReduceMotion } from './useReduceMotion.ts';
 const styles = { icon: hoverIcon, underline: hoverUnderline };
 
 /** A ref for a link whose `data-hover` parts spring on hover; touch never triggers it. */
-export function useLinkHover(style: keyof typeof styles) {
+export const useLinkHover = (style: keyof typeof styles) => {
   const reduce = useReduceMotion();
   // Stable, so React attaches the listener once per link rather than on every render.
   return useCallback(
@@ -24,4 +24,4 @@ export function useLinkHover(style: keyof typeof styles) {
     },
     [reduce, style],
   );
-}
+};

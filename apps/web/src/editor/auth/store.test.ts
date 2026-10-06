@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createSessionStore, saveHandshake, takeHandshake } from './store.ts';
 
-function memStorage() {
+const memStorage = () => {
   const m = new Map<string, string>();
   return {
     getItem: (k: string) => m.get(k) ?? null,
@@ -9,7 +9,7 @@ function memStorage() {
     removeItem: (k: string) => void m.delete(k),
     m,
   };
-}
+};
 
 describe('session store', () => {
   it('starts anonymous and persists a sign-in', () => {

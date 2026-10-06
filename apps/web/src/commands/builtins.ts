@@ -14,7 +14,7 @@ const THEMES: ReadonlyArray<{ value: ThemePreference; title: string; icon: IconN
   { value: 'dark', title: 'Dark', icon: 'lucide:moon' },
 ];
 
-function siteCommands(): Command[] {
+const siteCommands = (): Command[] => {
   const go = (id: string, title: string, to: string, icon: IconName, keywords: string[] = []) =>
     ({ id, title, group: 'Go to', icon, keywords, run: (ctx) => ctx.go(to) }) satisfies Command;
   return [
@@ -47,9 +47,9 @@ function siteCommands(): Command[] {
       }),
     ),
   ];
-}
+};
 
-function preferenceCommands(): Command[] {
+const preferenceCommands = (): Command[] => {
   const { preference, customThemes } = themeController.store.state;
   const current = (value: ThemePreference) => (value === preference ? 'Current' : undefined);
   const choose = (value: ThemePreference) => (ctx: { close: () => void }) => {
@@ -87,9 +87,9 @@ function preferenceCommands(): Command[] {
       ],
     },
   ];
-}
+};
 
-function accountCommands(offerSignIn: boolean): Command[] {
+const accountCommands = (offerSignIn: boolean): Command[] => {
   const signedIn = session.store.state.status === 'authenticated';
   if (!signedIn) {
     return offerSignIn
@@ -135,13 +135,13 @@ function accountCommands(offerSignIn: boolean): Command[] {
       },
     },
   ];
-}
+};
 
 const optional = <K extends string, V>(key: K, value: V | undefined) =>
   (value === undefined ? {} : { [key]: value }) as Partial<Record<K, V>>;
 
 /** Registers the site's own commands while the palette host is mounted. */
-export function useBuiltinCommands(open: boolean) {
+export const useBuiltinCommands = (open: boolean) => {
   useEffect(() => registerCommands('site', siteCommands), []);
   useEffect(() => registerCommands('preferences', preferenceCommands), []);
   useEffect(() => {
@@ -155,4 +155,4 @@ export function useBuiltinCommands(open: boolean) {
     }
     return off;
   }, [open]);
-}
+};

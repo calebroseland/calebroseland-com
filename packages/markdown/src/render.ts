@@ -21,11 +21,11 @@ export type Rendered = {
   headings: Array<{ depth: number; id: string; text: string }>;
 };
 
-function collect(
+const collect = (
   images: string[],
   headings: Rendered['headings'],
   resolveImage?: RenderOptions['resolveImage'],
-) {
+) => {
   return () => (tree: Root) => {
     visit(tree, 'element', (node: Element) => {
       // Shiki writes `class` and `tabindex`; the sanitizer only knows the hast property names.
@@ -69,13 +69,13 @@ function collect(
       }
     });
   };
-}
+};
 
 /** Markdown (GFM) → sanitized HTML with Shiki dual-theme highlighting driven by CSS variables. */
-export async function renderMarkdown(
+export const renderMarkdown = async (
   markdown: string,
   opts: RenderOptions = {},
-): Promise<Rendered> {
+): Promise<Rendered> => {
   const images: string[] = [];
   const headings: Rendered['headings'] = [];
   const file = await unified()
@@ -104,4 +104,4 @@ export async function renderMarkdown(
     .use(rehypeStringify)
     .process(markdown);
   return { html: String(file), images, headings };
-}
+};

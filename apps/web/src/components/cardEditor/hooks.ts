@@ -5,7 +5,7 @@ import { type EditState, fieldErrors, fromProfile, tagProblem, toProfile } from 
 
 /** The card being edited: its state, whether it has changed, the profile it would save, and what is
     wrong with it, keyed by field path. */
-export function useProfileDraft(profile: Profile) {
+export const useProfileDraft = (profile: Profile) => {
   const [state, setState] = useState<EditState>(() => fromProfile(profile));
   const [dirty, setDirty] = useState(false);
   const next = toProfile(profile, state);
@@ -27,17 +27,17 @@ export function useProfileDraft(profile: Profile) {
       setDirty(true);
     },
   };
-}
+};
 
 /** Text for a polite live region, for changes a screen reader would otherwise miss (a reorder). */
-export function useAnnouncer() {
+export const useAnnouncer = () => {
   const [message, announce] = useState('');
   return { message, announce };
-}
+};
 
 /** Moves focus to the element marked `data-focus-key`, once React has put it where it now belongs:
     a moved item's handle, or a new item's text. */
-export function useFocusByKey() {
+export const useFocusByKey = () => {
   const [pending, setPending] = useState<string | null>(null);
   useEffect(() => {
     if (!pending) {
@@ -47,14 +47,14 @@ export function useFocusByKey() {
     setPending(null);
   }, [pending]);
   return setPending;
-}
+};
 
 /** Holds a navigation away while there are unsaved edits, for the card to ask about; a tab closing or
     reloading gets the browser's own prompt. */
-export function useUnsavedGuard(dirty: boolean) {
+export const useUnsavedGuard = (dirty: boolean) => {
   return useBlocker({
     shouldBlockFn: () => dirty,
     enableBeforeUnload: () => dirty,
     withResolver: true,
   });
-}
+};

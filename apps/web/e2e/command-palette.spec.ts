@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures.ts';
 
 /** Presses the palette shortcut as the page's platform defines it (Mod is ⌘ on macOS, Ctrl elsewhere). */
-async function openPalette(page: Page) {
+const openPalette = async (page: Page) => {
   // The shortcut is registered once the app has rendered.
   await expect(page.getByRole('button', { name: 'Search and commands' })).toBeVisible();
   // TanStack Hotkeys' own rule: macOS if either the platform or the user agent says so.
@@ -12,7 +12,7 @@ async function openPalette(page: Page) {
   );
   await page.keyboard.press(mac ? 'Meta+k' : 'Control+k');
   await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeVisible();
-}
+};
 
 test.describe('command palette', () => {
   test('⌘K / Ctrl+K opens it; a search and Enter go to the post', async ({ page }) => {

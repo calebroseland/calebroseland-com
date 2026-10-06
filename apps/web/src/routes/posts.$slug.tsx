@@ -4,6 +4,23 @@ import { CenteredMessage, Page } from '../components/Page.tsx';
 import { findBySlug, loadEntry } from '../content/entries.ts';
 import { siteProfile } from '../content/profile.ts';
 
+/** The post this route loaded. */
+const usePost = () => {
+  return Route.useLoaderData();
+};
+
+const PostRoute = () => {
+  const entry = usePost();
+  return (
+    <Page>
+      <article>
+        <EntryHeader meta={entry.meta} />
+        <ArticleBody entry={entry} />
+      </article>
+    </Page>
+  );
+};
+
 export const Route = createFileRoute('/posts/$slug')({
   loader: async ({ params }) => {
     const meta = findBySlug('post', params.slug);
@@ -41,20 +58,3 @@ export const Route = createFileRoute('/posts/$slug')({
   }),
   component: PostRoute,
 });
-
-/** The post this route loaded. */
-function usePost() {
-  return Route.useLoaderData();
-}
-
-function PostRoute() {
-  const entry = usePost();
-  return (
-    <Page>
-      <article>
-        <EntryHeader meta={entry.meta} />
-        <ArticleBody entry={entry} />
-      </article>
-    </Page>
-  );
-}

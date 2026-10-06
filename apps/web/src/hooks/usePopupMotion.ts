@@ -17,7 +17,7 @@ const rendered = (el: HTMLElement) =>
 
 /** Springs a Base UI popup in when it mounts or reopens, and out when it closes. Pass `open` for a popup
     that also closes from outside its root's onOpenChange (a shortcut, a store), and skip onOpenChange. */
-export function usePopupMotion(kind: PopupKind, open?: boolean) {
+export const usePopupMotion = (kind: PopupKind, open?: boolean) => {
   const reduce = useReduceMotion();
   const node = useRef<HTMLElement | null>(null);
   const entered = useRef<WeakSet<HTMLElement>>(new WeakSet());
@@ -102,4 +102,4 @@ export function usePopupMotion(kind: PopupKind, open?: boolean) {
       play(open ? enterPopup : leavePopup);
     },
   };
-}
+};

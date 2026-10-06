@@ -29,11 +29,11 @@ const tree = {
   ],
 };
 
-function mockFetch(handler: (url: string, init?: RequestInit) => Response | Promise<Response>) {
+const mockFetch = (handler: (url: string, init?: RequestInit) => Response | Promise<Response>) => {
   const spy = vi.fn(handler as typeof fetch);
   vi.stubGlobal('fetch', spy);
   return spy;
-}
+};
 
 afterEach(() => {
   vi.unstubAllGlobals();

@@ -4,11 +4,11 @@ const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avi
 export const MAX_EDGE = 1600;
 const MAX_BYTES = 5 * 1024 * 1024;
 
-export function targetSize(
+export const targetSize = (
   width: number,
   height: number,
   maxEdge = MAX_EDGE,
-): { width: number; height: number } {
+): { width: number; height: number } => {
   const longest = Math.max(width, height);
   if (longest <= maxEdge) {
     return { width, height };
@@ -18,7 +18,7 @@ export function targetSize(
     width: Math.max(1, Math.round(width * scale)),
     height: Math.max(1, Math.round(height * scale)),
   };
-}
+};
 
 export class UnsupportedImageError extends Error {
   constructor(type: string) {
@@ -44,7 +44,7 @@ export type ResizedImage = {
 };
 
 /** GIFs are passed through (canvas would flatten animation); everything else is drawn to a canvas at ≤ MAX_EDGE. */
-export async function resizeImage(file: File, maxEdge = MAX_EDGE): Promise<ResizedImage> {
+export const resizeImage = async (file: File, maxEdge = MAX_EDGE): Promise<ResizedImage> => {
   if (!IMAGE_TYPES.has(file.type)) {
     throw new UnsupportedImageError(file.type);
   }
@@ -80,4 +80,4 @@ export async function resizeImage(file: File, maxEdge = MAX_EDGE): Promise<Resiz
       .replace(/[^a-zA-Z0-9-_]+/g, '-')
       .toLowerCase() || 'image';
   return { blob, width, height, type, name: `${base}.${ext}` };
-}
+};

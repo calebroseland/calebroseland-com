@@ -9,16 +9,16 @@ const isCard = (href: string) => (CARD as readonly string[]).includes(href.split
 
 /** Turns the page back into the landing card, on its front or its contact side, morphing unless motion
     is reduced. */
-export function useBackToCard() {
+export const useBackToCard = () => {
   const reduce = useReduceMotion();
   const navigate = useNavigate();
   return (to: (typeof CARD)[number] = '/') =>
     withViewTransition('leave', () => navigate({ to, viewTransition: false }), reduce);
-}
+};
 
 /** Goes to an address the way the site's own links do: into or out of the card by its morph (the
     router's page transition would cut it short), anywhere else by the page transition. */
-export function useSiteGo() {
+export const useSiteGo = () => {
   const reduce = useReduceMotion();
   const navigate = useNavigate();
   const onCard = useRouterState({ select: (s) => isCard(s.location.pathname) });
@@ -29,7 +29,7 @@ export function useSiteGo() {
     }
     return withViewTransition(kind, () => navigate({ href, viewTransition: false }), reduce);
   };
-}
+};
 
 /** A plain click; a modified one (new tab, new window) is left to the browser. */
 export const isPlainClick = (e: MouseEvent): boolean =>

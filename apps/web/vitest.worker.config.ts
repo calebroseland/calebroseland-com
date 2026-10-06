@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
    Outbound fetches are answered by a scripted GitHub so the OAuth exchange is exercised end to end. */
 const GITHUB_STUB = 'https://github.stub';
 
-async function fakeGitHub(request: Request): Promise<Response> {
+const fakeGitHub = async (request: Request): Promise<Response> => {
   const url = new URL(request.url);
   if (url.pathname === '/login/oauth/access_token') {
     const body = (await request.json()) as {
@@ -28,7 +28,7 @@ async function fakeGitHub(request: Request): Promise<Response> {
     return Response.json({ access_token: 'gho_test_token', token_type: 'bearer', scope: '' });
   }
   return new Response('not found', { status: 404 });
-}
+};
 
 export default defineConfig({
   plugins: [

@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { defaultTheme } from './custom.ts';
 import { createThemeStore, resolveTheme } from './store.ts';
 
-function fakeEnv(
+const fakeEnv = (
   opts: { stored?: Record<string, string>; systemDark?: boolean; throwing?: boolean } = {},
-) {
+) => {
   const data = new Map<string, string>(Object.entries(opts.stored ?? {}));
   const blocked = () => {
     throw new Error('blocked');
@@ -44,7 +44,7 @@ function fakeEnv(
     },
   };
   return { storage, media, root, data, props };
-}
+};
 
 const ocean = { ...defaultTheme('dark', 'abc', 'Ocean'), accent: '#0ca678' };
 

@@ -9,7 +9,7 @@ export type AddedImage =
   | { ok: false; reason: 'failed'; error: unknown };
 
 /** Resizes an image and adds it to the buffer, waiting for alt text before it can be saved. */
-export async function addImage(controller: BufferController, file: File): Promise<AddedImage> {
+export const addImage = async (controller: BufferController, file: File): Promise<AddedImage> => {
   try {
     const img = await resizeImage(file);
     const asset: BufferAsset = {
@@ -29,7 +29,7 @@ export async function addImage(controller: BufferController, file: File): Promis
     }
     return { ok: false, reason: 'failed', error };
   }
-}
+};
 
 const MIME: Record<string, string> = {
   png: 'image/png',
@@ -43,7 +43,7 @@ const MIME: Record<string, string> = {
 
 /** Where the editor can show an image the markdown names relative to its entry: a pending image's
     object URL, else the file as loaded with the bundle. Anything else is shown as written. */
-export function previewSrc(src: string, buffer: Buffer, files: Bundle['files']): string {
+export const previewSrc = (src: string, buffer: Buffer, files: Bundle['files']): string => {
   if (/^([a-z][a-z\d+.-]*:|\/)/i.test(src)) {
     return src;
   }
@@ -60,4 +60,4 @@ export function previewSrc(src: string, buffer: Buffer, files: Bundle['files']):
   return file.encoding === 'base64'
     ? `data:${type};base64,${file.content}`
     : `data:${type};charset=utf-8,${encodeURIComponent(file.content)}`;
-}
+};

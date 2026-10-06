@@ -11,21 +11,21 @@ type Vars = CSSProperties & Record<`--${string}`, string | number>;
 
 const cx = (...parts: Array<string | undefined>) => parts.filter(Boolean).join(' ');
 
-export function Stack({
+export const Stack = ({
   as: Tag = 'div',
   gap = '4',
   align,
   className,
   ...rest
-}: Common & { gap?: SpaceToken; align?: 'start' | 'center' | 'end' | 'stretch' }) {
+}: Common & { gap?: SpaceToken; align?: 'start' | 'center' | 'end' | 'stretch' }) => {
   const style: Vars = { '--gap': space(gap) };
   if (align) {
     style['--align'] = align === 'start' || align === 'end' ? `flex-${align}` : align;
   }
   return <Tag className={cx(styles.stack, className)} style={style} {...rest} />;
-}
+};
 
-export function Cluster({
+export const Cluster = ({
   as: Tag = 'div',
   gap = '2',
   align,
@@ -36,7 +36,7 @@ export function Cluster({
   gap?: SpaceToken;
   align?: 'start' | 'center' | 'end' | 'baseline';
   justify?: 'start' | 'center' | 'end' | 'between';
-}) {
+}) => {
   const style: Vars = { '--gap': space(gap) };
   if (align) {
     style['--align'] = align === 'start' || align === 'end' ? `flex-${align}` : align;
@@ -50,29 +50,29 @@ export function Cluster({
           : justify;
   }
   return <Tag className={cx(styles.cluster, className)} style={style} {...rest} />;
-}
+};
 
-export function Grid({
+export const Grid = ({
   as: Tag = 'div',
   gap = '6',
   min = '16rem',
   className,
   ...rest
-}: Common & { gap?: SpaceToken; min?: `${number}rem` | `${number}ch` }) {
+}: Common & { gap?: SpaceToken; min?: `${number}rem` | `${number}ch` }) => {
   const style: Vars = { '--gap': space(gap), '--min': min };
   return <Tag className={cx(styles.grid, className)} style={style} {...rest} />;
-}
+};
 
-export function Center({
+export const Center = ({
   as: Tag = 'div',
   max = 'measure',
   gutter,
   className,
   ...rest
-}: Common & { max?: MeasureToken | `${number}rem`; gutter?: SpaceToken }) {
+}: Common & { max?: MeasureToken | `${number}rem`; gutter?: SpaceToken }) => {
   const style: Vars = { '--max': max.endsWith('rem') ? max : `var(--${max})` };
   if (gutter) {
     style['--gutter'] = space(gutter);
   }
   return <Tag className={cx(styles.center, className)} style={style} {...rest} />;
-}
+};

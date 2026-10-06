@@ -9,7 +9,7 @@ const read = (p: string) => readFileSync(new URL(p, import.meta.url), 'utf8');
 const primitives = read('./tokens/primitives.css');
 const themes = { light: read('./tokens/themes/light.css'), dark: read('./tokens/themes/dark.css') };
 
-function declarations(css: string): Map<string, string> {
+const declarations = (css: string): Map<string, string> => {
   const out = new Map<string, string>();
   for (const m of css.matchAll(/(--[a-z0-9-]+):\s*([^;]+);/g)) {
     // primitives.css declares durations twice (reduced motion); first wins, which is the base block
@@ -18,9 +18,9 @@ function declarations(css: string): Map<string, string> {
     }
   }
   return out;
-}
+};
 
-function resolve(vars: Map<string, string>, value: string, depth = 0): string {
+const resolve = (vars: Map<string, string>, value: string, depth = 0): string => {
   if (depth > 20) {
     throw new Error(`token cycle at ${value}`);
   }
@@ -31,18 +31,18 @@ function resolve(vars: Map<string, string>, value: string, depth = 0): string {
     }
     return resolve(vars, v, depth + 1);
   });
-}
+};
 
 // Browsers gamut-map OKLCH to sRGB before painting, so measure the clipped colour, as axe does.
 const toRgb = (c: string) => clampChroma(converter('rgb')(c), 'rgb');
-function contrast(vars: Map<string, string>, fg: string, bg: string): number {
+const contrast = (vars: Map<string, string>, fg: string, bg: string): number => {
   const f = toRgb(resolve(vars, `var(${fg})`));
   const b = toRgb(resolve(vars, `var(${bg})`));
   if (!f || !b) {
     throw new Error(`could not parse ${fg} or ${bg}`);
   }
   return wcagContrast(f, b);
-}
+};
 
 const bodyPairs: Array<[string, string]> = [
   ['--color-text', '--color-bg'],

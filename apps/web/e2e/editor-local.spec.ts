@@ -12,7 +12,7 @@ import { scratchContentDir } from './scratch-content.ts';
 const onDisk = (rel: string) => readFileSync(join(scratchContentDir, rel), 'utf8');
 
 /** A new post's directory is named for the day it was created, so find it by slug. */
-function postDir(slug: string): string {
+const postDir = (slug: string): string => {
   const posts = join(scratchContentDir, 'posts');
   for (const year of readdirSync(posts)) {
     const match = readdirSync(join(posts, year)).find((d) => d.endsWith(`-${slug}`));
@@ -21,24 +21,24 @@ function postDir(slug: string): string {
     }
   }
   throw new Error(`no post directory for ${slug}`);
-}
+};
 
 /** An image in the editor that the browser actually loaded, not a broken relative URL. */
-async function expectLoaded(page: import('@playwright/test').Page, alt: string) {
+const expectLoaded = async (page: import('@playwright/test').Page, alt: string) => {
   const img = page.getByRole('textbox', { name: 'Post body' }).getByRole('img', { name: alt });
   await expect(img).toBeVisible();
   await expect
     .poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth))
     .toBeGreaterThan(0);
-}
+};
 
 /** A native drag in small steps, so the page sees the dragover events a real pointer sends. */
-async function drag(
+const drag = async (
   page: import('@playwright/test').Page,
   handle: import('@playwright/test').Locator,
   target: import('@playwright/test').Locator,
   edge: 'top' | 'right',
-) {
+) => {
   // Scrolled into view and holding still, so the press lands on the handle.
   await handle.hover();
   const from = await handle.boundingBox();
@@ -66,15 +66,15 @@ async function drag(
   // Settle on the target so it has seen a dragover at the final point before the drop.
   await page.mouse.move(x + 1, y, { steps: 2 });
   await page.mouse.up();
-}
+};
 
-async function signInLocal(page: import('@playwright/test').Page) {
+const signInLocal = async (page: import('@playwright/test').Page) => {
   await page.goto('/login');
   await page.evaluate(() => localStorage.clear());
   await page.getByText('Developer options').click();
   await page.getByRole('button', { name: 'Edit files on this branch' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Editor' })).toBeVisible();
-}
+};
 
 /* Writing content makes the dev server broadcast a reload to every open page, so these run one at a
    time rather than racing each other through a reload. */

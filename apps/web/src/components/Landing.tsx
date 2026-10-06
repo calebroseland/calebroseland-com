@@ -58,7 +58,7 @@ const HEIGHT = 0.75;
 
 const still: Transition = { duration: 0 };
 
-function faceMotion(reduce: boolean) {
+const faceMotion = (reduce: boolean) => {
   const t = (duration: number): Transition =>
     reduce ? still : { duration, ease: CSS_EASE, height: { duration: HEIGHT, ease: CSS_EASE } };
   return {
@@ -67,10 +67,10 @@ function faceMotion(reduce: boolean) {
     exit: { opacity: 0, rotateX: -90, height: 0, transition: t(FLIP_OUT) },
     style: { transformPerspective: 400 },
   };
-}
+};
 
 /** Moves focus to the element once it mounts, when the mount was caused by the user turning the card. */
-function useFocusOnMount<T extends HTMLElement>(when: boolean): RefObject<T | null> {
+const useFocusOnMount = <T extends HTMLElement>(when: boolean): RefObject<T | null> => {
   const ref = useRef<T>(null);
   useEffect(() => {
     if (when) {
@@ -78,21 +78,21 @@ function useFocusOnMount<T extends HTMLElement>(when: boolean): RefObject<T | nu
     }
   }, [when]);
   return ref;
-}
+};
 
 /** Passes other props through, so it can be a tooltip's trigger. */
-function ExternalLink({ href, children, ...rest }: ComponentProps<'a'> & { href: string }) {
+const ExternalLink = ({ href, children, ...rest }: ComponentProps<'a'> & { href: string }) => {
   return (
     <a {...rest} className={styles.link} href={href} target="_blank" rel="noopener noreferrer">
       {children}
       <span className="visually-hidden"> (opens in new tab)</span>
     </a>
   );
-}
+};
 
 /** Every link on the card wears the same icon, in the same slot, so labels line up down a column.
     A root-relative url is a page on this site, so it goes through the router (and its basepath). */
-function CardLink({ link, iconOnly = false }: { link: ProfileLink; iconOnly?: boolean }) {
+const CardLink = ({ link, iconOnly = false }: { link: ProfileLink; iconOnly?: boolean }) => {
   const hoverRef = useLinkHover('icon');
   const body = (
     <>
@@ -114,10 +114,10 @@ function CardLink({ link, iconOnly = false }: { link: ProfileLink; iconOnly?: bo
     </ExternalLink>
   );
   return iconOnly ? <Tip label={link.label}>{anchor}</Tip> : anchor;
-}
+};
 
 /** An inline group: every link, one row of icons, in both states of the card. */
-function IconRow({ links, group }: { links: readonly ProfileLink[]; group: number }) {
+const IconRow = ({ links, group }: { links: readonly ProfileLink[]; group: number }) => {
   return (
     <ul className={`${styles.list} ${styles.iconRow}`} role="list">
       {links.map((link, i) => (
@@ -131,18 +131,18 @@ function IconRow({ links, group }: { links: readonly ProfileLink[]; group: numbe
       ))}
     </ul>
   );
-}
+};
 
 const TAGS_SHOWN = 6;
 
 /** Whether every focus area shows, and the id the "+N more" button controls. */
-function useTagsShown() {
+const useTagsShown = () => {
   const [all, setAll] = useState(false);
   return { all, setAll, listId: useId() };
-}
+};
 
 /** Focus areas (see FocusChip); past a handful, the rest wait behind "+N more". */
-function Tags({ tags }: { tags: readonly ProfileTag[] }) {
+const Tags = ({ tags }: { tags: readonly ProfileTag[] }) => {
   const { all, setAll, listId } = useTagsShown();
   const hidden = tags.length - TAGS_SHOWN;
   return (
@@ -168,14 +168,14 @@ function Tags({ tags }: { tags: readonly ProfileTag[] }) {
       )}
     </div>
   );
-}
+};
 
 /** The id the toggle's aria-controls points at. */
-function useLinksId() {
+const useLinksId = () => {
   return useId();
-}
+};
 
-function Front({
+const Front = ({
   profile,
   expanded,
   onToggle,
@@ -191,7 +191,7 @@ function Front({
   onEdit: (() => void) | null;
   opening: boolean;
   focusOnMount: 'flip' | 'edit' | null;
-}) {
+}) => {
   const linksId = useLinksId();
   const flipRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === 'flip');
   const editRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === 'edit');
@@ -341,9 +341,9 @@ function Front({
       </button>
     </>
   );
-}
+};
 
-function Back({
+const Back = ({
   profile,
   contact,
   onFlip,
@@ -353,7 +353,7 @@ function Back({
   contact: ProfileContact;
   onFlip: () => void;
   focusOnMount: boolean;
-}) {
+}) => {
   const closeRef = useFocusOnMount<HTMLButtonElement>(focusOnMount);
   return (
     <div className={styles.back}>
@@ -415,29 +415,29 @@ function Back({
       </Tip>
     </div>
   );
-}
+};
 
 /** Which face the URL shows: the front at /, the contact side at /contact. */
-function useCardSide(): 'front' | 'back' {
+const useCardSide = (): 'front' | 'back' => {
   return useMatch({ from: '/_card/contact', shouldThrow: false }) ? 'back' : 'front';
-}
+};
 
 /** The profile on show: after a save to the working tree the file on disk is the new profile, shown
     without a reload. */
-function useShownProfile(published: Profile) {
+const useShownProfile = (published: Profile) => {
   const [saved, setSaved] = useState<Profile | null>(null);
   return { profile: saved ?? published, setSaved };
-}
+};
 
 /** Turns the card by changing the URL, so back and forward turn it too. */
-function useFlipCard(side: 'front' | 'back') {
+const useFlipCard = (side: 'front' | 'back') => {
   const navigate = useNavigate();
   return () => void navigate({ to: side === 'front' ? '/contact' : '/' });
-}
+};
 
 /** The card's edit session, the face it shows (its own: /contact would redirect a card with no contact
     yet), and whether it is loading. Signing out (the palette can, mid-edit) ends it: its backend is gone. */
-function useEditSession(signedIn: boolean) {
+const useEditSession = (signedIn: boolean) => {
   const [editing, setEditing] = useState<OpenEditor | null>(null);
   const [editSide, setEditSide] = useState<'front' | 'back'>('front');
   const [opening, setOpening] = useState(false);
@@ -445,12 +445,12 @@ function useEditSession(signedIn: boolean) {
     setEditing(null);
   }
   return { editing, setEditing, editSide, setEditSide, opening, setOpening };
-}
+};
 
 /** Where focus goes when a face appears. It follows the card only after the visitor has turned it, by
     the buttons or by back and forward; the first paint leaves focus alone. After the editor closes, it
     goes back to the Edit button instead. */
-function useFaceFocus(side: 'front' | 'back') {
+const useFaceFocus = (side: 'front' | 'back') => {
   const [turned, setTurned] = useState(false);
   const [returnToEdit, setReturnToEdit] = useState(false);
   const [shownSide, setShownSide] = useState(side);
@@ -460,9 +460,9 @@ function useFaceFocus(side: 'front' | 'back') {
     setReturnToEdit(false);
   }
   return { turned, returnToEdit, setReturnToEdit };
-}
+};
 
-export function Landing({ profile: published }: { profile: Profile }) {
+export const Landing = ({ profile: published }: { profile: Profile }) => {
   const { profile, setSaved } = useShownProfile(published);
   const reduce = useReduceMotion();
   const go = useSiteGo();
@@ -601,4 +601,4 @@ export function Landing({ profile: published }: { profile: Profile }) {
       </main>
     </div>
   );
-}
+};

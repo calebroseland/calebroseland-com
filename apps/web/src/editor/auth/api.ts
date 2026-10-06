@@ -26,7 +26,7 @@ const problemSchema = z.object({
   code: z.optional(z.string()),
 });
 
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(
     public readonly status: number,
     public readonly title: string,
@@ -38,25 +38,25 @@ export class ApiError extends Error {
   }
 }
 
-async function readProblem(res: Response): Promise<ApiError> {
+const readProblem = async (res: Response): Promise<ApiError> => {
   const parsed = problemSchema.safeParse(await res.json().catch(() => null));
   return parsed.success
     ? new ApiError(parsed.data.status, parsed.data.title, parsed.data.detail, parsed.data.code)
     : new ApiError(res.status, `HTTP ${res.status}`);
-}
+};
 
-export async function fetchAuthConfig(fetchImpl: typeof fetch = fetch): Promise<AuthConfig> {
+export const fetchAuthConfig = async (fetchImpl: typeof fetch = fetch): Promise<AuthConfig> => {
   const res = await fetchImpl(`${apiOrigin()}/api/auth/config`);
   if (!res.ok) {
     throw await readProblem(res);
   }
   return configSchema.parse(await res.json());
-}
+};
 
-export async function exchangeCode(
+export const exchangeCode = async (
   input: { code: string; codeVerifier: string; redirectUri: string },
   fetchImpl: typeof fetch = fetch,
-): Promise<TokenGrant> {
+): Promise<TokenGrant> => {
   const res = await fetchImpl(`${apiOrigin()}/api/auth/callback`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -66,4 +66,4 @@ export async function exchangeCode(
     throw await readProblem(res);
   }
   return tokenSchema.parse(await res.json());
-}
+};

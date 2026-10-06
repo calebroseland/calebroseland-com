@@ -15,11 +15,11 @@ const clientError = z.object({
   kind: z.enum(['error', 'unhandledrejection']).default('error'),
 });
 
-export async function logClientError(
+export const logClientError = async (
   request: Request,
   env: WorkerEnv,
   requestId: string,
-): Promise<Response> {
+): Promise<Response> => {
   const size = Number(request.headers.get('content-length') ?? 0);
   if (size > MAX_BYTES) {
     return problem(
@@ -63,4 +63,4 @@ export async function logClientError(
   );
   // 204 so the beacon never retries and the client never branches on a body.
   return new Response(null, { status: 204 });
-}
+};

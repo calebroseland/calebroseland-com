@@ -14,7 +14,7 @@ type Props = {
   className?: string | undefined;
 };
 
-export function Icon({ name, size = 'md', label, className }: Props) {
+export const Icon = ({ name, size = 'md', label, className }: Props) => {
   const style = { '--size': `var(--icon-${size})` } as CSSProperties;
   const a11y = label
     ? ({ role: 'img', 'aria-label': label, 'aria-hidden': false } as const)
@@ -27,4 +27,4 @@ export function Icon({ name, size = 'md', label, className }: Props) {
       {...a11y}
     />
   );
-}
+};

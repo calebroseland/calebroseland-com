@@ -10,10 +10,10 @@ export const callbackUrl = (): string =>
   ).toString();
 
 /** Starts the GitHub OAuth leg. Throws if the environment has no client id (the login page then shows alternatives). */
-export async function startGitHubLogin(
+export const startGitHubLogin = async (
   returnTo: string,
   navigate: (url: string) => void = (url) => window.location.assign(url),
-): Promise<void> {
+): Promise<void> => {
   const config = await fetchAuthConfig();
   if (!config.oauth || !config.clientId) {
     throw new Error('GitHub sign-in is not configured for this environment.');
@@ -29,12 +29,12 @@ export async function startGitHubLogin(
       challenge: await createChallenge(verifier),
     }),
   );
-}
+};
 
 /** Where a sign-in returns: the page it started from, if it is one of this app's own, else the editor. */
-export function afterSignIn(returnTo: string | undefined): string {
+export const afterSignIn = (returnTo: string | undefined): string => {
   if (!isAppHref(returnTo)) {
     return '/editor';
   }
   return /^\/login(?:[/?#]|$)/.test(returnTo) ? '/editor' : returnTo;
-}
+};

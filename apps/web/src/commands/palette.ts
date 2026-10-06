@@ -13,11 +13,11 @@ export const palette = {
 
 export const PALETTE_HOTKEY = 'Mod+K';
 
-export function usePaletteOpen(): boolean {
+export const usePaletteOpen = (): boolean => {
   return useStore(open);
-}
+};
 
 /** ⌘K (Ctrl+K elsewhere) opens and closes the palette from anywhere, inputs included. */
-export function usePaletteHotkey() {
+export const usePaletteHotkey = () => {
   useHotkey(PALETTE_HOTKEY, () => palette.toggle(), { ignoreInputs: false });
-}
+};

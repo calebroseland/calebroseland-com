@@ -8,28 +8,28 @@ import type { EntryKind } from './drafts/paths.ts';
 export const isAppHref = (href: string | undefined): href is string =>
   href?.startsWith('/') === true && !/^\/[/\\]/.test(href);
 
-export function useOpenInEditor() {
+export const useOpenInEditor = () => {
   const navigate = useNavigate();
   return (slug: string) => navigate({ to: '/editor/$slug', params: { slug } });
-}
+};
 
 /** The live page for an entry: a page at its own address, a post under /posts. */
-export function useShowLive() {
+export const useShowLive = () => {
   const navigate = useNavigate();
   return (entry: { kind: EntryKind; slug: string }) =>
     entry.kind === 'page'
       ? navigate({ to: '/$slug', params: { slug: entry.slug } })
       : navigate({ to: '/posts/$slug', params: { slug: entry.slug } });
-}
+};
 
 /** An in-app address kept from before signing in. */
-export function useReturnTo() {
+export const useReturnTo = () => {
   const navigate = useNavigate();
   return (href: string) => navigate({ to: href });
-}
+};
 
 /** The account menu's moves: the board, a new entry, and signing in to come back here. */
-export function useAccountLinks() {
+export const useAccountLinks = () => {
   const navigate = useNavigate();
   const href = useCurrentHref();
   return {
@@ -37,4 +37,4 @@ export function useAccountLinks() {
     newEntry: () => void navigate({ to: '/editor/new' }),
     signIn: () => void navigate({ to: '/login', search: { returnTo: href } }),
   };
-}
+};

@@ -50,7 +50,7 @@ const sha = (seed: string) => {
   return (h >>> 0).toString(16).padStart(8, '0').repeat(5);
 };
 
-export function initialFakeState(): FakeState {
+export const initialFakeState = (): FakeState => {
   return {
     viewer: {
       login: 'fake-user',
@@ -66,9 +66,9 @@ export function initialFakeState(): FakeState {
     pulls: [],
     nextPr: 1,
   };
-}
+};
 
-export function createFakeClient(
+export const createFakeClient = (
   opts: {
     storage?: FakeStorage;
     state?: FakeState;
@@ -77,7 +77,7 @@ export function createFakeClient(
         already shows instead of empty. Not consulted once the default branch has files. */
     seed?: () => Promise<Bundle['files']>;
   } = {},
-): GitHubClient & { state: FakeState; reset(): void } {
+): GitHubClient & { state: FakeState; reset(): void } => {
   const existing = opts.state ?? opts.storage?.load();
   let state: FakeState = existing ?? initialFakeState();
   const persist = () => opts.storage?.save(state);
@@ -273,4 +273,4 @@ export function createFakeClient(
       return { sha: mergeSha };
     },
   };
-}
+};

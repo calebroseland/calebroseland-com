@@ -11,7 +11,7 @@ const chipIcon = (name: string) => (isIconName(name) ? name : 'lucide:code');
    and shows its icon, its label, or both. An icon-only chip is a square tile whose label is its
    accessible name and its tooltip. Every chip looks the same at rest; one that links shows a link
    mark on hover or focus, so the difference is found by reaching for it. */
-export function FocusChip({ tag }: { tag: ResolvedTag }) {
+export const FocusChip = ({ tag }: { tag: ResolvedTag }) => {
   const iconOnly = tag.icon !== null && tag.show === 'icon';
   const withIcon = tag.icon !== null && tag.show !== 'label';
   const className = [styles.chip, iconOnly && styles.tile].filter(Boolean).join(' ');
@@ -45,4 +45,4 @@ export function FocusChip({ tag }: { tag: ResolvedTag }) {
   );
 
   return iconOnly ? <Tip label={tag.label}>{chip}</Tip> : chip;
-}
+};

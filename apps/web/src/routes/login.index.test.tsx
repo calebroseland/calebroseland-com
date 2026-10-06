@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 /* The login page offers what the environment allows. Each case loads the app fresh, since the
    methods are asked of the Worker once per page load. */
-async function renderLogin(github: boolean) {
+const renderLogin = async (github: boolean) => {
   vi.resetModules();
   vi.stubGlobal(
     'fetch',
@@ -18,7 +18,7 @@ async function renderLogin(github: boolean) {
     history: createMemoryHistory({ initialEntries: ['/login'] }),
   });
   render(<RouterProvider router={router} />);
-}
+};
 
 describe('/login', () => {
   afterEach(() => {

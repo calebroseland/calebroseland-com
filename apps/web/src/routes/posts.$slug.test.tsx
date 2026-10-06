@@ -39,14 +39,14 @@ vi.mock('../content/entries.ts', async (importOriginal) => {
 import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router';
 import { routeTree } from '../routeTree.gen.ts';
 
-async function renderAt(path: string) {
+const renderAt = async (path: string) => {
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: [path] }),
   });
   render(<RouterProvider router={router} />);
   return router;
-}
+};
 
 describe('/posts/$slug', () => {
   it('renders the entry with title, date, tags, and body html', async () => {

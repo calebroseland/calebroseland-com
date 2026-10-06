@@ -30,7 +30,7 @@ const key = () => `k${++seq}`;
 
 export const MAX_TAGS = 12;
 
-export function fromProfile(p: Profile): EditState {
+export const fromProfile = (p: Profile): EditState => {
   return {
     name: p.name,
     tagline: p.tagline,
@@ -48,9 +48,9 @@ export function fromProfile(p: Profile): EditState {
       locationUrl: p.contact?.location?.url ?? '',
     },
   };
-}
+};
 
-function toContact(c: EditContact): Profile['contact'] {
+const toContact = (c: EditContact): Profile['contact'] => {
   const email = c.email.trim();
   const phone = c.phone.trim();
   const label = c.location.trim();
@@ -61,9 +61,9 @@ function toContact(c: EditContact): Profile['contact'] {
     ...(label && { location: { label, ...(url && { url }) } }),
   };
   return Object.keys(contact).length > 0 ? contact : undefined;
-}
+};
 
-export function toProfile(base: Profile, s: EditState): Profile {
+export const toProfile = (base: Profile, s: EditState): Profile => {
   const { contact: _contact, ...rest } = base;
   const contact = toContact(s.contact);
   return {
@@ -82,7 +82,7 @@ export function toProfile(base: Profile, s: EditState): Profile {
       })),
     })),
   };
-}
+};
 
 export const newLink = (): EditLink => ({
   key: key(),
@@ -107,7 +107,11 @@ export const newTag = (label: string): EditTag => ({
 });
 
 /** Why a tag cannot be added (or renamed to `raw`), or null when it can. */
-export function tagProblem(tags: readonly EditTag[], raw: string, except?: string): string | null {
+export const tagProblem = (
+  tags: readonly EditTag[],
+  raw: string,
+  except?: string,
+): string | null => {
   const tag = raw.trim();
   if (!tag) {
     return 'Type a focus area first.';
@@ -122,7 +126,7 @@ export function tagProblem(tags: readonly EditTag[], raw: string, except?: strin
     return `Up to ${MAX_TAGS} focus areas.`;
   }
   return null;
-}
+};
 
 const MESSAGES: Record<string, string> = {
   name: "The name can't be empty.",
@@ -138,7 +142,7 @@ const MESSAGES: Record<string, string> = {
 };
 
 /** Field path (e.g. `groups.0.links.2.url`) → a message a person can act on. */
-export function fieldErrors(p: Profile): Map<string, string> {
+export const fieldErrors = (p: Profile): Map<string, string> => {
   const result = profileSchema.safeParse(p);
   const errors = new Map<string, string>();
   if (result.success) {
@@ -159,7 +163,7 @@ export function fieldErrors(p: Profile): Map<string, string> {
     }
   }
   return errors;
-}
+};
 
 /** Icons a link or focus area can use: every icon in the design system's registry, named for people. */
 export const ICON_CHOICES = (Object.keys(icons) as IconName[])
@@ -170,7 +174,11 @@ export const ICON_CHOICES = (Object.keys(icons) as IconName[])
 export type LinkSlot = { group: number; index: number };
 
 /** Moves a link within its group or into another; `to.index` is where it ends up. */
-export function moveLink(groups: readonly EditGroup[], from: LinkSlot, to: LinkSlot): EditGroup[] {
+export const moveLink = (
+  groups: readonly EditGroup[],
+  from: LinkSlot,
+  to: LinkSlot,
+): EditGroup[] => {
   const link = groups[from.group]?.links[from.index];
   if (!link || !groups[to.group]) {
     return [...groups];
@@ -186,14 +194,14 @@ export function moveLink(groups: readonly EditGroup[], from: LinkSlot, to: LinkS
     links.splice(Math.max(0, Math.min(to.index, links.length)), 0, link);
     return { ...g, links };
   });
-}
+};
 
 /** Where the arrow keys take a link: along its group, then over the edge into the next or previous. */
-export function nextLinkSlot(
+export const nextLinkSlot = (
   groups: readonly EditGroup[],
   from: LinkSlot,
   delta: -1 | 1,
-): LinkSlot | null {
+): LinkSlot | null => {
   const length = groups[from.group]?.links.length ?? 0;
   const index = from.index + delta;
   if (index >= 0 && index < length) {
@@ -205,4 +213,4 @@ export function nextLinkSlot(
     return null;
   }
   return { group, index: delta < 0 ? target.links.length : 0 };
-}
+};

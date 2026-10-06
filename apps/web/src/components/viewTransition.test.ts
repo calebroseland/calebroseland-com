@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { withViewTransition } from './viewTransition.ts';
 
-function stubDocument() {
+const stubDocument = () => {
   const root = { dataset: {} as DOMStringMap };
   const finishes: Array<() => void> = [];
   vi.stubGlobal('document', {
@@ -13,7 +13,7 @@ function stubDocument() {
     },
   });
   return { root, finishes };
-}
+};
 
 describe('withViewTransition', () => {
   afterEach(() => vi.unstubAllGlobals());

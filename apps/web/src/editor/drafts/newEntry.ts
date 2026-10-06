@@ -6,7 +6,7 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /** The new-entry form. The slug follows the title until it is edited by hand; `entry` is what to
     create, or null while the form is incomplete. */
-export function useNewEntryForm(initialKind: EntryKind) {
+export const useNewEntryForm = (initialKind: EntryKind) => {
   const [kind, setKind] = useState<EntryKind>(initialKind);
   const [title, setTitle] = useState('');
   const [typedSlug, setTypedSlug] = useState<string | null>(null);
@@ -29,4 +29,4 @@ export function useNewEntryForm(initialKind: EntryKind) {
     setDate,
     entry,
   };
-}
+};

@@ -4,6 +4,23 @@ import { CenteredMessage, Page } from '../components/Page.tsx';
 import { findBySlug, loadEntry } from '../content/entries.ts';
 import { siteProfile } from '../content/profile.ts';
 
+/** The page this route loaded. */
+const usePage = () => {
+  return Route.useLoaderData();
+};
+
+const PageRoute = () => {
+  const entry = usePage();
+  return (
+    <Page width="measure">
+      <article>
+        <EntryHeader meta={entry.meta} showMeta={false} />
+        <ArticleBody entry={entry} />
+      </article>
+    </Page>
+  );
+};
+
 /* Top-level pages such as /about. Editor routes are more specific and win. */
 export const Route = createFileRoute('/$slug')({
   loader: async ({ params }) => {
@@ -34,20 +51,3 @@ export const Route = createFileRoute('/$slug')({
   }),
   component: PageRoute,
 });
-
-/** The page this route loaded. */
-function usePage() {
-  return Route.useLoaderData();
-}
-
-function PageRoute() {
-  const entry = usePage();
-  return (
-    <Page width="measure">
-      <article>
-        <EntryHeader meta={entry.meta} showMeta={false} />
-        <ArticleBody entry={entry} />
-      </article>
-    </Page>
-  );
-}

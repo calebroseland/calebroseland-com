@@ -8,18 +8,12 @@ import { EditorShell } from '../editor/EditorShell.tsx';
 import styles from '../editor/editor.module.css';
 import { useOpenInEditor } from '../editor/navigation.ts';
 
-export const Route = createFileRoute('/editor/new')({
-  validateSearch: z.object({ kind: z.optional(z.enum(['post', 'page'])) }),
-  head: () => ({ meta: [{ title: 'New entry · Editor' }] }),
-  component: NewEntry,
-});
-
 /** The kind asked for in the URL (the board's New page link asks for a page). */
-function useRequestedKind(): EntryKind {
+const useRequestedKind = (): EntryKind => {
   return Route.useSearch().kind ?? 'post';
-}
+};
 
-function NewEntry() {
+const NewEntry = () => {
   const form = useNewEntryForm(useRequestedKind());
   const { kind, title, slugOk, date } = form;
   const effectiveSlug = form.slug;
@@ -129,4 +123,10 @@ function NewEntry() {
       </form>
     </EditorShell>
   );
-}
+};
+
+export const Route = createFileRoute('/editor/new')({
+  validateSearch: z.object({ kind: z.optional(z.enum(['post', 'page'])) }),
+  head: () => ({ meta: [{ title: 'New entry · Editor' }] }),
+  component: NewEntry,
+});

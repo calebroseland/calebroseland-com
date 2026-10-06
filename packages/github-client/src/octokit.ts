@@ -20,14 +20,14 @@ import {
 
 const MyOctokit = Octokit.plugin(restEndpointMethods);
 
-function toPr(pr: {
+const toPr = (pr: {
   number: number;
   html_url: string;
   state: string;
   merged_at?: string | null;
   mergeable?: boolean | null;
   head: { ref: string };
-}): PullRequest {
+}): PullRequest => {
   return {
     number: pr.number,
     url: pr.html_url,
@@ -36,10 +36,10 @@ function toPr(pr: {
     mergeable: pr.mergeable ?? null,
     headRef: pr.head.ref,
   };
-}
+};
 
 /** Real GitHub through @octokit/core + REST plugin. Subrequest counts per method are noted for the Worker budget, though calls run in the browser. */
-export function createOctokitClient(token: string, repo: RepoRef): GitHubClient {
+export const createOctokitClient = (token: string, repo: RepoRef): GitHubClient => {
   const octokit = new MyOctokit({ auth: token });
   const base = { owner: repo.owner, repo: repo.repo };
 
@@ -226,4 +226,4 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
         return { sha: data.sha };
       }),
   };
-}
+};

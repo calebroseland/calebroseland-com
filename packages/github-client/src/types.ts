@@ -15,9 +15,9 @@ export type FileInput = {
 export const isBinaryContent = (content: FileInput['content']): content is Uint8Array | Blob =>
   content instanceof Uint8Array || content instanceof Blob;
 
-export async function toBytes(content: Uint8Array | Blob): Promise<Uint8Array> {
+export const toBytes = async (content: Uint8Array | Blob): Promise<Uint8Array> => {
   return content instanceof Uint8Array ? content : new Uint8Array(await content.arrayBuffer());
-}
+};
 
 export type Bundle = {
   ref: string;

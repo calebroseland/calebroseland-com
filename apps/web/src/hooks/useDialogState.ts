@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 /** A dialog that opens about something (a row, an error) and closes back to nothing. */
-export function useDialogState<T>() {
+export const useDialogState = <T>() => {
   const [subject, setSubject] = useState<T | null>(null);
   return {
     subject,
@@ -15,4 +15,4 @@ export function useDialogState<T>() {
       }
     },
   };
-}
+};

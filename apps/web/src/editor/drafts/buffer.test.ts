@@ -39,7 +39,7 @@ const base: Buffer = {
   updatedAt: '2026-09-18T00:00:00.000Z',
 };
 
-function mem() {
+const mem = () => {
   const m = new Map<string, string>();
   return {
     getItem: (k: string) => m.get(k) ?? null,
@@ -47,7 +47,7 @@ function mem() {
     removeItem: (k: string) => void m.delete(k),
     m,
   };
-}
+};
 
 describe('buffer store', () => {
   it('marks dirty on edits and clean on save, moving new assets to existing', () => {

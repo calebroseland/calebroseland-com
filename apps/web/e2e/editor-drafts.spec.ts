@@ -3,7 +3,7 @@ import { expect, test } from './fixtures.ts';
 
 /* Full local loop against the in-memory fake GitHub: create → write → image → save → reload → conflict. */
 
-async function signInFake(page: import('@playwright/test').Page) {
+const signInFake = async (page: import('@playwright/test').Page) => {
   await page.goto('/login');
   await page.evaluate(() => localStorage.removeItem('crc:fake-github'));
   await page.getByText('Developer options').click();
@@ -12,7 +12,7 @@ async function signInFake(page: import('@playwright/test').Page) {
   // Let the board finish loading before the test navigates again; WebKit cancels in-flight module imports otherwise.
   await expect(page.getByRole('heading', { level: 1, name: 'Editor' })).toBeVisible();
   await expect(page.getByText('fake-user')).toBeVisible();
-}
+};
 
 // 1x1 PNG
 const pngBytes = Buffer.from(

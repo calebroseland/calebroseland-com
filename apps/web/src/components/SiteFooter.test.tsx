@@ -29,14 +29,14 @@ const profile = {
   contact: { email: 'name@example.com' },
 } as unknown as Profile;
 
-function renderFooter() {
+const renderFooter = () => {
   const routeTree = createRootRoute({ component: () => <SiteFooter profile={profile} /> });
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: ['/'] }),
   });
   return render(<RouterProvider router={router} />);
-}
+};
 
 describe('SiteFooter', () => {
   beforeEach(() => detailsExpanded.setState(() => false));

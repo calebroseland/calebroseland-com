@@ -16,15 +16,15 @@ export const customPreference = (id: string): ThemePreference => `custom:${id}`;
 const customId = (pref: ThemePreference) =>
   pref.startsWith('custom:') ? pref.slice('custom:'.length) : null;
 
-function read(storage: ThemeEnv['storage'], key: string): string | null {
+const read = (storage: ThemeEnv['storage'], key: string): string | null => {
   try {
     return storage?.getItem(key) ?? null;
   } catch {
     return null;
   }
-}
+};
 
-function write(storage: ThemeEnv['storage'], key: string, value: string | null) {
+const write = (storage: ThemeEnv['storage'], key: string, value: string | null) => {
   try {
     if (value === null) {
       storage?.removeItem(key);
@@ -34,10 +34,10 @@ function write(storage: ThemeEnv['storage'], key: string, value: string | null) 
   } catch {
     // storage unavailable (private mode); the theme lives for the session only
   }
-}
+};
 
 /** Stored themes that fail to parse are dropped one by one, not all at once. */
-function readCustomThemes(storage: ThemeEnv['storage']): CustomTheme[] {
+const readCustomThemes = (storage: ThemeEnv['storage']): CustomTheme[] => {
   try {
     const raw: unknown = JSON.parse(read(storage, CUSTOM_KEY) ?? '[]');
     if (!Array.isArray(raw)) {
@@ -50,20 +50,20 @@ function readCustomThemes(storage: ThemeEnv['storage']): CustomTheme[] {
   } catch {
     return [];
   }
-}
+};
 
-function readPreference(storage: ThemeEnv['storage'], themes: CustomTheme[]): ThemePreference {
+const readPreference = (storage: ThemeEnv['storage'], themes: CustomTheme[]): ThemePreference => {
   const v = read(storage, KEY);
   if ((builtInThemes as ReadonlyArray<string | null>).includes(v)) {
     return v as BuiltInTheme;
   }
   const id = v && customId(v as ThemePreference);
   return id && themes.some((t) => t.id === id) ? (v as ThemePreference) : 'auto';
-}
+};
 
-export function resolveTheme(pref: BuiltInTheme, systemDark: boolean): ResolvedTheme {
+export const resolveTheme = (pref: BuiltInTheme, systemDark: boolean): ResolvedTheme => {
   return pref === 'auto' ? (systemDark ? 'dark' : 'light') : pref;
-}
+};
 
 export type ThemeEnv = {
   storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
@@ -95,7 +95,7 @@ export type ThemeController = {
   dispose(): void;
 };
 
-export function createThemeStore(env: ThemeEnv): ThemeController {
+export const createThemeStore = (env: ThemeEnv): ThemeController => {
   const themes = readCustomThemes(env.storage);
   const store = new Store<ThemeState>({
     preference: readPreference(env.storage, themes),
@@ -190,14 +190,14 @@ export function createThemeStore(env: ThemeEnv): ThemeController {
       env.media?.removeEventListener('change', onChange);
     },
   };
-}
+};
 
 export const newThemeId = (): string =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID().slice(0, 8)
     : Date.now().toString(36);
 
-function browserEnv(): ThemeEnv {
+const browserEnv = (): ThemeEnv => {
   if (typeof window === 'undefined') {
     return {};
   }
@@ -230,6 +230,6 @@ function browserEnv(): ThemeEnv {
     env.media = window.matchMedia('(prefers-color-scheme: dark)');
   }
   return env;
-}
+};
 
 export const themeController: ThemeController = createThemeStore(browserEnv());

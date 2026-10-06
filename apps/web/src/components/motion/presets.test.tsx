@@ -4,7 +4,7 @@ import { enterPopup, hoverUnderline } from './presets.ts';
 
 vi.mock('motion/mini', () => ({ animate: vi.fn(() => Promise.resolve()) }));
 
-function navLink(status?: 'active') {
+const navLink = (status?: 'active') => {
   const link = document.createElement('a');
   if (status) {
     link.dataset.status = status;
@@ -13,7 +13,7 @@ function navLink(status?: 'active') {
   line.dataset.hover = 'underline';
   link.append(line);
   return { link, line };
-}
+};
 
 describe('hoverUnderline', () => {
   beforeEach(() => vi.mocked(animate).mockClear());

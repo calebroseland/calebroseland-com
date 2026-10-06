@@ -60,12 +60,12 @@ export const customTheme = z.object({
 export type CustomTheme = z.infer<typeof customTheme>;
 
 /** Today's look: Open Color blue and gray, the site's faces, every scale at 1. */
-export function defaultTheme(
+export const defaultTheme = (
   base: 'light' | 'dark',
   id: string,
   name: string,
   fonts: ThemeFonts = DEFAULT_FONTS,
-): CustomTheme {
+): CustomTheme => {
   return {
     id,
     name,
@@ -84,7 +84,7 @@ export function defaultTheme(
     measure: 68,
     shadowScale: 1,
   };
-}
+};
 
 /* Lightness of each ramp step is today's Open Color value, so the step that carries text keeps its
    contrast. Chroma is the step's share of the ramp's peak, applied to the picked colour's (capped). */
@@ -150,7 +150,7 @@ const RADII: Record<string, number> = { xs: 2, sm: 4, md: 6, lg: 10, xl: 16 };
 
 const round = (n: number, places = 4) => Number(n.toFixed(places));
 
-function shadows(base: 'light' | 'dark', s: number): Record<string, string> {
+const shadows = (base: 'light' | 'dark', s: number): Record<string, string> => {
   if (s === 0) {
     return { '--shadow-sm': 'none', '--shadow-md': 'none', '--shadow-lg': 'none' };
   }
@@ -168,7 +168,7 @@ function shadows(base: 'light' | 'dark', s: number): Record<string, string> {
         '--shadow-md': layer(2, 8, 0.4),
         '--shadow-lg': layer(8, 24, 0.5),
       };
-}
+};
 
 const themeFonts = (t: CustomTheme): ThemeFonts => ({
   text: t.fontText,
@@ -180,7 +180,7 @@ const themeFonts = (t: CustomTheme): ThemeFonts => ({
 export const needsAdobeFonts = (t: CustomTheme): boolean => usesAdobeFonts(themeFonts(t));
 
 /** The CSS custom properties a theme sets on <html>, on top of its base's semantic layer. */
-export function themeVars(t: CustomTheme): Record<string, string> {
+export const themeVars = (t: CustomTheme): Record<string, string> => {
   const vars: Record<string, string> = {};
   for (const [step, l, k] of ACCENT_STEPS) {
     vars[`--accent-${step}`] =
@@ -211,4 +211,4 @@ export function themeVars(t: CustomTheme): Record<string, string> {
   vars['--measure-wide'] = `${t.measure + 12}ch`;
   Object.assign(vars, shadows(t.base, t.shadowScale));
   return vars;
-}
+};

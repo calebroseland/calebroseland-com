@@ -28,7 +28,7 @@ const endSessionOnAuthError = (err: unknown) => {
 const identity = (s: Session) =>
   s.status === 'authenticated' ? `${s.backend}:${s.token}` : 'anonymous';
 
-export function editorQueryClient(): QueryClient {
+export const editorQueryClient = (): QueryClient => {
   if (client) {
     return client;
   }
@@ -54,4 +54,4 @@ export function editorQueryClient(): QueryClient {
   });
   client = qc;
   return qc;
-}
+};

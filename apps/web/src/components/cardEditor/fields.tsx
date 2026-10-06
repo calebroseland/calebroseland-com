@@ -7,11 +7,11 @@ import { ICON_CHOICES } from './model.ts';
 
 /** A labelled field in a popover or on the contact side. */
 /** Ties a field's label to its control. */
-function useLabelId() {
+const useLabelId = () => {
   return useId();
-}
+};
 
-export function TextField({
+export const TextField = ({
   label,
   value,
   error,
@@ -27,7 +27,7 @@ export function TextField({
   className?: string | undefined;
   type?: 'text' | 'url';
   visibleLabel?: boolean;
-}) {
+}) => {
   const id = useLabelId();
   return (
     <div className={styles.field}>
@@ -52,12 +52,12 @@ export function TextField({
       )}
     </div>
   );
-}
+};
 
 /* Text on the card, editable where it stands: it keeps the type of whatever holds it, and shows a
    field's edge only on hover, focus, or when something is wrong. Leading and trailing content (a
    link's icon) sits inside that edge, beside the text. */
-export function InlineText({
+export const InlineText = ({
   label,
   value,
   error,
@@ -76,7 +76,7 @@ export function InlineText({
   focusKey?: string;
   leading?: ReactNode;
   trailing?: ReactNode;
-}) {
+}) => {
   const id = useLabelId();
   return (
     <span className={[styles.inlineField, className].filter(Boolean).join(' ')}>
@@ -105,10 +105,10 @@ export function InlineText({
       )}
     </span>
   );
-}
+};
 
 /** A drag handle that also moves its item with the arrow keys. */
-export function Handle({
+export const Handle = ({
   label,
   focusKey,
   axis,
@@ -124,7 +124,7 @@ export function Handle({
   handleRef: RefObject<HTMLElement | null>;
   className?: string;
   children: ReactNode;
-}) {
+}) => {
   const keys = {
     vertical: { back: ['ArrowUp'], forward: ['ArrowDown'] },
     horizontal: { back: ['ArrowLeft'], forward: ['ArrowRight'] },
@@ -151,11 +151,11 @@ export function Handle({
       {children}
     </button>
   );
-}
+};
 
 const NO_ICON = 'none';
 
-export function IconSelect({
+export const IconSelect = ({
   value,
   label,
   allowNone = false,
@@ -170,7 +170,7 @@ export function IconSelect({
   /** The trigger's look: a bordered button, or the icon as it sits on the card. */
   className?: string | undefined;
   onChange: (icon: string | null) => void;
-}) {
+}) => {
   const known = value === null || ICON_CHOICES.some((c) => c.value === value);
   const choices = [
     ...(allowNone ? [{ value: NO_ICON, label: 'No icon' }] : []),
@@ -215,4 +215,4 @@ export function IconSelect({
       </Select.Portal>
     </Select.Root>
   );
-}
+};

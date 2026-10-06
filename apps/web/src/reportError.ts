@@ -3,14 +3,14 @@
 
 const SAMPLE_RATE = 0.1;
 
-function endpoint(): string {
+const endpoint = (): string => {
   return `${(typeof __API_ORIGIN__ === 'string' && __API_ORIGIN__) || ''}/api/log`;
-}
+};
 
-export function reportError(
+export const reportError = (
   input: { message: string; stack?: string | undefined; kind?: 'error' | 'unhandledrejection' },
   deps: { random?: () => number; send?: (url: string, body: string) => void } = {},
-): void {
+): void => {
   const random = deps.random ?? Math.random;
   if (random() >= SAMPLE_RATE) {
     return;
@@ -37,9 +37,9 @@ export function reportError(
       }).catch(() => undefined);
     });
   send(endpoint(), body);
-}
+};
 
-export function installErrorReporting(target: Window = window): void {
+export const installErrorReporting = (target: Window = window): void => {
   target.addEventListener('error', (event) => {
     reportError({
       message: event.message || 'Unknown error',
@@ -55,4 +55,4 @@ export function installErrorReporting(target: Window = window): void {
       kind: 'unhandledrejection',
     });
   });
-}
+};

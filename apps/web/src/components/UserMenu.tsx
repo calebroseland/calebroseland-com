@@ -32,7 +32,7 @@ const builtIns = [
 /* The account menu (Base UI Menu): the theme, and what the visitor can do as themselves — signing in
    or out, and, once signed in, the editing screens. Custom themes sit under the built-ins with their
    accent as a swatch, and the theme editor opens from here too. */
-export function UserMenu() {
+export const UserMenu = () => {
   const { preference, resolved, customThemes } = useThemeState();
   const current = useSession();
   const editing = useDialogState<{ theme: CustomTheme; isNew: boolean }>();
@@ -172,4 +172,4 @@ export function UserMenu() {
       )}
     </>
   );
-}
+};

@@ -13,22 +13,16 @@ import { afterSignIn } from '../editor/auth/login.ts';
 import { canSignIn, type SignInMethods } from '../editor/auth/methods.ts';
 import styles from '../editor/editor.module.css';
 
-export const Route = createFileRoute('/login/')({
-  validateSearch: z.object({ returnTo: z.optional(z.string()), error: z.optional(z.string()) }),
-  head: () => ({ meta: [{ title: 'Sign in' }, { name: 'robots', content: 'noindex' }] }),
-  component: LoginRoute,
-});
-
 /** Where to go once signed in: back to the page that asked, or to the editor. */
-function useLoginSearch() {
+const useLoginSearch = () => {
   const { returnTo, error } = Route.useSearch();
   return {
     target: afterSignIn(returnTo),
     error: error ? decodeURIComponent(error) : null,
   };
-}
+};
 
-function LoginRoute() {
+const LoginRoute = () => {
   const { target, error } = useLoginSearch();
   const methods = useSignInMethods();
 
@@ -74,10 +68,10 @@ function LoginRoute() {
       </CenteredMessage>
     </Page>
   );
-}
+};
 
 /** OAuth first, with the working tree, the fake GitHub and a pasted token as developer options. */
-function GitHubSignIn({ target, methods }: { target: string; methods: SignInMethods }) {
+const GitHubSignIn = ({ target, methods }: { target: string; methods: SignInMethods }) => {
   const github = useGitHubSignIn(target);
   const signIn = useDirectSignIn(target);
   const token = useTokenField();
@@ -152,9 +146,9 @@ function GitHubSignIn({ target, methods }: { target: string; methods: SignInMeth
       </details>
     </>
   );
-}
+};
 
-function WorkingTreeOption({ target, primary = false }: { target: string; primary?: boolean }) {
+const WorkingTreeOption = ({ target, primary = false }: { target: string; primary?: boolean }) => {
   const signIn = useDirectSignIn(target);
   return (
     <div className={primary ? `${styles.option} ${styles.leadOption}` : styles.option}>
@@ -171,4 +165,10 @@ function WorkingTreeOption({ target, primary = false }: { target: string; primar
       </p>
     </div>
   );
-}
+};
+
+export const Route = createFileRoute('/login/')({
+  validateSearch: z.object({ returnTo: z.optional(z.string()), error: z.optional(z.string()) }),
+  head: () => ({ meta: [{ title: 'Sign in' }, { name: 'robots', content: 'noindex' }] }),
+  component: LoginRoute,
+});

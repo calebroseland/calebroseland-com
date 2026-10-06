@@ -12,23 +12,12 @@ import styles from './posts.module.css';
 // zod/mini keeps the full zod runtime out of the site shell; route schemas are small and tree-shakeable.
 const search = z.object({ tag: z.optional(z.string()) });
 
-export const Route = createFileRoute('/posts/')({
-  validateSearch: search,
-  component: PostsIndex,
-  head: () => ({
-    meta: [{ title: `Posts · ${siteProfile.name}` }, { name: 'description', content: 'Posts' }],
-    links: [
-      { rel: 'alternate', type: 'application/rss+xml', title: siteProfile.name, href: '/feed.xml' },
-    ],
-  }),
-});
-
 /** The tag the list is narrowed to, from the URL. */
-function useTagFilter() {
+const useTagFilter = () => {
   return Route.useSearch().tag;
-}
+};
 
-function PostsIndex() {
+const PostsIndex = () => {
   const tag = useTagFilter();
   const shown = tag ? posts.filter((p) => p.tags.includes(tag)) : posts;
   return (
@@ -62,4 +51,15 @@ function PostsIndex() {
       )}
     </Page>
   );
-}
+};
+
+export const Route = createFileRoute('/posts/')({
+  validateSearch: search,
+  component: PostsIndex,
+  head: () => ({
+    meta: [{ title: `Posts · ${siteProfile.name}` }, { name: 'description', content: 'Posts' }],
+    links: [
+      { rel: 'alternate', type: 'application/rss+xml', title: siteProfile.name, href: '/feed.xml' },
+    ],
+  }),
+});

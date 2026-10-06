@@ -9,7 +9,7 @@ export type PublishState =
   | { kind: 'conflict'; pr: PullRequest }
   | { kind: 'merged'; pr: PullRequest };
 
-export function publishState(pr: PullRequest | null): PublishState {
+export const publishState = (pr: PullRequest | null): PublishState => {
   if (!pr) {
     return { kind: 'none' };
   }
@@ -23,14 +23,14 @@ export function publishState(pr: PullRequest | null): PublishState {
     return { kind: 'open', pr, mergeable: pr.mergeable };
   }
   return { kind: 'none' };
-}
+};
 
-export function pullRequestBody(input: {
+export const pullRequestBody = (input: {
   title: string;
   summary?: string | undefined;
   slug: string;
   ref: string;
-}): string {
+}): string => {
   return [
     input.summary ? input.summary : `Publish “${input.title}”.`,
     '',
@@ -39,7 +39,7 @@ export function pullRequestBody(input: {
     '',
     'Opened from the editor. Merging deploys to production and deletes the draft branch.',
   ].join('\n');
-}
+};
 
 export type PullRequestInput = {
   ref: string;
@@ -48,22 +48,22 @@ export type PullRequestInput = {
   slug: string;
 };
 
-export function openPr(gh: GitHubClient, input: PullRequestInput): Promise<PullRequest> {
+export const openPr = (gh: GitHubClient, input: PullRequestInput): Promise<PullRequest> => {
   return gh.openPullRequest({ ref: input.ref, title: input.title, body: pullRequestBody(input) });
-}
+};
 
-export async function mergeAndCleanUp(
+export const mergeAndCleanUp = async (
   gh: GitHubClient,
   input: { ref: string; number: number },
-): Promise<{ sha: string }> {
+): Promise<{ sha: string }> => {
   const merged = await gh.mergePullRequest(input.number);
   // GitHub's delete_branch_on_merge may already have removed it; ignore a missing ref.
   await gh.deleteDraft(input.ref).catch(() => undefined);
   return merged;
-}
+};
 
 /** Polls the live health endpoint until the merged sha is deployed, or gives up after `timeoutMs`. */
-export async function waitForDeploy(opts: {
+export const waitForDeploy = async (opts: {
   healthUrl: string;
   sha: string;
   timeoutMs?: number;
@@ -71,7 +71,7 @@ export async function waitForDeploy(opts: {
   fetchImpl?: typeof fetch;
   now?: () => number;
   sleep?: (ms: number) => Promise<void>;
-}): Promise<boolean> {
+}): Promise<boolean> => {
   const fetchImpl = opts.fetchImpl ?? fetch;
   const now = opts.now ?? Date.now;
   const sleep = opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
@@ -91,4 +91,4 @@ export async function waitForDeploy(opts: {
     await sleep(opts.intervalMs ?? 10_000);
   }
   return false;
-}
+};

@@ -12,12 +12,12 @@ export const scratchContentDir = resolve(
   '../.tmp/e2e-content',
 );
 
-function prepareScratchContent() {
+const prepareScratchContent = () => {
   const source = resolve(dirname(fileURLToPath(import.meta.url)), '../fixtures/content');
   rmSync(scratchContentDir, { recursive: true, force: true });
   mkdirSync(dirname(scratchContentDir), { recursive: true });
   cpSync(source, scratchContentDir, { recursive: true });
-}
+};
 
 if (import.meta.main) {
   prepareScratchContent();

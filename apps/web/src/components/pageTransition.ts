@@ -25,12 +25,12 @@ type ChangeInfo = {
 
 const depth = (pathname: string) => pathname.split('/').filter(Boolean).length;
 
-function reduceMotion(): boolean {
+const reduceMotion = (): boolean => {
   return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
+};
 
 /** The view-transition types for one navigation, or false for none. */
-export function pageTypes(declared: PageEffect | undefined, info: ChangeInfo): string[] | false {
+export const pageTypes = (declared: PageEffect | undefined, info: ChangeInfo): string[] | false => {
   const from = info.fromLocation;
   if (!from || !info.pathChanged || declared === false || reduceMotion()) {
     return false;
@@ -40,16 +40,16 @@ export function pageTypes(declared: PageEffect | undefined, info: ChangeInfo): s
   const direction = b > a ? 'forward' : b < a ? 'back' : 'across';
   const effect = declared ?? (direction === 'across' ? 'fade' : 'zoom');
   return ['page', `page-${effect}`, `page-${direction}`];
-}
+};
 
 /** For one link or navigate call: `viewTransition={pageTransition("fade")}`; false turns it off. */
-export function pageTransition(
+export const pageTransition = (
   effect: PageEffect,
-): false | { types: (info: ChangeInfo) => string[] | false } {
+): false | { types: (info: ChangeInfo) => string[] | false } => {
   return effect === false
     ? false
     : { types: (info: ChangeInfo): string[] | false => pageTypes(effect, info) };
-}
+};
 
 let router: AnyRouter | undefined;
 let uaAnimated = false;
@@ -76,7 +76,7 @@ export const pageViewTransition = {
 };
 
 /** Call once, right after creating the router, so route-declared effects can be read. */
-export function installPageTransitions(r: AnyRouter): void {
+export const installPageTransitions = (r: AnyRouter): void => {
   router = r;
   if (typeof window === 'undefined') {
     return;
@@ -92,4 +92,4 @@ export function installPageTransitions(r: AnyRouter): void {
   r.subscribe('onResolved', () => {
     uaAnimated = false;
   });
-}
+};

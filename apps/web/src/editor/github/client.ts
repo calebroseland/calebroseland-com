@@ -19,7 +19,7 @@ const repo: RepoRef = {
 
 const FAKE_KEY = 'crc:fake-github';
 
-function fakeStorage() {
+const fakeStorage = () => {
   return {
     load(): FakeState | null {
       try {
@@ -37,10 +37,10 @@ function fakeStorage() {
       }
     },
   };
-}
+};
 
 let fakeSingleton: ReturnType<typeof createFakeClient> | undefined;
-function fakeClient() {
+const fakeClient = () => {
   fakeSingleton ??= createFakeClient({
     storage: fakeStorage(),
     latencyMs: 120,
@@ -50,10 +50,10 @@ function fakeClient() {
     }),
   });
   return fakeSingleton;
-}
+};
 
 /** One client per session; the fake persists to localStorage so a dev session survives reloads. */
-export function clientFor(session: Session): GitHubClient {
+export const clientFor = (session: Session): GitHubClient => {
   if (session.status !== 'authenticated') {
     throw new Error('Not signed in');
   }
@@ -64,4 +64,4 @@ export function clientFor(session: Session): GitHubClient {
     return createOctokitClient(session.token, repo);
   }
   return fakeClient();
-}
+};

@@ -10,7 +10,7 @@ import { themeController } from '../theme/store.ts';
 import { UserMenu } from './UserMenu.tsx';
 
 /** The menu navigates, so it needs a router; one route is enough for the theme side of it. */
-function renderMenu() {
+const renderMenu = () => {
   const routeTree = createRootRoute({ component: UserMenu });
   render(
     <RouterProvider
@@ -18,7 +18,7 @@ function renderMenu() {
     />,
   );
   return screen.findByRole('button', { name: /^Account:/ });
-}
+};
 
 const root = document.documentElement;
 
@@ -31,15 +31,15 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-async function openMenu() {
+const openMenu = async () => {
   fireEvent.click(screen.getByRole('button', { name: /^Account:/ }));
   return screen.findByRole('menu');
-}
+};
 
-async function newTheme() {
+const newTheme = async () => {
   fireEvent.click(within(await openMenu()).getByRole('menuitem', { name: /New custom theme/ }));
   return screen.findByRole('dialog', { name: 'New theme' });
-}
+};
 
 describe('UserMenu', () => {
   it('lists the built-in themes with the current one checked, and switches on choice', async () => {
@@ -141,7 +141,7 @@ describe('UserMenu sign-in', () => {
   });
 
   /* The ways to sign in are asked of the Worker once per page load, so each case loads fresh. */
-  async function renderFresh(github: boolean) {
+  const renderFresh = async (github: boolean) => {
     vi.resetModules();
     vi.stubGlobal(
       'fetch',
@@ -159,7 +159,7 @@ describe('UserMenu sign-in', () => {
     );
     fireEvent.click(await screen.findByRole('button', { name: /^Account:/ }));
     return screen.findByRole('menu');
-  }
+  };
 
   it('offers sign-in when the environment has a way to sign in', async () => {
     vi.stubEnv('DEV', true);

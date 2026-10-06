@@ -16,7 +16,7 @@ const WORKING_TREE_REF = 'working tree';
 
 type TreeResponse = { headSha: string; files: Bundle['files'] };
 
-async function json<T>(input: string, init?: RequestInit): Promise<T> {
+const json = async <T>(input: string, init?: RequestInit): Promise<T> => {
   const res = await fetch(input, init);
   if (res.status === 409) {
     const body = (await res.json().catch(() => ({}))) as { headSha?: string };
@@ -26,13 +26,13 @@ async function json<T>(input: string, init?: RequestInit): Promise<T> {
     throw new Error(`${init?.method ?? 'GET'} ${input} failed: ${res.status}`);
   }
   return (await res.json()) as T;
-}
+};
 
 const unsupported = (what: string) => (): never => {
   throw new Error(`${what} is not available when editing the working tree`);
 };
 
-export function createLocalClient(): GitHubClient {
+export const createLocalClient = (): GitHubClient => {
   const tree = () => json<TreeResponse>('/@local/tree');
 
   return {
@@ -142,13 +142,13 @@ export function createLocalClient(): GitHubClient {
     },
     mergePullRequest: unsupported('Merging') as GitHubClient['mergePullRequest'],
   };
-}
+};
 
 /** Removes a whole bundle directory from the working tree. */
-export async function deleteLocalEntry(dir: string): Promise<void> {
+export const deleteLocalEntry = async (dir: string): Promise<void> => {
   await json('/@local/delete', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ dir }),
   });
-}
+};

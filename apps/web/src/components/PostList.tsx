@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { type EntryMeta, formatDate } from '../content/entries.ts';
 import styles from './PostList.module.css';
 
-export function PostList({ posts }: { posts: readonly EntryMeta[] }) {
+export const PostList = ({ posts }: { posts: readonly EntryMeta[] }) => {
   return (
     <Stack as="ol" gap="8" role="list" className={styles.list}>
       {posts.map((p) => (
@@ -23,4 +23,4 @@ export function PostList({ posts }: { posts: readonly EntryMeta[] }) {
       ))}
     </Stack>
   );
-}
+};

@@ -38,7 +38,7 @@ const brandNames: Partial<Record<IconName, string>> = {
 };
 
 /** A readable name for a picker: the brand's own spelling, else the icon's words capitalised. */
-export function iconLabel(name: IconName): string {
+export const iconLabel = (name: IconName): string => {
   const words = (name.split(':')[1] ?? name).replace(/-/g, ' ');
   return brandNames[name] ?? words.charAt(0).toUpperCase() + words.slice(1);
-}
+};

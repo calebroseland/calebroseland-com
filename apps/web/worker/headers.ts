@@ -23,7 +23,7 @@ export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
   'content-security-policy-report-only': csp,
 };
 
-export function securityHeaders(res: Response): Response {
+export const securityHeaders = (res: Response): Response => {
   const out = new Response(res.body, res);
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     if (!out.headers.has(name)) {
@@ -31,10 +31,10 @@ export function securityHeaders(res: Response): Response {
     }
   }
   return out;
-}
+};
 
 /** The same headers in Cloudflare's static-assets `_headers` format, for every path. */
-export function headersFile(): string {
+export const headersFile = (): string => {
   const lines = Object.entries(SECURITY_HEADERS).map(([name, value]) => `  ${name}: ${value}`);
   return `/*\n${lines.join('\n')}\n`;
-}
+};

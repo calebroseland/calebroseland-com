@@ -15,7 +15,7 @@ export type SessionEnv = {
   storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> | undefined;
 };
 
-function read(storage: SessionEnv['storage']): Session {
+const read = (storage: SessionEnv['storage']): Session => {
   try {
     const raw = storage?.getItem(KEY);
     if (!raw) {
@@ -35,7 +35,7 @@ function read(storage: SessionEnv['storage']): Session {
     // unreadable storage: start anonymous
   }
   return { status: 'anonymous' };
-}
+};
 
 export type SessionController = {
   store: Store<Session>;
@@ -43,7 +43,7 @@ export type SessionController = {
   signOut(): void;
 };
 
-export function createSessionStore(env: SessionEnv): SessionController {
+export const createSessionStore = (env: SessionEnv): SessionController => {
   const store = new Store<Session>(read(env.storage));
   const persist = () => {
     try {
@@ -67,33 +67,33 @@ export function createSessionStore(env: SessionEnv): SessionController {
       persist();
     },
   };
-}
+};
 
-export const session: SessionController = createSessionStore(
-  typeof window === 'undefined' ? {} : { storage: safeSessionStorage() },
-);
-
-function safeSessionStorage(): SessionEnv['storage'] {
+const safeSessionStorage = (): SessionEnv['storage'] => {
   try {
     return window.sessionStorage;
   } catch {
     return undefined;
   }
-}
+};
+
+export const session: SessionController = createSessionStore(
+  typeof window === 'undefined' ? {} : { storage: safeSessionStorage() },
+);
 
 /* PKCE handshake state also lives in sessionStorage, keyed separately so it can be cleared on completion. */
 const HANDSHAKE = 'crc:oauth-handshake';
 export type Handshake = { verifier: string; state: string; returnTo: string };
 
-export function saveHandshake(
+export const saveHandshake = (
   h: Handshake,
   storage: SessionEnv['storage'] = safeSessionStorage(),
-): void {
+): void => {
   storage?.setItem(HANDSHAKE, JSON.stringify(h));
-}
-export function takeHandshake(
+};
+export const takeHandshake = (
   storage: SessionEnv['storage'] = safeSessionStorage(),
-): Handshake | null {
+): Handshake | null => {
   try {
     const raw = storage?.getItem(HANDSHAKE);
     storage?.removeItem(HANDSHAKE);
@@ -111,4 +111,4 @@ export function takeHandshake(
   } catch {
     return null;
   }
-}
+};

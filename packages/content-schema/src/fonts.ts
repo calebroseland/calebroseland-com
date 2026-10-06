@@ -56,16 +56,16 @@ const resolve = (fonts: ThemeFonts) => ({
 });
 
 /** The CSS custom properties that put a theme's faces on the page. */
-export function fontVars(fonts: ThemeFonts): Record<string, string> {
+export const fontVars = (fonts: ThemeFonts): Record<string, string> => {
   const r = resolve(fonts);
   return {
     '--font-sans': FONTS[r.text].stack,
     '--font-brand': FONTS[r.name].stack,
     '--font-prose': FONTS[r.reading].stack,
   };
-}
+};
 
 /** Whether the faces include one only the Adobe Fonts kit serves. */
-export function usesAdobeFonts(fonts: ThemeFonts): boolean {
+export const usesAdobeFonts = (fonts: ThemeFonts): boolean => {
   return Object.values(resolve(fonts)).some((id) => FONTS[id].adobe);
-}
+};

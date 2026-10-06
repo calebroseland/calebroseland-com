@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import styles from './editor.module.css';
 
 /* Base UI AlertDialog: focus trap and restoration, Escape closes, state as data attributes for CSS. */
-export function ConfirmDialog({
+export const ConfirmDialog = ({
   open,
   onOpenChange,
   title,
@@ -15,7 +15,7 @@ export function ConfirmDialog({
   title: string;
   description: ReactNode;
   actions: ReactNode;
-}) {
+}) => {
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
@@ -30,4 +30,4 @@ export function ConfirmDialog({
       </AlertDialog.Portal>
     </AlertDialog.Root>
   );
-}
+};

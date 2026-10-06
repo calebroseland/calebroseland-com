@@ -1,13 +1,13 @@
 import { expect, test } from './fixtures.ts';
 
-async function signInFake(page: import('@playwright/test').Page) {
+const signInFake = async (page: import('@playwright/test').Page) => {
   await page.goto('/login');
   await page.evaluate(() => localStorage.removeItem('crc:fake-github'));
   await page.getByText('Developer options').click();
   await page.getByRole('button', { name: 'Use local fake GitHub' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Editor' })).toBeVisible();
   await expect(page.getByText('fake-user')).toBeVisible();
-}
+};
 
 test.describe('editor publish', () => {
   test('the full loop: draft → save → pull request → merge → live post, with the branch cleaned up', async ({

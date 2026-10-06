@@ -23,7 +23,7 @@ export type EditorEntry = {
 };
 
 /** Reads every index.md in a content tree. Invalid frontmatter is skipped rather than failing the board. */
-export function entriesFromBundle(bundle: Bundle, status: EntryStatus): EditorEntry[] {
+export const entriesFromBundle = (bundle: Bundle, status: EntryStatus): EditorEntry[] => {
   const out: EditorEntry[] = [];
   for (const file of bundle.files) {
     if (!file.path.endsWith('/index.md')) {
@@ -49,13 +49,13 @@ export function entriesFromBundle(bundle: Bundle, status: EntryStatus): EditorEn
   return out.sort((a, b) =>
     a.date === b.date ? a.slug.localeCompare(b.slug) : b.date.localeCompare(a.date),
   );
-}
+};
 
 /** Draft branches shadow the published entry with the same slug, so only one row appears per slug. */
-export function mergeEntries(
+export const mergeEntries = (
   published: readonly EditorEntry[],
   drafts: readonly { ref: string; slug: string; pr: PullRequest | null }[],
-): EditorEntry[] {
+): EditorEntry[] => {
   const bySlug = new Map(published.map((e) => [e.slug, e]));
   const rows: EditorEntry[] = [];
   for (const draft of drafts) {
@@ -74,4 +74,4 @@ export function mergeEntries(
     });
   }
   return [...rows, ...bySlug.values()];
-}
+};

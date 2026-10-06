@@ -15,14 +15,14 @@ import { type EditTag, MAX_TAGS, newTag, tagProblem } from './model.ts';
 
 /** The card's focus areas as chips: reorder, add, remove, and each one's settings a click away. */
 /** The tag being typed, why it cannot be added yet, and the id tying its label and message to it. */
-function useTagDraft() {
+const useTagDraft = () => {
   const [draft, setDraft] = useState('');
   const [problem, setProblem] = useState<string | null>(null);
   const inputId = useId();
   return { draft, setDraft, problem, setProblem, inputId };
-}
+};
 
-export function TagEditor({
+export const TagEditor = ({
   tags,
   errors,
   onChange,
@@ -32,7 +32,7 @@ export function TagEditor({
   errors: Map<string, string>;
   onChange: (tags: EditTag[]) => void;
   onMove: (from: number, to: number) => void;
-}) {
+}) => {
   const { draft, setDraft, problem, setProblem, inputId } = useTagDraft();
   useListReorder(
     tags.map((t) => ({ ...t, id: t.key })),
@@ -97,11 +97,11 @@ export function TagEditor({
       )}
     </fieldset>
   );
-}
+};
 
 /* A focus area as the card will show it (icon, label, or both), marked when it links, with its
    settings a click away. */
-function TagChip({
+const TagChip = ({
   tag,
   index,
   error,
@@ -115,7 +115,7 @@ function TagChip({
   onChange: (tag: EditTag) => void;
   onMove: (delta: -1 | 1) => void;
   onRemove: () => void;
-}) {
+}) => {
   const { ref, handleRef, state } = useItemRegistration(tag.key, index, {
     listId: 'tags',
     axis: 'horizontal',
@@ -159,7 +159,7 @@ function TagChip({
       <DropIndicator edge={state.edge} />
     </li>
   );
-}
+};
 
 const SHOW_OPTIONS = [
   { value: 'icon', label: 'Icon' },
@@ -167,7 +167,7 @@ const SHOW_OPTIONS = [
   { value: 'both', label: 'Both' },
 ] as const;
 
-function TagSettings({
+const TagSettings = ({
   tag,
   name,
   error,
@@ -177,7 +177,7 @@ function TagSettings({
   name: string;
   error: string | undefined;
   onChange: (tag: EditTag) => void;
-}) {
+}) => {
   const motion = usePopupMotion('dropdown');
   return (
     <Popover.Root onOpenChange={motion.onOpenChange}>
@@ -245,4 +245,4 @@ function TagSettings({
       </Popover.Portal>
     </Popover.Root>
   );
-}
+};

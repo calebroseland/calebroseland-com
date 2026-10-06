@@ -8,7 +8,7 @@ import { useCurrentHref } from '../hooks/useCurrentHref.ts';
 import styles from './Article.module.css';
 
 /** An entry's title and meta; `action` takes the Edit link's place on a page that is not an entry. */
-export function EntryHeader({
+export const EntryHeader = ({
   meta,
   showMeta = true,
   action,
@@ -16,7 +16,7 @@ export function EntryHeader({
   meta: EntryMeta;
   showMeta?: boolean;
   action?: ReactNode;
-}) {
+}) => {
   return (
     <header className={styles.header}>
       <div className={styles.titleRow}>
@@ -31,10 +31,10 @@ export function EntryHeader({
       )}
     </header>
   );
-}
+};
 
 /** Signed in, an editor can open this entry in the editor from the page itself. */
-function EditEntry({ slug, title }: { slug: string; title: string }) {
+const EditEntry = ({ slug, title }: { slug: string; title: string }) => {
   const signedIn = useSignedIn();
   const here = useCurrentHref();
   if (!signedIn) {
@@ -52,10 +52,10 @@ function EditEntry({ slug, title }: { slug: string; title: string }) {
       Edit
     </Link>
   );
-}
+};
 
 /** Tags as chips linking to the posts they filter; `all` leads with a chip for every post. */
-export function TagList({
+export const TagList = ({
   tags,
   all = false,
   className,
@@ -63,7 +63,7 @@ export function TagList({
   tags: readonly string[];
   all?: boolean;
   className?: string | undefined;
-}) {
+}) => {
   return (
     <ul role="list" className={`${styles.tags} ${className ?? ''}`} aria-label="Tags">
       {all && (
@@ -84,14 +84,14 @@ export function TagList({
       ))}
     </ul>
   );
-}
+};
 
-export function ArticleBody({ entry }: { entry: LoadedEntry }) {
+export const ArticleBody = ({ entry }: { entry: LoadedEntry }) => {
   // biome-ignore lint/security/noDangerouslySetInnerHtml: html is produced at build time by @crc/markdown through rehype-sanitize
   return <div className="prose" dangerouslySetInnerHTML={{ __html: entry.html }} />;
-}
+};
 
-export function ArticleSkeleton() {
+export const ArticleSkeleton = () => {
   return (
     <div className={styles.skeleton} aria-busy="true" aria-label="Loading">
       <span />
@@ -100,4 +100,4 @@ export function ArticleSkeleton() {
       <span />
     </div>
   );
-}
+};

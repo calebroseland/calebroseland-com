@@ -13,7 +13,7 @@ export type Failure =
 
 type Outcome<T> = { ok: true; value: T } | Failure;
 
-export function toFailure(error: unknown): Failure {
+export const toFailure = (error: unknown): Failure => {
   if (error instanceof StaleRefError) {
     return { ok: false, reason: 'conflict', error };
   }
@@ -21,7 +21,7 @@ export function toFailure(error: unknown): Failure {
     return { ok: false, reason: 'expired', error };
   }
   return { ok: false, reason: 'failed', error };
-}
+};
 
 export type Command<TVariables, TData> = {
   run: (variables: TVariables) => Promise<Outcome<TData>>;
@@ -33,9 +33,9 @@ export type Command<TVariables, TData> = {
 };
 
 /** A mutation as a command that never throws: every run resolves to an Outcome. */
-export function useCommand<TData, TVariables>(
+export const useCommand = <TData, TVariables>(
   options: UseMutationOptions<TData, Error, TVariables>,
-): Command<TVariables, TData> {
+): Command<TVariables, TData> => {
   const mutation = useMutation(options);
   return {
     run: (variables) =>
@@ -44,4 +44,4 @@ export function useCommand<TData, TVariables>(
     variables: mutation.variables,
     failure: mutation.error ? toFailure(mutation.error) : null,
   };
-}
+};

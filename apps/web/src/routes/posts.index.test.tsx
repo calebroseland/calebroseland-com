@@ -51,7 +51,7 @@ vi.mock('virtual:content/profile', () => ({
 import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router';
 import { routeTree } from '../routeTree.gen.ts';
 
-async function renderAt(path: string) {
+const renderAt = async (path: string) => {
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: [path] }),
@@ -59,7 +59,7 @@ async function renderAt(path: string) {
   render(<RouterProvider router={router} />);
   await screen.findByRole('heading', { level: 1 });
   return router;
-}
+};
 
 describe('/posts', () => {
   it('lists posts newest first with dates and summaries', async () => {

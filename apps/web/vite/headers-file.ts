@@ -2,7 +2,7 @@ import type { Plugin } from 'vite';
 import { headersFile } from '../worker/headers.ts';
 
 /** Writes `_headers` beside the built assets, so pages and files get the Worker's security headers. */
-export function securityHeadersFile(): Plugin {
+export const securityHeadersFile = (): Plugin => {
   return {
     name: 'crc:headers-file',
     apply: 'build',
@@ -11,4 +11,4 @@ export function securityHeadersFile(): Plugin {
       this.emitFile({ type: 'asset', fileName: '_headers', source: headersFile() });
     },
   };
-}
+};

@@ -8,16 +8,16 @@ import { allCommands, type Command, commandSources, visibleFor } from './registr
 export type CommandGroup = { value: string; items: Command[] };
 
 /** True from the first time `value` is true: keeps the lazily loaded palette mounted to animate out. */
-export function useHasBeenTrue(value: boolean): boolean {
+export const useHasBeenTrue = (value: boolean): boolean => {
   const [seen, setSeen] = useState(value);
   if (value && !seen) {
     setSeen(true);
   }
   return seen;
-}
+};
 
 /** The palette's view: the page stack (for nested commands), the query, and the grouped commands. */
-export function usePaletteView(open: boolean) {
+export const usePaletteView = (open: boolean) => {
   const [stack, setStack] = useState<readonly Command[]>([]);
   const [query, setQuery] = useState('');
   const sources = useStore(commandSources);
@@ -53,10 +53,10 @@ export function usePaletteView(open: boolean) {
       setQuery('');
     },
   };
-}
+};
 
 /** Runs a command with what it needs: navigation that closes the palette, and where the visitor is. */
-export function useRunCommand() {
+export const useRunCommand = () => {
   const go = useSiteGo();
   const href = useCurrentHref();
   return (c: Command) =>
@@ -68,4 +68,4 @@ export function useRunCommand() {
         await go(to);
       },
     });
-}
+};

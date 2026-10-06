@@ -4,7 +4,7 @@ import type { Buffer } from './buffer.ts';
 import { findEntryDir } from './paths.ts';
 
 /** Turns a content tree into an editor buffer for one slug, whichever kind owns it. */
-export function bufferFromBundle(bundle: Bundle, slug: string): Buffer {
+export const bufferFromBundle = (bundle: Bundle, slug: string): Buffer => {
   const paths = bundle.files.map((f) => f.path);
   const found = findEntryDir(paths, slug);
   if (!found) {
@@ -31,4 +31,4 @@ export function bufferFromBundle(bundle: Bundle, slug: string): Buffer {
     imagesDropped: false,
     updatedAt: new Date().toISOString(),
   };
-}
+};

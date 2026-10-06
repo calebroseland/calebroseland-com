@@ -20,36 +20,26 @@ import { useDialogState } from '../hooks/useDialogState.ts';
 
 type Panel = 'meta' | 'media';
 
-export const Route = createFileRoute('/editor/$slug')({
-  validateSearch: z.object({
-    panel: z.optional(z.enum(['meta', 'media'])),
-    // The page an edit was opened from, which Close returns to.
-    from: z.optional(z.string()),
-  }),
-  head: ({ params }) => ({ meta: [{ title: `${params.slug} · Editor` }] }),
-  component: DraftRoute,
-});
-
-function useSlug(): string {
+const useSlug = (): string => {
   return Route.useParams().slug;
-}
+};
 
 /** The side panel on show, kept in the URL. */
-function usePanel() {
+const usePanel = () => {
   const { panel = 'meta' } = Route.useSearch();
   const navigate = Route.useNavigate();
   return { panel, show: (next: Panel) => navigate({ search: (s) => ({ ...s, panel: next }) }) };
-}
+};
 
 /** Where Close goes: back to the page the edit was opened from, or to the editor's list. */
-function useClose() {
+const useClose = () => {
   const { from } = Route.useSearch();
   const navigate = Route.useNavigate();
   const href = isAppHref(from) ? from : '/editor';
   return { href, go: () => void navigate({ href }) };
-}
+};
 
-function DraftRoute() {
+const DraftRoute = () => {
   const slug = useSlug();
   const entry = useEntry(slug);
   switch (entry.status) {
@@ -90,9 +80,9 @@ function DraftRoute() {
       // from the pre-save cache and blank the body. Wholesale replacements are handled inside.
       return <DraftEditor key={entry.ref} slug={slug} bundle={entry.bundle} />;
   }
-}
+};
 
-function StartEditing({ slug }: { slug: string }) {
+const StartEditing = ({ slug }: { slug: string }) => {
   const gh = useGitHub();
   const begin = useBeginEditing();
   const start = async () => {
@@ -122,9 +112,9 @@ function StartEditing({ slug }: { slug: string }) {
       </Stack>
     </EditorShell>
   );
-}
+};
 
-function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
+const DraftEditor = ({ slug, bundle }: { slug: string; bundle: Bundle }) => {
   const { branches, publishes } = useCapabilities();
   const { panel, show } = usePanel();
   const close = useClose();
@@ -338,4 +328,14 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
       />
     </EditorShell>
   );
-}
+};
+
+export const Route = createFileRoute('/editor/$slug')({
+  validateSearch: z.object({
+    panel: z.optional(z.enum(['meta', 'media'])),
+    // The page an edit was opened from, which Close returns to.
+    from: z.optional(z.string()),
+  }),
+  head: ({ params }) => ({ meta: [{ title: `${params.slug} · Editor` }] }),
+  component: DraftRoute,
+});

@@ -31,20 +31,20 @@ type AuthConfig = {
 };
 
 /** Tells the SPA which ways of signing in to offer in this environment. */
-export function authConfig(env: WorkerEnv): Response {
+export const authConfig = (env: WorkerEnv): Response => {
   const github = featureOn(env.FEATURE_GITHUB_EDITING);
   const oauth = github && Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
   return Response.json(
     { github, oauth, clientId: oauth ? env.GITHUB_CLIENT_ID : null } satisfies AuthConfig,
     { headers: { 'cache-control': 'no-store' } },
   );
-}
+};
 
-export async function authCallback(
+export const authCallback = async (
   request: Request,
   env: WorkerEnv,
   requestId: string,
-): Promise<Response> {
+): Promise<Response> => {
   if (!featureOn(env.FEATURE_GITHUB_EDITING)) {
     return problem(404, 'GitHub editing is off', 'FEATURE_GITHUB_EDITING is not on here.');
   }
@@ -140,4 +140,4 @@ export async function authCallback(
     'GitHub rejected the exchange',
     err.success ? err.data.error : `HTTP ${upstream.status}`,
   );
-}
+};

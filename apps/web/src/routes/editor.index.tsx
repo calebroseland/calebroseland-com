@@ -18,12 +18,6 @@ import { useOpenInEditor } from '../editor/navigation.ts';
 import { notify } from '../editor/Toast.tsx';
 import { useDialogState } from '../hooks/useDialogState.ts';
 
-export const Route = createFileRoute('/editor/')({
-  validateSearch: z.object({ kind: z.optional(z.enum(['post', 'page'])) }),
-  head: () => ({ meta: [{ title: 'Editor' }] }),
-  component: Board,
-});
-
 const FILTERS = [
   { label: 'All', kind: undefined },
   { label: 'Posts', kind: 'post' },
@@ -33,13 +27,13 @@ const FILTERS = [
 const NEW_LABEL = { post: 'New post', page: 'New page' } as const;
 
 /** The kind the board is narrowed to, kept in the URL so a view can be linked to. */
-function useKindFilter(): EntryKind | undefined {
+const useKindFilter = (): EntryKind | undefined => {
   return Route.useSearch().kind;
-}
+};
 
 type Discarding = { ref: string; slug: string; dir: string };
 
-function Board() {
+const Board = () => {
   const kind = useKindFilter();
   const board = useBoard(kind);
   const login = useViewerLogin();
@@ -192,9 +186,9 @@ function Board() {
       />
     </EditorShell>
   );
-}
+};
 
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
+const Group = ({ title, children }: { title: string; children: React.ReactNode }) => {
   return (
     <section className={styles.group} aria-label={title}>
       <h2 className={styles.groupTitle}>{title}</h2>
@@ -203,9 +197,9 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
       </Stack>
     </section>
   );
-}
+};
 
-function describe(entry: EditorEntry): string {
+const describe = (entry: EditorEntry): string => {
   switch (entry.status) {
     case 'pull-request':
       return `Pull request #${entry.pr?.number}`;
@@ -216,9 +210,9 @@ function describe(entry: EditorEntry): string {
     default:
       return entry.draft ? `${entry.dir} · marked draft` : entry.dir;
   }
-}
+};
 
-function Row({
+const Row = ({
   entry,
   action,
   busy,
@@ -230,7 +224,7 @@ function Row({
   busy?: boolean;
   onAction?: () => void;
   onDiscard?: () => void;
-}) {
+}) => {
   return (
     <li className={styles.row}>
       <div className={styles.rowMain}>
@@ -264,4 +258,10 @@ function Row({
       )}
     </li>
   );
-}
+};
+
+export const Route = createFileRoute('/editor/')({
+  validateSearch: z.object({ kind: z.optional(z.enum(['post', 'page'])) }),
+  head: () => ({ meta: [{ title: 'Editor' }] }),
+  component: Board,
+});

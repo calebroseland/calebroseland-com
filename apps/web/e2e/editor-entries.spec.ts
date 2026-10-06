@@ -2,25 +2,25 @@ import { expect, test } from './fixtures.ts';
 
 /* Pages, and re-editing something already published. Both run against the in-memory fake GitHub. */
 
-async function signInFake(page: import('@playwright/test').Page) {
+const signInFake = async (page: import('@playwright/test').Page) => {
   await page.goto('/login');
   await page.evaluate(() => localStorage.clear());
   await page.getByText('Developer options').click();
   await page.getByRole('button', { name: 'Use local fake GitHub' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Editor' })).toBeVisible();
   await expect(page.getByText('fake-user')).toBeVisible();
-}
+};
 
-async function createEntry(
+const createEntry = async (
   page: import('@playwright/test').Page,
   kind: 'post' | 'page',
   title: string,
-) {
+) => {
   await page.getByRole('link', { name: 'New entry' }).click();
   await page.getByRole('radio', { name: new RegExp(`^${kind}`, 'i') }).check();
   await page.getByLabel('Title').fill(title);
   await page.getByRole('button', { name: `Create ${kind}` }).click();
-}
+};
 
 test.describe('pages', () => {
   test('a page is created without a date, edited, and saved to its own bundle', async ({

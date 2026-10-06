@@ -28,7 +28,7 @@ const MAX_BODY = 32 * 1024 * 1024;
 
 type StoredFile = { path: string; content: string; encoding: 'utf-8' | 'base64' };
 
-function walk(dir: string, out: string[] = []): string[] {
+const walk = (dir: string, out: string[] = []): string[] => {
   if (!existsSync(dir)) {
     return out;
   }
@@ -41,12 +41,12 @@ function walk(dir: string, out: string[] = []): string[] {
     }
   }
   return out;
-}
+};
 
-export function readTree(
+export const readTree = (
   contentDir: string,
   prefix: string,
-): { headSha: string; files: StoredFile[] } {
+): { headSha: string; files: StoredFile[] } => {
   const files = walk(contentDir)
     .map((abs) => {
       const rel = `${prefix}/${relative(contentDir, abs).replaceAll('\\', '/')}`;
@@ -66,9 +66,9 @@ export function readTree(
     hash.update(`${f.path}:${f.content};`);
   }
   return { headSha: hash.digest('hex').slice(0, 40), files };
-}
+};
 
-function currentBranch(root: string): string {
+const currentBranch = (root: string): string => {
   try {
     return execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
       cwd: root,
@@ -77,9 +77,9 @@ function currentBranch(root: string): string {
   } catch {
     return 'unknown';
   }
-}
+};
 
-function readBody(req: IncomingMessage): Promise<unknown> {
+const readBody = (req: IncomingMessage): Promise<unknown> => {
   return new Promise((done, fail) => {
     let raw = '';
     req.on('data', (chunk) => {
@@ -97,9 +97,9 @@ function readBody(req: IncomingMessage): Promise<unknown> {
     });
     req.on('error', fail);
   });
-}
+};
 
-export function localStore(opts: { root: string; prefix?: string }): Plugin {
+export const localStore = (opts: { root: string; prefix?: string }): Plugin => {
   const prefix = opts.prefix ?? 'content';
   let contentDir = '';
 
@@ -214,4 +214,4 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
       });
     },
   };
-}
+};

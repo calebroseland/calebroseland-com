@@ -33,7 +33,7 @@ type Source = () => readonly Command[];
 const sources = new Store<ReadonlyMap<string, Source>>(new Map());
 
 /** Adds commands under an id, replacing any already there; returns the way to remove them. */
-export function registerCommands(id: string, source: Source): () => void {
+export const registerCommands = (id: string, source: Source): (() => void) => {
   sources.setState((current) => new Map(current).set(id, source));
   return () =>
     sources.setState((current) => {
@@ -44,22 +44,22 @@ export function registerCommands(id: string, source: Source): () => void {
       next.delete(id);
       return next;
     });
-}
+};
 
 export const commandSources = sources;
 
 /** Every registered command, in registration order. */
-export function allCommands(map: ReadonlyMap<string, Source> = sources.state): Command[] {
+export const allCommands = (map: ReadonlyMap<string, Source> = sources.state): Command[] => {
   return [...map.values()].flatMap((source) => source());
-}
+};
 
 /** What the palette lists for a query: visible commands, plus hidden ones named exactly. */
-export function visibleFor(commands: readonly Command[], query: string): Command[] {
+export const visibleFor = (commands: readonly Command[], query: string): Command[] => {
   const q = query.trim().toLowerCase();
   return commands.filter(
     (c) => !c.hidden || (q !== '' && (c.keywords ?? []).some((k) => k.toLowerCase() === q)),
   );
-}
+};
 
 /** The text a query is matched against: the title and every keyword. */
 export const searchText = (c: Command): string => [c.title, ...(c.keywords ?? [])].join(' ');

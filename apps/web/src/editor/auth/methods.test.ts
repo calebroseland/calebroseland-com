@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /* signInMethods() asks the Worker once per page load, so each case loads the module fresh. */
-async function load(config: { github: boolean; oauth: boolean } | 'no worker') {
+const load = async (config: { github: boolean; oauth: boolean } | 'no worker') => {
   vi.resetModules();
   vi.stubGlobal(
     'fetch',
@@ -14,7 +14,7 @@ async function load(config: { github: boolean; oauth: boolean } | 'no worker') {
   const methods = await import('./methods.ts');
   const { session } = await import('./store.ts');
   return { ...methods, session };
-}
+};
 
 describe('sign-in methods', () => {
   beforeEach(() => vi.stubEnv('DEV', true));

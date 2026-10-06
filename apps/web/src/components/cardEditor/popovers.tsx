@@ -7,7 +7,7 @@ import styles from './CardEditor.module.css';
 import type { EditGroup } from './model.ts';
 
 /** A group's settings, and moving or removing it without a drag. */
-export function GroupPopover({
+export const GroupPopover = ({
   group,
   name,
   canRemove,
@@ -21,7 +21,7 @@ export function GroupPopover({
   onChange: (group: EditGroup) => void;
   onMove: (delta: -1 | 1) => void;
   onRemove: () => void;
-}) {
+}) => {
   const motion = usePopupMotion('dropdown');
   return (
     <Popover.Root onOpenChange={motion.onOpenChange}>
@@ -60,4 +60,4 @@ export function GroupPopover({
       </Popover.Portal>
     </Popover.Root>
   );
-}
+};

@@ -6,7 +6,7 @@ const loadFeatures = () => import('./motion/features.ts').then((mod) => mod.defa
 
 /* `strict` makes the full `motion` component a runtime error, so the bundle cannot regress by accident.
    Reduced motion is honoured here for JS animation and in primitives.css for CSS transitions. */
-export function MotionProvider({ children }: { children: ReactNode }) {
+export const MotionProvider = ({ children }: { children: ReactNode }) => {
   return (
     <LazyMotion features={loadFeatures} strict>
       <MotionConfig
@@ -17,4 +17,4 @@ export function MotionProvider({ children }: { children: ReactNode }) {
       </MotionConfig>
     </LazyMotion>
   );
-}
+};

@@ -13,16 +13,16 @@ import styles from './Tip.module.css';
 
 /* One delay group for the whole site: a tooltip opens quickly, and once one is showing, moving to the
    next opens it at once with no fade (Base UI marks it data-instant). */
-export function TipProvider({ children }: { children: ReactNode }) {
+export const TipProvider = ({ children }: { children: ReactNode }) => {
   return (
     <Tooltip.Provider delay={150} closeDelay={0} timeout={400}>
       {children}
     </Tooltip.Provider>
   );
-}
+};
 
 /** A tooltip with an arrow pointing at the element it describes. `children` becomes the trigger. */
-export function Tip({
+export const Tip = ({
   label,
   side = 'top',
   children,
@@ -30,7 +30,7 @@ export function Tip({
   label: ReactNode;
   side?: 'top' | 'bottom' | 'left' | 'right';
   children: ReactElement;
-}) {
+}) => {
   const motion = usePopupMotion('tip');
   const hold = useTouchHold(() => motion.onOpenChange(false));
   return (
@@ -52,14 +52,14 @@ export function Tip({
       </Tooltip.Portal>
     </Tooltip.Root>
   );
-}
+};
 
 const HOLD_MS = 500;
 const SHOWN_MS = 1500;
 
 /* Touch has no hover, so holding a control shows its tip, as native tooltips do on Android. The press
    that ends the hold is spent on the tip: it neither follows the link nor opens a context menu. */
-function useTouchHold(onHide: () => void) {
+const useTouchHold = (onHide: () => void) => {
   const [open, setOpen] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const held = useRef(false);
@@ -109,4 +109,4 @@ function useTouchHold(onHide: () => void) {
       },
     },
   };
-}
+};

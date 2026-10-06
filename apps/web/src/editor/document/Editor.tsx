@@ -19,9 +19,9 @@ export type EditorApi = {
 };
 
 /** A handle for the screen to reach into the document (insert an image, set its alt text). */
-export function useEditorApi() {
+export const useEditorApi = () => {
   return useRef<EditorApi | null>(null);
-}
+};
 
 type EditorProps = {
   initialMarkdown: string;
@@ -32,7 +32,7 @@ type EditorProps = {
   apiRef?: RefObject<EditorApi | null>;
 };
 
-export function Editor(props: EditorProps) {
+export const Editor = (props: EditorProps) => {
   const { editor, pickImages } = useMarkdownEditor(props);
   return (
     <div className={styles.frame}>
@@ -40,16 +40,16 @@ export function Editor(props: EditorProps) {
       <EditorContent editor={editor} />
     </div>
   );
-}
+};
 
 /** The TipTap editor for one document: markdown in and out, pasted or dropped images handed back. */
-function useMarkdownEditor({
+const useMarkdownEditor = ({
   initialMarkdown,
   onChange,
   onImageFiles,
   previewSrc,
   apiRef,
-}: EditorProps) {
+}: EditorProps) => {
   const onChangeRef = useLatest(onChange);
   const onImageFilesRef = useLatest(onImageFiles);
   const previewSrcRef = useLatest(previewSrc);
@@ -105,7 +105,7 @@ function useMarkdownEditor({
   });
   useApiBinding(editor, apiRef);
   return { editor, pickImages: (files: File[]) => onImageFilesRef.current(files) };
-}
+};
 
 /* Relative names ("hero.png") would resolve against the editor's own URL, so the rendered src is the
    preview while data-src keeps the name, which is what copy and paste inside the editor read back. */
@@ -130,7 +130,7 @@ const PreviewImage = Image.extend<ImageOptions & { previewSrc: (src: string) => 
 });
 
 /** Exposes the editor's commands through `apiRef` for as long as the editor exists. */
-function useApiBinding(editor: TipTap | null, apiRef: RefObject<EditorApi | null> | undefined) {
+const useApiBinding = (editor: TipTap | null, apiRef: RefObject<EditorApi | null> | undefined) => {
   useEffect(() => {
     if (!apiRef || !editor) {
       return;
@@ -156,4 +156,4 @@ function useApiBinding(editor: TipTap | null, apiRef: RefObject<EditorApi | null
       apiRef.current = null;
     };
   }, [editor, apiRef]);
-}
+};

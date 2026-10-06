@@ -52,7 +52,7 @@ export type EditFaces = { front: ReactNode; back: ReactNode };
 /** Loads what the editor needs before it is shown, so the card can turn editable in one step. */
 
 /** Whether the card has been turned in this session, so focus follows only a turn the editor made. */
-function useTurnOver(onFlip: () => void) {
+const useTurnOver = (onFlip: () => void) => {
   const [turned, setTurned] = useState(false);
   return {
     turned,
@@ -61,11 +61,11 @@ function useTurnOver(onFlip: () => void) {
       onFlip();
     },
   };
-}
+};
 
-export function prepareEdit(published: Profile): Promise<ProfileSource> {
+export const prepareEdit = (published: Profile): Promise<ProfileSource> => {
   return loadProfile(clientFor(session.store.state), published);
-}
+};
 
 /** One edit session across both faces of the card; brings its own editor context, since the landing
     sits outside /editor. The landing places the faces, so the flip between them stays its own. */
@@ -89,7 +89,7 @@ export default function CardEditSession({
   );
 }
 
-function Session({
+const Session = ({
   source,
   onFlip,
   onDone,
@@ -99,7 +99,7 @@ function Session({
   onFlip: () => void;
   onDone: (result: EditResult) => void;
   children: (faces: EditFaces) => ReactNode;
-}) {
+}) => {
   const s = useEditSession(source, onDone);
   const { turned, flip } = useTurnOver(onFlip);
   const { leaving } = s;
@@ -135,12 +135,12 @@ function Session({
       />
     </>
   );
-}
+};
 
 type EditSession = ReturnType<typeof useEditSession>;
 
 /** The draft, its moves, additions and removals (each announced), and saving it. */
-function useEditSession(source: ProfileSource, onDone: (result: EditResult) => void) {
+const useEditSession = (source: ProfileSource, onDone: (result: EditResult) => void) => {
   const working = !useCapabilities().branches;
   const { state, dirty, next, errors, update } = useProfileDraft(source.profile);
   const announcer = useAnnouncer();
@@ -280,10 +280,10 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
     addGroup,
     removeGroup,
   };
-}
+};
 
 /** Focuses the element once it mounts, when the mount was caused by turning the card. */
-function useFocusWhen<T extends HTMLElement>(when: boolean): RefObject<T | null> {
+const useFocusWhen = <T extends HTMLElement>(when: boolean): RefObject<T | null> => {
   const ref = useRef<T>(null);
   useEffect(() => {
     if (when) {
@@ -291,11 +291,11 @@ function useFocusWhen<T extends HTMLElement>(when: boolean): RefObject<T | null>
     }
   }, [when]);
   return ref;
-}
+};
 
 /* The front, editable in place: the card's own classes for its look, and its view-transition names on
    what both states share, so turning editable morphs the card rather than swapping it. */
-function EditFront({
+const EditFront = ({
   s,
   onFlip,
   focusFlip,
@@ -303,7 +303,7 @@ function EditFront({
   s: EditSession;
   onFlip: () => void;
   focusFlip: boolean;
-}) {
+}) => {
   const { state, errors, update } = s;
   const flipRef = useFocusWhen<HTMLButtonElement>(focusFlip);
   return (
@@ -367,9 +367,17 @@ function EditFront({
       <SaveBar s={s} />
     </form>
   );
-}
+};
 
-function EditGroupColumn({ s, group, index }: { s: EditSession; group: EditGroup; index: number }) {
+const EditGroupColumn = ({
+  s,
+  group,
+  index,
+}: {
+  s: EditSession;
+  group: EditGroup;
+  index: number;
+}) => {
   const listId = linkListId(group);
   const { ref, handleRef, state } = useItemRegistration(group.key, index, {
     listId: GROUPS,
@@ -445,9 +453,9 @@ function EditGroupColumn({ s, group, index }: { s: EditSession; group: EditGroup
       <DropIndicator edge={state.edge} />
     </fieldset>
   );
-}
+};
 
-function EditLinkRow({
+const EditLinkRow = ({
   s,
   link,
   group,
@@ -463,7 +471,7 @@ function EditLinkRow({
   listId: string;
   canRemove: boolean;
   onChange: (l: EditLink) => void;
-}) {
+}) => {
   const { ref, handleRef, state } = useItemRegistration(link.key, index, { listId, kind: LINKS });
   const name = link.label.trim() || 'new link';
   const path = `groups.${group}.links.${index}`;
@@ -524,7 +532,7 @@ function EditLinkRow({
       <DropIndicator edge={state.edge} />
     </li>
   );
-}
+};
 
 const CONTACT_FIELDS = [
   ['email', 'Email', 'lucide:mail', 'contact.email'],
@@ -534,7 +542,7 @@ const CONTACT_FIELDS = [
 ] as const;
 
 /** The contact side, editable the same way; empty fields are left out of the file. */
-function EditBack({
+const EditBack = ({
   s,
   onFlip,
   focusFlip,
@@ -542,7 +550,7 @@ function EditBack({
   s: EditSession;
   onFlip: () => void;
   focusFlip: boolean;
-}) {
+}) => {
   const { state, errors, update } = s;
   const closeRef = useFocusWhen<HTMLButtonElement>(focusFlip);
   return (
@@ -587,10 +595,10 @@ function EditBack({
       <SaveBar s={s} />
     </form>
   );
-}
+};
 
 /** Where "show more" is on the read card: where the save goes, what needs fixing, Cancel and Save. */
-function SaveBar({ s }: { s: EditSession }) {
+const SaveBar = ({ s }: { s: EditSession }) => {
   const problems = s.errors.size;
   return (
     <div className={`${styles.bar} ${card.vt}`} style={vtName('card-more')}>
@@ -613,4 +621,4 @@ function SaveBar({ s }: { s: EditSession }) {
       </div>
     </div>
   );
-}
+};

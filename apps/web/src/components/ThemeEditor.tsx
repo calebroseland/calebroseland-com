@@ -40,16 +40,16 @@ const sixDigit = (hex: string) =>
     ? `#${[...hex.slice(1)].map((ch) => ch + ch).join('')}`.toLowerCase()
     : hex.toLowerCase();
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+const Section = ({ title, children }: { title: string; children: ReactNode }) => {
   return (
     <Fieldset.Root className={styles.section}>
       <Fieldset.Legend className={styles.sectionTitle}>{title}</Fieldset.Legend>
       {children}
     </Fieldset.Root>
   );
-}
+};
 
-function SliderField({
+const SliderField = ({
   label,
   value,
   range,
@@ -65,7 +65,7 @@ function SliderField({
   format: (v: number) => string;
   onChange: (v: number) => void;
   trackStyle?: CSSProperties;
-}) {
+}) => {
   return (
     <Slider.Root
       className={styles.slider}
@@ -98,14 +98,14 @@ function SliderField({
       </Slider.Control>
     </Slider.Root>
   );
-}
+};
 
 /** Ties a field's visible label to the control it names. */
-function useLabelId() {
+const useLabelId = () => {
   return useId();
-}
+};
 
-function ColorField({
+const ColorField = ({
   label,
   value,
   onChange,
@@ -113,7 +113,7 @@ function ColorField({
   label: string;
   value: string;
   onChange: (hex: string) => void;
-}) {
+}) => {
   const labelId = useLabelId();
   const motion = usePopupMotion('dropdown');
   return (
@@ -147,9 +147,9 @@ function ColorField({
       />
     </div>
   );
-}
+};
 
-function SelectField<V extends string>({
+const SelectField = <V extends string>({
   label,
   value,
   options,
@@ -159,7 +159,7 @@ function SelectField<V extends string>({
   value: V;
   options: ReadonlyArray<{ value: V; label: string; font: string }>;
   onChange: (v: V) => void;
-}) {
+}) => {
   const motion = usePopupMotion('dropdown');
   return (
     <Field.Root className={styles.field}>
@@ -199,7 +199,7 @@ function SelectField<V extends string>({
       </Select.Root>
     </Field.Root>
   );
-}
+};
 
 const PAIRS: ReadonlyArray<[label: string, fg: string, bg: string, min: number]> = [
   ['Body text', '--color-text', '--color-bg', 4.5],
@@ -213,7 +213,7 @@ type ContrastRow = { label: string; ratio: number; min: number };
 
 /* Reads the semantic colours the page is actually showing (the preview is already applied), so the
    numbers include every derivation step. Renders nothing where colours cannot be computed. */
-function useContrast(theme: CustomTheme): ContrastRow[] {
+const useContrast = (theme: CustomTheme): ContrastRow[] => {
   const [rows, setRows] = useState<ContrastRow[]>([]);
   useEffect(() => {
     void theme;
@@ -233,9 +233,9 @@ function useContrast(theme: CustomTheme): ContrastRow[] {
     setRows(next);
   }, [theme]);
   return rows;
-}
+};
 
-function ContrastReadout({ rows }: { rows: ContrastRow[] }) {
+const ContrastReadout = ({ rows }: { rows: ContrastRow[] }) => {
   if (rows.length === 0) {
     return null;
   }
@@ -263,7 +263,7 @@ function ContrastReadout({ rows }: { rows: ContrastRow[] }) {
       </ul>
     </section>
   );
-}
+};
 
 const textFonts = TEXT_FONTS.map((id) => ({
   value: id,
@@ -272,7 +272,7 @@ const textFonts = TEXT_FONTS.map((id) => ({
 }));
 
 /** The theme being edited, previewed live on the page and put back when the editor closes. */
-function useThemeDraft(initial: CustomTheme) {
+const useThemeDraft = (initial: CustomTheme) => {
   const [theme, setTheme] = useState(initial);
   useEffect(() => {
     themeController.preview(theme);
@@ -283,13 +283,13 @@ function useThemeDraft(initial: CustomTheme) {
     set: <K extends keyof CustomTheme>(key: K, value: CustomTheme[K]) =>
       setTheme((t) => ({ ...t, [key]: value })),
   };
-}
+};
 
 /** Delete takes a second press, so one click cannot throw a theme away. */
-function useDeleteConfirm() {
+const useDeleteConfirm = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   return { confirmDelete, setConfirmDelete };
-}
+};
 
 /* The page behind the sheet is the preview: every change applies to it at once, Save keeps it, and
    Cancel, Escape or the close button put back what was showing. Clicks on the page do not dismiss the

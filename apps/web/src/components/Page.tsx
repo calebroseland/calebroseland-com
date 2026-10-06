@@ -11,22 +11,22 @@ import { SearchButton } from './SearchButton.tsx';
 import { SiteFooter } from './SiteFooter.tsx';
 import { UserMenu } from './UserMenu.tsx';
 
-function useAtHome(): boolean {
+const useAtHome = (): boolean => {
   return useRouterState({
     select: (s) => s.location.pathname.replace(/\/$/, '') === ENTRY_PAGE,
   });
-}
+};
 
 /* Chrome for every page past the landing card: header with the brand + nav, main, footer. The brand is
    the way back: from any page it goes to the entry page (Posts), and from there it turns back into the
    card, which it shares view-transition names with (Landing.module.css). */
-export function Page({
+export const Page = ({
   children,
   width = 'measure-wide',
 }: {
   children: ReactNode;
   width?: 'measure' | 'measure-wide';
-}) {
+}) => {
   const atHome = useAtHome();
   const barRef = useStickyTop<HTMLElement>();
   const toCard = useBackToCard();
@@ -74,13 +74,13 @@ export function Page({
       <SiteFooter profile={siteProfile} />
     </div>
   );
-}
+};
 
-export function CenteredMessage({ title, children }: { title: string; children?: ReactNode }) {
+export const CenteredMessage = ({ title, children }: { title: string; children?: ReactNode }) => {
   return (
     <div className={styles.centered}>
       <h1>{title}</h1>
       {children}
     </div>
   );
-}
+};

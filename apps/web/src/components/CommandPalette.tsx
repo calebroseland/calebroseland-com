@@ -7,7 +7,7 @@ import { usePaletteHotkey, usePaletteOpen } from '../commands/palette.ts';
 const CommandPaletteDialog = lazy(() => import('./CommandPaletteDialog.tsx'));
 
 /** Mounted once at the root: ⌘K, the site's own commands, and the palette once it has opened. */
-export function CommandPalette() {
+export const CommandPalette = () => {
   usePaletteHotkey();
   const open = usePaletteOpen();
   useBuiltinCommands(open);
@@ -17,4 +17,4 @@ export function CommandPalette() {
       <CommandPaletteDialog open={open} />
     </Suspense>
   ) : null;
-}
+};

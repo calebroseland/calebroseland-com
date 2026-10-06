@@ -11,25 +11,25 @@ const crcTable = Array.from({ length: 256 }, (_, n) => {
   return c >>> 0;
 });
 
-function crc32(buf: Buffer): number {
+const crc32 = (buf: Buffer): number => {
   let c = 0xffffffff;
   for (const byte of buf) {
     c = (crcTable[(c ^ byte) & 0xff] ?? 0) ^ (c >>> 8);
   }
   return (c ^ 0xffffffff) >>> 0;
-}
+};
 
-function chunk(type: string, data: Buffer): Buffer {
+const chunk = (type: string, data: Buffer): Buffer => {
   const length = Buffer.alloc(4);
   length.writeUInt32BE(data.length);
   const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
   const crc = Buffer.alloc(4);
   crc.writeUInt32BE(crc32(body));
   return Buffer.concat([length, body, crc]);
-}
+};
 
 /** A valid RGB PNG of random noise, big enough to exercise the large-image path. */
-export function noisePng(width = 900, height = 600, seed = 1): Buffer {
+export const noisePng = (width = 900, height = 600, seed = 1): Buffer => {
   let state = seed;
   const random = () => {
     state = (state * 1103515245 + 12345) & 0x7fffffff;
@@ -54,4 +54,4 @@ export function noisePng(width = 900, height = 600, seed = 1): Buffer {
     chunk('IDAT', deflateSync(raw)),
     chunk('IEND', Buffer.alloc(0)),
   ]);
-}
+};

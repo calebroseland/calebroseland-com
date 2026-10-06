@@ -39,7 +39,7 @@ export type ResolvedTag = {
 };
 
 /** Either form, with defaults filled in: no icon means text only, and a chip links unless told not to. */
-export function resolveTag(tag: ProfileTag): ResolvedTag {
+export const resolveTag = (tag: ProfileTag): ResolvedTag => {
   if (typeof tag === 'string') {
     return { label: tag, icon: null, show: 'label', link: true };
   }
@@ -50,10 +50,10 @@ export function resolveTag(tag: ProfileTag): ResolvedTag {
     show: icon ? (tag.show ?? 'both') : 'label',
     link: tag.link ?? true,
   };
-}
+};
 
 /** The shortest form that means the same thing, so profile.yaml stays readable. */
-export function compactTag(tag: ResolvedTag): ProfileTag {
+export const compactTag = (tag: ResolvedTag): ProfileTag => {
   const show = tag.icon && tag.show !== 'both' ? tag.show : undefined;
   if (!tag.icon && tag.link) {
     return tag.label;
@@ -64,7 +64,7 @@ export function compactTag(tag: ResolvedTag): ProfileTag {
     ...(show && { show }),
     ...(!tag.link && { link: false }),
   };
-}
+};
 
 export const tagLabel = (tag: ProfileTag): string => (typeof tag === 'string' ? tag : tag.label);
 

@@ -55,7 +55,7 @@ import { routeTree } from '../routeTree.gen.ts';
 import { detailsExpanded } from './detailsState.ts';
 import { trackReturnPage } from './returnPage.ts';
 
-async function renderLanding() {
+const renderLanding = async () => {
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: ['/'] }),
@@ -64,7 +64,7 @@ async function renderLanding() {
   render(<RouterProvider router={router} />);
   await screen.findByRole('heading', { level: 1 });
   return router;
-}
+};
 
 const nav = () => screen.getByRole('navigation', { name: 'Profiles and links' });
 

@@ -7,20 +7,24 @@ import { session } from './auth/store.ts';
 import { EditorProvider } from './EditorProvider.tsx';
 
 /** Route guard for the editing routes: no usable session, no entry; /login sends the visitor back. */
-export async function requireEditor({ location }: { location: { href: string } }): Promise<void> {
+export const requireEditor = async ({
+  location,
+}: {
+  location: { href: string };
+}): Promise<void> => {
   await dropUnavailableSession();
   if (session.store.state.status !== 'authenticated') {
     throw redirect({ to: '/login', search: { returnTo: location.href } });
   }
-}
+};
 
 /* beforeLoad guards navigation; this guards the render, so signing out while an editing route is
    mounted swaps to a redirect instead of rendering children without a client. */
-export function EditorRoute({ children }: { children: ReactNode }) {
+export const EditorRoute = ({ children }: { children: ReactNode }) => {
   const signedIn = useSignedIn();
   const href = useCurrentHref();
   if (!signedIn) {
     return <Navigate to="/login" search={{ returnTo: href }} replace />;
   }
   return <EditorProvider>{children}</EditorProvider>;
-}
+};

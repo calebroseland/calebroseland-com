@@ -5,7 +5,7 @@ import styles from './SearchButton.module.css';
 import { Tip } from './Tip.tsx';
 
 /** Opens the command palette; its tooltip teaches the shortcut. */
-export function SearchButton() {
+export const SearchButton = () => {
   const keys = formatForDisplay(PALETTE_HOTKEY);
   return (
     <Tip label={`Search and commands (${keys})`} side="bottom">
@@ -20,4 +20,4 @@ export function SearchButton() {
       </button>
     </Tip>
   );
-}
+};

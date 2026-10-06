@@ -9,7 +9,7 @@ import { notify } from '../Toast.tsx';
 
 /* States follow UX-SPEC §3.5: pre-flight → PR open (checks) → mergeable → merging → deploying → done, plus conflict. */
 
-export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?: boolean }) {
+export const PublishDialog = ({ buffer, disabled }: { buffer: Buffer; disabled?: boolean }) => {
   const gh = useGitHub();
   const dialog = useDisclosure();
   const state = usePublishState(buffer.ref, dialog.open);
@@ -138,4 +138,4 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
       </Dialog.Portal>
     </Dialog.Root>
   );
-}
+};

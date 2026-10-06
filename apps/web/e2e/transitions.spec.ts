@@ -13,7 +13,7 @@ type Recorded = {
   oldFooter: string;
 };
 
-async function record(page: Page) {
+const record = async (page: Page) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __vts: Recorded[] };
     w.__vts = [];
@@ -43,7 +43,7 @@ async function record(page: Page) {
       return t;
     }) as typeof document.startViewTransition;
   });
-}
+};
 
 const transitions = (page: Page) =>
   page.evaluate(() => (window as unknown as { __vts: Recorded[] }).__vts);

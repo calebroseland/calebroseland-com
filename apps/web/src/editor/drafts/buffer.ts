@@ -43,17 +43,17 @@ export type Buffer = {
 const key = (ref: string) => `crc:buffer:${ref}`;
 
 /** Local storage when there is a browser that allows it; the buffer works without it. */
-export function browserStorage(): BufferStorage | undefined {
+export const browserStorage = (): BufferStorage | undefined => {
   try {
     return typeof window === 'undefined' ? undefined : window.localStorage;
   } catch {
     return undefined;
   }
-}
+};
 
 export type BufferStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
-export function readLocalBuffer(ref: string, storage: BufferStorage | undefined): Buffer | null {
+export const readLocalBuffer = (ref: string, storage: BufferStorage | undefined): Buffer | null => {
   try {
     const raw = storage?.getItem(key(ref));
     if (!raw) {
@@ -73,9 +73,9 @@ export function readLocalBuffer(ref: string, storage: BufferStorage | undefined)
   } catch {
     return null;
   }
-}
+};
 
-export function writeLocalBuffer(b: Buffer, storage: BufferStorage | undefined): void {
+export const writeLocalBuffer = (b: Buffer, storage: BufferStorage | undefined): void => {
   try {
     if (b.dirty) {
       // Only the text is kept. Serialising images here would blow the storage quota and take the
@@ -96,7 +96,7 @@ export function writeLocalBuffer(b: Buffer, storage: BufferStorage | undefined):
   } catch {
     // storage full or blocked: the in-memory buffer still works
   }
-}
+};
 
 export type BufferController = {
   store: Store<Buffer>;
@@ -111,7 +111,7 @@ export type BufferController = {
   replace: (next: Buffer) => void;
 };
 
-export function createBufferStore(initial: Buffer): BufferController {
+export const createBufferStore = (initial: Buffer): BufferController => {
   const store = new Store<Buffer>(initial);
   const touch = (patch: Partial<Buffer>) =>
     store.setState((s) => ({
@@ -165,9 +165,9 @@ export function createBufferStore(initial: Buffer): BufferController {
     replace: (next: Buffer) =>
       store.setState(() => ({ ...next, dirty: false, restoredFromLocal: false })),
   };
-}
+};
 
 /** Alt text is required for every new image before save. */
-export function missingAlt(b: Buffer): BufferAsset[] {
+export const missingAlt = (b: Buffer): BufferAsset[] => {
   return b.assets.filter((a) => !a.alt.trim());
-}
+};

@@ -9,13 +9,13 @@ import styles from '../editor.module.css';
 
 type Values = { title: string; date: string; tags: string; summary: string; draft: boolean };
 
-export function MetaPanel({
+export const MetaPanel = ({
   buffer,
   controller,
 }: {
   buffer: Buffer;
   controller: BufferController;
-}) {
+}) => {
   const form = useMetaForm(buffer, controller);
 
   const isPost = buffer.meta.kind === 'post';
@@ -140,9 +140,9 @@ export function MetaPanel({
       </Stack>
     </form>
   );
-}
+};
 
-function Field({
+const Field = ({
   label,
   id,
   hint,
@@ -154,7 +154,7 @@ function Field({
   hint?: string;
   error?: unknown;
   children: React.ReactNode;
-}) {
+}) => {
   const message =
     typeof error === 'string'
       ? error
@@ -173,10 +173,10 @@ function Field({
       )}
     </div>
   );
-}
+};
 
 /** The frontmatter as a form whose every change goes straight into the buffer. */
-function useMetaForm(buffer: Buffer, controller: BufferController) {
+const useMetaForm = (buffer: Buffer, controller: BufferController) => {
   return useForm({
     defaultValues: {
       title: buffer.meta.title,
@@ -202,4 +202,4 @@ function useMetaForm(buffer: Buffer, controller: BufferController) {
       },
     },
   });
-}
+};

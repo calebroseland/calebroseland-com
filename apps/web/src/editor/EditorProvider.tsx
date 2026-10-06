@@ -10,30 +10,30 @@ import { clientFor } from './github/client.ts';
 const GitHubContext = createContext<GitHubClient | null>(null);
 
 /** The client for whoever is signed in, rebuilt only when the session changes. */
-function useSessionClient(): GitHubClient | null {
+const useSessionClient = (): GitHubClient | null => {
   const current = useStore(session.store);
   return useMemo(() => (current.status === 'authenticated' ? clientFor(current) : null), [current]);
-}
+};
 
 /** Gives an editing surface the shared query client and the signed-in backend. */
-export function EditorProvider({ children }: { children: ReactNode }) {
+export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const gh = useSessionClient();
   return (
     <QueryClientProvider client={editorQueryClient()}>
       <GitHubContext.Provider value={gh}>{children}</GitHubContext.Provider>
     </QueryClientProvider>
   );
-}
+};
 
-export function useGitHub(): GitHubClient {
+export const useGitHub = (): GitHubClient => {
   const gh = useContext(GitHubContext);
   if (!gh) {
     throw new Error('useGitHub outside an authenticated editor route');
   }
   return gh;
-}
+};
 
 /** What the signed-in backend can do: branches, publishing, deploys, and its name. */
-export function useCapabilities(): Capabilities {
+export const useCapabilities = (): Capabilities => {
   return capabilitiesOf(useGitHub().kind);
-}
+};
