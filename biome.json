@@ -12,7 +12,8 @@
       "!**/dist",
       "!**/coverage",
       "!**/.wrangler",
-      "!**/worker-configuration.d.ts"
+      "!**/worker-configuration.d.ts",
+      "!**/*.drawio.svg"
     ]
   },
   "formatter": {
