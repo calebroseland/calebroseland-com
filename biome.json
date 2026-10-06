@@ -65,7 +65,8 @@
             "allow": ["error", "warn"]
           }
         },
-        "noShadow": "error"
+        "noShadow": "error",
+        "noImportCycles": "error"
       },
       "style": {
         "useImportType": "error",
@@ -109,13 +110,25 @@
           "options": {
             "filenameCases": ["camelCase", "PascalCase", "export"]
           }
-        }
+        },
+        "noMagicNumbers": "warn"
       },
       "nursery": {
         "useConsistentFunctionStyle": {
           "level": "error",
           "options": {
             "style": "expression"
+          }
+        },
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error",
+        "useExhaustiveSwitchCases": "error"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 15
           }
         }
       }
@@ -163,6 +176,26 @@
         "rules": {
           "style": {
             "useFilenamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "apps/web/e2e/**",
+        "tools/**",
+        "**/*.config.ts",
+        "apps/web/src/theme/custom.ts",
+        "apps/web/src/theme/contrast.ts",
+        "packages/ui/src/motionTokens.ts",
+        "packages/ui/src/contrast.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noMagicNumbers": "off"
           }
         }
       }
