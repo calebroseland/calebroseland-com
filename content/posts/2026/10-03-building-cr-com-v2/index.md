@@ -32,7 +32,7 @@ State goes in the first place that fits, in this order:
 
 Persistent state is just *markdown in a git repo*. `content/` holds posts, pages, the profile and the theme. GitHub is the database, Cloudflare is the host, and both run on free tiers.
 
-![Inside the app: the root shell and routes, build-time content into virtual modules, editor hooks over one query client with three backends, and the state order.](./app.svg)
+![Inside the app: the root shell and routes, build-time content into virtual modules, editor hooks over one query client with three backends, and the state order.](./app.drawio.svg)
 
 ---
 
@@ -46,7 +46,7 @@ There's one app (`apps/web`) and a handful of workspace packages: a design syste
 
 The Worker is deliberately boring. It answers `/api/*` and nothing else; everything else is static assets. No server rendering, no database, nothing to keep warm.
 
-![Runtime: the Worker serves static assets and answers only /api routes; the browser talks to api.github.com directly when GitHub editing is on.](./runtime.svg)
+![Runtime: the Worker serves static assets and answers only /api routes; the browser talks to api.github.com directly when GitHub editing is on.](./runtime.drawio.svg)
 
 💡 Every deploy also lands on GitHub Pages as a static backup, so a bad day at one host isn't a bad day for the site.
 
@@ -60,7 +60,7 @@ Vite 8 with the Cloudflare plugin runs the Worker in workerd locally, so dev loo
 
 Shipping follows the branch. A pull request runs the checks. A push to `next` deploys staging, and a push to `master` deploys production. Each deploy is smoke-tested against its live URL.
 
-![Delivery: pull requests run CI; next deploys the staging Worker, master deploys production, both publish a GitHub Pages backup.](./delivery.svg)
+![Delivery: pull requests run CI; next deploys the staging Worker, master deploys production, both publish a GitHub Pages backup.](./delivery.drawio.svg)
 
 ### Predictability
 
