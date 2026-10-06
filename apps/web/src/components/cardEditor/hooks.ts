@@ -1,7 +1,7 @@
-import type { Profile } from "@crc/content-schema";
-import { useBlocker } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { type EditState, fieldErrors, fromProfile, tagProblem, toProfile } from "./model.ts";
+import type { Profile } from '@crc/content-schema';
+import { useBlocker } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { type EditState, fieldErrors, fromProfile, tagProblem, toProfile } from './model.ts';
 
 /** The card being edited: its state, whether it has changed, the profile it would save, and what is
     wrong with it, keyed by field path. */
@@ -29,7 +29,7 @@ export function useProfileDraft(profile: Profile) {
 
 /** Text for a polite live region, for changes a screen reader would otherwise miss (a reorder). */
 export function useAnnouncer() {
-  const [message, announce] = useState("");
+  const [message, announce] = useState('');
   return { message, announce };
 }
 

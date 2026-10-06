@@ -1,27 +1,27 @@
-import { Autocomplete } from "@base-ui/react/autocomplete";
-import { Dialog } from "@base-ui/react/dialog";
-import { ScrollArea } from "@base-ui/react/scroll-area";
-import { Icon } from "@crc/ui";
-import type { KeyboardEvent } from "react";
-import { type CommandGroup, usePaletteView, useRunCommand } from "../commands/hooks.ts";
-import { palette } from "../commands/palette.ts";
-import { type Command, searchText } from "../commands/registry.ts";
-import { usePopupMotion } from "../hooks/usePopupMotion.ts";
-import styles from "./CommandPaletteDialog.module.css";
+import { Autocomplete } from '@base-ui/react/autocomplete';
+import { Dialog } from '@base-ui/react/dialog';
+import { ScrollArea } from '@base-ui/react/scroll-area';
+import { Icon } from '@crc/ui';
+import type { KeyboardEvent } from 'react';
+import { type CommandGroup, usePaletteView, useRunCommand } from '../commands/hooks.ts';
+import { palette } from '../commands/palette.ts';
+import { type Command, searchText } from '../commands/registry.ts';
+import { usePopupMotion } from '../hooks/usePopupMotion.ts';
+import styles from './CommandPaletteDialog.module.css';
 
 /* Base UI's command palette pattern: a Dialog around an inline Autocomplete. A command either runs,
    or opens a page of its own commands; Backspace in an empty search, or the back button, returns. */
 export default function CommandPaletteDialog({ open }: { open: boolean }) {
   const view = usePaletteView(open);
   const run = useRunCommand();
-  const motion = usePopupMotion("dialog", open);
+  const motion = usePopupMotion('dialog', open);
 
   const activate = (c: Command) => {
     if (c.page) view.enter(c);
     else void run(c);
   };
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && view.query === "" && view.page) {
+    if (e.key === 'Backspace' && view.query === '' && view.page) {
       e.preventDefault();
       view.back();
     }
@@ -56,9 +56,9 @@ export default function CommandPaletteDialog({ open }: { open: boolean }) {
                 <Icon name="lucide:search" size="sm" />
                 <Autocomplete.Input
                   className={styles.input}
-                  aria-label={view.page ? `Search ${view.page.title}` : "Search commands"}
+                  aria-label={view.page ? `Search ${view.page.title}` : 'Search commands'}
                   placeholder={
-                    view.page ? `${view.page.title}…` : "Go to, search posts, change theme…"
+                    view.page ? `${view.page.title}…` : 'Go to, search posts, change theme…'
                   }
                   onKeyDown={onKeyDown}
                 />

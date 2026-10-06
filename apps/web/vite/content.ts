@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, dirname, extname, join, relative, resolve } from "node:path";
+import { createHash } from 'node:crypto';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import {
   ADOBE_KIT,
   type Entry,
@@ -11,11 +11,11 @@ import {
   type SiteTheme,
   siteTheme,
   usesAdobeFonts,
-} from "@crc/content-schema";
-import { parseEntry, renderMarkdown } from "@crc/markdown";
-import type { Plugin } from "vite";
-import { contentDirFor, isEditorTree, sameOrigin, within } from "./content-dir.ts";
-import { readTree } from "./local-store.ts";
+} from '@crc/content-schema';
+import { parseEntry, renderMarkdown } from '@crc/markdown';
+import type { Plugin } from 'vite';
+import { contentDirFor, isEditorTree, sameOrigin, within } from './content-dir.ts';
+import { readTree } from './local-store.ts';
 
 /* Parses, validates, and renders everything under content/ at build time.
    Exposes:
@@ -24,11 +24,11 @@ import { readTree } from "./local-store.ts";
      virtual:content/entry/<id>       → { meta, html, headings } for one entry (lazy per route)
    Bundle assets referenced by markdown are emitted as hashed files. Invalid content fails the build with the path. */
 
-const PROFILE = "virtual:content/profile";
-const INDEX = "virtual:content/index";
-const THEME = "virtual:content/theme";
-const ENTRY = "virtual:content/entry/";
-const NULL = "\0";
+const PROFILE = 'virtual:content/profile';
+const INDEX = 'virtual:content/index';
+const THEME = 'virtual:content/theme';
+const ENTRY = 'virtual:content/entry/';
+const NULL = '\0';
 
 export type { EntryMeta };
 
@@ -39,7 +39,7 @@ function walk(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) walk(p, out);
-    else if (name === "index.md") out.push(p);
+    else if (name === 'index.md') out.push(p);
   }
   return out;
 }
@@ -52,8 +52,8 @@ export function content(opts: {
   contentDir?: string;
 }): Plugin {
   const contentDir = opts.contentDir ?? contentDirFor(opts.root);
-  const profilePath = join(contentDir, "profile.yaml");
-  const themePath = join(contentDir, "theme.yaml");
+  const profilePath = join(contentDir, 'profile.yaml');
+  const themePath = join(contentDir, 'theme.yaml');
   let includeDrafts = opts.includeDrafts ?? false;
   let isBuild = false;
   const emitted = new Map<string, string>(); // absolute asset path → public url
@@ -61,7 +61,7 @@ export function content(opts: {
   /** content/theme.yaml, optional: without it the site keeps today's faces. */
   function loadTheme(): SiteTheme {
     try {
-      return parseYaml(siteTheme, existsSync(themePath) ? readFileSync(themePath, "utf8") : "{}");
+      return parseYaml(siteTheme, existsSync(themePath) ? readFileSync(themePath, 'utf8') : '{}');
     } catch (err) {
       throw new Error(
         `content/theme.yaml is invalid:\n${err instanceof Error ? err.message : String(err)}`,
@@ -70,18 +70,18 @@ export function content(opts: {
   }
 
   function loadEntries(): Loaded[] {
-    const files = [...walk(join(contentDir, "posts")), ...walk(join(contentDir, "pages"))];
+    const files = [...walk(join(contentDir, 'posts')), ...walk(join(contentDir, 'pages'))];
     const entries = files.map((file) => {
       let parsed: ReturnType<typeof parseEntry>;
       try {
-        parsed = parseEntry(readFileSync(file, "utf8"));
+        parsed = parseEntry(readFileSync(file, 'utf8'));
       } catch (err) {
         throw new Error(
           `${relative(opts.root, file)} is invalid:\n${err instanceof Error ? err.message : String(err)}`,
         );
       }
       const dir = dirname(file);
-      return { id: relative(contentDir, dir).replaceAll("\\", "/"), dir, ...parsed };
+      return { id: relative(contentDir, dir).replaceAll('\\', '/'), dir, ...parsed };
     });
     const slugs = new Map<string, string>();
     for (const e of entries) {
@@ -115,11 +115,11 @@ export function content(opts: {
     const abs = resolve(dir, src);
     if (!within(contentDir, abs) || !existsSync(abs))
       throw new Error(`missing asset ${src} referenced from ${relative(opts.root, dir)}`);
-    if (!isBuild) return `/@content/${relative(contentDir, abs).replaceAll("\\", "/")}`;
+    if (!isBuild) return `/@content/${relative(contentDir, abs).replaceAll('\\', '/')}`;
     const cached = emitted.get(abs);
     if (cached) return cached;
     const buf = readFileSync(abs);
-    const hash = createHash("sha256").update(buf).digest("hex").slice(0, 8);
+    const hash = createHash('sha256').update(buf).digest('hex').slice(0, 8);
     const name = `content/${basename(abs, extname(abs))}-${hash}${extname(abs)}`;
     emitted.set(abs, `/${name}`);
     pendingAssets.push({ fileName: name, source: buf });
@@ -128,63 +128,63 @@ export function content(opts: {
   const pendingAssets: Array<{ fileName: string; source: Buffer }> = [];
 
   return {
-    name: "crc:content",
+    name: 'crc:content',
     configResolved(config) {
-      isBuild = config.command === "build";
-      includeDrafts = opts.includeDrafts ?? config.mode !== "production";
+      isBuild = config.command === 'build';
+      includeDrafts = opts.includeDrafts ?? config.mode !== 'production';
     },
     configureServer(server) {
       // Serve bundle assets straight from content/ in dev.
       server.middlewares.use((req, res, next) => {
-        const path = req.url?.split("?")[0];
-        if (path === "/feed.xml" || path === "/sitemap.xml") {
-          const origin = opts.siteOrigin ?? "https://calebroseland.com";
+        const path = req.url?.split('?')[0];
+        if (path === '/feed.xml' || path === '/sitemap.xml') {
+          const origin = opts.siteOrigin ?? 'https://calebroseland.com';
           const entries = loadEntries().map(toMeta);
-          res.setHeader("content-type", "application/xml; charset=utf-8");
+          res.setHeader('content-type', 'application/xml; charset=utf-8');
           res.end(
-            path === "/feed.xml"
+            path === '/feed.xml'
               ? feedXml(
                   origin,
-                  entries.filter((e) => e.kind === "post"),
+                  entries.filter((e) => e.kind === 'post'),
                 )
               : sitemapXml(origin, entries),
           );
           return;
         }
-        if (!req.url?.startsWith("/@content/")) return next();
-        const rel = decodeURIComponent(req.url.slice("/@content/".length).split("?")[0] ?? "");
+        if (!req.url?.startsWith('/@content/')) return next();
+        const rel = decodeURIComponent(req.url.slice('/@content/'.length).split('?')[0] ?? '');
         const abs = resolve(contentDir, rel);
         if (
-          !sameOrigin(req) ||
-          !within(contentDir, abs) ||
-          !existsSync(abs) ||
-          statSync(abs).isDirectory()
+          !sameOrigin(req)
+          || !within(contentDir, abs)
+          || !existsSync(abs)
+          || statSync(abs).isDirectory()
         )
           return next();
         const type = {
-          ".png": "image/png",
-          ".jpg": "image/jpeg",
-          ".jpeg": "image/jpeg",
-          ".webp": "image/webp",
-          ".avif": "image/avif",
-          ".svg": "image/svg+xml",
-          ".gif": "image/gif",
+          '.png': 'image/png',
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.webp': 'image/webp',
+          '.avif': 'image/avif',
+          '.svg': 'image/svg+xml',
+          '.gif': 'image/gif',
         }[extname(abs).toLowerCase()];
-        if (type) res.setHeader("content-type", type);
+        if (type) res.setHeader('content-type', type);
         res.end(readFileSync(abs));
       });
       // This plugin runs the schema and the renderer in the dev server itself, which keeps the copies it
       // started with; restart on a change so content is never read by a stale schema.
-      const packages = ["content-schema", "markdown"].map((p) =>
-        resolve(opts.root, "packages", p, "src"),
+      const packages = ['content-schema', 'markdown'].map((p) =>
+        resolve(opts.root, 'packages', p, 'src'),
       );
       server.watcher.add(packages);
-      server.watcher.on("change", (file: string) => {
-        if (packages.some((dir) => file.startsWith(dir)) && !file.endsWith(".test.ts"))
+      server.watcher.on('change', (file: string) => {
+        if (packages.some((dir) => file.startsWith(dir)) && !file.endsWith('.test.ts'))
           void server.restart();
       });
       server.watcher.add(contentDir);
-      for (const event of ["add", "unlink", "addDir", "unlinkDir"] as const) {
+      for (const event of ['add', 'unlink', 'addDir', 'unlinkDir'] as const) {
         server.watcher.on(event, (file: string) => {
           if (file.startsWith(contentDir)) invalidateContent(server, contentDir);
         });
@@ -200,7 +200,7 @@ export function content(opts: {
       if (bare === PROFILE) {
         this.addWatchFile(profilePath);
         try {
-          return `export default ${JSON.stringify(parseYaml(profile, readFileSync(profilePath, "utf8")))};`;
+          return `export default ${JSON.stringify(parseYaml(profile, readFileSync(profilePath, 'utf8')))};`;
         } catch (err) {
           throw new Error(
             `content/profile.yaml is invalid:\n${err instanceof Error ? err.message : String(err)}`,
@@ -213,21 +213,21 @@ export function content(opts: {
       }
       if (bare === INDEX) {
         const entries = loadEntries();
-        for (const e of entries) this.addWatchFile(join(e.dir, "index.md"));
+        for (const e of entries) this.addWatchFile(join(e.dir, 'index.md'));
         // Static import() literals so Vite can resolve and code-split one chunk per entry.
         const loaders = entries
           .map(
             (e) =>
               `  ${JSON.stringify(e.id)}: () => import(${JSON.stringify(ENTRY + encodeURIComponent(e.id))}),`,
           )
-          .join("\n");
+          .join('\n');
         return `export default ${JSON.stringify(entries.map(toMeta))};\nexport const loaders = {\n${loaders}\n};`;
       }
       if (bare.startsWith(ENTRY)) {
         const wanted = decodeURIComponent(bare.slice(ENTRY.length));
         const e = loadEntries().find((x) => x.id === wanted);
         if (!e) throw new Error(`no content entry ${wanted}`);
-        this.addWatchFile(join(e.dir, "index.md"));
+        this.addWatchFile(join(e.dir, 'index.md'));
         const { html, headings } = await renderMarkdown(e.body, {
           resolveImage: (src) => assetUrl(e.dir, src),
         });
@@ -237,7 +237,7 @@ export function content(opts: {
     },
     generateBundle() {
       for (const a of pendingAssets)
-        this.emitFile({ type: "asset", fileName: a.fileName, source: a.source });
+        this.emitFile({ type: 'asset', fileName: a.fileName, source: a.source });
       pendingAssets.length = 0;
     },
     /* The default theme's faces, before any script runs, and where theme-init.js finds the Adobe kit
@@ -246,22 +246,22 @@ export function content(opts: {
       const { fonts } = loadTheme();
       const vars = Object.entries(fontVars(fonts))
         .map(([name, value]) => `${name}: ${value};`)
-        .join(" ");
+        .join(' ');
       return [
         {
-          tag: "style",
-          attrs: { id: "site-fonts" },
+          tag: 'style',
+          attrs: { id: 'site-fonts' },
           children: `:root { ${vars} }`,
-          injectTo: "head-prepend",
+          injectTo: 'head-prepend',
         },
         {
-          tag: "meta",
+          tag: 'meta',
           attrs: {
-            name: "adobe-fonts",
+            name: 'adobe-fonts',
             content: ADOBE_KIT,
-            "data-default": usesAdobeFonts(fonts) ? "on" : "off",
+            'data-default': usesAdobeFonts(fonts) ? 'on' : 'off',
           },
-          injectTo: "head-prepend",
+          injectTo: 'head-prepend',
         },
       ];
     },
@@ -273,37 +273,37 @@ export function content(opts: {
     // Feed and sitemap are emitted at build so the Worker serves them as static assets.
     async buildStart() {
       if (!isBuild) return;
-      const origin = opts.siteOrigin ?? "https://calebroseland.com";
+      const origin = opts.siteOrigin ?? 'https://calebroseland.com';
       const entries = loadEntries().map(toMeta);
-      const postsOnly = entries.filter((e) => e.kind === "post");
-      this.emitFile({ type: "asset", fileName: "feed.xml", source: feedXml(origin, postsOnly) });
+      const postsOnly = entries.filter((e) => e.kind === 'post');
+      this.emitFile({ type: 'asset', fileName: 'feed.xml', source: feedXml(origin, postsOnly) });
       this.emitFile({
-        type: "asset",
-        fileName: "sitemap.xml",
+        type: 'asset',
+        fileName: 'sitemap.xml',
         source: sitemapXml(origin, entries),
       });
     },
   };
 }
 
-function invalidateContent(server: import("vite").ViteDevServer, contentDir: string) {
+function invalidateContent(server: import('vite').ViteDevServer, contentDir: string) {
   for (const mod of server.moduleGraph.idToModuleMap.values()) {
-    if (mod.id?.includes("virtual:content/")) server.moduleGraph.invalidateModule(mod);
+    if (mod.id?.includes('virtual:content/')) server.moduleGraph.invalidateModule(mod);
   }
   // Skip the reload when the tree on disk is exactly what the editor just wrote: it already shows
   // that, and reloading would remount the editor. Any other change still reloads the open page.
-  if (!isEditorTree(readTree(contentDir, "content").headSha))
-    server.ws.send({ type: "full-reload" });
+  if (!isEditorTree(readTree(contentDir, 'content').headSha))
+    server.ws.send({ type: 'full-reload' });
 }
 
 const esc = (s: string) =>
   s.replace(
     /[<>&"']/g,
-    (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#39;" })[c] ?? c,
+    (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' })[c] ?? c,
   );
 
 export function entryUrl(origin: string, e: EntryMeta): string {
-  return e.kind === "post" ? `${origin}/posts/${e.slug}` : `${origin}/${e.slug}`;
+  return e.kind === 'post' ? `${origin}/posts/${e.slug}` : `${origin}/${e.slug}`;
 }
 
 export function feedXml(origin: string, posts: EntryMeta[]): string {
@@ -313,10 +313,10 @@ export function feedXml(origin: string, posts: EntryMeta[]): string {
     <title>${esc(p.title)}</title>
     <link>${entryUrl(origin, p)}</link>
     <guid isPermaLink="true">${entryUrl(origin, p)}</guid>
-    <pubDate>${new Date(p.date).toUTCString()}</pubDate>${p.summary ? `\n    <description>${esc(p.summary)}</description>` : ""}
+    <pubDate>${new Date(p.date).toUTCString()}</pubDate>${p.summary ? `\n    <description>${esc(p.summary)}</description>` : ''}
   </item>`,
     )
-    .join("\n");
+    .join('\n');
   const updated = posts[0] ? new Date(posts[0].date).toUTCString() : new Date(0).toUTCString();
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -337,7 +337,7 @@ export function sitemapXml(origin: string, entries: EntryMeta[]): string {
   const urls = [`${origin}/`, `${origin}/posts`, ...entries.map((e) => entryUrl(origin, e))];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}
+${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}
 </urlset>
 `;
 }

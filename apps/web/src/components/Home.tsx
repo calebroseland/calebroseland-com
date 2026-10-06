@@ -1,8 +1,8 @@
-import { Link } from "@tanstack/react-router";
-import { posts } from "../content/entries.ts";
-import styles from "./Home.module.css";
-import { Page } from "./Page.tsx";
-import { PostList } from "./PostList.tsx";
+import { Link } from '@tanstack/react-router';
+import { posts } from '../content/entries.ts';
+import styles from './Home.module.css';
+import { Page } from './Page.tsx';
+import { PostList } from './PostList.tsx';
 
 const LATEST = 3;
 

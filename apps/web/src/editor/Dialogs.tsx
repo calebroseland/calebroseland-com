@@ -1,6 +1,6 @@
-import { AlertDialog } from "@base-ui/react/alert-dialog";
-import type { ReactNode } from "react";
-import styles from "./editor.module.css";
+import { AlertDialog } from '@base-ui/react/alert-dialog';
+import type { ReactNode } from 'react';
+import styles from './editor.module.css';
 
 /* Base UI AlertDialog: focus trap and restoration, Escape closes, state as data attributes for CSS. */
 export function ConfirmDialog({

@@ -1,7 +1,7 @@
-import type { Bundle } from "@crc/github-client";
-import { parseEntry } from "@crc/markdown";
-import type { Buffer } from "./buffer.ts";
-import { findEntryDir } from "./paths.ts";
+import type { Bundle } from '@crc/github-client';
+import { parseEntry } from '@crc/markdown';
+import type { Buffer } from './buffer.ts';
+import { findEntryDir } from './paths.ts';
 
 /** Turns a content tree into an editor buffer for one slug, whichever kind owns it. */
 export function bufferFromBundle(bundle: Bundle, slug: string): Buffer {

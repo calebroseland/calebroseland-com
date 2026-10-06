@@ -1,8 +1,8 @@
-import { Icon } from "@crc/ui";
-import { formatForDisplay } from "@tanstack/react-hotkeys";
-import { PALETTE_HOTKEY, palette } from "../commands/palette.ts";
-import styles from "./SearchButton.module.css";
-import { Tip } from "./Tip.tsx";
+import { Icon } from '@crc/ui';
+import { formatForDisplay } from '@tanstack/react-hotkeys';
+import { PALETTE_HOTKEY, palette } from '../commands/palette.ts';
+import styles from './SearchButton.module.css';
+import { Tip } from './Tip.tsx';
 
 /** Opens the command palette; its tooltip teaches the shortcut. */
 export function SearchButton() {

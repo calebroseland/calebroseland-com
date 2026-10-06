@@ -1,20 +1,20 @@
-import type { IncomingMessage } from "node:http";
-import { resolve, sep } from "node:path";
+import type { IncomingMessage } from 'node:http';
+import { resolve, sep } from 'node:path';
 
 /** Where content lives. Overridable so tests can point at a scratch copy instead of the repository. */
 export function contentDirFor(root: string): string {
   return process.env.CRC_CONTENT_DIR
     ? resolve(process.env.CRC_CONTENT_DIR)
-    : resolve(root, "content");
+    : resolve(root, 'content');
 }
 
 /** Whether `abs` is `dir` or inside it. A bare prefix match would also admit a sibling like `content-old/`. */
 export const within = (dir: string, abs: string) => abs === dir || abs.startsWith(dir + sep);
 
 /** Dev routes answer only this site's own pages; any other page open in the browser could otherwise write content. */
-export function sameOrigin(req: Pick<IncomingMessage, "headers">): boolean {
-  const site = req.headers["sec-fetch-site"];
-  if (site && site !== "same-origin" && site !== "none") return false;
+export function sameOrigin(req: Pick<IncomingMessage, 'headers'>): boolean {
+  const site = req.headers['sec-fetch-site'];
+  if (site && site !== 'same-origin' && site !== 'none') return false;
   const origin = req.headers.origin;
   if (!origin) return true;
   try {
@@ -28,8 +28,8 @@ export function sameOrigin(req: Pick<IncomingMessage, "headers">): boolean {
    editor under the author's hands. The store records the tree it just produced; the content plugin
    still invalidates its modules on every change, and only skips the reload when the tree on disk is
    exactly what the editor wrote. Anything else, including an edit in your code editor, still reloads. */
-let editorTreeHash = "";
+let editorTreeHash = '';
 export const recordEditorTree = (headSha: string) => {
   editorTreeHash = headSha;
 };
-export const isEditorTree = (headSha: string) => headSha !== "" && headSha === editorTreeHash;
+export const isEditorTree = (headSha: string) => headSha !== '' && headSha === editorTreeHash;

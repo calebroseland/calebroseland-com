@@ -1,11 +1,11 @@
-import { Icon } from "@crc/ui";
-import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
-import type { EntryMeta, LoadedEntry } from "../content/entries.ts";
-import { formatDate } from "../content/entries.ts";
-import { useSignedIn } from "../editor/auth/hooks.ts";
-import { useCurrentHref } from "../hooks/useCurrentHref.ts";
-import styles from "./Article.module.css";
+import { Icon } from '@crc/ui';
+import { Link } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
+import type { EntryMeta, LoadedEntry } from '../content/entries.ts';
+import { formatDate } from '../content/entries.ts';
+import { useSignedIn } from '../editor/auth/hooks.ts';
+import { useCurrentHref } from '../hooks/useCurrentHref.ts';
+import styles from './Article.module.css';
 
 /** An entry's title and meta; `action` takes the Edit link's place on a page that is not an entry. */
 export function EntryHeader({
@@ -63,7 +63,7 @@ export function TagList({
   className?: string | undefined;
 }) {
   return (
-    <ul role="list" className={`${styles.tags} ${className ?? ""}`} aria-label="Tags">
+    <ul role="list" className={`${styles.tags} ${className ?? ''}`} aria-label="Tags">
       {all && (
         <li>
           {/* Exact, so All is current only while no tag is chosen. */}

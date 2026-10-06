@@ -1,13 +1,13 @@
-import type { AnyRouter, ParsedLocation } from "@tanstack/react-router";
+import type { AnyRouter, ParsedLocation } from '@tanstack/react-router';
 
 /* Page transitions, the TanStack Router way: the router's `defaultViewTransition.types` names each
    navigation (`page`, the effect, the direction), a link overrides with `viewTransition={{ types }}`, and
    Page.module.css styles them with :active-view-transition-type(). Without type support, browsers crossfade. */
 
 /** How a page arrives: a crossfade, a zoom in (deeper) or out (back up), or nothing. */
-export type PageEffect = "fade" | "zoom" | false;
+export type PageEffect = 'fade' | 'zoom' | false;
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface StaticDataRouteOption {
     /** How this page arrives. Unset: zoom between levels, fade between siblings. */
     transition?: PageEffect;
@@ -22,10 +22,10 @@ type ChangeInfo = {
   pathChanged: boolean;
 };
 
-const depth = (pathname: string) => pathname.split("/").filter(Boolean).length;
+const depth = (pathname: string) => pathname.split('/').filter(Boolean).length;
 
 function reduceMotion(): boolean {
-  return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 /** The view-transition types for one navigation, or false for none. */
@@ -34,9 +34,9 @@ export function pageTypes(declared: PageEffect | undefined, info: ChangeInfo): s
   if (!from || !info.pathChanged || declared === false || reduceMotion()) return false;
   const a = depth(from.pathname);
   const b = depth(info.toLocation.pathname);
-  const direction = b > a ? "forward" : b < a ? "back" : "across";
-  const effect = declared ?? (direction === "across" ? "fade" : "zoom");
-  return ["page", `page-${effect}`, `page-${direction}`];
+  const direction = b > a ? 'forward' : b < a ? 'back' : 'across';
+  const effect = declared ?? (direction === 'across' ? 'fade' : 'zoom');
+  return ['page', `page-${effect}`, `page-${direction}`];
 }
 
 /** For one link or navigate call: `viewTransition={pageTransition("fade")}`; false turns it off. */
@@ -69,16 +69,16 @@ export const pageViewTransition = {
 /** Call once, right after creating the router, so route-declared effects can be read. */
 export function installPageTransitions(r: AnyRouter): void {
   router = r;
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   // Capture runs before the router's own popstate listener.
   window.addEventListener(
-    "popstate",
+    'popstate',
     (e) => {
-      uaAnimated = "hasUAVisualTransition" in e && e.hasUAVisualTransition === true;
+      uaAnimated = 'hasUAVisualTransition' in e && e.hasUAVisualTransition === true;
     },
     { capture: true },
   );
-  r.subscribe("onResolved", () => {
+  r.subscribe('onResolved', () => {
     uaAnimated = false;
   });
 }

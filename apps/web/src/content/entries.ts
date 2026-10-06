@@ -1,5 +1,5 @@
-import index, { loaders } from "virtual:content/index";
-import type { EntryMeta } from "@crc/content-schema";
+import index, { loaders } from 'virtual:content/index';
+import type { EntryMeta } from '@crc/content-schema';
 
 export type { EntryMeta };
 export type LoadedEntry = {
@@ -9,12 +9,12 @@ export type LoadedEntry = {
 };
 
 const entries: readonly EntryMeta[] = index;
-export const posts = entries.filter((e) => e.kind === "post");
-export const pages = entries.filter((e) => e.kind === "page");
+export const posts = entries.filter((e) => e.kind === 'post');
+export const pages = entries.filter((e) => e.kind === 'page');
 
 export const allTags = [...new Set(posts.flatMap((p) => p.tags))].sort();
 
-export function findBySlug(kind: EntryMeta["kind"], slug: string): EntryMeta | undefined {
+export function findBySlug(kind: EntryMeta['kind'], slug: string): EntryMeta | undefined {
   return entries.find((e) => e.kind === kind && e.slug === slug);
 }
 
@@ -26,4 +26,4 @@ export async function loadEntry(id: string): Promise<LoadedEntry> {
 }
 
 export const formatDate = (iso: string) =>
-  new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeZone: "UTC" }).format(new Date(iso));
+  new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(iso));

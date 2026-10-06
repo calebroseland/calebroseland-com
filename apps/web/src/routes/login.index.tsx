@@ -1,21 +1,21 @@
-import { Stack } from "@crc/ui";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import * as z from "zod/mini";
-import { CenteredMessage, Page } from "../components/Page.tsx";
-import { ENTRY_PAGE } from "../components/returnPage.ts";
+import { Stack } from '@crc/ui';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import * as z from 'zod/mini';
+import { CenteredMessage, Page } from '../components/Page.tsx';
+import { ENTRY_PAGE } from '../components/returnPage.ts';
 import {
   useDirectSignIn,
   useGitHubSignIn,
   useSignInMethods,
   useTokenField,
-} from "../editor/auth/hooks.ts";
-import { afterSignIn } from "../editor/auth/login.ts";
-import { canSignIn, type SignInMethods } from "../editor/auth/methods.ts";
-import styles from "../editor/editor.module.css";
+} from '../editor/auth/hooks.ts';
+import { afterSignIn } from '../editor/auth/login.ts';
+import { canSignIn, type SignInMethods } from '../editor/auth/methods.ts';
+import styles from '../editor/editor.module.css';
 
-export const Route = createFileRoute("/login/")({
+export const Route = createFileRoute('/login/')({
   validateSearch: z.object({ returnTo: z.optional(z.string()), error: z.optional(z.string()) }),
-  head: () => ({ meta: [{ title: "Sign in" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: 'Sign in' }, { name: 'robots', content: 'noindex' }] }),
   component: LoginRoute,
 });
 
@@ -96,7 +96,7 @@ function GitHubSignIn({ target, methods }: { target: string; methods: SignInMeth
         disabled={github.busy || !methods.oauth}
         aria-busy={github.busy}
       >
-        {github.busy ? "Redirecting…" : "Sign in with GitHub"}
+        {github.busy ? 'Redirecting…' : 'Sign in with GitHub'}
       </button>
       {!methods.oauth && (
         <p className={styles.muted}>GitHub sign-in isn't configured for this environment.</p>
@@ -109,7 +109,7 @@ function GitHubSignIn({ target, methods }: { target: string; methods: SignInMeth
             <button
               type="button"
               className={styles.secondary}
-              onClick={() => signIn("fake", "fake")}
+              onClick={() => signIn('fake', 'fake')}
             >
               Use local fake GitHub
             </button>
@@ -122,7 +122,7 @@ function GitHubSignIn({ target, methods }: { target: string; methods: SignInMeth
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (token.value) signIn("octokit", token.value);
+                if (token.value) signIn('octokit', token.value);
               }}
               className={styles.tokenForm}
             >
@@ -157,7 +157,7 @@ function WorkingTreeOption({ target, primary = false }: { target: string; primar
       <button
         type="button"
         className={primary ? styles.primary : styles.secondary}
-        onClick={() => signIn("local", "local")}
+        onClick={() => signIn('local', 'local')}
       >
         Edit files on this branch
       </button>

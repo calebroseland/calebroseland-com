@@ -1,8 +1,8 @@
-import * as z from "zod/mini";
+import * as z from 'zod/mini';
 
 /* Client for the Worker's /api/auth routes. Same-origin in production; the Pages backup points at the production Worker. */
 
-const apiOrigin = (): string => (typeof __API_ORIGIN__ === "string" && __API_ORIGIN__) || "";
+const apiOrigin = (): string => (typeof __API_ORIGIN__ === 'string' && __API_ORIGIN__) || '';
 
 const configSchema = z.object({
   github: z.boolean(),
@@ -31,7 +31,7 @@ export class ApiError extends Error {
     public readonly code?: string,
   ) {
     super(detail ? `${title}: ${detail}` : title);
-    this.name = "ApiError";
+    this.name = 'ApiError';
   }
 }
 
@@ -53,8 +53,8 @@ export async function exchangeCode(
   fetchImpl: typeof fetch = fetch,
 ) {
   const res = await fetchImpl(`${apiOrigin()}/api/auth/callback`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify(input),
   });
   if (!res.ok) throw await readProblem(res);

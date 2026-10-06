@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { DEFAULT_FONTS, NAME_FONTS, READING_FONTS, TEXT_FONTS } from "./fonts.ts";
+import { z } from 'zod';
+import { DEFAULT_FONTS, NAME_FONTS, READING_FONTS, TEXT_FONTS } from './fonts.ts';
 
 /** The site's default theme (content/theme.yaml); every field falls back to today's faces. */
 export const siteTheme = z.object({

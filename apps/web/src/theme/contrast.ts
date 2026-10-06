@@ -5,7 +5,7 @@
 
 type Rgb = readonly [number, number, number];
 
-const num = (s: string) => (s.endsWith("%") ? Number.parseFloat(s) / 100 : Number.parseFloat(s));
+const num = (s: string) => (s.endsWith('%') ? Number.parseFloat(s) / 100 : Number.parseFloat(s));
 
 function oklchToSrgb(l: number, c: number, hDeg: number): Rgb {
   const h = (hDeg * Math.PI) / 180;
@@ -29,15 +29,15 @@ export function parseColor(css: string): Rgb | null {
   if (!m) return null;
   const fn = (m[1] as string).toLowerCase();
   const parts = (m[2] as string).split(/[\s,/]+/).filter(Boolean);
-  if (fn === "color") {
-    if (parts[0] !== "srgb") return null;
+  if (fn === 'color') {
+    if (parts[0] !== 'srgb') return null;
     const [r, g, b] = parts.slice(1, 4).map(num);
     return r === undefined || g === undefined || b === undefined ? null : [r, g, b];
   }
-  const [x, y, z] = parts.slice(0, 3).map((p) => (p === "none" ? 0 : num(p)));
+  const [x, y, z] = parts.slice(0, 3).map((p) => (p === 'none' ? 0 : num(p)));
   if (x === undefined || y === undefined || z === undefined || [x, y, z].some(Number.isNaN))
     return null;
-  return fn === "oklch" ? oklchToSrgb(x, y, z) : [x / 255, y / 255, z / 255];
+  return fn === 'oklch' ? oklchToSrgb(x, y, z) : [x / 255, y / 255, z / 255];
 }
 
 const luminance = ([r, g, b]: Rgb) => {

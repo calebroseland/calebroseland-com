@@ -1,7 +1,7 @@
-import type { Bundle } from "@crc/github-client";
-import { useStore } from "@tanstack/react-store";
-import { useCallback, useEffect, useState } from "react";
-import { useLatest } from "../../hooks/useLatest.ts";
+import type { Bundle } from '@crc/github-client';
+import { useStore } from '@tanstack/react-store';
+import { useCallback, useEffect, useState } from 'react';
+import { useLatest } from '../../hooks/useLatest.ts';
 import {
   type Buffer,
   type BufferController,
@@ -9,9 +9,9 @@ import {
   createBufferStore,
   readLocalBuffer,
   writeLocalBuffer,
-} from "./buffer.ts";
-import { previewSrc } from "./images.ts";
-import { bufferFromBundle } from "./load.ts";
+} from './buffer.ts';
+import { previewSrc } from './images.ts';
+import { bufferFromBundle } from './load.ts';
 
 /** The working copy of one draft: built once per branch from the bundle, or from unsaved work kept on
     this device, and mirrored back to the device as it changes. */
@@ -65,7 +65,7 @@ function useFlushBeforeLeaving(controller: BufferController, dirty: boolean) {
       writeLocalBuffer(controller.store.state, browserStorage());
       e.preventDefault();
     };
-    window.addEventListener("beforeunload", guard);
-    return () => window.removeEventListener("beforeunload", guard);
+    window.addEventListener('beforeunload', guard);
+    return () => window.removeEventListener('beforeunload', guard);
   }, [dirty, controller]);
 }

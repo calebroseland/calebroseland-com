@@ -1,7 +1,7 @@
-import { Stack } from "@crc/ui";
-import { Link } from "@tanstack/react-router";
-import { type EntryMeta, formatDate } from "../content/entries.ts";
-import styles from "./PostList.module.css";
+import { Stack } from '@crc/ui';
+import { Link } from '@tanstack/react-router';
+import { type EntryMeta, formatDate } from '../content/entries.ts';
+import styles from './PostList.module.css';
 
 export function PostList({ posts }: { posts: readonly EntryMeta[] }) {
   return (

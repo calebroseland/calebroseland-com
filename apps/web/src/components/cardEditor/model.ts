@@ -4,8 +4,8 @@ import {
   profile as profileSchema,
   type ResolvedTag,
   resolveTag,
-} from "@crc/content-schema";
-import { type IconName, iconLabel, icons } from "@crc/ui/icons";
+} from '@crc/content-schema';
+import { type IconName, iconLabel, icons } from '@crc/ui/icons';
 
 /* The card editor's working copy of the profile. Links and groups carry a key so React keeps their
    inputs (and focus) through reordering; the keys never reach the YAML. Validation is the profile
@@ -42,20 +42,20 @@ export function fromProfile(p: Profile): EditState {
       links: g.links.map((l) => ({ key: key(), ...l })),
     })),
     contact: {
-      email: p.contact?.email ?? "",
-      phone: p.contact?.phone ?? "",
-      location: p.contact?.location?.label ?? "",
-      locationUrl: p.contact?.location?.url ?? "",
+      email: p.contact?.email ?? '',
+      phone: p.contact?.phone ?? '',
+      location: p.contact?.location?.label ?? '',
+      locationUrl: p.contact?.location?.url ?? '',
     },
   };
 }
 
-function toContact(c: EditContact): Profile["contact"] {
+function toContact(c: EditContact): Profile['contact'] {
   const email = c.email.trim();
   const phone = c.phone.trim();
   const label = c.location.trim();
   const url = c.locationUrl.trim();
-  const contact: NonNullable<Profile["contact"]> = {
+  const contact: NonNullable<Profile['contact']> = {
     ...(email && { email }),
     ...(phone && { phone }),
     ...(label && { location: { label, ...(url && { url }) } }),
@@ -86,13 +86,13 @@ export function toProfile(base: Profile, s: EditState): Profile {
 
 export const newLink = (): EditLink => ({
   key: key(),
-  label: "",
-  url: "https://",
-  icon: "lucide:external-link",
+  label: '',
+  url: 'https://',
+  icon: 'lucide:external-link',
 });
 export const newGroup = (): EditGroup => ({
   key: key(),
-  title: "",
+  title: '',
   inline: false,
   links: [newLink()],
 });
@@ -102,15 +102,15 @@ export const newTag = (label: string): EditTag => ({
   key: key(),
   label,
   icon: null,
-  show: "label",
+  show: 'label',
   link: true,
 });
 
 /** Why a tag cannot be added (or renamed to `raw`), or null when it can. */
 export function tagProblem(tags: readonly EditTag[], raw: string, except?: string): string | null {
   const tag = raw.trim();
-  if (!tag) return "Type a focus area first.";
-  if (tag.length > 24) return "Keep it to 24 characters.";
+  if (!tag) return 'Type a focus area first.';
+  if (tag.length > 24) return 'Keep it to 24 characters.';
   if (tags.some((t) => t.key !== except && t.label.trim().toLowerCase() === tag.toLowerCase()))
     return `${tag} is already there.`;
   if (!except && tags.length >= MAX_TAGS) return `Up to ${MAX_TAGS} focus areas.`;
@@ -119,15 +119,15 @@ export function tagProblem(tags: readonly EditTag[], raw: string, except?: strin
 
 const MESSAGES: Record<string, string> = {
   name: "The name can't be empty.",
-  tagline: "Add a tagline of up to 120 characters.",
-  title: "Name the group (up to 40 characters).",
-  label: "Add a label of up to 40 characters.",
-  url: "Use a full address (https://…) or a path on this site (/posts).",
-  icon: "Pick an icon.",
-  links: "A group needs at least one link.",
-  email: "Use an address like name@example.com.",
-  phone: "Digits, spaces and + ( ) . - only.",
-  groups: "Keep at least one group.",
+  tagline: 'Add a tagline of up to 120 characters.',
+  title: 'Name the group (up to 40 characters).',
+  label: 'Add a label of up to 40 characters.',
+  url: 'Use a full address (https://…) or a path on this site (/posts).',
+  icon: 'Pick an icon.',
+  links: 'A group needs at least one link.',
+  email: 'Use an address like name@example.com.',
+  phone: 'Digits, spaces and + ( ) . - only.',
+  groups: 'Keep at least one group.',
 };
 
 /** Field path (e.g. `groups.0.links.2.url`) → a message a person can act on. */
@@ -136,11 +136,11 @@ export function fieldErrors(p: Profile): Map<string, string> {
   const errors = new Map<string, string>();
   if (result.success) return errors;
   for (const issue of result.error.issues) {
-    const path = issue.path.join(".");
-    const last = String(issue.path.at(-1) ?? "");
-    if (issue.path[0] === "tags" && issue.path.length >= 2) {
+    const path = issue.path.join('.');
+    const last = String(issue.path.at(-1) ?? '');
+    if (issue.path[0] === 'tags' && issue.path.length >= 2) {
       const at = `tags.${String(issue.path[1])}`;
-      if (!errors.has(at)) errors.set(at, "Give it a label of up to 24 characters.");
+      if (!errors.has(at)) errors.set(at, 'Give it a label of up to 24 characters.');
       continue;
     }
     if (!errors.has(path)) errors.set(path, MESSAGES[last] ?? issue.message);

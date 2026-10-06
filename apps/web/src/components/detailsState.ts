@@ -1,15 +1,15 @@
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import type { KeyboardEvent } from "react";
+import { useStore } from '@tanstack/react-store';
+import { Store } from '@tanstack/store';
+import type { KeyboardEvent } from 'react';
 
 // One choice for the card and the footer, which show the same links; held outside both, which remount
 // with every page, so it survives navigation.
 export const detailsExpanded = new Store(false);
 
 // Mirrored on <html> for transitions that outlive the footer (entering from, and leaving to, the card).
-if (typeof document !== "undefined") {
+if (typeof document !== 'undefined') {
   const mirror = () => {
-    document.documentElement.dataset.footer = detailsExpanded.state ? "expanded" : "collapsed";
+    document.documentElement.dataset.footer = detailsExpanded.state ? 'expanded' : 'collapsed';
   };
   mirror();
   detailsExpanded.subscribe(mirror);
@@ -26,5 +26,5 @@ export function useDetailsExpanded() {
 /** For a details toggle's onKeyDown: a held Enter clicks a button on every repeat, where Space waits for
     release; dropping the repeats makes either key one toggle per press. */
 export function oncePerPress(event: KeyboardEvent) {
-  if (event.key === "Enter" && event.repeat) event.preventDefault();
+  if (event.key === 'Enter' && event.repeat) event.preventDefault();
 }

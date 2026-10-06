@@ -1,28 +1,28 @@
 /* CORS for /api/*. The allowlist is an env var so each environment names its own origins (and the Pages backup). */
 function allowedOrigins(env: Env): Set<string> {
   return new Set(
-    (env.ALLOWED_ORIGINS ?? "")
-      .split(",")
+    (env.ALLOWED_ORIGINS ?? '')
+      .split(',')
       .map((s) => s.trim())
       .filter(Boolean),
   );
 }
 
 export function corsHeaders(request: Request, env: Env): Record<string, string> {
-  const origin = request.headers.get("origin");
+  const origin = request.headers.get('origin');
   if (!origin || !allowedOrigins(env).has(origin)) return {};
   return {
-    "access-control-allow-origin": origin,
-    "access-control-allow-methods": "GET, POST, OPTIONS",
-    "access-control-allow-headers": "content-type",
-    "access-control-max-age": "600",
-    vary: "origin",
+    'access-control-allow-origin': origin,
+    'access-control-allow-methods': 'GET, POST, OPTIONS',
+    'access-control-allow-headers': 'content-type',
+    'access-control-max-age': '600',
+    vary: 'origin',
   };
 }
 
 /** Same-origin requests carry no Origin header on GET; cross-origin ones must be on the allowlist. */
 export function originAllowed(request: Request, env: Env): boolean {
-  const origin = request.headers.get("origin");
+  const origin = request.headers.get('origin');
   if (!origin) return true;
   return allowedOrigins(env).has(origin);
 }

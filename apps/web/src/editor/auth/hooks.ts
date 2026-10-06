@@ -1,11 +1,11 @@
-import { useStore } from "@tanstack/react-store";
-import { useEffect, useState } from "react";
-import { ENTRY_PAGE } from "../../components/returnPage.ts";
-import { useCurrentHref } from "../../hooks/useCurrentHref.ts";
-import { useReturnTo } from "../navigation.ts";
-import { startGitHubLogin } from "./login.ts";
-import { type SignInMethods, signInMethods } from "./methods.ts";
-import { type Backend, type Session, session } from "./store.ts";
+import { useStore } from '@tanstack/react-store';
+import { useEffect, useState } from 'react';
+import { ENTRY_PAGE } from '../../components/returnPage.ts';
+import { useCurrentHref } from '../../hooks/useCurrentHref.ts';
+import { useReturnTo } from '../navigation.ts';
+import { startGitHubLogin } from './login.ts';
+import { type SignInMethods, signInMethods } from './methods.ts';
+import { type Backend, type Session, session } from './store.ts';
 
 /* The session as React sees it. Reads go through these; sign-in and sign-out stay on `session`. */
 
@@ -14,7 +14,7 @@ export function useSession(): Session {
 }
 
 export function useSignedIn(): boolean {
-  return useStore(session.store, (s) => s.status === "authenticated");
+  return useStore(session.store, (s) => s.status === 'authenticated');
 }
 
 /** How someone can sign in here; null until known. Asks only once `needed` is true, so a page that
@@ -52,7 +52,7 @@ export function useGitHubSignIn(returnTo: string) {
 export function useDirectSignIn(returnTo: string) {
   const go = useReturnTo();
   return (backend: Backend, token: string) => {
-    session.signIn({ status: "authenticated", backend, token });
+    session.signIn({ status: 'authenticated', backend, token });
     void go(returnTo);
   };
 }
@@ -60,12 +60,12 @@ export function useDirectSignIn(returnTo: string) {
 /** Signs out, leaving the editing routes first so their guard never redirects a page mid-render. */
 export function useSignOut() {
   const go = useReturnTo();
-  const onEditingRoute = useCurrentHref().startsWith("/editor");
-  return () => void go(onEditingRoute ? ENTRY_PAGE : ".").then(() => session.signOut());
+  const onEditingRoute = useCurrentHref().startsWith('/editor');
+  return () => void go(onEditingRoute ? ENTRY_PAGE : '.').then(() => session.signOut());
 }
 
 /** The pasted personal access token, before it is used. */
 export function useTokenField() {
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState('');
   return { token, setToken, value: token.trim() };
 }

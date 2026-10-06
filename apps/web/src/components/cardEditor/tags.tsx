@@ -1,17 +1,17 @@
-import { Field } from "@base-ui/react/field";
-import { Fieldset } from "@base-ui/react/fieldset";
-import { Popover } from "@base-ui/react/popover";
-import { Radio } from "@base-ui/react/radio";
-import { RadioGroup } from "@base-ui/react/radio-group";
-import { Switch } from "@base-ui/react/switch";
-import { DropIndicator, useItemRegistration, useListReorder } from "@crc/interaction";
-import { Icon } from "@crc/ui";
-import { type RefObject, useId, useState } from "react";
-import { usePopupMotion } from "../../hooks/usePopupMotion.ts";
-import { Tip } from "../Tip.tsx";
-import styles from "./CardEditor.module.css";
-import { Handle, IconSelect, TextField } from "./fields.tsx";
-import { type EditTag, MAX_TAGS, newTag, tagProblem } from "./model.ts";
+import { Field } from '@base-ui/react/field';
+import { Fieldset } from '@base-ui/react/fieldset';
+import { Popover } from '@base-ui/react/popover';
+import { Radio } from '@base-ui/react/radio';
+import { RadioGroup } from '@base-ui/react/radio-group';
+import { Switch } from '@base-ui/react/switch';
+import { DropIndicator, useItemRegistration, useListReorder } from '@crc/interaction';
+import { Icon } from '@crc/ui';
+import { type RefObject, useId, useState } from 'react';
+import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
+import { Tip } from '../Tip.tsx';
+import styles from './CardEditor.module.css';
+import { Handle, IconSelect, TextField } from './fields.tsx';
+import { type EditTag, MAX_TAGS, newTag, tagProblem } from './model.ts';
 
 /** The card's focus areas as chips: reorder, add, remove, and each one's settings a click away. */
 export function TagEditor({
@@ -25,13 +25,13 @@ export function TagEditor({
   onChange: (tags: EditTag[]) => void;
   onMove: (from: number, to: number) => void;
 }) {
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState('');
   const [problem, setProblem] = useState<string | null>(null);
   const inputId = useId();
   useListReorder(
     tags.map((t) => ({ ...t, id: t.key })),
     (next) => onChange(next.map(({ id: _id, ...t }) => t)),
-    { listId: "tags" },
+    { listId: 'tags' },
   );
 
   const add = () => {
@@ -39,7 +39,7 @@ export function TagEditor({
     setProblem(issue);
     if (issue) return;
     onChange([...tags, newTag(draft.trim())]);
-    setDraft("");
+    setDraft('');
   };
 
   return (
@@ -74,7 +74,7 @@ export function TagEditor({
               setProblem(null);
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === ",") {
+              if (e.key === 'Enter' || e.key === ',') {
                 e.preventDefault();
                 add();
               }
@@ -109,12 +109,12 @@ function TagChip({
   onRemove: () => void;
 }) {
   const { ref, handleRef, state } = useItemRegistration(tag.key, index, {
-    listId: "tags",
-    axis: "horizontal",
+    listId: 'tags',
+    axis: 'horizontal',
   });
-  const name = tag.label.trim() || "Untitled focus area";
-  const iconOnly = tag.icon !== null && tag.show === "icon";
-  const withIcon = tag.icon !== null && tag.show !== "label";
+  const name = tag.label.trim() || 'Untitled focus area';
+  const iconOnly = tag.icon !== null && tag.show === 'icon';
+  const withIcon = tag.icon !== null && tag.show !== 'label';
   return (
     <li
       ref={ref as RefObject<HTMLLIElement>}
@@ -129,7 +129,7 @@ function TagChip({
         onMove={onMove}
         handleRef={handleRef}
       >
-        {withIcon && tag.icon && <Icon name={tag.icon} size={iconOnly ? "md" : "sm"} />}
+        {withIcon && tag.icon && <Icon name={tag.icon} size={iconOnly ? 'md' : 'sm'} />}
         {!iconOnly && name}
         {tag.link && (
           <Tip label="Links to its posts">
@@ -154,9 +154,9 @@ function TagChip({
 }
 
 const SHOW_OPTIONS = [
-  { value: "icon", label: "Icon" },
-  { value: "label", label: "Label" },
-  { value: "both", label: "Both" },
+  { value: 'icon', label: 'Icon' },
+  { value: 'label', label: 'Label' },
+  { value: 'both', label: 'Both' },
 ] as const;
 
 function TagSettings({
@@ -170,7 +170,7 @@ function TagSettings({
   error: string | undefined;
   onChange: (tag: EditTag) => void;
 }) {
-  const motion = usePopupMotion("dropdown");
+  const motion = usePopupMotion('dropdown');
   return (
     <Popover.Root onOpenChange={motion.onOpenChange}>
       <Popover.Trigger className={styles.remove} aria-label={`Settings for ${name}`}>
@@ -197,7 +197,7 @@ function TagSettings({
                   onChange({
                     ...tag,
                     icon,
-                    show: icon ? (tag.show === "label" ? "both" : tag.show) : "label",
+                    show: icon ? (tag.show === 'label' ? 'both' : tag.show) : 'label',
                   })
                 }
               />
@@ -207,8 +207,8 @@ function TagSettings({
               disabled={tag.icon === null}
               render={
                 <RadioGroup
-                  value={tag.icon === null ? "label" : tag.show}
-                  onValueChange={(show) => onChange({ ...tag, show: show as EditTag["show"] })}
+                  value={tag.icon === null ? 'label' : tag.show}
+                  onValueChange={(show) => onChange({ ...tag, show: show as EditTag['show'] })}
                 />
               }
             >

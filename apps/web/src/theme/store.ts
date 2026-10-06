@@ -1,22 +1,22 @@
-import { Store } from "@tanstack/store";
-import { type CustomTheme, customTheme, needsAdobeFonts, themeVars } from "./custom.ts";
+import { Store } from '@tanstack/store';
+import { type CustomTheme, customTheme, needsAdobeFonts, themeVars } from './custom.ts';
 
-const builtInThemes = ["auto", "light", "dark"] as const;
+const builtInThemes = ['auto', 'light', 'dark'] as const;
 type BuiltInTheme = (typeof builtInThemes)[number];
 export type ThemePreference = BuiltInTheme | `custom:${string}`;
-export type ResolvedTheme = "light" | "dark";
+export type ResolvedTheme = 'light' | 'dark';
 
 /* localStorage keys. `theme-vars` holds the active custom theme already resolved to CSS variables, so
    theme-init.js can paint it before the app loads without knowing how themes are built. */
-const KEY = "theme";
-const CUSTOM_KEY = "theme-custom";
-const VARS_KEY = "theme-vars";
+const KEY = 'theme';
+const CUSTOM_KEY = 'theme-custom';
+const VARS_KEY = 'theme-vars';
 
 export const customPreference = (id: string): ThemePreference => `custom:${id}`;
 const customId = (pref: ThemePreference) =>
-  pref.startsWith("custom:") ? pref.slice("custom:".length) : null;
+  pref.startsWith('custom:') ? pref.slice('custom:'.length) : null;
 
-function read(storage: ThemeEnv["storage"], key: string): string | null {
+function read(storage: ThemeEnv['storage'], key: string): string | null {
   try {
     return storage?.getItem(key) ?? null;
   } catch {
@@ -24,7 +24,7 @@ function read(storage: ThemeEnv["storage"], key: string): string | null {
   }
 }
 
-function write(storage: ThemeEnv["storage"], key: string, value: string | null) {
+function write(storage: ThemeEnv['storage'], key: string, value: string | null) {
   try {
     if (value === null) storage?.removeItem(key);
     else storage?.setItem(key, value);
@@ -34,9 +34,9 @@ function write(storage: ThemeEnv["storage"], key: string, value: string | null) 
 }
 
 /** Stored themes that fail to parse are dropped one by one, not all at once. */
-function readCustomThemes(storage: ThemeEnv["storage"]): CustomTheme[] {
+function readCustomThemes(storage: ThemeEnv['storage']): CustomTheme[] {
   try {
-    const raw: unknown = JSON.parse(read(storage, CUSTOM_KEY) ?? "[]");
+    const raw: unknown = JSON.parse(read(storage, CUSTOM_KEY) ?? '[]');
     if (!Array.isArray(raw)) return [];
     return raw.flatMap((t) => {
       const parsed = customTheme.safeParse(t);
@@ -47,23 +47,23 @@ function readCustomThemes(storage: ThemeEnv["storage"]): CustomTheme[] {
   }
 }
 
-function readPreference(storage: ThemeEnv["storage"], themes: CustomTheme[]): ThemePreference {
+function readPreference(storage: ThemeEnv['storage'], themes: CustomTheme[]): ThemePreference {
   const v = read(storage, KEY);
   if ((builtInThemes as readonly (string | null)[]).includes(v)) return v as BuiltInTheme;
   const id = v && customId(v as ThemePreference);
-  return id && themes.some((t) => t.id === id) ? (v as ThemePreference) : "auto";
+  return id && themes.some((t) => t.id === id) ? (v as ThemePreference) : 'auto';
 }
 
 export function resolveTheme(pref: BuiltInTheme, systemDark: boolean): ResolvedTheme {
-  return pref === "auto" ? (systemDark ? "dark" : "light") : pref;
+  return pref === 'auto' ? (systemDark ? 'dark' : 'light') : pref;
 }
 
 export type ThemeEnv = {
-  storage?: Pick<Storage, "getItem" | "setItem" | "removeItem">;
-  media?: Pick<MediaQueryList, "matches" | "addEventListener" | "removeEventListener">;
+  storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+  media?: Pick<MediaQueryList, 'matches' | 'addEventListener' | 'removeEventListener'>;
   root?: {
     dataset: DOMStringMap;
-    style: Pick<CSSStyleDeclaration, "setProperty" | "removeProperty">;
+    style: Pick<CSSStyleDeclaration, 'setProperty' | 'removeProperty'>;
   };
   /** The Adobe Fonts kit: whether the default theme needs it, and how to load it once one does. */
   adobeFonts?: { byDefault: boolean; load: () => void };
@@ -80,7 +80,7 @@ export function createThemeStore(env: ThemeEnv) {
   const themes = readCustomThemes(env.storage);
   const store = new Store<ThemeState>({
     preference: readPreference(env.storage, themes),
-    resolved: "light",
+    resolved: 'light',
     customThemes: themes,
   });
   let preview: CustomTheme | null = null;
@@ -97,7 +97,7 @@ export function createThemeStore(env: ThemeEnv) {
     const pref = store.state.preference;
     const resolved = custom
       ? custom.base
-      : resolveTheme(customId(pref) ? "auto" : (pref as BuiltInTheme), env.media?.matches ?? false);
+      : resolveTheme(customId(pref) ? 'auto' : (pref as BuiltInTheme), env.media?.matches ?? false);
     store.setState((s) => (s.resolved === resolved ? s : { ...s, resolved }));
 
     const vars = custom ? themeVars(custom) : {};
@@ -115,9 +115,9 @@ export function createThemeStore(env: ThemeEnv) {
   apply();
 
   const onChange = () => {
-    if (store.state.preference === "auto" && !preview) apply();
+    if (store.state.preference === 'auto' && !preview) apply();
   };
-  env.media?.addEventListener("change", onChange);
+  env.media?.addEventListener('change', onChange);
 
   const saveThemes = (customThemes: CustomTheme[]) => {
     store.setState((s) => ({ ...s, customThemes }));
@@ -151,11 +151,11 @@ export function createThemeStore(env: ThemeEnv) {
     deleteCustom(id: string) {
       saveThemes(store.state.customThemes.filter((t) => t.id !== id));
       preview = null;
-      if (customId(store.state.preference) === id) this.setPreference("auto");
+      if (customId(store.state.preference) === id) this.setPreference('auto');
       else apply();
     },
     dispose() {
-      env.media?.removeEventListener("change", onChange);
+      env.media?.removeEventListener('change', onChange);
     },
   };
 }
@@ -163,12 +163,12 @@ export function createThemeStore(env: ThemeEnv) {
 export type ThemeController = ReturnType<typeof createThemeStore>;
 
 export const newThemeId = (): string =>
-  typeof crypto !== "undefined" && "randomUUID" in crypto
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID().slice(0, 8)
     : Date.now().toString(36);
 
 function browserEnv(): ThemeEnv {
-  if (typeof window === "undefined") return {};
+  if (typeof window === 'undefined') return {};
   const env: ThemeEnv = { root: document.documentElement };
   try {
     env.storage = window.localStorage;
@@ -179,20 +179,20 @@ function browserEnv(): ThemeEnv {
   const kit = document.querySelector<HTMLMetaElement>('meta[name="adobe-fonts"]');
   if (kit)
     env.adobeFonts = {
-      byDefault: kit.dataset.default === "on",
+      byDefault: kit.dataset.default === 'on',
       load: () => {
-        if (document.getElementById("adobe-fonts")) return;
-        const link = Object.assign(document.createElement("link"), {
-          id: "adobe-fonts",
-          rel: "stylesheet",
+        if (document.getElementById('adobe-fonts')) return;
+        const link = Object.assign(document.createElement('link'), {
+          id: 'adobe-fonts',
+          rel: 'stylesheet',
           href: kit.content,
         });
         document.head.append(link);
       },
     };
   // jsdom and very old browsers lack matchMedia; auto then resolves to light
-  if (typeof window.matchMedia === "function")
-    env.media = window.matchMedia("(prefers-color-scheme: dark)");
+  if (typeof window.matchMedia === 'function')
+    env.media = window.matchMedia('(prefers-color-scheme: dark)');
   return env;
 }
 

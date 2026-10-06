@@ -1,6 +1,6 @@
-import { z } from "zod";
-import type { WorkerEnv } from "./env.ts";
-import { problem } from "./problem.ts";
+import { z } from 'zod';
+import type { WorkerEnv } from './env.ts';
+import { problem } from './problem.ts';
 
 /* Client error sink. Deliberately small: a bounded, validated payload logged as structured JSON to
    Workers Logs. No vendor, no storage, no personal data. The client samples before sending. */
@@ -12,7 +12,7 @@ const clientError = z.object({
   stack: z.string().max(2000).optional(),
   url: z.url().max(500),
   userAgent: z.string().max(300).optional(),
-  kind: z.enum(["error", "unhandledrejection"]).default("error"),
+  kind: z.enum(['error', 'unhandledrejection']).default('error'),
 });
 
 export async function logClientError(
@@ -20,28 +20,28 @@ export async function logClientError(
   env: WorkerEnv,
   requestId: string,
 ): Promise<Response> {
-  const size = Number(request.headers.get("content-length") ?? 0);
+  const size = Number(request.headers.get('content-length') ?? 0);
   if (size > MAX_BYTES)
     return problem(
       413,
-      "Payload too large",
+      'Payload too large',
       `Client error reports are capped at ${MAX_BYTES} bytes.`,
     );
 
   const raw = await request.text();
-  if (raw.length > MAX_BYTES) return problem(413, "Payload too large");
+  if (raw.length > MAX_BYTES) return problem(413, 'Payload too large');
 
   let parsedJson: unknown;
   try {
     parsedJson = JSON.parse(raw);
   } catch {
-    return problem(400, "Invalid JSON");
+    return problem(400, 'Invalid JSON');
   }
 
   const parsed = clientError.safeParse(parsedJson);
   if (!parsed.success) {
-    return problem(400, "Invalid request body", undefined, {
-      errors: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })),
+    return problem(400, 'Invalid request body', undefined, {
+      errors: parsed.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
     });
   }
 
@@ -49,7 +49,7 @@ export async function logClientError(
   console.error(
     JSON.stringify({
       requestId,
-      event: "client.error",
+      event: 'client.error',
       kind,
       env: env.ENVIRONMENT,
       message,

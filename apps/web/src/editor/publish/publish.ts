@@ -1,20 +1,20 @@
-import type { GitHubClient, PullRequest } from "@crc/github-client";
+import type { GitHubClient, PullRequest } from '@crc/github-client';
 
 /* Publish = pull request → checks → merge → deploy. The editor never force-merges: a conflicting PR is
    explained and linked, and the merge button only enables when GitHub reports it mergeable. */
 
 export type PublishState =
-  | { kind: "none" }
-  | { kind: "open"; pr: PullRequest; mergeable: boolean | null }
-  | { kind: "conflict"; pr: PullRequest }
-  | { kind: "merged"; pr: PullRequest };
+  | { kind: 'none' }
+  | { kind: 'open'; pr: PullRequest; mergeable: boolean | null }
+  | { kind: 'conflict'; pr: PullRequest }
+  | { kind: 'merged'; pr: PullRequest };
 
 export function publishState(pr: PullRequest | null): PublishState {
-  if (!pr) return { kind: "none" };
-  if (pr.merged) return { kind: "merged", pr };
-  if (pr.state === "open" && pr.mergeable === false) return { kind: "conflict", pr };
-  if (pr.state === "open") return { kind: "open", pr, mergeable: pr.mergeable };
-  return { kind: "none" };
+  if (!pr) return { kind: 'none' };
+  if (pr.merged) return { kind: 'merged', pr };
+  if (pr.state === 'open' && pr.mergeable === false) return { kind: 'conflict', pr };
+  if (pr.state === 'open') return { kind: 'open', pr, mergeable: pr.mergeable };
+  return { kind: 'none' };
 }
 
 export function pullRequestBody(input: {
@@ -25,12 +25,12 @@ export function pullRequestBody(input: {
 }): string {
   return [
     input.summary ? input.summary : `Publish “${input.title}”.`,
-    "",
+    '',
     `- Slug: \`${input.slug}\``,
     `- Branch: \`${input.ref}\``,
-    "",
-    "Opened from the editor. Merging deploys to production and deletes the draft branch.",
-  ].join("\n");
+    '',
+    'Opened from the editor. Merging deploys to production and deletes the draft branch.',
+  ].join('\n');
 }
 
 export type PullRequestInput = {
@@ -67,7 +67,7 @@ export async function waitForDeploy(opts: {
   const deadline = now() + (opts.timeoutMs ?? 180_000);
   while (now() < deadline) {
     try {
-      const res = await fetchImpl(opts.healthUrl, { cache: "no-store" });
+      const res = await fetchImpl(opts.healthUrl, { cache: 'no-store' });
       if (res.ok) {
         const body = (await res.json()) as { sha?: string };
         if (body.sha === opts.sha) return true;

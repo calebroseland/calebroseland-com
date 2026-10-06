@@ -6,7 +6,7 @@ export function problem(
   extra?: Record<string, unknown>,
 ): Response {
   return Response.json(
-    { type: "about:blank", title, status, ...(detail ? { detail } : {}), ...extra },
-    { status, headers: { "content-type": "application/problem+json" } },
+    { type: 'about:blank', title, status, ...(detail ? { detail } : {}), ...extra },
+    { status, headers: { 'content-type': 'application/problem+json' } },
   );
 }

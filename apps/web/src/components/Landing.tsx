@@ -5,10 +5,10 @@ import {
   type ProfileTag,
   resolveTag,
   tagLabel,
-} from "@crc/content-schema";
-import { Icon } from "@crc/ui";
-import { Link, useMatch, useNavigate } from "@tanstack/react-router";
-import { AnimatePresence, m, type Transition } from "motion/react";
+} from '@crc/content-schema';
+import { Icon } from '@crc/ui';
+import { Link, useMatch, useNavigate } from '@tanstack/react-router';
+import { AnimatePresence, m, type Transition } from 'motion/react';
 import {
   type ComponentProps,
   type CSSProperties,
@@ -18,23 +18,23 @@ import {
   useId,
   useRef,
   useState,
-} from "react";
-import { hasContact } from "../content/profile.ts";
-import { useSignedIn } from "../editor/auth/hooks.ts";
-import type { ProfileSource } from "../editor/profile.ts";
-import { notify } from "../editor/Toast.tsx";
-import { useLinkHover } from "../hooks/useLinkHover.ts";
-import { useReduceMotion } from "../hooks/useReduceMotion.ts";
-import { backdrop, isBackdropClick } from "./backdrop.ts";
-import { useSiteGo } from "./backToCard.ts";
-import type { EditFaces, EditResult } from "./cardEditor/CardEditor.tsx";
-import { oncePerPress, useDetailsExpanded } from "./detailsState.ts";
-import { FocusChip } from "./FocusChip.tsx";
-import styles from "./Landing.module.css";
-import { returnPage } from "./returnPage.ts";
-import { Tip } from "./Tip.tsx";
-import { UserMenu } from "./UserMenu.tsx";
-import { footerHeadingName, footerLinkName, vtName, withViewTransition } from "./viewTransition.ts";
+} from 'react';
+import { hasContact } from '../content/profile.ts';
+import { useSignedIn } from '../editor/auth/hooks.ts';
+import type { ProfileSource } from '../editor/profile.ts';
+import { notify } from '../editor/Toast.tsx';
+import { useLinkHover } from '../hooks/useLinkHover.ts';
+import { useReduceMotion } from '../hooks/useReduceMotion.ts';
+import { backdrop, isBackdropClick } from './backdrop.ts';
+import { useSiteGo } from './backToCard.ts';
+import type { EditFaces, EditResult } from './cardEditor/CardEditor.tsx';
+import { oncePerPress, useDetailsExpanded } from './detailsState.ts';
+import { FocusChip } from './FocusChip.tsx';
+import styles from './Landing.module.css';
+import { returnPage } from './returnPage.ts';
+import { Tip } from './Tip.tsx';
+import { UserMenu } from './UserMenu.tsx';
+import { footerHeadingName, footerLinkName, vtName, withViewTransition } from './viewTransition.ts';
 
 type OpenEditor = {
   source: ProfileSource;
@@ -63,7 +63,7 @@ function faceMotion(reduce: boolean) {
     reduce ? still : { duration, ease: CSS_EASE, height: { duration: HEIGHT, ease: CSS_EASE } };
   return {
     initial: { opacity: 0, rotateX: -90, height: 0 },
-    animate: { opacity: 1, rotateX: 0, height: "auto", transition: t(FLIP_IN) },
+    animate: { opacity: 1, rotateX: 0, height: 'auto', transition: t(FLIP_IN) },
     exit: { opacity: 0, rotateX: -90, height: 0, transition: t(FLIP_OUT) },
     style: { transformPerspective: 400 },
   };
@@ -79,7 +79,7 @@ function useFocusOnMount<T extends HTMLElement>(when: boolean): RefObject<T | nu
 }
 
 /** Passes other props through, so it can be a tooltip's trigger. */
-function ExternalLink({ href, children, ...rest }: ComponentProps<"a"> & { href: string }) {
+function ExternalLink({ href, children, ...rest }: ComponentProps<'a'> & { href: string }) {
   return (
     <a {...rest} className={styles.link} href={href} target="_blank" rel="noopener noreferrer">
       {children}
@@ -91,7 +91,7 @@ function ExternalLink({ href, children, ...rest }: ComponentProps<"a"> & { href:
 /** Every link on the card wears the same icon, in the same slot, so labels line up down a column.
     A root-relative url is a page on this site, so it goes through the router (and its basepath). */
 function CardLink({ link, iconOnly = false }: { link: ProfileLink; iconOnly?: boolean }) {
-  const hoverRef = useLinkHover("icon");
+  const hoverRef = useLinkHover('icon');
   const body = (
     <>
       <span className={styles.linkIcon} data-hover="icon">
@@ -102,7 +102,7 @@ function CardLink({ link, iconOnly = false }: { link: ProfileLink; iconOnly?: bo
       </span>
     </>
   );
-  const anchor = link.url.startsWith("/") ? (
+  const anchor = link.url.startsWith('/') ? (
     <Link ref={hoverRef} to={link.url} className={styles.link}>
       {body}
     </Link>
@@ -139,7 +139,7 @@ function Tags({ tags }: { tags: readonly ProfileTag[] }) {
   const listId = useId();
   const hidden = tags.length - TAGS_SHOWN;
   return (
-    <div className={`${styles.tags} ${styles.vt}`} style={vtName("card-tags")}>
+    <div className={`${styles.tags} ${styles.vt}`} style={vtName('card-tags')}>
       <ul id={listId} className={styles.tagList} role="list" aria-label="Focus areas">
         {(all ? tags : tags.slice(0, TAGS_SHOWN)).map((tag) => (
           <li key={tagLabel(tag)}>
@@ -153,10 +153,10 @@ function Tags({ tags }: { tags: readonly ProfileTag[] }) {
           className={styles.tagMore}
           aria-expanded={all}
           aria-controls={listId}
-          aria-label={all ? "Show fewer focus areas" : `+${hidden} more focus areas`}
+          aria-label={all ? 'Show fewer focus areas' : `+${hidden} more focus areas`}
           onClick={() => setAll((a) => !a)}
         >
-          {all ? "Show fewer" : `+${hidden} more`}
+          {all ? 'Show fewer' : `+${hidden} more`}
         </button>
       )}
     </div>
@@ -178,16 +178,16 @@ function Front({
   onFlip: (() => void) | null;
   onEdit: (() => void) | null;
   opening: boolean;
-  focusOnMount: "flip" | "edit" | null;
+  focusOnMount: 'flip' | 'edit' | null;
 }) {
   const linksId = useId();
-  const flipRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === "flip");
-  const editRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === "edit");
+  const flipRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === 'flip');
+  const editRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === 'edit');
   return (
     <>
       <div className={styles.corners}>
         <div className={styles.cornerStart}>
-          <span className={`${styles.cornerSlot} ${styles.vt}`} style={vtName("card-theme")}>
+          <span className={`${styles.cornerSlot} ${styles.vt}`} style={vtName('card-theme')}>
             <UserMenu />
           </span>
           {onEdit && (
@@ -196,7 +196,7 @@ function Front({
                 ref={editRef}
                 type="button"
                 className={`${styles.cornerButton} ${styles.vt}`}
-                style={vtName("card-edit")}
+                style={vtName('card-edit')}
                 aria-label="Edit card"
                 aria-busy={opening || undefined}
                 disabled={opening}
@@ -213,7 +213,7 @@ function Front({
               ref={flipRef}
               type="button"
               className={`${styles.cornerButton} ${styles.vt}`}
-              style={vtName("card-flip")}
+              style={vtName('card-flip')}
               aria-label="Contact information"
               onClick={onFlip}
             >
@@ -227,7 +227,7 @@ function Front({
       <h1 id="site-name" className={styles.name}>
         <span className={styles.siteName}>{profile.name}</span>
       </h1>
-      <p className={`${styles.tagline} ${styles.vt}`} style={vtName("card-tagline")}>
+      <p className={`${styles.tagline} ${styles.vt}`} style={vtName('card-tagline')}>
         {profile.tagline}
       </p>
 
@@ -240,7 +240,7 @@ function Front({
         data-expanded={expanded || undefined}
         style={
           {
-            "--faces": Math.max(1, profile.groups.filter((x) => !x.inline).length),
+            '--faces': Math.max(1, profile.groups.filter((x) => !x.inline).length),
           } as CSSProperties
         }
       >
@@ -278,22 +278,22 @@ function Front({
                   >
                     <CardLink link={primary} />
                     {/* Where each hidden link would sit, so the footer's links flow out of the card. */}
-                    {!expanded &&
-                      rest.map((link, i) => (
+                    {!expanded
+                      && rest.map((link, i) => (
                         <span
                           key={link.url}
                           aria-hidden="true"
                           inert
                           className={`${styles.linkAnchor} ${styles.toFooter}`}
-                          style={{ ...footerLinkName(g, i + 1), "--row": i + 1 } as CSSProperties}
+                          style={{ ...footerLinkName(g, i + 1), '--row': i + 1 } as CSSProperties}
                         >
                           {/* Invisible; sizes the mark like the link so it does not stretch. */}
                           <CardLink link={link} />
                         </span>
                       ))}
                   </li>
-                  {expanded &&
-                    rest.map((link, i) => (
+                  {expanded
+                    && rest.map((link, i) => (
                       <li
                         key={link.url}
                         className={`${styles.linkItem} ${styles.vt} ${styles.toFooter}`}
@@ -315,14 +315,14 @@ function Front({
       <button
         type="button"
         className={`${styles.more} ${styles.vt}`}
-        style={vtName("card-more")}
+        style={vtName('card-more')}
         aria-expanded={expanded}
         aria-controls={linksId}
         onKeyDown={oncePerPress}
         onClick={onToggle}
       >
-        <span className={`${styles.moreLabel} ${styles.vt}`} style={vtName("card-more-label")}>
-          show {expanded ? "less" : "more"}
+        <span className={`${styles.moreLabel} ${styles.vt}`} style={vtName('card-more-label')}>
+          show {expanded ? 'less' : 'more'}
         </span>
       </button>
     </>
@@ -351,7 +351,7 @@ function Back({
         <ul className={styles.details} role="list" aria-label="Contact">
           {contact.phone && (
             <li>
-              <a className={styles.detail} href={`tel:${contact.phone.replaceAll(/[^+\d]/g, "")}`}>
+              <a className={styles.detail} href={`tel:${contact.phone.replaceAll(/[^+\d]/g, '')}`}>
                 <Icon name="lucide:phone" size="md" />
                 <span>{contact.phone}</span>
               </a>
@@ -404,8 +404,8 @@ function Back({
 }
 
 /** Which face the URL shows: the front at /, the contact side at /contact. */
-function useCardSide(): "front" | "back" {
-  return useMatch({ from: "/_card/contact", shouldThrow: false }) ? "back" : "front";
+function useCardSide(): 'front' | 'back' {
+  return useMatch({ from: '/_card/contact', shouldThrow: false }) ? 'back' : 'front';
 }
 
 export function Landing({ profile: published }: { profile: Profile }) {
@@ -422,7 +422,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
   const signedIn = useSignedIn();
   const [editing, setEditing] = useState<OpenEditor | null>(null);
   // While editing, the face is the session's own: /contact would redirect a card with no contact yet.
-  const [editSide, setEditSide] = useState<"front" | "back">("front");
+  const [editSide, setEditSide] = useState<'front' | 'back'>('front');
   // Signing out (the palette can, mid-edit) ends the edit: its backend is gone.
   if (editing && !signedIn) setEditing(null);
   const [opening, setOpening] = useState(false);
@@ -442,25 +442,25 @@ export function Landing({ profile: published }: { profile: Profile }) {
   const openEditor = async () => {
     setOpening(true);
     try {
-      const mod = await import("./cardEditor/CardEditor.tsx");
+      const mod = await import('./cardEditor/CardEditor.tsx');
       const source = await mod.prepareEdit(profile);
       await withViewTransition(
-        "edit",
+        'edit',
         () => {
-          setEditSide("front");
+          setEditSide('front');
           setEditing({ source, Session: mod.default });
         },
         reduce,
       );
     } catch {
-      notify("Couldn't open the editor. Check the connection and try again.", { kind: "error" });
+      notify("Couldn't open the editor. Check the connection and try again.", { kind: 'error' });
     } finally {
       setOpening(false);
     }
   };
   const closeEditor = (result: EditResult) =>
     void withViewTransition(
-      "edit",
+      'edit',
       () => {
         if (result?.workingTree) setSaved(result.profile);
         setReturnToEdit(true);
@@ -469,21 +469,21 @@ export function Landing({ profile: published }: { profile: Profile }) {
       reduce,
     );
 
-  const flip = () => void navigate({ to: side === "front" ? "/contact" : "/" });
+  const flip = () => void navigate({ to: side === 'front' ? '/contact' : '/' });
 
   /* The card's two faces, read-only or the edit session's, turned by the same flip. */
   const faces = ({ front, back }: { front: ReactNode; back: ReactNode | null }) => {
-    const showBack = back !== null && (editing ? editSide : side) === "back";
+    const showBack = back !== null && (editing ? editSide : side) === 'back';
     return (
       <AnimatePresence mode="wait" initial={false}>
         {showBack ? (
           <m.section
             key="back"
-            aria-labelledby={editing ? undefined : "site-name"}
+            aria-labelledby={editing ? undefined : 'site-name'}
             className={`${styles.card} ${styles.cardBack}`}
             // Capture, so one press turns the card back before a tooltip takes the key to close itself.
             onKeyDownCapture={(e) => {
-              if (!editing && e.key === "Escape") flip();
+              if (!editing && e.key === 'Escape') flip();
             }}
             {...faceMotion(reduce)}
           >
@@ -492,7 +492,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
         ) : (
           <m.section
             key="front"
-            aria-labelledby={editing ? undefined : "site-name"}
+            aria-labelledby={editing ? undefined : 'site-name'}
             className={styles.card}
             data-expanded={editing || expanded || undefined}
             data-editing={editing ? true : undefined}
@@ -521,7 +521,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
         {editing ? (
           <editing.Session
             source={editing.source}
-            onFlip={() => setEditSide((f) => (f === "front" ? "back" : "front"))}
+            onFlip={() => setEditSide((f) => (f === 'front' ? 'back' : 'front'))}
             onDone={closeEditor}
           >
             {faces}
@@ -532,11 +532,11 @@ export function Landing({ profile: published }: { profile: Profile }) {
               <Front
                 profile={profile}
                 expanded={expanded}
-                onToggle={() => withViewTransition("expand", toggleDetails, reduce)}
+                onToggle={() => withViewTransition('expand', toggleDetails, reduce)}
                 onFlip={hasContact(profile) ? flip : null}
                 onEdit={signedIn ? () => void openEditor() : null}
                 opening={opening}
-                focusOnMount={returnToEdit ? "edit" : turned ? "flip" : null}
+                focusOnMount={returnToEdit ? 'edit' : turned ? 'flip' : null}
               />
             ),
             back: contact ? (
@@ -549,7 +549,7 @@ export function Landing({ profile: published }: { profile: Profile }) {
           <button
             type="button"
             className={`${styles.enter} ${styles.vt}`}
-            style={vtName("card-enter")}
+            style={vtName('card-enter')}
             onClick={enter}
           >
             Enter

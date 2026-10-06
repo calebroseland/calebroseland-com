@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 /** A dialog that opens about something (a row, an error) and closes back to nothing. */
 export function useDialogState<T>() {

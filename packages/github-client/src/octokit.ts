@@ -1,6 +1,6 @@
-import { Octokit } from "@octokit/core";
-import { restEndpointMethods } from "@octokit/plugin-rest-endpoint-methods";
-import { toBase64 } from "./base64.ts";
+import { Octokit } from '@octokit/core';
+import { restEndpointMethods } from '@octokit/plugin-rest-endpoint-methods';
+import { toBase64 } from './base64.ts';
 import {
   AuthError,
   type Bundle,
@@ -16,7 +16,7 @@ import {
   slugFromRef,
   toBytes,
   type Viewer,
-} from "./types.ts";
+} from './types.ts';
 
 const MyOctokit = Octokit.plugin(restEndpointMethods);
 
@@ -31,7 +31,7 @@ function toPr(pr: {
   return {
     number: pr.number,
     url: pr.html_url,
-    state: pr.state === "open" ? "open" : "closed",
+    state: pr.state === 'open' ? 'open' : 'closed',
     merged: Boolean(pr.merged_at),
     mergeable: pr.mergeable ?? null,
     headRef: pr.head.ref,
@@ -47,14 +47,14 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
     try {
       return await fn();
     } catch (err) {
-      if (typeof err === "object" && err && "status" && (err as { status?: number }).status === 401)
+      if (typeof err === 'object' && err && 'status' && (err as { status?: number }).status === 401)
         throw new AuthError();
       throw err;
     }
   };
 
   return {
-    kind: "octokit",
+    kind: 'octokit',
     defaultBranch: repo.defaultBranch,
 
     getViewer: () =>
@@ -67,10 +67,10 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
       wrap(async () => {
         const [{ data: refs }, { data: prs }] = await Promise.all([
           octokit.rest.git.listMatchingRefs({ ...base, ref: `heads/${DRAFT_PREFIX}` }),
-          octokit.rest.pulls.list({ ...base, state: "open", per_page: 100 }),
+          octokit.rest.pulls.list({ ...base, state: 'open', per_page: 100 }),
         ]);
         return refs.map((r) => {
-          const ref = r.ref.replace(/^refs\/heads\//, "");
+          const ref = r.ref.replace(/^refs\/heads\//, '');
           const pr = prs.find((p) => p.head.ref === ref);
           return {
             ref,
@@ -102,9 +102,9 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
         const { data: tree } = await octokit.rest.git.getTree({
           ...base,
           tree_sha: head.object.sha,
-          recursive: "1",
+          recursive: '1',
         });
-        const inDir = tree.tree.filter((t) => t.type === "blob" && t.path?.startsWith(`${dir}/`));
+        const inDir = tree.tree.filter((t) => t.type === 'blob' && t.path?.startsWith(`${dir}/`));
         const files = await Promise.all(
           inDir.map(async (t) => {
             const { data: blob } = await octokit.rest.git.getBlob({
@@ -115,12 +115,12 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
             return {
               path: t.path as string,
               sha: t.sha as string,
-              encoding: isText ? ("utf-8" as const) : ("base64" as const),
+              encoding: isText ? ('utf-8' as const) : ('base64' as const),
               content: isText
                 ? new TextDecoder().decode(
-                    Uint8Array.from(atob(blob.content.replace(/\n/g, "")), (c) => c.charCodeAt(0)),
+                    Uint8Array.from(atob(blob.content.replace(/\n/g, '')), (c) => c.charCodeAt(0)),
                   )
-                : blob.content.replace(/\n/g, ""),
+                : blob.content.replace(/\n/g, ''),
             };
           }),
         );
@@ -144,12 +144,12 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
             const { data } = await octokit.rest.git.createBlob({
               ...base,
               content: binary ? toBase64(await toBytes(raw)) : raw,
-              encoding: binary || f.encoding === "base64" ? "base64" : "utf-8",
+              encoding: binary || f.encoding === 'base64' ? 'base64' : 'utf-8',
             });
             return {
               path: `${dir}/${f.path}`,
-              mode: "100644" as const,
-              type: "blob" as const,
+              mode: '100644' as const,
+              type: 'blob' as const,
               sha: data.sha,
             };
           }),
@@ -196,7 +196,7 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
         const { data } = await octokit.rest.pulls.list({
           ...base,
           head: `${repo.owner}:${ref}`,
-          state: "open",
+          state: 'open',
           per_page: 1,
         });
         const first = data[0];
@@ -210,7 +210,7 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
         const { data } = await octokit.rest.pulls.merge({
           ...base,
           pull_number: number,
-          merge_method: "squash",
+          merge_method: 'squash',
         });
         return { sha: data.sha };
       }),

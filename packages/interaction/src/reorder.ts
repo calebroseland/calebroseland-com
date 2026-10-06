@@ -2,7 +2,7 @@
    produce identical results and the keyboard path is testable without a DOM. */
 
 /** Where a drop lands on a row (vertical lists) or a chip (horizontal lists). */
-export type Edge = "top" | "bottom" | "left" | "right";
+export type Edge = 'top' | 'bottom' | 'left' | 'right';
 
 export function reorder<T>(items: readonly T[], from: number, to: number): T[] {
   if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length)
@@ -15,22 +15,22 @@ export function reorder<T>(items: readonly T[], from: number, to: number): T[] {
 
 /** Index the dragged item lands on when dropped on `target` at `edge`. */
 export function dropIndex(from: number, target: number, edge: Edge): number {
-  let to = edge === "top" || edge === "left" ? target : target + 1;
+  let to = edge === 'top' || edge === 'left' ? target : target + 1;
   if (from < to) to -= 1;
   return to;
 }
 
-export type MoveCommand = "up" | "down" | "top" | "bottom";
+export type MoveCommand = 'up' | 'down' | 'top' | 'bottom';
 
 export function moveIndex(index: number, length: number, command: MoveCommand): number {
   switch (command) {
-    case "up":
+    case 'up':
       return Math.max(0, index - 1);
-    case "down":
+    case 'down':
       return Math.min(length - 1, index + 1);
-    case "top":
+    case 'top':
       return 0;
-    case "bottom":
+    case 'bottom':
       return length - 1;
   }
 }

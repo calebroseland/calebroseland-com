@@ -1,6 +1,6 @@
-export type { Entry, EntryMeta, Page, Post } from "./entry.ts";
-export { entry, page, post } from "./entry.ts";
-export type { FontId, ThemeFonts } from "./fonts.ts";
+export type { Entry, EntryMeta, Page, Post } from './entry.ts';
+export { entry, page, post } from './entry.ts';
+export type { FontId, ThemeFonts } from './fonts.ts';
 export {
   ADOBE_KIT,
   DEFAULT_FONTS,
@@ -10,8 +10,8 @@ export {
   READING_FONTS,
   TEXT_FONTS,
   usesAdobeFonts,
-} from "./fonts.ts";
-export { parseYaml } from "./load.ts";
+} from './fonts.ts';
+export { parseYaml } from './load.ts';
 export type {
   Profile,
   ProfileContact,
@@ -19,7 +19,7 @@ export type {
   ProfileLinkGroup,
   ProfileTag,
   ResolvedTag,
-} from "./profile.ts";
+} from './profile.ts';
 export {
   compactTag,
   profile,
@@ -28,6 +28,6 @@ export {
   profileLinkGroup,
   resolveTag,
   tagLabel,
-} from "./profile.ts";
-export type { SiteTheme } from "./theme.ts";
-export { siteTheme } from "./theme.ts";
+} from './profile.ts';
+export type { SiteTheme } from './theme.ts';
+export { siteTheme } from './theme.ts';

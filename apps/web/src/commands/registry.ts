@@ -1,5 +1,5 @@
-import type { IconName } from "@crc/ui/icons";
-import { Store } from "@tanstack/store";
+import type { IconName } from '@crc/ui/icons';
+import { Store } from '@tanstack/store';
 
 /* The command palette's commands. Any part of the app registers a source; the palette reads them all
    when it opens, so a source always reflects current state. */
@@ -55,9 +55,9 @@ export function allCommands(map: ReadonlyMap<string, Source> = sources.state): C
 export function visibleFor(commands: readonly Command[], query: string): Command[] {
   const q = query.trim().toLowerCase();
   return commands.filter(
-    (c) => !c.hidden || (q !== "" && (c.keywords ?? []).some((k) => k.toLowerCase() === q)),
+    (c) => !c.hidden || (q !== '' && (c.keywords ?? []).some((k) => k.toLowerCase() === q)),
   );
 }
 
 /** The text a query is matched against: the title and every keyword. */
-export const searchText = (c: Command): string => [c.title, ...(c.keywords ?? [])].join(" ");
+export const searchText = (c: Command): string => [c.title, ...(c.keywords ?? [])].join(' ');

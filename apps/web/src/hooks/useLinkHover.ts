@@ -1,7 +1,7 @@
-import { hover } from "motion";
-import { useCallback } from "react";
-import { canAnimate, hoverIcon, hoverUnderline } from "../components/motion/presets.ts";
-import { useReduceMotion } from "./useReduceMotion.ts";
+import { hover } from 'motion';
+import { useCallback } from 'react';
+import { canAnimate, hoverIcon, hoverUnderline } from '../components/motion/presets.ts';
+import { useReduceMotion } from './useReduceMotion.ts';
 
 const styles = { icon: hoverIcon, underline: hoverUnderline };
 

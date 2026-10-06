@@ -1,6 +1,6 @@
-import { useState } from "react";
-import type { NewEntry } from "../data/ops.ts";
-import { type EntryKind, slugify } from "./paths.ts";
+import { useState } from 'react';
+import type { NewEntry } from '../data/ops.ts';
+import { type EntryKind, slugify } from './paths.ts';
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -8,7 +8,7 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
     create, or null while the form is incomplete. */
 export function useNewEntryForm(initialKind: EntryKind) {
   const [kind, setKind] = useState<EntryKind>(initialKind);
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState('');
   const [typedSlug, setTypedSlug] = useState<string | null>(null);
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const slug = typedSlug ?? slugify(title);

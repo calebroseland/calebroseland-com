@@ -1,18 +1,18 @@
-import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
+import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import {
   draggable,
   dropTargetForElements,
   monitorForElements,
-} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { preserveOffsetOnSource } from "@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source";
-import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
+} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
+import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import {
   attachClosestEdge,
   extractClosestEdge,
-} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { useEffect, useRef, useState } from "react";
-import styles from "./DropIndicator.module.css";
-import { dropIndex, type Edge, reorder } from "./reorder.ts";
+} from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { useEffect, useRef, useState } from 'react';
+import styles from './DropIndicator.module.css';
+import { dropIndex, type Edge, reorder } from './reorder.ts';
 
 /* Pointer drag-and-drop for lists. Pragmatic DnD owns the drag; the caller re-renders with the new
    order after drop (Motion `layout` on the *other* items is fine, never on the dragged one). Keyboard
@@ -20,12 +20,12 @@ import { dropIndex, type Edge, reorder } from "./reorder.ts";
    lists that share a `kind` trade items (links between groups), other drags never cross. */
 
 type Item = { id: string };
-const SYMBOL = Symbol("crc-list-item");
+const SYMBOL = Symbol('crc-list-item');
 type DragData = { [SYMBOL]: true; id: string; index: number; listId: string; kind: string };
-type ListData = { [SYMBOL]: "list"; listId: string; kind: string; length: number };
+type ListData = { [SYMBOL]: 'list'; listId: string; kind: string; length: number };
 const isDragData = (d: Record<string | symbol, unknown>): d is DragData => d[SYMBOL] === true;
-const isListData = (d: Record<string | symbol, unknown>): d is ListData => d[SYMBOL] === "list";
-const DEFAULT_LIST = "list";
+const isListData = (d: Record<string | symbol, unknown>): d is ListData => d[SYMBOL] === 'list';
+const DEFAULT_LIST = 'list';
 
 /** A place in a list: where a drag started, or the index it ends at once moved. */
 export type Slot = { listId: string; index: number };
@@ -33,13 +33,13 @@ export type ListOptions = { listId?: string };
 export type ItemOptions = ListOptions & {
   kind?: string;
   /** Which edges a drop can land on: a column, a row, or a wrapping grid (all four). */
-  axis?: "vertical" | "horizontal" | "grid";
+  axis?: 'vertical' | 'horizontal' | 'grid';
 };
 
-const EDGES: Record<NonNullable<ItemOptions["axis"]>, Edge[]> = {
-  vertical: ["top", "bottom"],
-  horizontal: ["left", "right"],
-  grid: ["top", "bottom", "left", "right"],
+const EDGES: Record<NonNullable<ItemOptions['axis']>, Edge[]> = {
+  vertical: ['top', 'bottom'],
+  horizontal: ['left', 'right'],
+  grid: ['top', 'bottom', 'left', 'right'],
 };
 
 /** Calls `onMove` for every drop of a `kind` item; `to.index` is where the item ends up. */
@@ -64,7 +64,7 @@ export function useDragMoves(kind: string, onMove: (from: Slot, to: Slot) => voi
           const edge = extractClosestEdge(target.data) as Edge | null;
           if (!edge) return;
           const { listId, index } = target.data;
-          const after = edge === "bottom" || edge === "right";
+          const after = edge === 'bottom' || edge === 'right';
           const to = same(listId) ? dropIndex(from.index, index, edge) : index + (after ? 1 : 0);
           if (!same(listId) || to !== from.index) onMoveRef.current(from, { listId, index: to });
         },
@@ -92,7 +92,7 @@ export function useListReorder<T extends Item>(
 export function useItemRegistration(
   id: string,
   index: number,
-  { listId = DEFAULT_LIST, kind = listId, axis = "vertical" }: ItemOptions = {},
+  { listId = DEFAULT_LIST, kind = listId, axis = 'vertical' }: ItemOptions = {},
 ) {
   const ref = useRef<HTMLElement | null>(null);
   const handleRef = useRef<HTMLElement | null>(null);
@@ -118,8 +118,8 @@ export function useItemRegistration(
             nativeSetDragImage,
             getOffset: preserveOffsetOnSource({ element: el, input: location.current.input }),
             render: ({ container }) => {
-              const frame = document.createElement("div");
-              frame.className = styles.preview ?? "";
+              const frame = document.createElement('div');
+              frame.className = styles.preview ?? '';
               frame.style.inlineSize = `${el.getBoundingClientRect().width}px`;
               frame.append(el.cloneNode(true));
               container.append(frame);
@@ -161,7 +161,7 @@ export function useListTarget({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const data: ListData = { [SYMBOL]: "list", listId, kind, length };
+    const data: ListData = { [SYMBOL]: 'list', listId, kind, length };
     return dropTargetForElements({
       element: el,
       canDrop: ({ source }) => isDragData(source.data) && source.data.kind === kind,

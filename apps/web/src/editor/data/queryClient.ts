@@ -1,8 +1,8 @@
-import { AuthError } from "@crc/github-client";
-import { MutationCache, QueryCache, QueryClient, type QueryKey } from "@tanstack/react-query";
-import { type Session, session } from "../auth/store.ts";
+import { AuthError } from '@crc/github-client';
+import { MutationCache, QueryCache, QueryClient, type QueryKey } from '@tanstack/react-query';
+import { type Session, session } from '../auth/store.ts';
 
-declare module "@tanstack/react-query" {
+declare module '@tanstack/react-query' {
   interface Register {
     mutationMeta: {
       /** Queries a successful write makes stale; refreshed before the mutation's own onSuccess runs. */
@@ -23,7 +23,7 @@ const endSessionOnAuthError = (err: unknown) => {
 };
 
 const identity = (s: Session) =>
-  s.status === "authenticated" ? `${s.backend}:${s.token}` : "anonymous";
+  s.status === 'authenticated' ? `${s.backend}:${s.token}` : 'anonymous';
 
 export function editorQueryClient(): QueryClient {
   if (client) return client;

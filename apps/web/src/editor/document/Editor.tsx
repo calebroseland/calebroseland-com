@@ -1,12 +1,12 @@
-import Image, { type ImageOptions } from "@tiptap/extension-image";
-import Placeholder from "@tiptap/extension-placeholder";
-import { Markdown } from "@tiptap/markdown";
-import { EditorContent, type Editor as TipTap, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { type RefObject, useEffect, useRef } from "react";
-import { useLatest } from "../../hooks/useLatest.ts";
-import styles from "./Editor.module.css";
-import { Toolbar } from "./Toolbar.tsx";
+import Image, { type ImageOptions } from '@tiptap/extension-image';
+import Placeholder from '@tiptap/extension-placeholder';
+import { Markdown } from '@tiptap/markdown';
+import { EditorContent, type Editor as TipTap, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import { type RefObject, useEffect, useRef } from 'react';
+import { useLatest } from '../../hooks/useLatest.ts';
+import styles from './Editor.module.css';
+import { Toolbar } from './Toolbar.tsx';
 
 /* TipTap owns the document and its own drag handles. Storage is markdown, produced by @tiptap/markdown;
    the allowed node set is what GitHub renders (spec §5.6). Images are inserted by the caller after resize. */
@@ -58,8 +58,8 @@ function useMarkdownEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
-        codeBlock: { HTMLAttributes: { class: "code" } },
-        link: { openOnClick: false, autolink: true, defaultProtocol: "https" },
+        codeBlock: { HTMLAttributes: { class: 'code' } },
+        link: { openOnClick: false, autolink: true, defaultProtocol: 'https' },
       }),
       Markdown,
       PreviewImage.configure({
@@ -67,20 +67,20 @@ function useMarkdownEditor({
         allowBase64: true,
         previewSrc: (src) => previewSrcRef.current?.(src) ?? src,
       }),
-      Placeholder.configure({ placeholder: "Write. Type / for commands, paste or drop an image." }),
+      Placeholder.configure({ placeholder: 'Write. Type / for commands, paste or drop an image.' }),
     ],
     content: initialMarkdown,
-    contentType: "markdown",
+    contentType: 'markdown',
     editorProps: {
       attributes: {
         class: `prose ${styles.content}`,
-        "aria-label": "Post body",
-        role: "textbox",
-        "aria-multiline": "true",
+        'aria-label': 'Post body',
+        role: 'textbox',
+        'aria-multiline': 'true',
       },
       handlePaste: (_view, event) => {
         const files = [...(event.clipboardData?.files ?? [])].filter((f) =>
-          f.type.startsWith("image/"),
+          f.type.startsWith('image/'),
         );
         if (files.length === 0) return false;
         event.preventDefault();
@@ -89,7 +89,7 @@ function useMarkdownEditor({
       },
       handleDrop: (_view, event) => {
         const files = [...(event.dataTransfer?.files ?? [])].filter((f) =>
-          f.type.startsWith("image/"),
+          f.type.startsWith('image/'),
         );
         if (files.length === 0) return false;
         event.preventDefault();
@@ -117,9 +117,9 @@ const PreviewImage = Image.extend<ImageOptions & { previewSrc: (src: string) => 
       ...this.parent?.(),
       src: {
         default: null,
-        parseHTML: (el) => el.getAttribute("data-src") ?? el.getAttribute("src"),
+        parseHTML: (el) => el.getAttribute('data-src') ?? el.getAttribute('src'),
         renderHTML: (attrs) =>
-          attrs.src ? { src: previewSrc(attrs.src as string), "data-src": attrs.src } : {},
+          attrs.src ? { src: previewSrc(attrs.src as string), 'data-src': attrs.src } : {},
       },
     };
   },
@@ -135,7 +135,7 @@ function useApiBinding(editor: TipTap | null, apiRef: RefObject<EditorApi | null
         const { tr } = editor.state;
         let changed = false;
         editor.state.doc.descendants((node, pos) => {
-          if (node.type.name === "image" && node.attrs.src === src) {
+          if (node.type.name === 'image' && node.attrs.src === src) {
             tr.setNodeMarkup(pos, undefined, { ...node.attrs, alt });
             changed = true;
           }

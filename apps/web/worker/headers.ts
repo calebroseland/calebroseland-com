@@ -12,15 +12,15 @@ const csp = [
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-].join("; ");
+].join('; ');
 
 export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
-  "x-content-type-options": "nosniff",
-  "referrer-policy": "strict-origin-when-cross-origin",
-  "permissions-policy": "camera=(), microphone=(), geolocation=()",
-  "strict-transport-security": "max-age=31536000; includeSubDomains",
+  'x-content-type-options': 'nosniff',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': 'camera=(), microphone=(), geolocation=()',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
   // Report-only until Phase 6 confirms zero violations across a week (spec §13).
-  "content-security-policy-report-only": csp,
+  'content-security-policy-report-only': csp,
 };
 
 export function securityHeaders(res: Response): Response {
@@ -33,5 +33,5 @@ export function securityHeaders(res: Response): Response {
 /** The same headers in Cloudflare's static-assets `_headers` format, for every path. */
 export function headersFile(): string {
   const lines = Object.entries(SECURITY_HEADERS).map(([name, value]) => `  ${name}: ${value}`);
-  return `/*\n${lines.join("\n")}\n`;
+  return `/*\n${lines.join('\n')}\n`;
 }

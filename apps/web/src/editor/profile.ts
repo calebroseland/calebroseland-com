@@ -1,14 +1,14 @@
-import { type Profile, profile as profileSchema } from "@crc/content-schema";
-import type { GitHubClient } from "@crc/github-client";
-import { Document, isMap, isScalar, isSeq, parseDocument, visit } from "yaml";
-import { capabilitiesOf } from "./data/backend.ts";
+import { type Profile, profile as profileSchema } from '@crc/content-schema';
+import type { GitHubClient } from '@crc/github-client';
+import { Document, isMap, isScalar, isSeq, parseDocument, visit } from 'yaml';
+import { capabilitiesOf } from './data/backend.ts';
 
 /* One path for reading and writing content/profile.yaml, used by the landing card's in-place editor.
    On GitHub (and the fake) edits accumulate on a drafts/profile branch that is
    published like any draft; in working-tree mode they are the file on disk. */
 
-export const PROFILE_REF = "drafts/profile";
-const PROFILE_PATH = "content/profile.yaml";
+export const PROFILE_REF = 'drafts/profile';
+const PROFILE_PATH = 'content/profile.yaml';
 
 export type ProfileSource = {
   profile: Profile;
@@ -29,13 +29,13 @@ export async function loadProfile(gh: GitHubClient, fallback: Profile): Promise<
   const draft = branches
     ? ((await gh.listDrafts()).find((d) => d.ref === PROFILE_REF) ?? null)
     : null;
-  const bundle = await gh.readBundle(draft?.ref ?? gh.defaultBranch, "content");
+  const bundle = await gh.readBundle(draft?.ref ?? gh.defaultBranch, 'content');
   const file = bundle.files.find((f) => f.path === PROFILE_PATH);
   return {
     profile: file ? profileSchema.parse(parseDocument(file.content).toJS()) : fallback,
-    yaml: file?.content ?? "",
+    yaml: file?.content ?? '',
     ref: branches ? PROFILE_REF : bundle.ref,
-    headSha: !branches || draft ? bundle.headSha : "",
+    headSha: !branches || draft ? bundle.headSha : '',
     branchExists: !branches || draft !== null,
   };
 }
@@ -56,10 +56,10 @@ export function serializeProfile(sourceYaml: string, next: Profile): string {
     Pair(_key, pair) {
       // Keys set on a fresh document are plain strings; parsed ones are scalar nodes.
       const key = String(isScalar(pair.key) ? pair.key.value : pair.key);
-      if (key === "tags" && isSeq(pair.value)) pair.value.flow = true;
-      if (key === "links" && isSeq(pair.value))
+      if (key === 'tags' && isSeq(pair.value)) pair.value.flow = true;
+      if (key === 'links' && isSeq(pair.value))
         for (const item of pair.value.items) if (isMap(item)) item.flow = true;
-      if (key === "location" && isMap(pair.value)) pair.value.flow = true;
+      if (key === 'location' && isMap(pair.value)) pair.value.flow = true;
     },
   });
   return doc.toString({ lineWidth: 0 });
@@ -76,15 +76,15 @@ export async function saveProfile(
   const valid = profileSchema.parse(next);
   let { ref, headSha } = source;
   if (!source.branchExists) {
-    const draft = await gh.createDraft("profile");
+    const draft = await gh.createDraft('profile');
     ref = draft.ref;
     headSha = draft.headSha;
   }
   const yaml = serializeProfile(source.yaml, valid);
   const saved = await gh.saveBundle({
     ref,
-    dir: "content",
-    files: [{ path: "profile.yaml", content: yaml }],
+    dir: 'content',
+    files: [{ path: 'profile.yaml', content: yaml }],
     message,
     expectedHeadSha: headSha,
   });

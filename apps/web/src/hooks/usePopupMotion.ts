@@ -1,19 +1,19 @@
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import {
   canAnimate,
   enterPopup,
   leavePopup,
   type PopupKind,
   resetPopup,
-} from "../components/motion/presets.ts";
-import { useReduceMotion } from "./useReduceMotion.ts";
+} from '../components/motion/presets.ts';
+import { useReduceMotion } from './useReduceMotion.ts';
 
 type Running = ReturnType<typeof enterPopup>;
 type Start = (el: HTMLElement, kind: PopupKind) => Running;
 
 // Kept-mounted popups (a Select's) sit in the DOM hidden while closed, and animating those throws.
 const rendered = (el: HTMLElement) =>
-  typeof el.checkVisibility === "function" ? el.checkVisibility() : el.getClientRects().length > 0;
+  typeof el.checkVisibility === 'function' ? el.checkVisibility() : el.getClientRects().length > 0;
 
 /** Springs a Base UI popup in when it mounts or reopens, and out when it closes. Pass `open` for a popup
     that also closes from outside its root's onOpenChange (a shortcut, a store), and skip onOpenChange. */
@@ -30,7 +30,7 @@ export function usePopupMotion(kind: PopupKind, open?: boolean) {
       cancelAnimationFrame(retrying.current);
       const el = node.current;
       // Moving along a tooltip group swaps at once; menus wear data-instant too, so only tips skip.
-      const instant = kind === "tip" && el?.hasAttribute("data-instant");
+      const instant = kind === 'tip' && el?.hasAttribute('data-instant');
       if (!el || reduce || !canAnimate || instant) return;
       if (!rendered(el)) {
         if (start !== enterPopup) return;
@@ -77,7 +77,7 @@ export function usePopupMotion(kind: PopupKind, open?: boolean) {
     onOpenChange: (open: boolean, details?: { reason?: string }) => {
       // A tip closed because a sibling in its group opened (reason "none") swaps out at once; Base UI
       // marks it data-instant only after this call.
-      if (!open && kind === "tip" && details?.reason === "none") {
+      if (!open && kind === 'tip' && details?.reason === 'none') {
         for (const a of running.current) a.cancel();
         running.current = [];
         return;

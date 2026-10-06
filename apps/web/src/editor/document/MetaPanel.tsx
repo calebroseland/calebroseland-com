@@ -1,8 +1,8 @@
-import { entry } from "@crc/content-schema";
-import { Stack } from "@crc/ui";
-import { useForm } from "@tanstack/react-form";
-import type { Buffer, BufferController } from "../drafts/buffer.ts";
-import styles from "../editor.module.css";
+import { entry } from '@crc/content-schema';
+import { Stack } from '@crc/ui';
+import { useForm } from '@tanstack/react-form';
+import type { Buffer, BufferController } from '../drafts/buffer.ts';
+import styles from '../editor.module.css';
 
 /* Frontmatter form. Slug is fixed after the first save (directory names are immutable). Validation is
    the same Zod schema the build uses, so what the editor accepts is what the site will publish. */
@@ -18,7 +18,7 @@ export function MetaPanel({
 }) {
   const form = useMetaForm(buffer, controller);
 
-  const isPost = buffer.meta.kind === "post";
+  const isPost = buffer.meta.kind === 'post';
 
   const check = (values: Values): string | undefined => {
     const r = entry.safeParse({
@@ -26,7 +26,7 @@ export function MetaPanel({
       slug: buffer.meta.slug,
       ...values,
       tags: values.tags
-        .split(",")
+        .split(',')
         .map((t) => t.trim())
         .filter(Boolean),
       summary: values.summary || undefined,
@@ -37,7 +37,7 @@ export function MetaPanel({
   return (
     <form
       className={styles.panel}
-      aria-label={`${isPost ? "Post" : "Page"} details`}
+      aria-label={`${isPost ? 'Post' : 'Page'} details`}
       onSubmit={(e) => {
         e.preventDefault();
       }}
@@ -49,7 +49,7 @@ export function MetaPanel({
             onBlur: ({ value, fieldApi }) =>
               value.trim()
                 ? check({ ...fieldApi.form.state.values, title: value })
-                : "Title is required",
+                : 'Title is required',
           }}
         >
           {(f) => (
@@ -80,7 +80,7 @@ export function MetaPanel({
               name="date"
               validators={{
                 onBlur: ({ value }) =>
-                  Number.isNaN(Date.parse(value)) ? "Enter a valid date" : undefined,
+                  Number.isNaN(Date.parse(value)) ? 'Enter a valid date' : undefined,
               }}
             >
               {(f) => (
@@ -156,9 +156,9 @@ function Field({
   children: React.ReactNode;
 }) {
   const message =
-    typeof error === "string"
+    typeof error === 'string'
       ? error
-      : error && typeof error === "object" && "message" in error
+      : error && typeof error === 'object' && 'message' in error
         ? String((error as { message: unknown }).message)
         : undefined;
   return (
@@ -181,15 +181,15 @@ function useMetaForm(buffer: Buffer, controller: BufferController) {
     defaultValues: {
       title: buffer.meta.title,
       date: buffer.meta.date,
-      tags: buffer.meta.tags.join(", "),
-      summary: buffer.meta.summary ?? "",
+      tags: buffer.meta.tags.join(', '),
+      summary: buffer.meta.summary ?? '',
       draft: buffer.meta.draft,
     } satisfies Values,
     listeners: {
       onChange: ({ formApi }) => {
         const v = formApi.state.values;
         const tags = v.tags
-          .split(",")
+          .split(',')
           .map((t) => t.trim())
           .filter(Boolean);
         controller.setMeta({

@@ -1,22 +1,22 @@
-import type { Entry } from "@crc/content-schema";
-import type { Draft, FileInput, GitHubClient } from "@crc/github-client";
-import { serializeEntry } from "@crc/markdown";
-import type { Buffer } from "../drafts/buffer.ts";
-import { bundleDirFor, type EntryKind } from "../drafts/paths.ts";
-import { deleteLocalEntry } from "../github/local.ts";
-import { capabilitiesOf } from "./backend.ts";
+import type { Entry } from '@crc/content-schema';
+import type { Draft, FileInput, GitHubClient } from '@crc/github-client';
+import { serializeEntry } from '@crc/markdown';
+import type { Buffer } from '../drafts/buffer.ts';
+import { bundleDirFor, type EntryKind } from '../drafts/paths.ts';
+import { deleteLocalEntry } from '../github/local.ts';
+import { capabilitiesOf } from './backend.ts';
 
 /* The editor's writes, as plain async functions of a client. Caching is not their concern: the
    mutation options in mutations.ts say what each write makes stale. */
 
 /** meta mirrors an Entry with the date as a string; the kind discriminant is carried through. */
-function toFrontmatter(meta: Buffer["meta"]): Entry {
+function toFrontmatter(meta: Buffer['meta']): Entry {
   return { ...meta, date: new Date(meta.date) } as Entry;
 }
 
 function bundleFiles(b: Buffer): FileInput[] {
   const index: FileInput = {
-    path: "index.md",
+    path: 'index.md',
     content: serializeEntry({ meta: toFrontmatter(b.meta), body: b.markdown }),
   };
   // The file itself is handed over: the working-tree backend streams it to disk, and the GitHub
@@ -44,7 +44,7 @@ export async function createEntryDraft(
   const { headSha } = await gh.saveBundle({
     ref: draft.ref,
     dir,
-    files: [{ path: "index.md", content: serializeEntry({ meta, body: "" }) }],
+    files: [{ path: 'index.md', content: serializeEntry({ meta, body: '' }) }],
     message: `${input.kind}: start "${input.title}"`,
     expectedHeadSha: draft.headSha,
   });

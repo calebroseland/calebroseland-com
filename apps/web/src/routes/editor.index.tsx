@@ -1,36 +1,36 @@
-import { Stack } from "@crc/ui";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import * as z from "zod/mini";
-import { ConfirmDialog } from "../editor/Dialogs.tsx";
+import { Stack } from '@crc/ui';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import * as z from 'zod/mini';
+import { ConfirmDialog } from '../editor/Dialogs.tsx';
 import {
   useBeginEditing,
   useBoard,
   useDiscardEntry,
   useViewerLogin,
-} from "../editor/data/hooks.ts";
-import type { EntryKind } from "../editor/drafts/paths.ts";
-import { RowMenu, RowMenuItem } from "../editor/drafts/RowMenu.tsx";
-import { useCapabilities } from "../editor/EditorProvider.tsx";
-import { EditorShell } from "../editor/EditorShell.tsx";
-import styles from "../editor/editor.module.css";
-import type { EditorEntry } from "../editor/entries.ts";
-import { useOpenInEditor } from "../editor/navigation.ts";
-import { notify } from "../editor/Toast.tsx";
-import { useDialogState } from "../hooks/useDialogState.ts";
+} from '../editor/data/hooks.ts';
+import type { EntryKind } from '../editor/drafts/paths.ts';
+import { RowMenu, RowMenuItem } from '../editor/drafts/RowMenu.tsx';
+import { useCapabilities } from '../editor/EditorProvider.tsx';
+import { EditorShell } from '../editor/EditorShell.tsx';
+import styles from '../editor/editor.module.css';
+import type { EditorEntry } from '../editor/entries.ts';
+import { useOpenInEditor } from '../editor/navigation.ts';
+import { notify } from '../editor/Toast.tsx';
+import { useDialogState } from '../hooks/useDialogState.ts';
 
-export const Route = createFileRoute("/editor/")({
-  validateSearch: z.object({ kind: z.optional(z.enum(["post", "page"])) }),
-  head: () => ({ meta: [{ title: "Editor" }] }),
+export const Route = createFileRoute('/editor/')({
+  validateSearch: z.object({ kind: z.optional(z.enum(['post', 'page'])) }),
+  head: () => ({ meta: [{ title: 'Editor' }] }),
   component: Board,
 });
 
 const FILTERS = [
-  { label: "All", kind: undefined },
-  { label: "Posts", kind: "post" },
-  { label: "Pages", kind: "page" },
+  { label: 'All', kind: undefined },
+  { label: 'Posts', kind: 'post' },
+  { label: 'Pages', kind: 'page' },
 ] as const;
 
-const NEW_LABEL = { post: "New post", page: "New page" } as const;
+const NEW_LABEL = { post: 'New post', page: 'New page' } as const;
 
 /** The kind the board is narrowed to, kept in the URL so a view can be linked to. */
 function useKindFilter(): EntryKind | undefined {
@@ -54,31 +54,31 @@ function Board() {
   const runDiscard = async (row: Discarding) => {
     const outcome = await discard.run(row);
     if (outcome.ok)
-      notify(local ? "Deleted from your working tree" : "Discarded the draft branch", {
-        kind: "success",
+      notify(local ? 'Deleted from your working tree' : 'Discarded the draft branch', {
+        kind: 'success',
       });
-    else notify("Couldn't discard that.", { kind: "error" });
+    else notify("Couldn't discard that.", { kind: 'error' });
   };
 
   const startEditing = async (slug: string) => {
     const outcome = await edit.run(slug);
     if (outcome.ok) await openInEditor(slug);
-    else notify("Couldn't start editing that entry.", { kind: "error" });
+    else notify("Couldn't start editing that entry.", { kind: 'error' });
   };
 
-  const ready = board.status === "ready" ? board : null;
+  const ready = board.status === 'ready' ? board : null;
   const target = discarding.subject;
 
   return (
     <EditorShell
       actions={
         <Link to="/editor/new" search={kind ? { kind } : {}} className={styles.primary}>
-          {kind ? NEW_LABEL[kind] : "New entry"}
+          {kind ? NEW_LABEL[kind] : 'New entry'}
         </Link>
       }
     >
       <p className={styles.muted}>
-        Signed in as {login ?? "…"} · {caps.label}
+        Signed in as {login ?? '…'} · {caps.label}
       </p>
       {/* Posts and pages share one board; the filter lives in the URL so a view can be linked to. */}
       <nav className={`${styles.tabs} ${styles.filters}`} aria-label="Show">
@@ -91,15 +91,15 @@ function Board() {
             className={styles.tab}
           >
             {f.label}
-            {ready && <span className={styles.tabCount}> {ready.counts[f.kind ?? "all"]}</span>}
+            {ready && <span className={styles.tabCount}> {ready.counts[f.kind ?? 'all']}</span>}
           </Link>
         ))}
       </nav>
-      <div className={styles.board} aria-busy={board.status === "loading"}>
-        {board.status === "loading" && <p className={styles.muted}>Loading…</p>}
-        {board.status === "error" && (
+      <div className={styles.board} aria-busy={board.status === 'loading'}>
+        {board.status === 'loading' && <p className={styles.muted}>Loading…</p>}
+        {board.status === 'error' && (
           <p role="alert" className={styles.alert}>
-            Couldn't load entries from GitHub.{" "}
+            Couldn't load entries from GitHub.{' '}
             <button type="button" className={styles.toastAction} onClick={board.retry}>
               Retry
             </button>
@@ -107,11 +107,11 @@ function Board() {
         )}
         {ready && ready.inProgress.length + ready.live.length === 0 && (
           <p className={styles.muted}>
-            {kind === "page"
-              ? "No pages yet."
-              : kind === "post"
-                ? "No posts yet."
-                : "Nothing here yet."}
+            {kind === 'page'
+              ? 'No pages yet.'
+              : kind === 'post'
+                ? 'No posts yet.'
+                : 'Nothing here yet.'}
           </p>
         )}
 
@@ -178,7 +178,7 @@ function Board() {
                 discarding.close();
               }}
             >
-              {local ? "Delete" : "Discard"}
+              {local ? 'Delete' : 'Discard'}
             </button>
           </>
         }
@@ -200,11 +200,11 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
 
 function describe(entry: EditorEntry): string {
   switch (entry.status) {
-    case "pull-request":
+    case 'pull-request':
       return `Pull request #${entry.pr?.number}`;
-    case "draft":
+    case 'draft':
       return entry.ref;
-    case "working-tree":
+    case 'working-tree':
       return entry.dir;
     default:
       return entry.draft ? `${entry.dir} · marked draft` : entry.dir;
@@ -241,7 +241,7 @@ function Row({
           disabled={busy}
           aria-busy={busy}
         >
-          {busy ? "Starting…" : action}
+          {busy ? 'Starting…' : action}
         </button>
       ) : (
         <Link to="/editor/$slug" params={{ slug: entry.slug }} className={styles.secondary}>
@@ -251,7 +251,7 @@ function Row({
       {onDiscard && (
         <RowMenu label={`Actions for ${entry.slug}`}>
           <RowMenuItem onClick={onDiscard} danger>
-            {entry.status === "working-tree" ? "Delete entry" : "Discard draft"}
+            {entry.status === 'working-tree' ? 'Delete entry' : 'Discard draft'}
           </RowMenuItem>
         </RowMenu>
       )}

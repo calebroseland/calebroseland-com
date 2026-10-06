@@ -1,6 +1,6 @@
-export { fromBase64, toBase64 } from "./base64.ts";
-export { createFakeClient, type FakeState, type FakeStorage, initialFakeState } from "./fake.ts";
-export { createOctokitClient } from "./octokit.ts";
+export { fromBase64, toBase64 } from './base64.ts';
+export { createFakeClient, type FakeState, type FakeStorage, initialFakeState } from './fake.ts';
+export { createOctokitClient } from './octokit.ts';
 export {
   AuthError,
   type Bundle,
@@ -16,4 +16,4 @@ export {
   slugFromRef,
   toBytes,
   type Viewer,
-} from "./types.ts";
+} from './types.ts';

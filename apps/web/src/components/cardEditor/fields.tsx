@@ -1,9 +1,9 @@
-import { Select } from "@base-ui/react/select";
-import { Icon } from "@crc/ui";
-import { type KeyboardEvent, type ReactNode, type RefObject, useId } from "react";
-import { usePopupMotion } from "../../hooks/usePopupMotion.ts";
-import styles from "./CardEditor.module.css";
-import { ICON_CHOICES } from "./model.ts";
+import { Select } from '@base-ui/react/select';
+import { Icon } from '@crc/ui';
+import { type KeyboardEvent, type ReactNode, type RefObject, useId } from 'react';
+import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
+import styles from './CardEditor.module.css';
+import { ICON_CHOICES } from './model.ts';
 
 /** A labelled field in a popover or on the contact side. */
 export function TextField({
@@ -12,7 +12,7 @@ export function TextField({
   error,
   onChange,
   className,
-  type = "text",
+  type = 'text',
   visibleLabel = false,
 }: {
   label: string;
@@ -20,20 +20,20 @@ export function TextField({
   error: string | undefined;
   onChange: (v: string) => void;
   className?: string | undefined;
-  type?: "text" | "url";
+  type?: 'text' | 'url';
   visibleLabel?: boolean;
 }) {
   const id = useId();
   return (
     <div className={styles.field}>
-      <label htmlFor={id} className={visibleLabel ? styles.label : "visually-hidden"}>
+      <label htmlFor={id} className={visibleLabel ? styles.label : 'visually-hidden'}>
         {label}
       </label>
       <input
         id={id}
         type="text"
-        inputMode={type === "url" ? "url" : undefined}
-        className={[styles.input, className].filter(Boolean).join(" ")}
+        inputMode={type === 'url' ? 'url' : undefined}
+        className={[styles.input, className].filter(Boolean).join(' ')}
         value={value}
         placeholder={label}
         aria-invalid={error ? true : undefined}
@@ -74,7 +74,7 @@ export function InlineText({
 }) {
   const id = useId();
   return (
-    <span className={[styles.inlineField, className].filter(Boolean).join(" ")}>
+    <span className={[styles.inlineField, className].filter(Boolean).join(' ')}>
       <label htmlFor={id} className="visually-hidden">
         {label}
       </label>
@@ -114,26 +114,26 @@ export function Handle({
 }: {
   label: string;
   focusKey: string;
-  axis: "vertical" | "horizontal" | "grid";
+  axis: 'vertical' | 'horizontal' | 'grid';
   onMove: (delta: -1 | 1) => void;
   handleRef: RefObject<HTMLElement | null>;
   className?: string;
   children: ReactNode;
 }) {
   const keys = {
-    vertical: { back: ["ArrowUp"], forward: ["ArrowDown"] },
-    horizontal: { back: ["ArrowLeft"], forward: ["ArrowRight"] },
-    grid: { back: ["ArrowUp", "ArrowLeft"], forward: ["ArrowDown", "ArrowRight"] },
+    vertical: { back: ['ArrowUp'], forward: ['ArrowDown'] },
+    horizontal: { back: ['ArrowLeft'], forward: ['ArrowRight'] },
+    grid: { back: ['ArrowUp', 'ArrowLeft'], forward: ['ArrowDown', 'ArrowRight'] },
   }[axis];
   return (
     <button
       type="button"
       ref={handleRef as RefObject<HTMLButtonElement>}
-      className={[styles.handle, className].filter(Boolean).join(" ")}
+      className={[styles.handle, className].filter(Boolean).join(' ')}
       data-focus-key={focusKey}
       aria-label={label}
       aria-roledescription="reorderable"
-      aria-keyshortcuts={[...keys.back, ...keys.forward].join(" ")}
+      aria-keyshortcuts={[...keys.back, ...keys.forward].join(' ')}
       onKeyDown={(e: KeyboardEvent) => {
         const back = keys.back.includes(e.key);
         if (!back && !keys.forward.includes(e.key)) return;
@@ -146,31 +146,31 @@ export function Handle({
   );
 }
 
-const NO_ICON = "none";
+const NO_ICON = 'none';
 
 export function IconSelect({
   value,
   label,
   allowNone = false,
-  size = "md",
+  size = 'md',
   className = styles.iconTrigger,
   onChange,
 }: {
   value: string | null;
   label: string;
   allowNone?: boolean;
-  size?: "md" | "xl";
+  size?: 'md' | 'xl';
   /** The trigger's look: a bordered button, or the icon as it sits on the card. */
   className?: string | undefined;
   onChange: (icon: string | null) => void;
 }) {
   const known = value === null || ICON_CHOICES.some((c) => c.value === value);
   const choices = [
-    ...(allowNone ? [{ value: NO_ICON, label: "No icon" }] : []),
+    ...(allowNone ? [{ value: NO_ICON, label: 'No icon' }] : []),
     ...(known || value === null ? [] : [{ value, label: value }]),
     ...ICON_CHOICES,
   ];
-  const motion = usePopupMotion("dropdown");
+  const motion = usePopupMotion('dropdown');
   return (
     <Select.Root
       onOpenChange={motion.onOpenChange}
