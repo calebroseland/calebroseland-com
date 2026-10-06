@@ -9,6 +9,13 @@ import { notify } from '../Toast.tsx';
 
 /* States follow UX-SPEC §3.5: pre-flight → PR open (checks) → mergeable → merging → deploying → done, plus conflict. */
 
+const mergeLabel = (pending: boolean, stage: string): string => {
+  if (!pending) {
+    return 'Merge and publish';
+  }
+  return stage === 'deploying' ? 'Deploying…' : 'Merging…';
+};
+
 export const PublishDialog = ({ buffer, disabled }: { buffer: Buffer; disabled?: boolean }) => {
   const gh = useGitHub();
   const dialog = useDisclosure();
@@ -126,11 +133,7 @@ export const PublishDialog = ({ buffer, disabled }: { buffer: Buffer; disabled?:
                 disabled={busy || state.mergeable !== true}
                 title={state.mergeable === true ? undefined : 'Waiting for checks'}
               >
-                {merge.pending
-                  ? merge.stage === 'deploying'
-                    ? 'Deploying…'
-                    : 'Merging…'
-                  : 'Merge and publish'}
+                {mergeLabel(merge.pending, merge.stage)}
               </button>
             )}
           </div>

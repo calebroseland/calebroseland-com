@@ -447,6 +447,15 @@ const useEditSession = (signedIn: boolean) => {
   return { editing, setEditing, editSide, setEditSide, opening, setOpening };
 };
 
+/** The control a newly shown front face focuses: Edit after the editor closes, else the flip button
+    once the visitor has turned the card. */
+const faceFocus = (returnToEdit: boolean, turned: boolean): 'edit' | 'flip' | null => {
+  if (returnToEdit) {
+    return 'edit';
+  }
+  return turned ? 'flip' : null;
+};
+
 /** Where focus goes when a face appears. It follows the card only after the visitor has turned it, by
     the buttons or by back and forward; the first paint leaves focus alone. After the editor closes, it
     goes back to the Edit button instead. */
@@ -578,7 +587,7 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
                 onFlip={hasContact(profile) ? flip : null}
                 onEdit={signedIn ? () => void openEditor() : null}
                 opening={opening}
-                focusOnMount={returnToEdit ? 'edit' : turned ? 'flip' : null}
+                focusOnMount={faceFocus(returnToEdit, turned)}
               />
             ),
             back: contact ? (

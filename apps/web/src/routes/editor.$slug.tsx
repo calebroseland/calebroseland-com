@@ -114,6 +114,13 @@ const StartEditing = ({ slug }: { slug: string }) => {
   );
 };
 
+const saveStatus = (saving: boolean, dirty: boolean): string => {
+  if (saving) {
+    return 'Saving…';
+  }
+  return dirty ? 'Unsaved changes' : 'Saved';
+};
+
 const DraftEditor = ({ slug, bundle }: { slug: string; bundle: Bundle }) => {
   const { branches, publishes } = useCapabilities();
   const { panel, show } = usePanel();
@@ -209,7 +216,7 @@ const DraftEditor = ({ slug, bundle }: { slug: string; bundle: Bundle }) => {
       actions={
         <div className={styles.editorBar}>
           <span className={styles.status} data-dirty={buffer.dirty}>
-            {save.pending ? 'Saving…' : buffer.dirty ? 'Unsaved changes' : 'Saved'}
+            {saveStatus(save.pending, buffer.dirty)}
           </span>
           <button
             type="button"

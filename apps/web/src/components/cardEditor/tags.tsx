@@ -22,6 +22,14 @@ const useTagDraft = () => {
   return { draft, setDraft, problem, setProblem, inputId };
 };
 
+/** A tag without an icon can only show its label; one gaining an icon shows both until told otherwise. */
+const showWithIcon = (icon: string | null, show: EditTag['show']): EditTag['show'] => {
+  if (!icon) {
+    return 'label';
+  }
+  return show === 'label' ? 'both' : show;
+};
+
 export const TagEditor = ({
   tags,
   errors,
@@ -205,7 +213,7 @@ const TagSettings = ({
                   onChange({
                     ...tag,
                     icon,
-                    show: icon ? (tag.show === 'label' ? 'both' : tag.show) : 'label',
+                    show: showWithIcon(icon, tag.show),
                   })
                 }
               />

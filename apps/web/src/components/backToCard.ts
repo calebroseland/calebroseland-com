@@ -23,11 +23,14 @@ export const useSiteGo = () => {
   const navigate = useNavigate();
   const onCard = useRouterState({ select: (s) => isCard(s.location.pathname) });
   return (href: string): Promise<void> => {
-    const kind = onCard === isCard(href) ? null : onCard ? 'enter' : 'leave';
-    if (!kind) {
+    if (onCard === isCard(href)) {
       return navigate({ href });
     }
-    return withViewTransition(kind, () => navigate({ href, viewTransition: false }), reduce);
+    return withViewTransition(
+      onCard ? 'enter' : 'leave',
+      () => navigate({ href, viewTransition: false }),
+      reduce,
+    );
   };
 };
 

@@ -142,6 +142,17 @@ export const MetaPanel = ({
   );
 };
 
+/** A field error as text: Zod issues arrive as objects, form validators as strings. */
+const messageOf = (error: unknown): string | undefined => {
+  if (typeof error === 'string') {
+    return error;
+  }
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as { message: unknown }).message);
+  }
+  return undefined;
+};
+
 const Field = ({
   label,
   id,
@@ -155,12 +166,7 @@ const Field = ({
   error?: unknown;
   children: React.ReactNode;
 }) => {
-  const message =
-    typeof error === 'string'
-      ? error
-      : error && typeof error === 'object' && 'message' in error
-        ? String((error as { message: unknown }).message)
-        : undefined;
+  const message = messageOf(error);
   return (
     <div className={styles.field}>
       <label htmlFor={id}>{label}</label>

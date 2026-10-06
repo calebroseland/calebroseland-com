@@ -36,7 +36,9 @@
     return;
   }
   adobe(kit && kit.dataset.default === 'on');
-  t = t === 'light' || t === 'dark' ? t : 'auto';
-  root.dataset.theme =
-    t === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : t;
+  // Anything but an explicit choice follows the system.
+  if (t !== 'light' && t !== 'dark') {
+    t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  root.dataset.theme = t;
 })();

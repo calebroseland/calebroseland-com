@@ -76,7 +76,8 @@
           }
         },
         "useExplicitLengthCheck": "error",
-        "noNegationElse": "error"
+        "noNegationElse": "error",
+        "noNestedTernary": "error"
       },
       "nursery": {
         "useConsistentFunctionStyle": {

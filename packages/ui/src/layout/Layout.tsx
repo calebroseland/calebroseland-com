@@ -20,10 +20,14 @@ export const Stack = ({
 }: Common & { gap?: SpaceToken; align?: 'start' | 'center' | 'end' | 'stretch' }) => {
   const style: Vars = { '--gap': space(gap) };
   if (align) {
-    style['--align'] = align === 'start' || align === 'end' ? `flex-${align}` : align;
+    style['--align'] = flexAlign(align);
   }
   return <Tag className={cx(styles.stack, className)} style={style} {...rest} />;
 };
+
+/** `start`/`end` as flex keywords, so they also apply where `start` would mean the writing direction. */
+const flexAlign = (value: string): string =>
+  value === 'start' || value === 'end' ? `flex-${value}` : value;
 
 export const Cluster = ({
   as: Tag = 'div',
@@ -42,12 +46,7 @@ export const Cluster = ({
     style['--align'] = align === 'start' || align === 'end' ? `flex-${align}` : align;
   }
   if (justify) {
-    style['--justify'] =
-      justify === 'between'
-        ? 'space-between'
-        : justify === 'start' || justify === 'end'
-          ? `flex-${justify}`
-          : justify;
+    style['--justify'] = justify === 'between' ? 'space-between' : flexAlign(justify);
   }
   return <Tag className={cx(styles.cluster, className)} style={style} {...rest} />;
 };

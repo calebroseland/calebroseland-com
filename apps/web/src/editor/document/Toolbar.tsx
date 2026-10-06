@@ -122,6 +122,17 @@ const commands: Cmd[] = [
   },
 ];
 
+/** Roving focus: Home and End jump to the ends, the arrows step and wrap. */
+const nextIndex = (key: string, i: number, count: number): number => {
+  if (key === 'Home') {
+    return 0;
+  }
+  if (key === 'End') {
+    return count - 1;
+  }
+  return (i + (key === 'ArrowRight' ? 1 : -1) + count) % count;
+};
+
 /** Which commands are on at the cursor, and the hidden file input the image button opens. */
 const useToolbarState = (editor: Editor) => {
   const fileInput = useRef<HTMLInputElement>(null);
@@ -151,13 +162,7 @@ export const Toolbar = ({
       return;
     }
     e.preventDefault();
-    const next =
-      e.key === 'Home'
-        ? 0
-        : e.key === 'End'
-          ? buttons.length - 1
-          : (i + (e.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length;
-    buttons[next]?.focus();
+    buttons[nextIndex(e.key, i, buttons.length)]?.focus();
   };
   return (
     <div className={styles.toolbar} role="toolbar" aria-label="Formatting" onKeyDown={onKeyDown}>

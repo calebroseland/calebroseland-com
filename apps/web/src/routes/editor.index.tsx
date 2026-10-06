@@ -18,6 +18,8 @@ import { useOpenInEditor } from '../editor/navigation.ts';
 import { notify } from '../editor/Toast.tsx';
 import { useDialogState } from '../hooks/useDialogState.ts';
 
+const EMPTY = { page: 'No pages yet.', post: 'No posts yet.' } as const;
+
 const FILTERS = [
   { label: 'All', kind: undefined },
   { label: 'Posts', kind: 'post' },
@@ -105,13 +107,7 @@ const Board = () => {
           </p>
         )}
         {ready && ready.inProgress.length + ready.live.length === 0 && (
-          <p className={styles.muted}>
-            {kind === 'page'
-              ? 'No pages yet.'
-              : kind === 'post'
-                ? 'No posts yet.'
-                : 'Nothing here yet.'}
-          </p>
+          <p className={styles.muted}>{kind ? EMPTY[kind] : 'Nothing here yet.'}</p>
         )}
 
         {ready && ready.inProgress.length > 0 && (

@@ -62,7 +62,10 @@ const readPreference = (storage: ThemeEnv['storage'], themes: CustomTheme[]): Th
 };
 
 export const resolveTheme = (pref: BuiltInTheme, systemDark: boolean): ResolvedTheme => {
-  return pref === 'auto' ? (systemDark ? 'dark' : 'light') : pref;
+  if (pref !== 'auto') {
+    return pref;
+  }
+  return systemDark ? 'dark' : 'light';
 };
 
 export type ThemeEnv = {

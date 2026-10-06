@@ -30,6 +30,14 @@ const reduceMotion = (): boolean => {
 };
 
 /** The view-transition types for one navigation, or false for none. */
+/** Deeper is forward, shallower is back, the same depth is across. */
+const directionOf = (from: number, to: number): 'forward' | 'back' | 'across' => {
+  if (to === from) {
+    return 'across';
+  }
+  return to > from ? 'forward' : 'back';
+};
+
 export const pageTypes = (declared: PageEffect | undefined, info: ChangeInfo): string[] | false => {
   const from = info.fromLocation;
   if (!from || !info.pathChanged || declared === false || reduceMotion()) {
@@ -37,7 +45,7 @@ export const pageTypes = (declared: PageEffect | undefined, info: ChangeInfo): s
   }
   const a = depth(from.pathname);
   const b = depth(info.toLocation.pathname);
-  const direction = b > a ? 'forward' : b < a ? 'back' : 'across';
+  const direction = directionOf(a, b);
   const effect = declared ?? (direction === 'across' ? 'fade' : 'zoom');
   return ['page', `page-${effect}`, `page-${direction}`];
 };
