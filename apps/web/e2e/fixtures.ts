@@ -11,8 +11,12 @@ export const test = base.extend<{ allowConsoleErrors: boolean }>({
     // nothing handles, like a missing asset or a module that would not load.
     const handled = (url: string | undefined) => Boolean(url && /\/api\/|\/@local\//.test(url));
     page.on('console', (msg) => {
-      if (msg.type() !== 'error') return;
-      if (handled(msg.location()?.url)) return;
+      if (msg.type() !== 'error') {
+        return;
+      }
+      if (handled(msg.location()?.url)) {
+        return;
+      }
       errors.push(msg.text());
     });
     page.on('pageerror', (err) => errors.push(err.message));
@@ -23,16 +27,21 @@ export const test = base.extend<{ allowConsoleErrors: boolean }>({
       // race rather than a fault. A cancelled script or module import still is one.
       const benign =
         /cancel|abort/i.test(reason) && ['fetch', 'xhr', 'document'].includes(req.resourceType());
-      if (!benign) errors.push(`request failed: ${req.url()} (${reason})`);
+      if (!benign) {
+        errors.push(`request failed: ${req.url()} (${reason})`);
+      }
     });
     page.on('response', (res) => {
-      if (res.status() >= 400 && !handled(res.url()))
+      if (res.status() >= 400 && !handled(res.url())) {
         errors.push(`HTTP ${res.status()}: ${res.url()}`);
+      }
     });
     // Every view transition in every test must keep the page covered from start to end.
     await page.addInitScript(probeTransitionCoverage);
     await use(page);
-    if (!allowConsoleErrors) expect(errors, 'unexpected console errors').toEqual([]);
+    if (!allowConsoleErrors) {
+      expect(errors, 'unexpected console errors').toEqual([]);
+    }
     const gaps = await page
       .evaluate(() => (window as unknown as { __vtGaps?: string[] }).__vtGaps ?? [])
       .catch(() => []);

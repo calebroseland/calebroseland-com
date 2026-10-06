@@ -60,7 +60,9 @@ function useFlushOnUnmount(controller: BufferController) {
     debounce would otherwise lose the edit, and the dev server reloads whenever content changes. */
 function useFlushBeforeLeaving(controller: BufferController, dirty: boolean) {
   useEffect(() => {
-    if (!dirty) return;
+    if (!dirty) {
+      return;
+    }
     const guard = (e: BeforeUnloadEvent) => {
       writeLocalBuffer(controller.store.state, browserStorage());
       e.preventDefault();

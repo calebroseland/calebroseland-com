@@ -8,7 +8,9 @@ const defaultRandom: RandomSource = (bytes) => crypto.getRandomValues(bytes);
 export function randomString(length: number, random: RandomSource = defaultRandom): string {
   const bytes = random(new Uint8Array(length));
   let out = '';
-  for (const b of bytes) out += CHARS[b % CHARS.length];
+  for (const b of bytes) {
+    out += CHARS[b % CHARS.length];
+  }
   return out;
 }
 
@@ -18,7 +20,9 @@ export const createState = (random?: RandomSource) => randomString(32, random);
 export function base64Url(bytes: ArrayBuffer | Uint8Array): string {
   const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
   let s = '';
-  for (const b of arr) s += String.fromCharCode(b);
+  for (const b of arr) {
+    s += String.fromCharCode(b);
+  }
   return btoa(s).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
 }
 

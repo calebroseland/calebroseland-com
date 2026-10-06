@@ -43,7 +43,9 @@ function useFocusHeadingOnNavigate() {
   useEffect(
     () =>
       router.subscribe('onResolved', ({ pathChanged }) => {
-        if (!pathChanged) return;
+        if (!pathChanged) {
+          return;
+        }
         const h1 = document.querySelector<HTMLElement>('main h1');
         if (h1) {
           h1.tabIndex = -1;

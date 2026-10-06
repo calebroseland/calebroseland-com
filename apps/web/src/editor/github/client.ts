@@ -54,8 +54,14 @@ function fakeClient() {
 
 /** One client per session; the fake persists to localStorage so a dev session survives reloads. */
 export function clientFor(session: Session): GitHubClient {
-  if (session.status !== 'authenticated') throw new Error('Not signed in');
-  if (session.backend === 'local') return createLocalClient();
-  if (session.backend !== 'fake') return createOctokitClient(session.token, repo);
+  if (session.status !== 'authenticated') {
+    throw new Error('Not signed in');
+  }
+  if (session.backend === 'local') {
+    return createLocalClient();
+  }
+  if (session.backend !== 'fake') {
+    return createOctokitClient(session.token, repo);
+  }
   return fakeClient();
 }

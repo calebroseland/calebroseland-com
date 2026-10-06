@@ -13,7 +13,9 @@ export function useProfileDraft(profile: Profile) {
   // The schema allows repeats; the card should not show the same focus area twice.
   state.tags.forEach((t, i) => {
     const repeat = tagProblem(state.tags, t.label, t.key);
-    if (repeat && !errors.has(`tags.${i}`)) errors.set(`tags.${i}`, repeat);
+    if (repeat && !errors.has(`tags.${i}`)) {
+      errors.set(`tags.${i}`, repeat);
+    }
   });
   return {
     state,
@@ -38,7 +40,9 @@ export function useAnnouncer() {
 export function useFocusByKey() {
   const [pending, setPending] = useState<string | null>(null);
   useEffect(() => {
-    if (!pending) return;
+    if (!pending) {
+      return;
+    }
     document.querySelector<HTMLElement>(`[data-focus-key="${CSS.escape(pending)}"]`)?.focus();
     setPending(null);
   }, [pending]);

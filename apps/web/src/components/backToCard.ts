@@ -24,7 +24,9 @@ export function useSiteGo() {
   const onCard = useRouterState({ select: (s) => isCard(s.location.pathname) });
   return (href: string): Promise<void> => {
     const kind = onCard === isCard(href) ? null : onCard ? 'enter' : 'leave';
-    if (!kind) return navigate({ href });
+    if (!kind) {
+      return navigate({ href });
+    }
     return withViewTransition(kind, () => navigate({ href, viewTransition: false }), reduce);
   };
 }

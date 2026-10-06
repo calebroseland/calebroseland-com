@@ -26,7 +26,9 @@ export type EditorEntry = {
 export function entriesFromBundle(bundle: Bundle, status: EntryStatus): EditorEntry[] {
   const out: EditorEntry[] = [];
   for (const file of bundle.files) {
-    if (!file.path.endsWith('/index.md')) continue;
+    if (!file.path.endsWith('/index.md')) {
+      continue;
+    }
     const kind: EntryKind = file.path.startsWith(`${CONTENT_ROOT}/pages/`) ? 'page' : 'post';
     try {
       const { meta } = parseEntry(file.content);

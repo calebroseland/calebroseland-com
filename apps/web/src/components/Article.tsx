@@ -37,7 +37,9 @@ export function EntryHeader({
 function EditEntry({ slug, title }: { slug: string; title: string }) {
   const signedIn = useSignedIn();
   const here = useCurrentHref();
-  if (!signedIn) return null;
+  if (!signedIn) {
+    return null;
+  }
   return (
     <Link
       to="/editor/$slug"

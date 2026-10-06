@@ -7,10 +7,14 @@ import { findEntryDir } from './paths.ts';
 export function bufferFromBundle(bundle: Bundle, slug: string): Buffer {
   const paths = bundle.files.map((f) => f.path);
   const found = findEntryDir(paths, slug);
-  if (!found) throw new Error(`No bundle for "${slug}" on ${bundle.ref}`);
+  if (!found) {
+    throw new Error(`No bundle for "${slug}" on ${bundle.ref}`);
+  }
   const { dir } = found;
   const index = bundle.files.find((f) => f.path === `${dir}/index.md`);
-  if (!index) throw new Error(`Missing index.md in ${dir}`);
+  if (!index) {
+    throw new Error(`Missing index.md in ${dir}`);
+  }
   const { meta, body } = parseEntry(index.content);
   return {
     ref: bundle.ref,

@@ -21,7 +21,9 @@ export function findBySlug(kind: EntryMeta['kind'], slug: string): EntryMeta | u
 /** Each entry is its own lazy module so a post's HTML only loads on its route. */
 export async function loadEntry(id: string): Promise<LoadedEntry> {
   const load = loaders[id];
-  if (!load) throw new Error(`no content entry ${id}`);
+  if (!load) {
+    throw new Error(`no content entry ${id}`);
+  }
   return (await load()).default;
 }
 

@@ -53,17 +53,22 @@ function Board() {
   // Without branches there is nothing to throw away but the entry's files.
   const runDiscard = async (row: Discarding) => {
     const outcome = await discard.run(row);
-    if (outcome.ok)
+    if (outcome.ok) {
       notify(local ? 'Deleted from your working tree' : 'Discarded the draft branch', {
         kind: 'success',
       });
-    else notify("Couldn't discard that.", { kind: 'error' });
+    } else {
+      notify("Couldn't discard that.", { kind: 'error' });
+    }
   };
 
   const startEditing = async (slug: string) => {
     const outcome = await edit.run(slug);
-    if (outcome.ok) await openInEditor(slug);
-    else notify("Couldn't start editing that entry.", { kind: 'error' });
+    if (outcome.ok) {
+      await openInEditor(slug);
+    } else {
+      notify("Couldn't start editing that entry.", { kind: 'error' });
+    }
   };
 
   const ready = board.status === 'ready' ? board : null;
@@ -174,7 +179,9 @@ function Board() {
               type="button"
               className={`${styles.primary} ${styles.danger}`}
               onClick={() => {
-                if (target) void runDiscard(target);
+                if (target) {
+                  void runDiscard(target);
+                }
                 discarding.close();
               }}
             >

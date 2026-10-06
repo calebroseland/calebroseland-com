@@ -19,7 +19,9 @@ export function Stack({
   ...rest
 }: Common & { gap?: SpaceToken; align?: 'start' | 'center' | 'end' | 'stretch' }) {
   const style: Vars = { '--gap': space(gap) };
-  if (align) style['--align'] = align === 'start' || align === 'end' ? `flex-${align}` : align;
+  if (align) {
+    style['--align'] = align === 'start' || align === 'end' ? `flex-${align}` : align;
+  }
   return <Tag className={cx(styles.stack, className)} style={style} {...rest} />;
 }
 
@@ -36,14 +38,17 @@ export function Cluster({
   justify?: 'start' | 'center' | 'end' | 'between';
 }) {
   const style: Vars = { '--gap': space(gap) };
-  if (align) style['--align'] = align === 'start' || align === 'end' ? `flex-${align}` : align;
-  if (justify)
+  if (align) {
+    style['--align'] = align === 'start' || align === 'end' ? `flex-${align}` : align;
+  }
+  if (justify) {
     style['--justify'] =
       justify === 'between'
         ? 'space-between'
         : justify === 'start' || justify === 'end'
           ? `flex-${justify}`
           : justify;
+  }
   return <Tag className={cx(styles.cluster, className)} style={style} {...rest} />;
 }
 
@@ -66,6 +71,8 @@ export function Center({
   ...rest
 }: Common & { max?: MeasureToken | `${number}rem`; gutter?: SpaceToken }) {
   const style: Vars = { '--max': max.endsWith('rem') ? max : `var(--${max})` };
-  if (gutter) style['--gutter'] = space(gutter);
+  if (gutter) {
+    style['--gutter'] = space(gutter);
+  }
   return <Tag className={cx(styles.center, className)} style={style} {...rest} />;
 }

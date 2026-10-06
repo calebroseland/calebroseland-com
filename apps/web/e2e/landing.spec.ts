@@ -100,7 +100,9 @@ test.describe('landing', () => {
 
     // Past the card, a background click does nothing.
     const box = await page.getByRole('main').boundingBox();
-    if (!box) throw new Error('main has no box');
+    if (!box) {
+      throw new Error('main has no box');
+    }
     await page.mouse.click(box.x + box.width / 2, box.y + box.height - 8);
     await expect(page).toHaveURL(/\/posts$/);
   });

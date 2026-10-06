@@ -16,7 +16,9 @@ function postDir(slug: string): string {
   const posts = join(scratchContentDir, 'posts');
   for (const year of readdirSync(posts)) {
     const match = readdirSync(join(posts, year)).find((d) => d.endsWith(`-${slug}`));
-    if (match) return `posts/${year}/${match}`;
+    if (match) {
+      return `posts/${year}/${match}`;
+    }
   }
   throw new Error(`no post directory for ${slug}`);
 }
@@ -40,7 +42,9 @@ async function drag(
   // Scrolled into view and holding still, so the press lands on the handle.
   await handle.hover();
   const from = await handle.boundingBox();
-  if (!from) throw new Error('drag: handle not on screen');
+  if (!from) {
+    throw new Error('drag: handle not on screen');
+  }
   const [fx, fy] = [from.x + from.width / 2, from.y + from.height / 2];
   await page.mouse.move(fx, fy);
   await page.mouse.down();
@@ -52,7 +56,9 @@ async function drag(
     'true',
   );
   const to = await target.boundingBox();
-  if (!to) throw new Error('drag: target not on screen');
+  if (!to) {
+    throw new Error('drag: target not on screen');
+  }
   // Near the top either way: the bottom of the form sits under its sticky save bar.
   const [x, y] =
     edge === 'top' ? [to.x + to.width / 2, to.y + 6] : [to.x + to.width - 6, to.y + 24];

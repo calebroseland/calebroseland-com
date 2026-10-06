@@ -65,7 +65,8 @@
       "style": {
         "useImportType": "error",
         "noNonNullAssertion": "warn",
-        "noDescendingSpecificity": "off"
+        "noDescendingSpecificity": "off",
+        "useBlockStatements": "error"
       }
     }
   },

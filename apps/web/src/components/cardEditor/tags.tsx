@@ -37,7 +37,9 @@ export function TagEditor({
   const add = () => {
     const issue = tagProblem(tags, draft);
     setProblem(issue);
-    if (issue) return;
+    if (issue) {
+      return;
+    }
     onChange([...tags, newTag(draft.trim())]);
     setDraft('');
   };

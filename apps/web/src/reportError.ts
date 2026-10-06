@@ -12,7 +12,9 @@ export function reportError(
   deps: { random?: () => number; send?: (url: string, body: string) => void } = {},
 ) {
   const random = deps.random ?? Math.random;
-  if (random() >= SAMPLE_RATE) return;
+  if (random() >= SAMPLE_RATE) {
+    return;
+  }
   const body = JSON.stringify({
     message: input.message.slice(0, 500),
     ...(input.stack ? { stack: input.stack.slice(0, 2000) } : {}),
@@ -24,7 +26,9 @@ export function reportError(
     deps.send
     ?? ((url: string, payload: string) => {
       // sendBeacon survives a page that is unloading; fetch is the fallback.
-      if (navigator.sendBeacon?.(url, new Blob([payload], { type: 'application/json' }))) return;
+      if (navigator.sendBeacon?.(url, new Blob([payload], { type: 'application/json' }))) {
+        return;
+      }
       void fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },

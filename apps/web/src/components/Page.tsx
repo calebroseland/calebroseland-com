@@ -35,7 +35,9 @@ export function Page({
   // A plain click on the brand at home runs the reverse morph; modified clicks open the card in a new
   // tab, and everywhere else the brand is an ordinary link home.
   const onBrandClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    if (!atHome || !isPlainClick(e)) return;
+    if (!atHome || !isPlainClick(e)) {
+      return;
+    }
     e.preventDefault();
     void toCard();
   };

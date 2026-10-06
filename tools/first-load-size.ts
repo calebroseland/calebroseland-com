@@ -21,11 +21,15 @@ if (scripts.size === 0) {
 }
 
 let bytes = 0;
-for (const path of scripts) bytes += gzipSync(readFileSync(resolve(client, path))).length;
+for (const path of scripts) {
+  bytes += gzipSync(readFileSync(resolve(client, path))).length;
+}
 
 const kb = bytes / 1000;
 const verdict = kb <= LIMIT_KB ? 'ok' : 'over';
 process.stdout.write(
   `first-load JS (entry + preloads, gzip): ${kb.toFixed(2)} kB of ${LIMIT_KB} kB, ${scripts.size} files: ${verdict}\n`,
 );
-if (verdict === 'over') process.exit(1);
+if (verdict === 'over') {
+  process.exit(1);
+}

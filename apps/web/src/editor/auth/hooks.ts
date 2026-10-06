@@ -22,7 +22,9 @@ export function useSignedIn(): boolean {
 export function useSignInMethods(needed = true): SignInMethods | null {
   const [methods, setMethods] = useState<SignInMethods | null>(null);
   useEffect(() => {
-    if (!needed) return;
+    if (!needed) {
+      return;
+    }
     let live = true;
     void signInMethods().then((m) => live && setMethods(m));
     return () => {

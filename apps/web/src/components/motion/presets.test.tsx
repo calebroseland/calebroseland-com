@@ -6,7 +6,9 @@ vi.mock('motion/mini', () => ({ animate: vi.fn(() => Promise.resolve()) }));
 
 function navLink(status?: 'active') {
   const link = document.createElement('a');
-  if (status) link.dataset.status = status;
+  if (status) {
+    link.dataset.status = status;
+  }
   const line = document.createElement('span');
   line.dataset.hover = 'underline';
   link.append(line);

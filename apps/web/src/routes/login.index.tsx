@@ -32,7 +32,7 @@ function LoginRoute() {
   const { target, error } = useLoginSearch();
   const methods = useSignInMethods();
 
-  if (!methods)
+  if (!methods) {
     return (
       <Page width="measure">
         <CenteredMessage title="Sign in">
@@ -42,7 +42,8 @@ function LoginRoute() {
         </CenteredMessage>
       </Page>
     );
-  if (!canSignIn(methods))
+  }
+  if (!canSignIn(methods)) {
     return (
       <Page width="measure">
         <CenteredMessage title="Sign in">
@@ -53,6 +54,7 @@ function LoginRoute() {
         </CenteredMessage>
       </Page>
     );
+  }
   return (
     <Page width="measure">
       <CenteredMessage title="Sign in">
@@ -122,7 +124,9 @@ function GitHubSignIn({ target, methods }: { target: string; methods: SignInMeth
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (token.value) signIn('octokit', token.value);
+                if (token.value) {
+                  signIn('octokit', token.value);
+                }
               }}
               className={styles.tokenForm}
             >

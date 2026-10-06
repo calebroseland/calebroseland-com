@@ -17,8 +17,11 @@ export default function CommandPaletteDialog({ open }: { open: boolean }) {
   const motion = usePopupMotion('dialog', open);
 
   const activate = (c: Command) => {
-    if (c.page) view.enter(c);
-    else void run(c);
+    if (c.page) {
+      view.enter(c);
+    } else {
+      void run(c);
+    }
   };
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && view.query === '' && view.page) {

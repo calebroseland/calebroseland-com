@@ -19,4 +19,6 @@ function prepareScratchContent() {
   cpSync(source, scratchContentDir, { recursive: true });
 }
 
-if (import.meta.main) prepareScratchContent();
+if (import.meta.main) {
+  prepareScratchContent();
+}

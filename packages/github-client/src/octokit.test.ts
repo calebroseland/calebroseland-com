@@ -12,14 +12,24 @@ describe('octokit client', () => {
     let refReads = 0;
     vi.stubGlobal('fetch', async (url: string, init: RequestInit) => {
       const path = decodeURIComponent(new URL(url).pathname);
-      if (path.endsWith('/git/ref/heads/draft/x'))
+      if (path.endsWith('/git/ref/heads/draft/x')) {
         return reply(200, { object: { sha: refReads++ === 0 ? 'a' : 'b' } });
-      if (path.includes('/git/commits/a')) return reply(200, { tree: { sha: 't0' } });
-      if (path.endsWith('/git/blobs')) return reply(201, { sha: 'blob' });
-      if (path.endsWith('/git/trees')) return reply(201, { sha: 't1' });
-      if (path.endsWith('/git/commits')) return reply(201, { sha: 'c', html_url: 'u' });
-      if (path.endsWith('/git/refs/heads/draft/x') && init.method === 'PATCH')
+      }
+      if (path.includes('/git/commits/a')) {
+        return reply(200, { tree: { sha: 't0' } });
+      }
+      if (path.endsWith('/git/blobs')) {
+        return reply(201, { sha: 'blob' });
+      }
+      if (path.endsWith('/git/trees')) {
+        return reply(201, { sha: 't1' });
+      }
+      if (path.endsWith('/git/commits')) {
+        return reply(201, { sha: 'c', html_url: 'u' });
+      }
+      if (path.endsWith('/git/refs/heads/draft/x') && init.method === 'PATCH') {
         return reply(422, { message: 'Update is not a fast forward' });
+      }
       return reply(404, { message: `unexpected ${init.method} ${path}` });
     });
     const gh = createOctokitClient('token', { owner: 'o', repo: 'r', defaultBranch: 'master' });

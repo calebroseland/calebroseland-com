@@ -17,7 +17,9 @@ export function useStickyTop<T extends HTMLElement>() {
       root.style.setProperty('--sticky-top', `${sticky ? el.offsetHeight : 0}px`);
     };
     publish();
-    if (typeof ResizeObserver === 'undefined') return;
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
     // A breakpoint that unpins the bar also changes its width, so resizing covers both.
     observer.current = new ResizeObserver(publish);
     observer.current.observe(el);

@@ -110,9 +110,14 @@ const commands: Cmd[] = [
     run: (e) => {
       const previous = e.getAttributes('link').href as string | undefined;
       const url = window.prompt('Link URL', previous ?? 'https://');
-      if (url === null) return;
-      if (url === '') e.chain().focus().extendMarkRange('link').unsetLink().run();
-      else e.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+      if (url === null) {
+        return;
+      }
+      if (url === '') {
+        e.chain().focus().extendMarkRange('link').unsetLink().run();
+      } else {
+        e.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+      }
     },
   },
 ];
@@ -131,11 +136,14 @@ export function Toolbar({
       Object.fromEntries(commands.map((c) => [c.id, c.active?.(editor) ?? false])),
   });
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End')
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') {
       return;
+    }
     const buttons = [...e.currentTarget.querySelectorAll<HTMLButtonElement>('button')];
     const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
-    if (i < 0) return;
+    if (i < 0) {
+      return;
+    }
     e.preventDefault();
     const next =
       e.key === 'Home'
@@ -178,7 +186,9 @@ export function Toolbar({
         onChange={(e) => {
           const files = [...(e.target.files ?? [])];
           e.target.value = '';
-          if (files.length) onPickImage(files);
+          if (files.length) {
+            onPickImage(files);
+          }
         }}
       />
     </div>

@@ -10,7 +10,9 @@ export function targetSize(
   maxEdge = MAX_EDGE,
 ): { width: number; height: number } {
   const longest = Math.max(width, height);
-  if (longest <= maxEdge) return { width, height };
+  if (longest <= maxEdge) {
+    return { width, height };
+  }
   const scale = maxEdge / longest;
   return {
     width: Math.max(1, Math.round(width * scale)),
@@ -43,9 +45,13 @@ export type ResizedImage = {
 
 /** GIFs are passed through (canvas would flatten animation); everything else is drawn to a canvas at ≤ MAX_EDGE. */
 export async function resizeImage(file: File, maxEdge = MAX_EDGE): Promise<ResizedImage> {
-  if (!IMAGE_TYPES.has(file.type)) throw new UnsupportedImageError(file.type);
+  if (!IMAGE_TYPES.has(file.type)) {
+    throw new UnsupportedImageError(file.type);
+  }
   if (file.type === 'image/gif') {
-    if (file.size > MAX_BYTES) throw new ImageTooLargeError();
+    if (file.size > MAX_BYTES) {
+      throw new ImageTooLargeError();
+    }
     return { blob: file, width: 0, height: 0, type: file.type, name: file.name };
   }
   const bitmap = await createImageBitmap(file);
@@ -54,13 +60,19 @@ export async function resizeImage(file: File, maxEdge = MAX_EDGE): Promise<Resiz
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Canvas 2D context unavailable');
+  if (!ctx) {
+    throw new Error('Canvas 2D context unavailable');
+  }
   ctx.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
   const type = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, 0.82));
-  if (!blob) throw new Error('Could not encode image');
-  if (blob.size > MAX_BYTES) throw new ImageTooLargeError();
+  if (!blob) {
+    throw new Error('Could not encode image');
+  }
+  if (blob.size > MAX_BYTES) {
+    throw new ImageTooLargeError();
+  }
   const ext = type === 'image/png' ? 'png' : 'jpg';
   const base =
     file.name

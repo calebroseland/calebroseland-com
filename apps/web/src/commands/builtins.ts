@@ -91,7 +91,7 @@ function preferenceCommands(): Command[] {
 
 function accountCommands(offerSignIn: boolean): Command[] {
   const signedIn = session.store.state.status === 'authenticated';
-  if (!signedIn)
+  if (!signedIn) {
     return offerSignIn
       ? [
           {
@@ -103,6 +103,7 @@ function accountCommands(offerSignIn: boolean): Command[] {
           },
         ]
       : [];
+  }
   return [
     {
       id: 'account.editor',
@@ -125,8 +126,11 @@ function accountCommands(offerSignIn: boolean): Command[] {
       icon: 'lucide:log-out',
       // Leave the editing routes first, so their guard never redirects a page mid-render.
       run: async (ctx) => {
-        if (ctx.href.startsWith('/editor')) await ctx.go(ENTRY_PAGE);
-        else ctx.close();
+        if (ctx.href.startsWith('/editor')) {
+          await ctx.go(ENTRY_PAGE);
+        } else {
+          ctx.close();
+        }
         session.signOut();
       },
     },
@@ -144,10 +148,11 @@ export function useBuiltinCommands(open: boolean) {
     let offerSignIn = false;
     const off = registerCommands('account', () => accountCommands(offerSignIn));
     // Asked only when the palette opens, so readers who never open it never call the Worker.
-    if (open)
+    if (open) {
       void signInMethods().then((m) => {
         offerSignIn = canSignIn(m);
       });
+    }
     return off;
   }, [open]);
 }

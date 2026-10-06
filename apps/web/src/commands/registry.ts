@@ -37,7 +37,9 @@ export function registerCommands(id: string, source: Source): () => void {
   sources.setState((current) => new Map(current).set(id, source));
   return () =>
     sources.setState((current) => {
-      if (current.get(id) !== source) return current;
+      if (current.get(id) !== source) {
+        return current;
+      }
       const next = new Map(current);
       next.delete(id);
       return next;

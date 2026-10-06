@@ -18,7 +18,9 @@ export type SessionEnv = {
 function read(storage: SessionEnv['storage']): Session {
   try {
     const raw = storage?.getItem(KEY);
-    if (!raw) return { status: 'anonymous' };
+    if (!raw) {
+      return { status: 'anonymous' };
+    }
     const parsed: unknown = JSON.parse(raw);
     if (
       typeof parsed === 'object'
@@ -39,9 +41,11 @@ export function createSessionStore(env: SessionEnv) {
   const store = new Store<Session>(read(env.storage));
   const persist = () => {
     try {
-      if (store.state.status === 'authenticated')
+      if (store.state.status === 'authenticated') {
         env.storage?.setItem(KEY, JSON.stringify(store.state));
-      else env.storage?.removeItem(KEY);
+      } else {
+        env.storage?.removeItem(KEY);
+      }
     } catch {
       // storage unavailable; session lives in memory only
     }
@@ -86,7 +90,9 @@ export function takeHandshake(
   try {
     const raw = storage?.getItem(HANDSHAKE);
     storage?.removeItem(HANDSHAKE);
-    if (!raw) return null;
+    if (!raw) {
+      return null;
+    }
     const h = JSON.parse(raw) as Partial<Handshake>;
     return typeof h.verifier === 'string' && typeof h.state === 'string'
       ? {

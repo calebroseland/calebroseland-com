@@ -52,7 +52,9 @@ export function useDragMoves(kind: string, onMove: (from: Slot, to: Slot) => voi
         canMonitor: ({ source }) => isDragData(source.data) && source.data.kind === kind,
         onDrop({ source, location }) {
           const target = location.current.dropTargets[0];
-          if (!target || !isDragData(source.data)) return;
+          if (!target || !isDragData(source.data)) {
+            return;
+          }
           const from = { listId: source.data.listId, index: source.data.index };
           const same = (listId: string) => listId === from.listId;
           if (isListData(target.data)) {
@@ -60,13 +62,19 @@ export function useDragMoves(kind: string, onMove: (from: Slot, to: Slot) => voi
             onMoveRef.current(from, { listId, index: same(listId) ? length - 1 : length });
             return;
           }
-          if (!isDragData(target.data)) return;
+          if (!isDragData(target.data)) {
+            return;
+          }
           const edge = extractClosestEdge(target.data) as Edge | null;
-          if (!edge) return;
+          if (!edge) {
+            return;
+          }
           const { listId, index } = target.data;
           const after = edge === 'bottom' || edge === 'right';
           const to = same(listId) ? dropIndex(from.index, index, edge) : index + (after ? 1 : 0);
-          if (!same(listId) || to !== from.index) onMoveRef.current(from, { listId, index: to });
+          if (!same(listId) || to !== from.index) {
+            onMoveRef.current(from, { listId, index: to });
+          }
         },
       }),
     [kind],
@@ -82,8 +90,9 @@ export function useListReorder<T extends Item>(
   const itemsRef = useRef(items);
   itemsRef.current = items;
   useDragMoves(listId, (from, to) => {
-    if (from.listId === listId && to.listId === listId)
+    if (from.listId === listId && to.listId === listId) {
       onReorder(reorder(itemsRef.current, from.index, to.index));
+    }
   });
   return { registerItem: useItemRegistration };
 }
@@ -103,7 +112,9 @@ export function useItemRegistration(
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el) {
+      return;
+    }
     const data: DragData = { [SYMBOL]: true, id, index, listId, kind };
     const allowedEdges = EDGES[axis];
     return combine(
@@ -160,7 +171,9 @@ export function useListTarget({
   const [over, setOver] = useState(false);
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el) {
+      return;
+    }
     const data: ListData = { [SYMBOL]: 'list', listId, kind, length };
     return dropTargetForElements({
       element: el,

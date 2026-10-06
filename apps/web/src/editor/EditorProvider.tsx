@@ -27,7 +27,9 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
 export function useGitHub(): GitHubClient {
   const gh = useContext(GitHubContext);
-  if (!gh) throw new Error('useGitHub outside an authenticated editor route');
+  if (!gh) {
+    throw new Error('useGitHub outside an authenticated editor route');
+  }
   return gh;
 }
 

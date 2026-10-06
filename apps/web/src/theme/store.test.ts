@@ -27,7 +27,9 @@ function fakeEnv(
     ),
     flip(dark: boolean) {
       media.matches = dark;
-      for (const fn of listeners) fn({} as MediaQueryListEvent);
+      for (const fn of listeners) {
+        fn({} as MediaQueryListEvent);
+      }
     },
   };
   const props = new Map<string, string>();

@@ -103,7 +103,9 @@ function Session({
       <ConfirmDialog
         open={leaving.status === 'blocked'}
         onOpenChange={(open) => {
-          if (!open) leaving.reset?.();
+          if (!open) {
+            leaving.reset?.();
+          }
         }}
         title="Discard your changes to the card?"
         description="You have edits you haven't saved. Leaving this page throws them away."
@@ -147,13 +149,15 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
         { kind: 'success' },
       );
       onDone({ profile: outcome.value.profile, workingTree: working });
-    } else if (outcome.reason === 'expired')
+    } else if (outcome.reason === 'expired') {
       notify('Your sign-in expired. Sign in again to save.', { kind: 'error' });
-    else if (outcome.reason === 'conflict')
+    } else if (outcome.reason === 'conflict') {
       notify('The profile changed since you opened it. Close the editor and open it again.', {
         kind: 'error',
       });
-    else notify("Couldn't save the profile.", { kind: 'error' });
+    } else {
+      notify("Couldn't save the profile.", { kind: 'error' });
+    }
   };
 
   const groupName = (g: number) => state.groups[g]?.title.trim() || `Group ${g + 1}`;
@@ -162,7 +166,9 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
 
   const moveTag = (from: number, to: number) => {
     const tag = state.tags[from];
-    if (!tag || to < 0 || to >= state.tags.length) return;
+    if (!tag || to < 0 || to >= state.tags.length) {
+      return;
+    }
     focusByKey(`tag:${tag.key}`);
     announcer.announce(`${tag.label} moved to position ${to + 1} of ${state.tags.length}`);
     update((s) => ({ ...s, tags: reorder(s.tags, from, to) }));
@@ -170,7 +176,9 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
 
   const relocateLink = (from: LinkSlot, to: LinkSlot) => {
     const link = state.groups[from.group]?.links[from.index];
-    if (!link) return;
+    if (!link) {
+      return;
+    }
     const groups = moveLink(state.groups, from, to);
     const length = groups[to.group]?.links.length ?? 0;
     focusByKey(link.key);
@@ -183,12 +191,16 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
   };
   const stepLink = (g: number, index: number, delta: -1 | 1) => {
     const to = nextLinkSlot(state.groups, { group: g, index }, delta);
-    if (to) relocateLink({ group: g, index }, to);
+    if (to) {
+      relocateLink({ group: g, index }, to);
+    }
   };
 
   const moveGroup = (from: number, to: number) => {
     const group = state.groups[from];
-    if (!group || to < 0 || to >= state.groups.length) return;
+    if (!group || to < 0 || to >= state.groups.length) {
+      return;
+    }
     focusByKey(`group:${group.key}`);
     announcer.announce(`${groupName(from)} moved to position ${to + 1} of ${state.groups.length}`);
     update((s) => ({ ...s, groups: reorder(s.groups, from, to) }));
@@ -205,7 +217,9 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
 
   const addLink = (g: number) => {
     const group = state.groups[g];
-    if (!group) return;
+    if (!group) {
+      return;
+    }
     const link = newLink();
     focusByKey(`label:${link.key}`);
     announcer.announce(`Added a link to ${groupName(g)}`);
@@ -214,7 +228,9 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
   const removeLink = (g: number, index: number) => {
     const group = state.groups[g];
     const link = group?.links[index];
-    if (!group || !link) return;
+    if (!group || !link) {
+      return;
+    }
     announcer.announce(`Removed ${link.label || 'the link'}`);
     setGroup(g, { ...group, links: group.links.filter((_, i) => i !== index) });
   };
@@ -239,7 +255,9 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
     saving: save.pending,
     onSubmit: (e: FormEvent) => {
       e.preventDefault();
-      if (dirty && errors.size === 0 && !save.pending) void submit();
+      if (dirty && errors.size === 0 && !save.pending) {
+        void submit();
+      }
     },
     cancel: () => onDone(null),
     leaving,
@@ -259,7 +277,9 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
 function useFocusWhen<T extends HTMLElement>(when: boolean): RefObject<T | null> {
   const ref = useRef<T>(null);
   useEffect(() => {
-    if (when) ref.current?.focus();
+    if (when) {
+      ref.current?.focus();
+    }
   }, [when]);
   return ref;
 }

@@ -38,7 +38,9 @@ export function notify(
     ...t.filter((x) => !urgent(x.kind) || !urgent(kind)),
     { id, kind, message, ...(opts.action ? { action: opts.action } : {}) },
   ]);
-  if (!urgent(kind)) setTimeout(() => dismiss(id), opts.ttl ?? 4000);
+  if (!urgent(kind)) {
+    setTimeout(() => dismiss(id), opts.ttl ?? 4000);
+  }
   return id;
 }
 function dismiss(id: number) {

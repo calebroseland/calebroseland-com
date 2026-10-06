@@ -19,14 +19,18 @@ let client: QueryClient | undefined;
 // A rejected token anywhere ends the session; the route guard then redirects to login with the
 // buffer intact.
 const endSessionOnAuthError = (err: unknown) => {
-  if (err instanceof AuthError) session.signOut();
+  if (err instanceof AuthError) {
+    session.signOut();
+  }
 };
 
 const identity = (s: Session) =>
   s.status === 'authenticated' ? `${s.backend}:${s.token}` : 'anonymous';
 
 export function editorQueryClient(): QueryClient {
-  if (client) return client;
+  if (client) {
+    return client;
+  }
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: 1, staleTime: 30_000 }, mutations: { retry: 0 } },
     queryCache: new QueryCache({ onError: endSessionOnAuthError }),
@@ -41,7 +45,9 @@ export function editorQueryClient(): QueryClient {
   // Another sign-in is another repository (or the working tree): nothing cached for the last applies.
   let current = identity(session.store.state);
   session.store.subscribe((next) => {
-    if (identity(next) === current) return;
+    if (identity(next) === current) {
+      return;
+    }
     current = identity(next);
     qc.clear();
   });

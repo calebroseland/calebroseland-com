@@ -18,14 +18,18 @@ export function withViewTransition(
   reduce: boolean,
 ): Promise<void> {
   const run = () => Promise.resolve(flushSync(update)).then(() => undefined);
-  if (reduce || typeof document.startViewTransition !== 'function') return run();
+  if (reduce || typeof document.startViewTransition !== 'function') {
+    return run();
+  }
   const root = document.documentElement;
   root.dataset.vt = kind;
   const transition = document.startViewTransition(run);
   current = transition;
   // A transition started over this one skips it; clearing then would strip the new one's timings.
   void transition.finished.finally(() => {
-    if (current !== transition) return;
+    if (current !== transition) {
+      return;
+    }
     current = null;
     delete root.dataset.vt;
   });

@@ -16,9 +16,15 @@ const leave: AnimationOptions = { duration: durations.fast, ease: [...eases.in] 
 
 /** A starting offset pointing away from the trigger, from the popup's `data-side`. */
 function fromTrigger(side: string | undefined, px: number): string {
-  if (side === 'top') return `0 ${px}px`;
-  if (side === 'bottom') return `0 ${-px}px`;
-  if (side === 'left' || side === 'inline-start') return `${px}px 0`;
+  if (side === 'top') {
+    return `0 ${px}px`;
+  }
+  if (side === 'bottom') {
+    return `0 ${-px}px`;
+  }
+  if (side === 'left' || side === 'inline-start') {
+    return `${px}px 0`;
+  }
   return `${-px}px 0`;
 }
 
@@ -89,7 +95,9 @@ export function leavePopup(node: HTMLElement, kind: PopupKind): Animation[] {
 
 /** Drops what a finished exit left on the element, so a popup shown without its entrance is visible. */
 export function resetPopup(node: HTMLElement): void {
-  for (const prop of ['opacity', 'scale', 'filter', 'translate']) node.style.removeProperty(prop);
+  for (const prop of ['opacity', 'scale', 'filter', 'translate']) {
+    node.style.removeProperty(prop);
+  }
 }
 
 /** A link that leads with an icon: the icon zooms slightly, and the label grows with it. */
@@ -97,18 +105,26 @@ export function hoverIcon(link: HTMLElement, on: boolean): Animation[] {
   const icon = link.querySelector<HTMLElement>('[data-hover="icon"]');
   const label = link.querySelector<HTMLElement>('[data-hover="label"]');
   const running: Animation[] = [];
-  if (icon) running.push(animate(icon, { scale: on ? 1.12 : 1 }, hoverSpring));
-  if (label) running.push(animate(label, { scale: on ? 1.04 : 1 }, hoverSpring));
+  if (icon) {
+    running.push(animate(icon, { scale: on ? 1.12 : 1 }, hoverSpring));
+  }
+  if (label) {
+    running.push(animate(label, { scale: on ? 1.04 : 1 }, hoverSpring));
+  }
   return running;
 }
 
 /** A text link: its underline draws in from the start edge, and rests drawn on the current page. */
 export function hoverUnderline(link: HTMLElement, on: boolean): Animation[] {
   const line = link.querySelector<HTMLElement>('[data-hover="underline"]');
-  if (!line) return [];
+  if (!line) {
+    return [];
+  }
   const drawn = on || link.dataset.status === 'active';
   const run = animate(line, { scale: drawn ? '1 1' : '0 1' }, drawn ? hoverSpring : leave);
   // Once settled, the stylesheet decides again, so a later route change still moves the line.
-  if (!on) void run.then(() => line.style.removeProperty('scale'));
+  if (!on) {
+    void run.then(() => line.style.removeProperty('scale'));
+  }
   return [run];
 }

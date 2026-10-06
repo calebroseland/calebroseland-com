@@ -10,10 +10,18 @@ export type PublishState =
   | { kind: 'merged'; pr: PullRequest };
 
 export function publishState(pr: PullRequest | null): PublishState {
-  if (!pr) return { kind: 'none' };
-  if (pr.merged) return { kind: 'merged', pr };
-  if (pr.state === 'open' && pr.mergeable === false) return { kind: 'conflict', pr };
-  if (pr.state === 'open') return { kind: 'open', pr, mergeable: pr.mergeable };
+  if (!pr) {
+    return { kind: 'none' };
+  }
+  if (pr.merged) {
+    return { kind: 'merged', pr };
+  }
+  if (pr.state === 'open' && pr.mergeable === false) {
+    return { kind: 'conflict', pr };
+  }
+  if (pr.state === 'open') {
+    return { kind: 'open', pr, mergeable: pr.mergeable };
+  }
   return { kind: 'none' };
 }
 
@@ -70,7 +78,9 @@ export async function waitForDeploy(opts: {
       const res = await fetchImpl(opts.healthUrl, { cache: 'no-store' });
       if (res.ok) {
         const body = (await res.json()) as { sha?: string };
-        if (body.sha === opts.sha) return true;
+        if (body.sha === opts.sha) {
+          return true;
+        }
       }
     } catch {
       // transient; keep polling

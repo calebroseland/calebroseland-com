@@ -66,7 +66,9 @@ function useTouchHold(onHide: () => void) {
   useEffect(() => () => clearTimeout(timer.current), []);
   const cancel = () => clearTimeout(timer.current);
   const swallow = (e: SyntheticEvent) => {
-    if (!held.current) return;
+    if (!held.current) {
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
   };
@@ -79,7 +81,9 @@ function useTouchHold(onHide: () => void) {
     trigger: {
       onPointerDown: (e: PointerEvent) => {
         held.current = false;
-        if (e.pointerType !== 'touch') return;
+        if (e.pointerType !== 'touch') {
+          return;
+        }
         cancel();
         timer.current = setTimeout(() => {
           held.current = true;
@@ -88,7 +92,9 @@ function useTouchHold(onHide: () => void) {
       },
       onPointerUp: () => {
         cancel();
-        if (!held.current) return;
+        if (!held.current) {
+          return;
+        }
         timer.current = setTimeout(() => {
           // Closed here rather than by Base UI, so the tip's exit is played from here too.
           onHide();

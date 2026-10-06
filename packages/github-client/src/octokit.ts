@@ -47,8 +47,14 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
     try {
       return await fn();
     } catch (err) {
-      if (typeof err === 'object' && err && 'status' && (err as { status?: number }).status === 401)
+      if (
+        typeof err === 'object'
+        && err
+        && 'status'
+        && (err as { status?: number }).status === 401
+      ) {
         throw new AuthError();
+      }
       throw err;
     }
   };
@@ -131,8 +137,9 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
       wrap(async () => {
         // 1 getRef + N blobs + 1 tree + 1 commit + 1 updateRef ≈ N + 4 requests
         const { data: head } = await octokit.rest.git.getRef({ ...base, ref: `heads/${ref}` });
-        if (head.object.sha !== expectedHeadSha)
+        if (head.object.sha !== expectedHeadSha) {
           throw new StaleRefError(ref, expectedHeadSha, head.object.sha);
+        }
         const { data: headCommit } = await octokit.rest.git.getCommit({
           ...base,
           commit_sha: head.object.sha,
@@ -169,7 +176,9 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
           await octokit.rest.git.updateRef({ ...base, ref: `heads/${ref}`, sha: commit.sha });
         } catch (err) {
           // 422 is a non-fast-forward: another save moved the branch after the check above.
-          if ((err as { status?: number }).status !== 422) throw err;
+          if ((err as { status?: number }).status !== 422) {
+            throw err;
+          }
           const { data: now } = await octokit.rest.git.getRef({ ...base, ref: `heads/${ref}` });
           throw new StaleRefError(ref, expectedHeadSha, now.object.sha);
         }
@@ -200,7 +209,9 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
           per_page: 1,
         });
         const first = data[0];
-        if (!first) return null;
+        if (!first) {
+          return null;
+        }
         const { data: full } = await octokit.rest.pulls.get({ ...base, pull_number: first.number });
         return toPr(full);
       }),

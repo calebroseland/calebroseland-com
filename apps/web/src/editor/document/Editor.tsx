@@ -82,7 +82,9 @@ function useMarkdownEditor({
         const files = [...(event.clipboardData?.files ?? [])].filter((f) =>
           f.type.startsWith('image/'),
         );
-        if (files.length === 0) return false;
+        if (files.length === 0) {
+          return false;
+        }
         event.preventDefault();
         onImageFilesRef.current(files);
         return true;
@@ -91,7 +93,9 @@ function useMarkdownEditor({
         const files = [...(event.dataTransfer?.files ?? [])].filter((f) =>
           f.type.startsWith('image/'),
         );
-        if (files.length === 0) return false;
+        if (files.length === 0) {
+          return false;
+        }
         event.preventDefault();
         onImageFilesRef.current(files);
         return true;
@@ -128,7 +132,9 @@ const PreviewImage = Image.extend<ImageOptions & { previewSrc: (src: string) => 
 /** Exposes the editor's commands through `apiRef` for as long as the editor exists. */
 function useApiBinding(editor: TipTap | null, apiRef: RefObject<EditorApi | null> | undefined) {
   useEffect(() => {
-    if (!apiRef || !editor) return;
+    if (!apiRef || !editor) {
+      return;
+    }
     apiRef.current = {
       insertImage: (src, alt) => editor.chain().focus().setImage({ src, alt }).run(),
       setImageAlt: (src, alt) => {
@@ -140,7 +146,9 @@ function useApiBinding(editor: TipTap | null, apiRef: RefObject<EditorApi | null
             changed = true;
           }
         });
-        if (changed) editor.view.dispatch(tr);
+        if (changed) {
+          editor.view.dispatch(tr);
+        }
       },
       focus: () => editor.commands.focus(),
     };

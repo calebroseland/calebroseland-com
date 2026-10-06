@@ -44,7 +44,9 @@ async function readProblem(res: Response): Promise<ApiError> {
 
 export async function fetchAuthConfig(fetchImpl: typeof fetch = fetch) {
   const res = await fetchImpl(`${apiOrigin()}/api/auth/config`);
-  if (!res.ok) throw await readProblem(res);
+  if (!res.ok) {
+    throw await readProblem(res);
+  }
   return configSchema.parse(await res.json());
 }
 
@@ -57,6 +59,8 @@ export async function exchangeCode(
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(input),
   });
-  if (!res.ok) throw await readProblem(res);
+  if (!res.ok) {
+    throw await readProblem(res);
+  }
   return tokenSchema.parse(await res.json());
 }

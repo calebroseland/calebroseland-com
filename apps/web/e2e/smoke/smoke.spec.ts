@@ -17,7 +17,9 @@ test.describe('@smoke', () => {
     expect(res.ok()).toBe(true);
     const body = (await res.json()) as { ok: boolean; sha: string };
     expect(body.ok).toBe(true);
-    if (process.env.EXPECTED_SHA) expect(body.sha).toBe(process.env.EXPECTED_SHA);
+    if (process.env.EXPECTED_SHA) {
+      expect(body.sha).toBe(process.env.EXPECTED_SHA);
+    }
   });
 
   test('theme toggle works', async ({ page }) => {

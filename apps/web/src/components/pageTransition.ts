@@ -31,7 +31,9 @@ function reduceMotion(): boolean {
 /** The view-transition types for one navigation, or false for none. */
 export function pageTypes(declared: PageEffect | undefined, info: ChangeInfo): string[] | false {
   const from = info.fromLocation;
-  if (!from || !info.pathChanged || declared === false || reduceMotion()) return false;
+  if (!from || !info.pathChanged || declared === false || reduceMotion()) {
+    return false;
+  }
   const a = depth(from.pathname);
   const b = depth(info.toLocation.pathname);
   const direction = b > a ? 'forward' : b < a ? 'back' : 'across';
@@ -53,13 +55,17 @@ let uaAnimated = false;
 export const pageViewTransition = {
   types: (info: ChangeInfo): string[] | false => {
     // A back swipe the browser already animated (iOS, Android gestures) is not animated twice.
-    if (uaAnimated || !router) return false;
+    if (uaAnimated || !router) {
+      return false;
+    }
     const to = router.matchRoutes(info.toLocation);
     const from = info.fromLocation ? router.matchRoutes(info.fromLocation) : [];
     const within = to.some(
       (m) => m.staticData?.animatesChildren && from.some((f) => f.routeId === m.routeId),
     );
-    if (within) return false;
+    if (within) {
+      return false;
+    }
     const declared = to.findLast((m) => m.staticData?.transition !== undefined)?.staticData
       .transition;
     return pageTypes(declared, info);
@@ -69,7 +75,9 @@ export const pageViewTransition = {
 /** Call once, right after creating the router, so route-declared effects can be read. */
 export function installPageTransitions(r: AnyRouter): void {
   router = r;
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {
+    return;
+  }
   // Capture runs before the router's own popstate listener.
   window.addEventListener(
     'popstate',

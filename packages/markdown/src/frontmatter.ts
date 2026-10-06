@@ -10,7 +10,9 @@ const FENCE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
 
 export function splitFrontmatter(text: string): { data: unknown; body: string } {
   const m = FENCE.exec(text);
-  if (!m) return { data: {}, body: text };
+  if (!m) {
+    return { data: {}, body: text };
+  }
   return { data: parse(m[1] ?? '') ?? {}, body: text.slice(m[0].length) };
 }
 
@@ -28,9 +30,19 @@ const KEY_ORDER = ['kind', 'title', 'slug', 'date', 'draft', 'tags', 'summary'];
 export function serializeEntry({ meta, body }: ParsedEntry): string {
   const source: Record<string, unknown> = { ...meta, date: meta.date.toISOString().slice(0, 10) };
   const data: Record<string, unknown> = {};
-  for (const key of KEY_ORDER) if (key in source) data[key] = source[key];
-  for (const key of Object.keys(source)) if (!(key in data)) data[key] = source[key];
-  if (meta.summary === undefined) delete data.summary;
+  for (const key of KEY_ORDER) {
+    if (key in source) {
+      data[key] = source[key];
+    }
+  }
+  for (const key of Object.keys(source)) {
+    if (!(key in data)) {
+      data[key] = source[key];
+    }
+  }
+  if (meta.summary === undefined) {
+    delete data.summary;
+  }
   const yaml = stringify(data, { lineWidth: 0 }).trimEnd();
   const content = body.replace(/^\n+/, '');
   return `---\n${yaml}\n---\n\n${content.endsWith('\n') || content === '' ? content : `${content}\n`}`;

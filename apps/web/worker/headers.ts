@@ -25,8 +25,11 @@ export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
 
 export function securityHeaders(res: Response): Response {
   const out = new Response(res.body, res);
-  for (const [name, value] of Object.entries(SECURITY_HEADERS))
-    if (!out.headers.has(name)) out.headers.set(name, value);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+    if (!out.headers.has(name)) {
+      out.headers.set(name, value);
+    }
+  }
   return out;
 }
 

@@ -26,8 +26,11 @@ function read(storage: ThemeEnv['storage'], key: string): string | null {
 
 function write(storage: ThemeEnv['storage'], key: string, value: string | null) {
   try {
-    if (value === null) storage?.removeItem(key);
-    else storage?.setItem(key, value);
+    if (value === null) {
+      storage?.removeItem(key);
+    } else {
+      storage?.setItem(key, value);
+    }
   } catch {
     // storage unavailable (private mode); the theme lives for the session only
   }
@@ -37,7 +40,9 @@ function write(storage: ThemeEnv['storage'], key: string, value: string | null) 
 function readCustomThemes(storage: ThemeEnv['storage']): CustomTheme[] {
   try {
     const raw: unknown = JSON.parse(read(storage, CUSTOM_KEY) ?? '[]');
-    if (!Array.isArray(raw)) return [];
+    if (!Array.isArray(raw)) {
+      return [];
+    }
     return raw.flatMap((t) => {
       const parsed = customTheme.safeParse(t);
       return parsed.success ? [parsed.data] : [];
@@ -49,7 +54,9 @@ function readCustomThemes(storage: ThemeEnv['storage']): CustomTheme[] {
 
 function readPreference(storage: ThemeEnv['storage'], themes: CustomTheme[]): ThemePreference {
   const v = read(storage, KEY);
-  if ((builtInThemes as readonly (string | null)[]).includes(v)) return v as BuiltInTheme;
+  if ((builtInThemes as readonly (string | null)[]).includes(v)) {
+    return v as BuiltInTheme;
+  }
   const id = v && customId(v as ThemePreference);
   return id && themes.some((t) => t.id === id) ? (v as ThemePreference) : 'auto';
 }
@@ -87,7 +94,9 @@ export function createThemeStore(env: ThemeEnv) {
   let applied: string[] = [];
 
   const activeCustom = (): CustomTheme | null => {
-    if (preview) return preview;
+    if (preview) {
+      return preview;
+    }
     const id = customId(store.state.preference);
     return store.state.customThemes.find((t) => t.id === id) ?? null;
   };
@@ -103,19 +112,30 @@ export function createThemeStore(env: ThemeEnv) {
     const vars = custom ? themeVars(custom) : {};
     if (env.root) {
       env.root.dataset.theme = resolved;
-      for (const name of applied) if (!(name in vars)) env.root.style.removeProperty(name);
-      for (const [name, value] of Object.entries(vars)) env.root.style.setProperty(name, value);
+      for (const name of applied) {
+        if (!(name in vars)) {
+          env.root.style.removeProperty(name);
+        }
+      }
+      for (const [name, value] of Object.entries(vars)) {
+        env.root.style.setProperty(name, value);
+      }
     }
     applied = Object.keys(vars);
     const adobe = custom ? needsAdobeFonts(custom) : (env.adobeFonts?.byDefault ?? false);
-    if (adobe) env.adobeFonts?.load();
-    if (!preview)
+    if (adobe) {
+      env.adobeFonts?.load();
+    }
+    if (!preview) {
       write(env.storage, VARS_KEY, custom ? JSON.stringify({ base: resolved, vars, adobe }) : null);
+    }
   };
   apply();
 
   const onChange = () => {
-    if (store.state.preference === 'auto' && !preview) apply();
+    if (store.state.preference === 'auto' && !preview) {
+      apply();
+    }
   };
   env.media?.addEventListener('change', onChange);
 
@@ -151,8 +171,11 @@ export function createThemeStore(env: ThemeEnv) {
     deleteCustom(id: string) {
       saveThemes(store.state.customThemes.filter((t) => t.id !== id));
       preview = null;
-      if (customId(store.state.preference) === id) this.setPreference('auto');
-      else apply();
+      if (customId(store.state.preference) === id) {
+        this.setPreference('auto');
+      } else {
+        apply();
+      }
     },
     dispose() {
       env.media?.removeEventListener('change', onChange);
@@ -168,7 +191,9 @@ export const newThemeId = (): string =>
     : Date.now().toString(36);
 
 function browserEnv(): ThemeEnv {
-  if (typeof window === 'undefined') return {};
+  if (typeof window === 'undefined') {
+    return {};
+  }
   const env: ThemeEnv = { root: document.documentElement };
   try {
     env.storage = window.localStorage;
@@ -177,11 +202,13 @@ function browserEnv(): ThemeEnv {
   }
   // Written by the content plugin into index.html; theme-init.js has linked the kit already if needed.
   const kit = document.querySelector<HTMLMetaElement>('meta[name="adobe-fonts"]');
-  if (kit)
+  if (kit) {
     env.adobeFonts = {
       byDefault: kit.dataset.default === 'on',
       load: () => {
-        if (document.getElementById('adobe-fonts')) return;
+        if (document.getElementById('adobe-fonts')) {
+          return;
+        }
         const link = Object.assign(document.createElement('link'), {
           id: 'adobe-fonts',
           rel: 'stylesheet',
@@ -190,9 +217,11 @@ function browserEnv(): ThemeEnv {
         document.head.append(link);
       },
     };
+  }
   // jsdom and very old browsers lack matchMedia; auto then resolves to light
-  if (typeof window.matchMedia === 'function')
+  if (typeof window.matchMedia === 'function') {
     env.media = window.matchMedia('(prefers-color-scheme: dark)');
+  }
   return env;
 }
 

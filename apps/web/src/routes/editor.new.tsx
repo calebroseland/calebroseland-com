@@ -27,9 +27,13 @@ function NewEntry() {
   const openInEditor = useOpenInEditor();
 
   const submit = async () => {
-    if (!form.entry) return;
+    if (!form.entry) {
+      return;
+    }
     const outcome = await create.run(form.entry);
-    if (outcome.ok) await openInEditor(outcome.value.draft.slug);
+    if (outcome.ok) {
+      await openInEditor(outcome.value.draft.slug);
+    }
   };
 
   return (

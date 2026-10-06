@@ -15,8 +15,9 @@ export async function startGitHubLogin(
   navigate: (url: string) => void = (url) => window.location.assign(url),
 ) {
   const config = await fetchAuthConfig();
-  if (!config.oauth || !config.clientId)
+  if (!config.oauth || !config.clientId) {
     throw new Error('GitHub sign-in is not configured for this environment.');
+  }
   const verifier = createVerifier();
   const state = createState();
   saveHandshake({ verifier, state, returnTo });
@@ -32,6 +33,8 @@ export async function startGitHubLogin(
 
 /** Where a sign-in returns: the page it started from, if it is one of this app's own, else the editor. */
 export function afterSignIn(returnTo: string | undefined): string {
-  if (!isAppHref(returnTo)) return '/editor';
+  if (!isAppHref(returnTo)) {
+    return '/editor';
+  }
   return /^\/login(?:[/?#]|$)/.test(returnTo) ? '/editor' : returnTo;
 }

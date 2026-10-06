@@ -45,7 +45,9 @@ function collect(
         const src = node.properties.src;
         if (!/^(https?:)?\/\//.test(src) && !src.startsWith('data:')) {
           images.push(src);
-          if (resolveImage) node.properties.src = resolveImage(src);
+          if (resolveImage) {
+            node.properties.src = resolveImage(src);
+          }
         }
         node.properties.loading = 'lazy';
         node.properties.decoding = 'async';

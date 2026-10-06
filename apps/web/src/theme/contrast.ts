@@ -26,17 +26,22 @@ function oklchToSrgb(l: number, c: number, hDeg: number): Rgb {
 /** Parses a computed colour to sRGB channels in 0–1, or null if it is not one we understand. */
 export function parseColor(css: string): Rgb | null {
   const m = css.trim().match(/^(rgba?|oklch|color)\(\s*([^)]*)\)$/i);
-  if (!m) return null;
+  if (!m) {
+    return null;
+  }
   const fn = (m[1] as string).toLowerCase();
   const parts = (m[2] as string).split(/[\s,/]+/).filter(Boolean);
   if (fn === 'color') {
-    if (parts[0] !== 'srgb') return null;
+    if (parts[0] !== 'srgb') {
+      return null;
+    }
     const [r, g, b] = parts.slice(1, 4).map(num);
     return r === undefined || g === undefined || b === undefined ? null : [r, g, b];
   }
   const [x, y, z] = parts.slice(0, 3).map((p) => (p === 'none' ? 0 : num(p)));
-  if (x === undefined || y === undefined || z === undefined || [x, y, z].some(Number.isNaN))
+  if (x === undefined || y === undefined || z === undefined || [x, y, z].some(Number.isNaN)) {
     return null;
+  }
   return fn === 'oklch' ? oklchToSrgb(x, y, z) : [x / 255, y / 255, z / 255];
 }
 

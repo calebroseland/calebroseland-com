@@ -23,7 +23,9 @@ function renderMenu() {
 const root = document.documentElement;
 
 beforeEach(() => {
-  for (const t of themeController.store.state.customThemes) themeController.deleteCustom(t.id);
+  for (const t of themeController.store.state.customThemes) {
+    themeController.deleteCustom(t.id);
+  }
   themeController.preview(null);
   themeController.setPreference('auto');
   localStorage.clear();

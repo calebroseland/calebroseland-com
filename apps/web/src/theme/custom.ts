@@ -151,7 +151,9 @@ const RADII: Record<string, number> = { xs: 2, sm: 4, md: 6, lg: 10, xl: 16 };
 const round = (n: number, places = 4) => Number(n.toFixed(places));
 
 function shadows(base: 'light' | 'dark', s: number): Record<string, string> {
-  if (s === 0) return { '--shadow-sm': 'none', '--shadow-md': 'none', '--shadow-lg': 'none' };
+  if (s === 0) {
+    return { '--shadow-sm': 'none', '--shadow-md': 'none', '--shadow-lg': 'none' };
+  }
   const ink = base === 'light' ? 'var(--gray-950)' : 'var(--black)';
   const layer = (y: number, blur: number, alpha: number) =>
     `0 ${round(y * s, 2)}px ${round(blur * s, 2)}px oklch(from ${ink} l c h / ${round(Math.min(1, alpha * s), 3)})`;
@@ -180,23 +182,30 @@ export const needsAdobeFonts = (t: CustomTheme): boolean => usesAdobeFonts(theme
 /** The CSS custom properties a theme sets on <html>, on top of its base's semantic layer. */
 export function themeVars(t: CustomTheme): Record<string, string> {
   const vars: Record<string, string> = {};
-  for (const [step, l, k] of ACCENT_STEPS)
+  for (const [step, l, k] of ACCENT_STEPS) {
     vars[`--accent-${step}`] =
       `oklch(from ${t.accent} ${l} calc(min(c, ${ACCENT_MAX_CHROMA}) * ${k}) h)`;
-  for (const [step, l, k] of GRAY_STEPS)
+  }
+  for (const [step, l, k] of GRAY_STEPS) {
     vars[`--gray-${step}`] = `oklch(${l} ${round(t.neutralTint * k)} ${round(t.neutralHue, 1)})`;
-  if (t.backdrop) vars['--color-backdrop'] = t.backdrop;
+  }
+  if (t.backdrop) {
+    vars['--color-backdrop'] = t.backdrop;
+  }
 
   Object.assign(vars, fontVars(themeFonts(t)));
 
-  for (const [name, size] of Object.entries(FONT_SIZES))
+  for (const [name, size] of Object.entries(FONT_SIZES)) {
     vars[`--font-size-${name}`] = t.textScale === 1 ? size : `calc(${size} * ${t.textScale})`;
+  }
   vars['--leading-normal'] = String(t.leading);
   vars['--leading-relaxed'] = String(round(t.leading + 0.15, 2));
-  for (const [name, rem] of Object.entries(SPACES))
+  for (const [name, rem] of Object.entries(SPACES)) {
     vars[`--space-${name}`] = `${round(rem * t.spaceScale)}rem`;
-  for (const [name, px] of Object.entries(RADII))
+  }
+  for (const [name, px] of Object.entries(RADII)) {
     vars[`--radius-${name}`] = `${round(px * t.radiusScale, 1)}px`;
+  }
   vars['--measure-narrow'] = `${t.measure - 16}ch`;
   vars['--measure'] = `${t.measure}ch`;
   vars['--measure-wide'] = `${t.measure + 12}ch`;

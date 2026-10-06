@@ -10,7 +10,9 @@ function allowedOrigins(env: Env): Set<string> {
 
 export function corsHeaders(request: Request, env: Env): Record<string, string> {
   const origin = request.headers.get('origin');
-  if (!origin || !allowedOrigins(env).has(origin)) return {};
+  if (!origin || !allowedOrigins(env).has(origin)) {
+    return {};
+  }
   return {
     'access-control-allow-origin': origin,
     'access-control-allow-methods': 'GET, POST, OPTIONS',
@@ -23,14 +25,20 @@ export function corsHeaders(request: Request, env: Env): Record<string, string> 
 /** Same-origin requests carry no Origin header on GET; cross-origin ones must be on the allowlist. */
 export function originAllowed(request: Request, env: Env): boolean {
   const origin = request.headers.get('origin');
-  if (!origin) return true;
+  if (!origin) {
+    return true;
+  }
   return allowedOrigins(env).has(origin);
 }
 
 export function withCors(res: Response, request: Request, env: Env): Response {
   const headers = corsHeaders(request, env);
-  if (Object.keys(headers).length === 0) return res;
+  if (Object.keys(headers).length === 0) {
+    return res;
+  }
   const out = new Response(res.body, res);
-  for (const [k, v] of Object.entries(headers)) out.headers.set(k, v);
+  for (const [k, v] of Object.entries(headers)) {
+    out.headers.set(k, v);
+  }
   return out;
 }

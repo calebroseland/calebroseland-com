@@ -97,7 +97,9 @@ function StartEditing({ slug }: { slug: string }) {
   const begin = useBeginEditing();
   const start = async () => {
     const outcome = await begin.run(slug);
-    if (!outcome.ok) notify("Couldn't start editing this entry.", { kind: 'error' });
+    if (!outcome.ok) {
+      notify("Couldn't start editing this entry.", { kind: 'error' });
+    }
   };
   return (
     <EditorShell title={slug}>
@@ -135,8 +137,9 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   const runSave = async (mode: 'save' | 'overwrite') => {
     const outcome = await save.run(mode);
     if (outcome.ok) {
-      if (!branches) notify(`Saved ${buffer.dir} to your working tree`, { kind: 'success' });
-      else {
+      if (!branches) {
+        notify(`Saved ${buffer.dir} to your working tree`, { kind: 'success' });
+      } else {
         const { commitUrl } = outcome.value;
         notify(`Committed to ${buffer.ref}`, {
           kind: 'success',
@@ -146,18 +149,20 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
           },
         });
       }
-    } else if (outcome.reason === 'conflict') conflict.open(outcome.error);
-    else if (outcome.reason === 'expired')
+    } else if (outcome.reason === 'conflict') {
+      conflict.open(outcome.error);
+    } else if (outcome.reason === 'expired') {
       notify('Your sign-in expired. Sign in again; your changes are kept on this device.', {
         kind: 'error',
       });
-    else
+    } else {
       notify(
         branches
           ? "Couldn't save to GitHub. Your changes are still here."
           : "Couldn't write to your working tree. Your changes are still here.",
         { kind: 'error', action: { label: 'Retry', onClick: () => void runSave('save') } },
       );
+    }
   };
 
   const onSave = () => {
@@ -180,7 +185,9 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   const reloadFromSource = async () => {
     conflict.close();
     const outcome = await reload.run();
-    if (!outcome.ok) notify("Couldn't load the current version.", { kind: 'error' });
+    if (!outcome.ok) {
+      notify("Couldn't load the current version.", { kind: 'error' });
+    }
   };
 
   /* Alt text lives in two places by necessity: the buffer, which enforces it before a save, and the
@@ -198,10 +205,11 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
         void show('media');
       }
       // A file the editor cannot take is for the writer to fix; a failure to process it is ours.
-      else
+      else {
         notify(added.reason === 'rejected' ? added.message : "Couldn't process that image.", {
           kind: added.reason === 'rejected' ? 'warning' : 'error',
         });
+      }
     }
   };
 
@@ -230,9 +238,13 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
             className={styles.secondary}
             onClick={(e) => {
               // A modified click opens a new tab as any link does.
-              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                return;
+              }
               e.preventDefault();
-              if (buffer.dirty) notify('Unsaved changes are kept on this device.');
+              if (buffer.dirty) {
+                notify('Unsaved changes are kept on this device.');
+              }
               close.go();
             }}
           >

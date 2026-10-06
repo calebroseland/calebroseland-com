@@ -14,8 +14,12 @@ export type Failure =
 type Outcome<T> = { ok: true; value: T } | Failure;
 
 export function toFailure(error: unknown): Failure {
-  if (error instanceof StaleRefError) return { ok: false, reason: 'conflict', error };
-  if (error instanceof AuthError) return { ok: false, reason: 'expired', error };
+  if (error instanceof StaleRefError) {
+    return { ok: false, reason: 'conflict', error };
+  }
+  if (error instanceof AuthError) {
+    return { ok: false, reason: 'expired', error };
+  }
   return { ok: false, reason: 'failed', error };
 }
 

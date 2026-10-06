@@ -55,7 +55,9 @@ export async function createEntryDraft(
    existing bundle directory is reused rather than a second one minted under today's date. */
 export async function beginEditing(gh: GitHubClient, slug: string): Promise<Draft> {
   const existing = (await gh.listDrafts()).find((d) => d.slug === slug);
-  if (existing) return existing;
+  if (existing) {
+    return existing;
+  }
   return gh.createDraft(slug);
 }
 
@@ -74,6 +76,9 @@ export async function saveDraft(
 
 /** Throws the draft away: its branch, or on the working tree the entry's files. */
 export async function discardEntry(gh: GitHubClient, row: { ref: string; dir: string }) {
-  if (capabilitiesOf(gh.kind).branches) await gh.deleteDraft(row.ref);
-  else await deleteLocalEntry(row.dir);
+  if (capabilitiesOf(gh.kind).branches) {
+    await gh.deleteDraft(row.ref);
+  } else {
+    await deleteLocalEntry(row.dir);
+  }
 }

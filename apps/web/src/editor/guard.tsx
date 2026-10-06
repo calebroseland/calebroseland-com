@@ -19,6 +19,8 @@ export async function requireEditor({ location }: { location: { href: string } }
 export function EditorRoute({ children }: { children: ReactNode }) {
   const signedIn = useSignedIn();
   const href = useCurrentHref();
-  if (!signedIn) return <Navigate to="/login" search={{ returnTo: href }} replace />;
+  if (!signedIn) {
+    return <Navigate to="/login" search={{ returnTo: href }} replace />;
+  }
   return <EditorProvider>{children}</EditorProvider>;
 }

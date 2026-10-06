@@ -10,7 +10,9 @@ const PAGES_ROOT = `${CONTENT_ROOT}/pages`;
 const rootFor = (kind: EntryKind) => (kind === 'page' ? PAGES_ROOT : POSTS_ROOT);
 
 export function bundleDirFor(kind: EntryKind, date: Date, slug: string): string {
-  if (kind === 'page') return `${PAGES_ROOT}/${slug}`;
+  if (kind === 'page') {
+    return `${PAGES_ROOT}/${slug}`;
+  }
   const y = date.getUTCFullYear();
   const m = String(date.getUTCMonth() + 1).padStart(2, '0');
   const d = String(date.getUTCDate()).padStart(2, '0');
@@ -38,7 +40,9 @@ export function findEntryDir(
 ): { kind: EntryKind; dir: string } | null {
   for (const kind of ['post', 'page'] as const) {
     const dir = findBundleDir(paths, kind, slug);
-    if (dir) return { kind, dir };
+    if (dir) {
+      return { kind, dir };
+    }
   }
   return null;
 }

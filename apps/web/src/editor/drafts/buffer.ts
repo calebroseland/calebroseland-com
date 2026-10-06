@@ -56,9 +56,13 @@ export type BufferStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 export function readLocalBuffer(ref: string, storage: BufferStorage | undefined): Buffer | null {
   try {
     const raw = storage?.getItem(key(ref));
-    if (!raw) return null;
+    if (!raw) {
+      return null;
+    }
     const b = JSON.parse(raw) as Buffer & { assetCount?: number };
-    if (typeof b.markdown !== 'string' || typeof b.baseHeadSha !== 'string') return null;
+    if (typeof b.markdown !== 'string' || typeof b.baseHeadSha !== 'string') {
+      return null;
+    }
     // Images are files, not JSON: a restored copy carries the text and says the images went.
     return {
       ...b,
@@ -86,7 +90,9 @@ export function writeLocalBuffer(b: Buffer, storage: BufferStorage | undefined) 
           restoredFromLocal: false,
         }),
       );
-    } else storage?.removeItem(key(b.ref));
+    } else {
+      storage?.removeItem(key(b.ref));
+    }
   } catch {
     // storage full or blocked: the in-memory buffer still works
   }
@@ -116,7 +122,9 @@ export function createBufferStore(initial: Buffer) {
   return {
     store,
     setMarkdown: (markdown: string) => {
-      if (markdown !== store.state.markdown) touch({ markdown });
+      if (markdown !== store.state.markdown) {
+        touch({ markdown });
+      }
     },
     setMeta: (meta: Partial<Buffer['meta']>) => touch({ meta: { ...store.state.meta, ...meta } }),
     addAsset: (asset: BufferAsset) =>

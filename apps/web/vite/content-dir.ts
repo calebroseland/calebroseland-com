@@ -14,9 +14,13 @@ export const within = (dir: string, abs: string) => abs === dir || abs.startsWit
 /** Dev routes answer only this site's own pages; any other page open in the browser could otherwise write content. */
 export function sameOrigin(req: Pick<IncomingMessage, 'headers'>): boolean {
   const site = req.headers['sec-fetch-site'];
-  if (site && site !== 'same-origin' && site !== 'none') return false;
+  if (site && site !== 'same-origin' && site !== 'none') {
+    return false;
+  }
   const origin = req.headers.origin;
-  if (!origin) return true;
+  if (!origin) {
+    return true;
+  }
   try {
     return new URL(origin).host === req.headers.host;
   } catch {

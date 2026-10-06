@@ -47,19 +47,34 @@ export function serializeProfile(sourceYaml: string, next: Profile): string {
   const doc: Document = sourceYaml.trim() ? parseDocument(sourceYaml) : new Document({});
   const before = (doc.toJS() ?? {}) as Record<string, unknown>;
   const after = next as Record<string, unknown>;
-  for (const key of Object.keys(before)) if (after[key] === undefined) doc.delete(key);
+  for (const key of Object.keys(before)) {
+    if (after[key] === undefined) {
+      doc.delete(key);
+    }
+  }
   for (const [key, value] of Object.entries(after)) {
-    if (value === undefined || JSON.stringify(before[key]) === JSON.stringify(value)) continue;
+    if (value === undefined || JSON.stringify(before[key]) === JSON.stringify(value)) {
+      continue;
+    }
     doc.set(key, doc.createNode(value));
   }
   visit(doc, {
     Pair(_key, pair) {
       // Keys set on a fresh document are plain strings; parsed ones are scalar nodes.
       const key = String(isScalar(pair.key) ? pair.key.value : pair.key);
-      if (key === 'tags' && isSeq(pair.value)) pair.value.flow = true;
-      if (key === 'links' && isSeq(pair.value))
-        for (const item of pair.value.items) if (isMap(item)) item.flow = true;
-      if (key === 'location' && isMap(pair.value)) pair.value.flow = true;
+      if (key === 'tags' && isSeq(pair.value)) {
+        pair.value.flow = true;
+      }
+      if (key === 'links' && isSeq(pair.value)) {
+        for (const item of pair.value.items) {
+          if (isMap(item)) {
+            item.flow = true;
+          }
+        }
+      }
+      if (key === 'location' && isMap(pair.value)) {
+        pair.value.flow = true;
+      }
     },
   });
   return doc.toString({ lineWidth: 0 });

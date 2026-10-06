@@ -9,7 +9,7 @@ const sizes = [
 ];
 
 test.describe('site header', () => {
-  for (const { name, width, height, pinned } of sizes)
+  for (const { name, width, height, pinned } of sizes) {
     test(`${pinned ? 'stays pinned' : 'scrolls away'} on ${name}`, async ({ page }) => {
       await page.setViewportSize({ width, height });
       await page.goto('/posts/hello-placeholder');
@@ -18,4 +18,5 @@ test.describe('site header', () => {
       const top = await page.getByRole('banner').evaluate((el) => el.getBoundingClientRect().top);
       expect(top === 0).toBe(pinned);
     });
+  }
 });

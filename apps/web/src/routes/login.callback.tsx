@@ -15,10 +15,13 @@ export const Route = createFileRoute('/login/callback')({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps }) => {
     const fail = (msg: string) => redirect({ to: '/login', search: { error: msg } });
-    if (deps.error_description) throw fail(deps.error_description);
+    if (deps.error_description) {
+      throw fail(deps.error_description);
+    }
     const handshake = takeHandshake();
-    if (!deps.code || !deps.state || !handshake || handshake.state !== deps.state)
+    if (!deps.code || !deps.state || !handshake || handshake.state !== deps.state) {
       throw fail("Sign-in didn't complete. Try again.");
+    }
     try {
       const token = await exchangeCode({
         code: deps.code,

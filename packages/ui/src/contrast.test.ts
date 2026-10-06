@@ -13,16 +13,22 @@ function declarations(css: string): Map<string, string> {
   const out = new Map<string, string>();
   for (const m of css.matchAll(/(--[a-z0-9-]+):\s*([^;]+);/g)) {
     // primitives.css declares durations twice (reduced motion); first wins, which is the base block
-    if (!out.has(m[1] as string)) out.set(m[1] as string, (m[2] as string).trim());
+    if (!out.has(m[1] as string)) {
+      out.set(m[1] as string, (m[2] as string).trim());
+    }
   }
   return out;
 }
 
 function resolve(vars: Map<string, string>, value: string, depth = 0): string {
-  if (depth > 20) throw new Error(`token cycle at ${value}`);
+  if (depth > 20) {
+    throw new Error(`token cycle at ${value}`);
+  }
   return value.replace(/var\((--[a-z0-9-]+)\)/g, (_, name: string) => {
     const v = vars.get(name);
-    if (v === undefined) throw new Error(`unresolved ${name}`);
+    if (v === undefined) {
+      throw new Error(`unresolved ${name}`);
+    }
     return resolve(vars, v, depth + 1);
   });
 }
@@ -32,7 +38,9 @@ const toRgb = (c: string) => clampChroma(converter('rgb')(c), 'rgb');
 function contrast(vars: Map<string, string>, fg: string, bg: string): number {
   const f = toRgb(resolve(vars, `var(${fg})`));
   const b = toRgb(resolve(vars, `var(${bg})`));
-  if (!f || !b) throw new Error(`could not parse ${fg} or ${bg}`);
+  if (!f || !b) {
+    throw new Error(`could not parse ${fg} or ${bg}`);
+  }
   return wcagContrast(f, b);
 }
 

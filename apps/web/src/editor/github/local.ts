@@ -22,7 +22,9 @@ async function json<T>(input: string, init?: RequestInit): Promise<T> {
     const body = (await res.json().catch(() => ({}))) as { headSha?: string };
     throw new StaleRefError(WORKING_TREE_REF, '', body.headSha ?? 'unknown');
   }
-  if (!res.ok) throw new Error(`${init?.method ?? 'GET'} ${input} failed: ${res.status}`);
+  if (!res.ok) {
+    throw new Error(`${init?.method ?? 'GET'} ${input} failed: ${res.status}`);
+  }
   return (await res.json()) as T;
 }
 
@@ -56,7 +58,9 @@ export function createLocalClient(): GitHubClient {
       const { headSha, files } = await tree();
       const drafts: Draft[] = [];
       for (const file of files) {
-        if (!file.path.endsWith('/index.md')) continue;
+        if (!file.path.endsWith('/index.md')) {
+          continue;
+        }
         try {
           drafts.push({
             ref: WORKING_TREE_REF,
@@ -95,7 +99,9 @@ export function createLocalClient(): GitHubClient {
 
       for (const file of files) {
         const raw = file.content;
-        if (!isBinaryContent(raw)) continue;
+        if (!isBinaryContent(raw)) {
+          continue;
+        }
         const body = raw instanceof Blob ? raw : new Blob([raw as BlobPart]);
         const query = new URLSearchParams({ path: `${dir}/${file.path}`, expectedHeadSha: head });
         const uploaded = await json<{ headSha: string }>(`/@local/upload?${query}`, {
@@ -113,7 +119,9 @@ export function createLocalClient(): GitHubClient {
           content: f.content as string,
           encoding: f.encoding === 'base64' ? ('base64' as const) : ('utf-8' as const),
         }));
-      if (text.length === 0) return { headSha: head, commitUrl: '' };
+      if (text.length === 0) {
+        return { headSha: head, commitUrl: '' };
+      }
 
       const { headSha } = await json<{ headSha: string }>('/@local/write', {
         method: 'POST',

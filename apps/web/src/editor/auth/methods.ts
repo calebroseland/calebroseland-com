@@ -35,6 +35,10 @@ const allows = (m: SignInMethods, backend: Backend): boolean =>
     no longer serve. */
 export async function dropUnavailableSession(): Promise<void> {
   const current = session.store.state;
-  if (current.status !== 'authenticated') return;
-  if (!allows(await signInMethods(), current.backend)) session.signOut();
+  if (current.status !== 'authenticated') {
+    return;
+  }
+  if (!allows(await signInMethods(), current.backend)) {
+    session.signOut();
+  }
 }

@@ -17,7 +17,9 @@ async function record(page: Page) {
   await page.addInitScript(() => {
     const w = window as unknown as { __vts: Recorded[] };
     w.__vts = [];
-    if (typeof document.startViewTransition !== 'function') return;
+    if (typeof document.startViewTransition !== 'function') {
+      return;
+    }
     const start = document.startViewTransition.bind(document);
     document.startViewTransition = ((arg: Parameters<typeof start>[0]) => {
       const t = start(arg);

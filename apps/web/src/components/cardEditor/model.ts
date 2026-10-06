@@ -109,11 +109,18 @@ export const newTag = (label: string): EditTag => ({
 /** Why a tag cannot be added (or renamed to `raw`), or null when it can. */
 export function tagProblem(tags: readonly EditTag[], raw: string, except?: string): string | null {
   const tag = raw.trim();
-  if (!tag) return 'Type a focus area first.';
-  if (tag.length > 24) return 'Keep it to 24 characters.';
-  if (tags.some((t) => t.key !== except && t.label.trim().toLowerCase() === tag.toLowerCase()))
+  if (!tag) {
+    return 'Type a focus area first.';
+  }
+  if (tag.length > 24) {
+    return 'Keep it to 24 characters.';
+  }
+  if (tags.some((t) => t.key !== except && t.label.trim().toLowerCase() === tag.toLowerCase())) {
     return `${tag} is already there.`;
-  if (!except && tags.length >= MAX_TAGS) return `Up to ${MAX_TAGS} focus areas.`;
+  }
+  if (!except && tags.length >= MAX_TAGS) {
+    return `Up to ${MAX_TAGS} focus areas.`;
+  }
   return null;
 }
 
@@ -134,16 +141,22 @@ const MESSAGES: Record<string, string> = {
 export function fieldErrors(p: Profile): Map<string, string> {
   const result = profileSchema.safeParse(p);
   const errors = new Map<string, string>();
-  if (result.success) return errors;
+  if (result.success) {
+    return errors;
+  }
   for (const issue of result.error.issues) {
     const path = issue.path.join('.');
     const last = String(issue.path.at(-1) ?? '');
     if (issue.path[0] === 'tags' && issue.path.length >= 2) {
       const at = `tags.${String(issue.path[1])}`;
-      if (!errors.has(at)) errors.set(at, 'Give it a label of up to 24 characters.');
+      if (!errors.has(at)) {
+        errors.set(at, 'Give it a label of up to 24 characters.');
+      }
       continue;
     }
-    if (!errors.has(path)) errors.set(path, MESSAGES[last] ?? issue.message);
+    if (!errors.has(path)) {
+      errors.set(path, MESSAGES[last] ?? issue.message);
+    }
   }
   return errors;
 }
@@ -159,12 +172,16 @@ export type LinkSlot = { group: number; index: number };
 /** Moves a link within its group or into another; `to.index` is where it ends up. */
 export function moveLink(groups: readonly EditGroup[], from: LinkSlot, to: LinkSlot): EditGroup[] {
   const link = groups[from.group]?.links[from.index];
-  if (!link || !groups[to.group]) return [...groups];
+  if (!link || !groups[to.group]) {
+    return [...groups];
+  }
   const without = groups.map((g, i) =>
     i === from.group ? { ...g, links: g.links.filter((_, j) => j !== from.index) } : g,
   );
   return without.map((g, i) => {
-    if (i !== to.group) return g;
+    if (i !== to.group) {
+      return g;
+    }
     const links = [...g.links];
     links.splice(Math.max(0, Math.min(to.index, links.length)), 0, link);
     return { ...g, links };
@@ -179,9 +196,13 @@ export function nextLinkSlot(
 ): LinkSlot | null {
   const length = groups[from.group]?.links.length ?? 0;
   const index = from.index + delta;
-  if (index >= 0 && index < length) return { group: from.group, index };
+  if (index >= 0 && index < length) {
+    return { group: from.group, index };
+  }
   const group = from.group + delta;
   const target = groups[group];
-  if (!target) return null;
+  if (!target) {
+    return null;
+  }
   return { group, index: delta < 0 ? target.links.length : 0 };
 }

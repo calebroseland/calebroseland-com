@@ -29,11 +29,16 @@ const MAX_BODY = 32 * 1024 * 1024;
 type StoredFile = { path: string; content: string; encoding: 'utf-8' | 'base64' };
 
 function walk(dir: string, out: string[] = []): string[] {
-  if (!existsSync(dir)) return out;
+  if (!existsSync(dir)) {
+    return out;
+  }
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
-    if (statSync(p).isDirectory()) walk(p, out);
-    else out.push(p);
+    if (statSync(p).isDirectory()) {
+      walk(p, out);
+    } else {
+      out.push(p);
+    }
   }
   return out;
 }
@@ -57,7 +62,9 @@ export function readTree(
   // The head is a hash of the tree, so an edit made outside the browser is caught the same way a moved
   // branch is: the save is refused rather than silently overwriting someone else's work.
   const hash = createHash('sha256');
-  for (const f of files) hash.update(`${f.path}:${f.content};`);
+  for (const f of files) {
+    hash.update(`${f.path}:${f.content};`);
+  }
   return { headSha: hash.digest('hex').slice(0, 40), files };
 }
 
@@ -77,7 +84,9 @@ function readBody(req: IncomingMessage): Promise<unknown> {
     let raw = '';
     req.on('data', (chunk) => {
       raw += chunk;
-      if (raw.length > MAX_BODY) fail(new Error('payload too large'));
+      if (raw.length > MAX_BODY) {
+        fail(new Error('payload too large'));
+      }
     });
     req.on('end', () => {
       try {
@@ -114,8 +123,12 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
 
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split('?')[0];
-        if (!url?.startsWith('/@local/')) return next();
-        if (!sameOrigin(req)) return json(res, 403, { error: 'cross-origin request' });
+        if (!url?.startsWith('/@local/')) {
+          return next();
+        }
+        if (!sameOrigin(req)) {
+          return json(res, 403, { error: 'cross-origin request' });
+        }
 
         void (async () => {
           try {
@@ -162,7 +175,9 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
               const target = params.get('path');
               const expected = params.get('expectedHeadSha');
               const abs = target ? inside(target) : null;
-              if (!abs) return json(res, 400, { error: 'path outside the content directory' });
+              if (!abs) {
+                return json(res, 400, { error: 'path outside the content directory' });
+              }
               const current = readTree(contentDir, prefix);
               if (expected && expected !== current.headSha) {
                 return json(res, 409, { error: 'stale', headSha: current.headSha });
@@ -184,7 +199,9 @@ export function localStore(opts: { root: string; prefix?: string }): Plugin {
             if (url === '/@local/delete' && req.method === 'POST') {
               const payload = (await readBody(req)) as { dir?: string };
               const abs = payload.dir ? inside(payload.dir) : null;
-              if (abs && abs !== contentDir) rmSync(abs, { recursive: true, force: true });
+              if (abs && abs !== contentDir) {
+                rmSync(abs, { recursive: true, force: true });
+              }
               const afterDelete = readTree(contentDir, prefix).headSha;
               recordEditorTree(afterDelete);
               return json(res, 200, { headSha: afterDelete });

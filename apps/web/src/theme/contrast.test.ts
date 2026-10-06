@@ -34,7 +34,9 @@ describe('contrastRatio', () => {
   it("agrees with the built-in light theme's body text (gray 9 on gray 0, about 15:1)", () => {
     const fg = parseColor('oklch(0.262 0.009 248)');
     const bg = parseColor('oklch(0.982 0.002 248)');
-    if (!fg || !bg) throw new Error('parse');
+    if (!fg || !bg) {
+      throw new Error('parse');
+    }
     expect(contrastRatio(fg, bg)).toBeGreaterThan(14);
     expect(contrastRatio(fg, bg)).toBeLessThan(16.5);
   });

@@ -35,11 +35,16 @@ export type { EntryMeta };
 type Loaded = { id: string; dir: string; meta: Entry; body: string };
 
 function walk(dir: string, out: string[] = []): string[] {
-  if (!existsSync(dir)) return out;
+  if (!existsSync(dir)) {
+    return out;
+  }
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
-    if (statSync(p).isDirectory()) walk(p, out);
-    else if (name === 'index.md') out.push(p);
+    if (statSync(p).isDirectory()) {
+      walk(p, out);
+    } else if (name === 'index.md') {
+      out.push(p);
+    }
   }
   return out;
 }
@@ -87,8 +92,9 @@ export function content(opts: {
     for (const e of entries) {
       const key = `${e.meta.kind}:${e.meta.slug}`;
       const prev = slugs.get(key);
-      if (prev)
+      if (prev) {
         throw new Error(`duplicate ${e.meta.kind} slug "${e.meta.slug}" in ${prev} and ${e.id}`);
+      }
       slugs.set(key, e.id);
     }
     return entries
@@ -113,11 +119,16 @@ export function content(opts: {
 
   function assetUrl(dir: string, src: string): string {
     const abs = resolve(dir, src);
-    if (!within(contentDir, abs) || !existsSync(abs))
+    if (!within(contentDir, abs) || !existsSync(abs)) {
       throw new Error(`missing asset ${src} referenced from ${relative(opts.root, dir)}`);
-    if (!isBuild) return `/@content/${relative(contentDir, abs).replaceAll('\\', '/')}`;
+    }
+    if (!isBuild) {
+      return `/@content/${relative(contentDir, abs).replaceAll('\\', '/')}`;
+    }
     const cached = emitted.get(abs);
-    if (cached) return cached;
+    if (cached) {
+      return cached;
+    }
     const buf = readFileSync(abs);
     const hash = createHash('sha256').update(buf).digest('hex').slice(0, 8);
     const name = `content/${basename(abs, extname(abs))}-${hash}${extname(abs)}`;
@@ -151,7 +162,9 @@ export function content(opts: {
           );
           return;
         }
-        if (!req.url?.startsWith('/@content/')) return next();
+        if (!req.url?.startsWith('/@content/')) {
+          return next();
+        }
         const rel = decodeURIComponent(req.url.slice('/@content/'.length).split('?')[0] ?? '');
         const abs = resolve(contentDir, rel);
         if (
@@ -159,8 +172,9 @@ export function content(opts: {
           || !within(contentDir, abs)
           || !existsSync(abs)
           || statSync(abs).isDirectory()
-        )
+        ) {
           return next();
+        }
         const type = {
           '.png': 'image/png',
           '.jpg': 'image/jpeg',
@@ -170,7 +184,9 @@ export function content(opts: {
           '.svg': 'image/svg+xml',
           '.gif': 'image/gif',
         }[extname(abs).toLowerCase()];
-        if (type) res.setHeader('content-type', type);
+        if (type) {
+          res.setHeader('content-type', type);
+        }
         res.end(readFileSync(abs));
       });
       // This plugin runs the schema and the renderer in the dev server itself, which keeps the copies it
@@ -180,22 +196,29 @@ export function content(opts: {
       );
       server.watcher.add(packages);
       server.watcher.on('change', (file: string) => {
-        if (packages.some((dir) => file.startsWith(dir)) && !file.endsWith('.test.ts'))
+        if (packages.some((dir) => file.startsWith(dir)) && !file.endsWith('.test.ts')) {
           void server.restart();
+        }
       });
       server.watcher.add(contentDir);
       for (const event of ['add', 'unlink', 'addDir', 'unlinkDir'] as const) {
         server.watcher.on(event, (file: string) => {
-          if (file.startsWith(contentDir)) invalidateContent(server, contentDir);
+          if (file.startsWith(contentDir)) {
+            invalidateContent(server, contentDir);
+          }
         });
       }
     },
     resolveId(id) {
-      if (id === PROFILE || id === INDEX || id === THEME || id.startsWith(ENTRY)) return NULL + id;
+      if (id === PROFILE || id === INDEX || id === THEME || id.startsWith(ENTRY)) {
+        return NULL + id;
+      }
       return null;
     },
     async load(id) {
-      if (!id.startsWith(NULL)) return null;
+      if (!id.startsWith(NULL)) {
+        return null;
+      }
       const bare = id.slice(1);
       if (bare === PROFILE) {
         this.addWatchFile(profilePath);
@@ -213,7 +236,9 @@ export function content(opts: {
       }
       if (bare === INDEX) {
         const entries = loadEntries();
-        for (const e of entries) this.addWatchFile(join(e.dir, 'index.md'));
+        for (const e of entries) {
+          this.addWatchFile(join(e.dir, 'index.md'));
+        }
         // Static import() literals so Vite can resolve and code-split one chunk per entry.
         const loaders = entries
           .map(
@@ -226,7 +251,9 @@ export function content(opts: {
       if (bare.startsWith(ENTRY)) {
         const wanted = decodeURIComponent(bare.slice(ENTRY.length));
         const e = loadEntries().find((x) => x.id === wanted);
-        if (!e) throw new Error(`no content entry ${wanted}`);
+        if (!e) {
+          throw new Error(`no content entry ${wanted}`);
+        }
         this.addWatchFile(join(e.dir, 'index.md'));
         const { html, headings } = await renderMarkdown(e.body, {
           resolveImage: (src) => assetUrl(e.dir, src),
@@ -236,8 +263,9 @@ export function content(opts: {
       return null;
     },
     generateBundle() {
-      for (const a of pendingAssets)
+      for (const a of pendingAssets) {
         this.emitFile({ type: 'asset', fileName: a.fileName, source: a.source });
+      }
       pendingAssets.length = 0;
     },
     /* The default theme's faces, before any script runs, and where theme-init.js finds the Adobe kit
@@ -266,13 +294,17 @@ export function content(opts: {
       ];
     },
     handleHotUpdate({ file, server }) {
-      if (!file.startsWith(contentDir)) return;
+      if (!file.startsWith(contentDir)) {
+        return;
+      }
       invalidateContent(server, contentDir);
       return [];
     },
     // Feed and sitemap are emitted at build so the Worker serves them as static assets.
     async buildStart() {
-      if (!isBuild) return;
+      if (!isBuild) {
+        return;
+      }
       const origin = opts.siteOrigin ?? 'https://calebroseland.com';
       const entries = loadEntries().map(toMeta);
       const postsOnly = entries.filter((e) => e.kind === 'post');
@@ -288,12 +320,15 @@ export function content(opts: {
 
 function invalidateContent(server: import('vite').ViteDevServer, contentDir: string) {
   for (const mod of server.moduleGraph.idToModuleMap.values()) {
-    if (mod.id?.includes('virtual:content/')) server.moduleGraph.invalidateModule(mod);
+    if (mod.id?.includes('virtual:content/')) {
+      server.moduleGraph.invalidateModule(mod);
+    }
   }
   // Skip the reload when the tree on disk is exactly what the editor just wrote: it already shows
   // that, and reloading would remount the editor. Any other change still reloads the open page.
-  if (!isEditorTree(readTree(contentDir, 'content').headSha))
+  if (!isEditorTree(readTree(contentDir, 'content').headSha)) {
     server.ws.send({ type: 'full-reload' });
+  }
 }
 
 const esc = (s: string) =>

@@ -7,7 +7,9 @@ import { siteProfile } from '../content/profile.ts';
 export const Route = createFileRoute('/posts/$slug')({
   loader: async ({ params }) => {
     const meta = findBySlug('post', params.slug);
-    if (!meta) throw notFound();
+    if (!meta) {
+      throw notFound();
+    }
     return loadEntry(meta.id);
   },
   pendingComponent: () => (

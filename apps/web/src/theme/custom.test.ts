@@ -15,8 +15,9 @@ describe('themeVars', () => {
   it("at defaults, reproduces today's type, spacing, radius and measure primitives", () => {
     for (const name of Object.keys(vars).filter((n) =>
       /^--(font-size|space|radius|measure|leading-normal|font-sans|font-brand)/.test(n),
-    ))
+    )) {
       expect([name, vars[name]]).toEqual([name, primitive(name)]);
+    }
   });
 
   it('derives every accent step from the picked colour, with fixed lightness and capped chroma', () => {

@@ -10,7 +10,9 @@ export function useDialogState<T>() {
     close: () => setSubject(null),
     /** For components that report open changes: only closing is theirs to decide. */
     onOpenChange: (open: boolean) => {
-      if (!open) setSubject(null);
+      if (!open) {
+        setSubject(null);
+      }
     },
   };
 }

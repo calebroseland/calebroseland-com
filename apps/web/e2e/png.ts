@@ -5,13 +5,17 @@ import { deflateSync } from 'node:zlib';
 
 const crcTable = Array.from({ length: 256 }, (_, n) => {
   let c = n;
-  for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  for (let k = 0; k < 8; k++) {
+    c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  }
   return c >>> 0;
 });
 
 function crc32(buf: Buffer): number {
   let c = 0xffffffff;
-  for (const byte of buf) c = (crcTable[(c ^ byte) & 0xff] ?? 0) ^ (c >>> 8);
+  for (const byte of buf) {
+    c = (crcTable[(c ^ byte) & 0xff] ?? 0) ^ (c >>> 8);
+  }
   return (c ^ 0xffffffff) >>> 0;
 }
 
@@ -35,7 +39,9 @@ export function noisePng(width = 900, height = 600, seed = 1): Buffer {
   let offset = 0;
   for (let y = 0; y < height; y++) {
     raw[offset++] = 0; // filter: none
-    for (let x = 0; x < width * 3; x++) raw[offset++] = random();
+    for (let x = 0; x < width * 3; x++) {
+      raw[offset++] = random();
+    }
   }
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(width, 0);

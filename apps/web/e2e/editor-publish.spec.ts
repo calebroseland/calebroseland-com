@@ -76,9 +76,13 @@ test.describe('editor publish', () => {
     // Flip the fake PR to non-mergeable, as GitHub would after master moves.
     await page.evaluate(() => {
       const raw = localStorage.getItem('crc:fake-github');
-      if (!raw) throw new Error('fake state missing');
+      if (!raw) {
+        throw new Error('fake state missing');
+      }
       const state = JSON.parse(raw);
-      for (const pr of state.pulls) pr.mergeable = false;
+      for (const pr of state.pulls) {
+        pr.mergeable = false;
+      }
       localStorage.setItem('crc:fake-github', JSON.stringify(state));
     });
     await page.reload();

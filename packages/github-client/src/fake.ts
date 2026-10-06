@@ -44,7 +44,9 @@ let counter = 0;
 const sha = (seed: string) => {
   counter += 1;
   let h = 2166136261;
-  for (const c of `${seed}:${counter}`) h = (h ^ c.charCodeAt(0)) * 16777619;
+  for (const c of `${seed}:${counter}`) {
+    h = (h ^ c.charCodeAt(0)) * 16777619;
+  }
   return (h >>> 0).toString(16).padStart(8, '0').repeat(5);
 };
 
@@ -81,7 +83,9 @@ export function createFakeClient(
   const persist = () => opts.storage?.save(state);
   const seedOnce = async () => {
     const files = await opts.seed?.().catch(() => []);
-    if (!files?.length) return;
+    if (!files?.length) {
+      return;
+    }
     state.branches[state.defaultBranch] = {
       headSha: sha('seed'),
       files: Object.fromEntries(
@@ -96,12 +100,16 @@ export function createFakeClient(
   const delay = async () => {
     seeded ??= seedOnce();
     await seeded;
-    if (opts.latencyMs) await new Promise((r) => setTimeout(r, opts.latencyMs));
+    if (opts.latencyMs) {
+      await new Promise((r) => setTimeout(r, opts.latencyMs));
+    }
   };
 
   const branch = (ref: string): Branch => {
     const b = state.branches[ref];
-    if (!b) throw new Error(`Not Found: branch ${ref}`);
+    if (!b) {
+      throw new Error(`Not Found: branch ${ref}`);
+    }
     return { headSha: b.headSha, files: new Map(Object.entries(b.files)) };
   };
   const writeBranch = (ref: string, b: Branch) => {
@@ -155,7 +163,9 @@ export function createFakeClient(
     async createDraft(slug) {
       await delay();
       const ref = draftRef(slug);
-      if (state.branches[ref]) throw new Error(`Reference already exists: ${ref}`);
+      if (state.branches[ref]) {
+        throw new Error(`Reference already exists: ${ref}`);
+      }
       const base = branch(state.defaultBranch);
       writeBranch(ref, { headSha: base.headSha, files: base.files });
       persist();
@@ -181,7 +191,9 @@ export function createFakeClient(
         persist();
         throw new StaleRefError(ref, expectedHeadSha, moved);
       }
-      if (b.headSha !== expectedHeadSha) throw new StaleRefError(ref, expectedHeadSha, b.headSha);
+      if (b.headSha !== expectedHeadSha) {
+        throw new StaleRefError(ref, expectedHeadSha, b.headSha);
+      }
       for (const f of files) {
         const raw = f.content;
         const binary = isBinaryContent(raw);
@@ -201,7 +213,11 @@ export function createFakeClient(
     async deleteDraft(ref) {
       await delay();
       delete state.branches[ref];
-      for (const p of state.pulls) if (p.headRef === ref && p.state === 'open') p.state = 'closed';
+      for (const p of state.pulls) {
+        if (p.headRef === ref && p.state === 'open') {
+          p.state = 'closed';
+        }
+      }
       persist();
     },
 
@@ -209,7 +225,9 @@ export function createFakeClient(
       await delay();
       branch(ref);
       const existing = prFor(ref);
-      if (existing) return strip(existing);
+      if (existing) {
+        return strip(existing);
+      }
       const number = state.nextPr++;
       const pr = {
         number,
@@ -236,11 +254,17 @@ export function createFakeClient(
     async mergePullRequest(number) {
       await delay();
       const pr = state.pulls.find((p) => p.number === number);
-      if (pr?.state !== 'open') throw new Error(`Not Found: pull ${number}`);
-      if (pr.mergeable === false) throw new Error('Pull Request is not mergeable');
+      if (pr?.state !== 'open') {
+        throw new Error(`Not Found: pull ${number}`);
+      }
+      if (pr.mergeable === false) {
+        throw new Error('Pull Request is not mergeable');
+      }
       const head = branch(pr.headRef);
       const base = branch(pr.base);
-      for (const [p, f] of head.files) base.files.set(p, f);
+      for (const [p, f] of head.files) {
+        base.files.set(p, f);
+      }
       const mergeSha = sha(`merge:${number}`);
       writeBranch(pr.base, { headSha: mergeSha, files: base.files });
       pr.state = 'closed';

@@ -21,15 +21,18 @@ export async function logClientError(
   requestId: string,
 ): Promise<Response> {
   const size = Number(request.headers.get('content-length') ?? 0);
-  if (size > MAX_BYTES)
+  if (size > MAX_BYTES) {
     return problem(
       413,
       'Payload too large',
       `Client error reports are capped at ${MAX_BYTES} bytes.`,
     );
+  }
 
   const raw = await request.text();
-  if (raw.length > MAX_BYTES) return problem(413, 'Payload too large');
+  if (raw.length > MAX_BYTES) {
+    return problem(413, 'Payload too large');
+  }
 
   let parsedJson: unknown;
   try {

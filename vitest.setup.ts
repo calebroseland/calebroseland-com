@@ -15,8 +15,10 @@ afterEach(() => {
   const warns = warnSpy.mock.calls;
   errorSpy.mockRestore();
   warnSpy.mockRestore();
-  if (errors.length > 0)
+  if (errors.length > 0) {
     throw new Error(`Unexpected console.error:\n${errors.map(String).join('\n')}`);
-  if (warns.length > 0)
+  }
+  if (warns.length > 0) {
     throw new Error(`Unexpected console.warn:\n${warns.map(String).join('\n')}`);
+  }
 });

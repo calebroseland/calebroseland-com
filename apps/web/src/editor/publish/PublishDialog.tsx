@@ -23,7 +23,9 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
       summary: buffer.meta.summary,
       slug: buffer.meta.slug,
     });
-    if (!outcome.ok) notify("Couldn't open the pull request.", { kind: 'error' });
+    if (!outcome.ok) {
+      notify("Couldn't open the pull request.", { kind: 'error' });
+    }
   };
 
   const mergeAndShow = async (number: number) => {
@@ -32,7 +34,9 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
       notify("Merge didn't complete. Check the pull request on GitHub.", { kind: 'error' });
       return;
     }
-    if (!outcome.value.deployed) return;
+    if (!outcome.value.deployed) {
+      return;
+    }
     notify('Published.', { kind: 'success' });
     dialog.setOpen(false);
     await showLive(buffer.meta);

@@ -11,7 +11,9 @@ export function useLinkHover(style: keyof typeof styles) {
   // Stable, so React attaches the listener once per link rather than on every render.
   return useCallback(
     (link: HTMLElement | null) => {
-      if (!link || reduce || !canAnimate) return;
+      if (!link || reduce || !canAnimate) {
+        return;
+      }
       const play = styles[style];
       return hover(link, () => {
         play(link, true);

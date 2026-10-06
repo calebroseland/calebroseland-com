@@ -27,7 +27,9 @@ async function api(request: Request, url: URL, env: Env): Promise<Response> {
     const headers = corsHeaders(request, env);
     return new Response(null, { status: Object.keys(headers).length ? 204 : 403, headers });
   }
-  if (!originAllowed(request, env)) return problem(403, 'Origin not allowed');
+  if (!originAllowed(request, env)) {
+    return problem(403, 'Origin not allowed');
+  }
 
   const method = request.method === 'HEAD' ? 'GET' : request.method;
   switch (`${method} ${url.pathname}`) {

@@ -87,7 +87,9 @@ export const mergeMutation = (
   mutationOptions({
     mutationFn: async (number: number) => {
       const merged = await mergeAndCleanUp(gh, { ref, number });
-      if (!capabilitiesOf(gh.kind).deploys) return { deployed: true };
+      if (!capabilitiesOf(gh.kind).deploys) {
+        return { deployed: true };
+      }
       onDeploying();
       const deployed = await waitForDeploy({
         healthUrl: `${window.location.origin}/api/health`,

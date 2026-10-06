@@ -25,7 +25,9 @@ export function SiteFooter({ profile }: { profile: Profile }) {
   const toCard = useBackToCard();
   // The same morph as the brand's way back to the card, onto its contact side.
   const openContact = (e: MouseEvent) => {
-    if (!isPlainClick(e)) return;
+    if (!isPlainClick(e)) {
+      return;
+    }
     e.preventDefault();
     void toCard('/contact');
   };
@@ -97,17 +99,22 @@ function latchToBottom() {
   const root = document.documentElement;
   const pin = () => window.scrollTo({ top: root.scrollHeight, behavior: 'instant' });
   pin();
-  if (typeof ResizeObserver === 'undefined') return;
+  if (typeof ResizeObserver === 'undefined') {
+    return;
+  }
   const resized = new ResizeObserver(pin);
   resized.observe(root);
   const release = () => {
     resized.disconnect();
     clearTimeout(timer);
-    for (const type of ['wheel', 'touchstart', 'keydown']) removeEventListener(type, release);
+    for (const type of ['wheel', 'touchstart', 'keydown']) {
+      removeEventListener(type, release);
+    }
   };
   const timer = setTimeout(release, LATCH_MS);
-  for (const type of ['wheel', 'touchstart', 'keydown'])
+  for (const type of ['wheel', 'touchstart', 'keydown']) {
     addEventListener(type, release, { passive: true, once: true });
+  }
 }
 
 /** An icon-only control gets its name as a tooltip; the control keeps its own accessible name. */

@@ -30,7 +30,9 @@ installErrorReporting();
 void dropUnavailableSession();
 
 const rootEl = document.getElementById('root');
-if (!rootEl) throw new Error('#root missing from index.html');
+if (!rootEl) {
+  throw new Error('#root missing from index.html');
+}
 
 createRoot(rootEl).render(
   <StrictMode>

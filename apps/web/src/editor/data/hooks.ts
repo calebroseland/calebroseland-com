@@ -51,8 +51,10 @@ export function useBoard(kind: EntryKind | undefined): Board {
   // Without branches the entries on disk are the whole story; there are no drafts to lay over them.
   const drafts = useQuery({ ...draftsQuery(gh), enabled: branches });
   const published = useQuery(publishedQuery(gh));
-  if ((branches && drafts.isPending) || published.isPending) return { status: 'loading' };
-  if (drafts.isError || published.isError)
+  if ((branches && drafts.isPending) || published.isPending) {
+    return { status: 'loading' };
+  }
+  if (drafts.isError || published.isError) {
     return {
       status: 'error',
       retry: () => {
@@ -60,6 +62,7 @@ export function useBoard(kind: EntryKind | undefined): Board {
         void published.refetch();
       },
     };
+  }
   const all = branches ? mergeEntries(published.data, drafts.data ?? []) : published.data;
   const rows = kind ? all.filter((r) => r.kind === kind) : all;
   return {
@@ -88,8 +91,10 @@ export function useEntry(slug: string): EntryView {
   const draft = drafts.data?.find((d) => d.slug === slug);
   const ref = draft?.ref ?? gh.defaultBranch;
   const tree = useQuery({ ...contentTreeQuery(gh, ref), enabled: drafts.isSuccess });
-  if (drafts.isPending || tree.isPending) return { status: 'loading' };
-  if (drafts.isError || tree.isError)
+  if (drafts.isPending || tree.isPending) {
+    return { status: 'loading' };
+  }
+  if (drafts.isError || tree.isError) {
     return {
       status: 'error',
       retry: () => {
@@ -97,8 +102,11 @@ export function useEntry(slug: string): EntryView {
         void tree.refetch();
       },
     };
+  }
   const paths = tree.data.files.map((f) => f.path);
-  if (!findEntryDir(paths, slug)) return { status: 'missing', ref };
+  if (!findEntryDir(paths, slug)) {
+    return { status: 'missing', ref };
+  }
   return draft ? { status: 'draft', ref, bundle: tree.data } : { status: 'published', ref };
 }
 

@@ -56,7 +56,9 @@ test.describe('pages', () => {
     await signInFake(page);
     await createEntry(page, 'page', 'Long read');
     await page.getByRole('textbox', { name: 'Post body' }).click();
-    for (let i = 0; i < 60; i++) await page.keyboard.press('Enter');
+    for (let i = 0; i < 60; i++) {
+      await page.keyboard.press('Enter');
+    }
     await page.mouse.wheel(0, 1500);
     const bar = await page.getByRole('banner').boundingBox();
     test.skip(!bar || bar.y + bar.height <= 0, 'the bar scrolls away on this screen');

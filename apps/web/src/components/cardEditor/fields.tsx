@@ -136,7 +136,9 @@ export function Handle({
       aria-keyshortcuts={[...keys.back, ...keys.forward].join(' ')}
       onKeyDown={(e: KeyboardEvent) => {
         const back = keys.back.includes(e.key);
-        if (!back && !keys.forward.includes(e.key)) return;
+        if (!back && !keys.forward.includes(e.key)) {
+          return;
+        }
         e.preventDefault();
         onMove(back ? -1 : 1);
       }}

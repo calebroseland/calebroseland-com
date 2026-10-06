@@ -13,14 +13,18 @@ async function fakeGitHub(request: Request): Promise<Response> {
       client_secret: string;
       code_verifier: string;
     };
-    if (body.client_secret !== 'test-secret')
+    if (body.client_secret !== 'test-secret') {
       return Response.json({ error: 'incorrect_client_credentials' }, { status: 200 });
-    if (body.code === 'explode') return new Response('boom', { status: 500 });
-    if (body.code !== 'good-code')
+    }
+    if (body.code === 'explode') {
+      return new Response('boom', { status: 500 });
+    }
+    if (body.code !== 'good-code') {
       return Response.json({
         error: 'bad_verification_code',
         error_description: 'The code passed is incorrect or expired.',
       });
+    }
     return Response.json({ access_token: 'gho_test_token', token_type: 'bearer', scope: '' });
   }
   return new Response('not found', { status: 404 });

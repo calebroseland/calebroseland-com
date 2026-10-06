@@ -73,7 +73,9 @@ function faceMotion(reduce: boolean) {
 function useFocusOnMount<T extends HTMLElement>(when: boolean): RefObject<T | null> {
   const ref = useRef<T>(null);
   useEffect(() => {
-    if (when) ref.current?.focus();
+    if (when) {
+      ref.current?.focus();
+    }
   }, [when]);
   return ref;
 }
@@ -246,7 +248,9 @@ function Front({
       >
         {profile.groups.map((group, g) => {
           const [primary, ...rest] = group.links;
-          if (!primary) return null;
+          if (!primary) {
+            return null;
+          }
           return (
             <div key={group.title} className={styles.group} data-inline={group.inline || undefined}>
               {expanded ? (
@@ -424,7 +428,9 @@ export function Landing({ profile: published }: { profile: Profile }) {
   // While editing, the face is the session's own: /contact would redirect a card with no contact yet.
   const [editSide, setEditSide] = useState<'front' | 'back'>('front');
   // Signing out (the palette can, mid-edit) ends the edit: its backend is gone.
-  if (editing && !signedIn) setEditing(null);
+  if (editing && !signedIn) {
+    setEditing(null);
+  }
   const [opening, setOpening] = useState(false);
   // After the editor closes, focus goes back to the Edit button once the front face has turned back.
   const [returnToEdit, setReturnToEdit] = useState(false);
@@ -462,7 +468,9 @@ export function Landing({ profile: published }: { profile: Profile }) {
     void withViewTransition(
       'edit',
       () => {
-        if (result?.workingTree) setSaved(result.profile);
+        if (result?.workingTree) {
+          setSaved(result.profile);
+        }
         setReturnToEdit(true);
         setEditing(null);
       },
@@ -483,7 +491,9 @@ export function Landing({ profile: published }: { profile: Profile }) {
             className={`${styles.card} ${styles.cardBack}`}
             // Capture, so one press turns the card back before a tooltip takes the key to close itself.
             onKeyDownCapture={(e) => {
-              if (!editing && e.key === 'Escape') flip();
+              if (!editing && e.key === 'Escape') {
+                flip();
+              }
             }}
             {...faceMotion(reduce)}
           >
@@ -514,7 +524,9 @@ export function Landing({ profile: published }: { profile: Profile }) {
       {...backdrop}
       onClick={(e) => {
         // Leaving mid-edit would throw the edit away, so the background only enters when not editing.
-        if (!editing && isBackdropClick(e)) void enter();
+        if (!editing && isBackdropClick(e)) {
+          void enter();
+        }
       }}
     >
       <main id="main" className={styles.stage} {...backdrop}>

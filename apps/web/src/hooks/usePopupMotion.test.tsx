@@ -15,7 +15,9 @@ vi.mock('./useReduceMotion.ts', () => ({ useReduceMotion: vi.fn(() => false) }))
 /** A popup element; `shown` stands in for layout, which jsdom does not do. */
 function popup(attrs: Record<string, string> = {}, shown = true) {
   const el = document.createElement('div');
-  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  for (const [k, v] of Object.entries(attrs)) {
+    el.setAttribute(k, v);
+  }
   const state = { shown };
   el.checkVisibility = () => state.shown;
   return { el, state };

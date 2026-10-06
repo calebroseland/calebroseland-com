@@ -68,8 +68,12 @@ describe('working-tree client', () => {
     const calls: Array<{ url: string; init?: RequestInit }> = [];
     mockFetch((url, init) => {
       calls.push({ url, ...(init ? { init } : {}) });
-      if (url.startsWith('/@local/upload')) return Response.json({ headSha: 'after-image' });
-      if (url === '/@local/write') return Response.json({ headSha: 'after-text' });
+      if (url.startsWith('/@local/upload')) {
+        return Response.json({ headSha: 'after-image' });
+      }
+      if (url === '/@local/write') {
+        return Response.json({ headSha: 'after-text' });
+      }
       return Response.json(tree);
     });
 
@@ -104,7 +108,9 @@ describe('working-tree client', () => {
 
   it('sends a large image byte for byte, with no encoding step to overflow', async () => {
     const bytes = new Uint8Array(300_000);
-    for (let i = 0; i < bytes.length; i++) bytes[i] = i % 251;
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = i % 251;
+    }
     let uploaded: Blob | null = null;
     mockFetch((url, init) => {
       if (url.startsWith('/@local/upload')) {

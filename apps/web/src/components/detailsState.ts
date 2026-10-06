@@ -26,5 +26,7 @@ export function useDetailsExpanded() {
 /** For a details toggle's onKeyDown: a held Enter clicks a button on every repeat, where Space waits for
     release; dropping the repeats makes either key one toggle per press. */
 export function oncePerPress(event: KeyboardEvent) {
-  if (event.key === 'Enter' && event.repeat) event.preventDefault();
+  if (event.key === 'Enter' && event.repeat) {
+    event.preventDefault();
+  }
 }

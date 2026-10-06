@@ -10,7 +10,9 @@ export type CommandGroup = { value: string; items: Command[] };
 /** True from the first time `value` is true: keeps the lazily loaded palette mounted to animate out. */
 export function useHasBeenTrue(value: boolean): boolean {
   const [seen, setSeen] = useState(value);
-  if (value && !seen) setSeen(true);
+  if (value && !seen) {
+    setSeen(true);
+  }
   return seen;
 }
 
@@ -31,8 +33,11 @@ export function usePaletteView(open: boolean) {
   const groups: CommandGroup[] = [];
   for (const c of commands) {
     const group = groups.find((g) => g.value === c.group);
-    if (group) group.items.push(c);
-    else groups.push({ value: c.group, items: [c] });
+    if (group) {
+      group.items.push(c);
+    } else {
+      groups.push({ value: c.group, items: [c] });
+    }
   }
   return {
     page,

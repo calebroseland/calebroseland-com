@@ -231,7 +231,9 @@ function useContrast(theme: CustomTheme): ContrastRow[] {
 }
 
 function ContrastReadout({ rows }: { rows: ContrastRow[] }) {
-  if (rows.length === 0) return null;
+  if (rows.length === 0) {
+    return null;
+  }
   const failing = rows.filter((r) => r.ratio < r.min).length;
   return (
     <section className={styles.contrast} aria-label="Contrast">
@@ -320,7 +322,9 @@ export default function ThemeEditor({
       open
       disablePointerDismissal
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) {
+          onClose();
+        }
       }}
     >
       <Dialog.Portal>
@@ -496,7 +500,9 @@ export default function ThemeEditor({
                 type="button"
                 className={styles.danger}
                 onClick={() => {
-                  if (!confirmDelete) return setConfirmDelete(true);
+                  if (!confirmDelete) {
+                    return setConfirmDelete(true);
+                  }
                   themeController.deleteCustom(initial.id);
                   onClose();
                 }}

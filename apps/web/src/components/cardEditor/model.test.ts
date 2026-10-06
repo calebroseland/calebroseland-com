@@ -49,7 +49,9 @@ describe('card editor model', () => {
   it('maps schema failures to the fields that caused them', () => {
     const s = fromProfile(base);
     const g = s.groups[0];
-    if (!g?.links[0]) throw new Error('fixture');
+    if (!g?.links[0]) {
+      throw new Error('fixture');
+    }
     const bad = toProfile(base, {
       ...s,
       name: '',

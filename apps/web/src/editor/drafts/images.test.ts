@@ -32,7 +32,8 @@ describe('previewSrc', () => {
   });
 
   it('leaves absolute, remote and unknown sources as written', () => {
-    for (const src of ['https://x.test/a.png', '/a.png', 'data:image/png;base64,x', 'gone.png'])
+    for (const src of ['https://x.test/a.png', '/a.png', 'data:image/png;base64,x', 'gone.png']) {
       expect(previewSrc(src, buffer, files)).toBe(src);
+    }
   });
 });

@@ -136,7 +136,9 @@ describe('binary content', () => {
   it('round-trips an image larger than the argument-stack limit', async () => {
     // A photo resized for the web is a few hundred kB; encoding it in one spread call used to throw.
     const bytes = new Uint8Array(300_000);
-    for (let i = 0; i < bytes.length; i++) bytes[i] = i % 251;
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = i % 251;
+    }
 
     const gh = createFakeClient();
     const draft = await gh.createDraft('with-image');
