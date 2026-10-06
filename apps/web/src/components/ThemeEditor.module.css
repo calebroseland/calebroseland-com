@@ -2,6 +2,8 @@
   /* A sheet at the side (desktop) or bottom (phone), so the page it previews stays in view. It sets its
      own type and spacing so the editor stays usable while those tokens are being changed. */
   .sheet {
+    --editor-gap: 0.75rem;
+    --editor-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     position: fixed;
     inset-block: var(--editor-gap);
     inset-inline-end: var(--editor-gap);
@@ -9,22 +11,20 @@
     display: grid;
     grid-template-rows: auto 1fr auto;
     inline-size: min(24rem, calc(100vw - 2 * var(--editor-gap)));
-    border-radius: 12px;
-    background: var(--color-surface-raised);
-    border: 1px solid var(--color-border);
-    box-shadow:
-      0 4px 8px oklch(0% 0 0 / 0.08),
-      0 16px 40px oklch(0% 0 0 / 0.18);
-    color: var(--color-text);
+    overflow: hidden;
     font-family: var(--editor-font);
     font-size: 0.9375rem;
     line-height: 1.4;
-    overflow: hidden;
+    color: var(--color-text);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow:
+      0 4px 8px oklch(0% 0 0 / 0.08),
+      0 16px 40px oklch(0% 0 0 / 0.18);
     transition:
       opacity var(--duration-normal) var(--ease-out),
       translate var(--duration-normal) var(--ease-out);
-    --editor-gap: 0.75rem;
-    --editor-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
     &[data-starting-style],
     &[data-ending-style] {
@@ -50,15 +50,15 @@
   .header,
   .footer {
     display: flex;
-    align-items: center;
     gap: 0.5rem;
+    align-items: center;
     padding: 0.75rem 1rem;
     background: var(--color-surface-raised);
   }
 
   .header {
-    justify-content: space-between;
     align-items: flex-start;
+    justify-content: space-between;
     border-block-end: 1px solid var(--color-border);
   }
 
@@ -72,14 +72,14 @@
   }
 
   .description {
-    color: var(--color-text-muted);
     font-size: 0.8125rem;
+    color: var(--color-text-muted);
   }
 
   .body {
     display: grid;
-    align-content: start;
     gap: 1.25rem;
+    align-content: start;
     padding: 1rem;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -89,8 +89,8 @@
   .section,
   .segmented {
     min-inline-size: 0;
-    margin: 0;
     padding: 0;
+    margin: 0;
     border: 0;
   }
 
@@ -103,10 +103,10 @@
 
   .sectionTitle {
     margin-block-end: 0.25rem;
-    color: var(--color-text-muted);
     font-size: 0.75rem;
-    letter-spacing: 0.12em;
+    color: var(--color-text-muted);
     text-transform: uppercase;
+    letter-spacing: 0.12em;
   }
 
   .field {
@@ -120,8 +120,8 @@
 
   .hint {
     margin-block-start: -0.5rem;
-    color: var(--color-text-muted);
     font-size: 0.8125rem;
+    color: var(--color-text-muted);
   }
 
   .input,
@@ -129,11 +129,11 @@
   .selectTrigger {
     min-block-size: 2.5rem;
     padding: 0.375rem 0.625rem;
-    border-radius: 8px;
-    border: 1px solid var(--color-border-strong);
-    background: var(--color-surface);
-    color: var(--color-text);
     font: inherit;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: 8px;
 
     &:focus-visible {
       outline: var(--focus-ring-width) solid var(--color-focus-ring);
@@ -154,18 +154,18 @@
 
   .segment {
     display: flex;
-    align-items: center;
     gap: 0.5rem;
+    align-items: center;
     min-block-size: 2.5rem;
     padding-inline: 0.75rem;
-    border-radius: 8px;
-    border: 1px solid var(--color-border-strong);
     cursor: pointer;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 8px;
 
     &:has([data-checked]) {
-      border-color: var(--color-accent);
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
+      border-color: var(--color-accent);
     }
   }
 
@@ -174,9 +174,9 @@
     place-items: center;
     inline-size: 1rem;
     block-size: 1rem;
-    border-radius: 50%;
-    border: 1px solid var(--color-border-strong);
     background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: 50%;
 
     &[data-checked] {
       border-color: var(--color-accent);
@@ -191,16 +191,16 @@
   .radioDot {
     inline-size: 0.5rem;
     block-size: 0.5rem;
-    border-radius: 50%;
     background: var(--color-accent);
+    border-radius: 50%;
   }
 
   /* Colour */
   .colorField {
     display: grid;
     grid-template-columns: 1fr auto 6.5rem;
-    align-items: center;
     gap: 0.5rem;
+    align-items: center;
   }
 
   .swatchButton {
@@ -208,8 +208,8 @@
     place-items: center;
     inline-size: 2.5rem;
     block-size: 2.5rem;
-    border-radius: 8px;
     border: 1px solid var(--color-border-strong);
+    border-radius: 8px;
 
     &:hover,
     &[data-popup-open] {
@@ -242,11 +242,11 @@
 
   .pickerPopup {
     padding: 0.75rem;
-    border-radius: 12px;
+    outline: none;
     background: var(--color-surface-raised);
     border: 1px solid var(--color-border);
+    border-radius: 12px;
     box-shadow: 0 12px 32px oklch(0% 0 0 / 0.2);
-    outline: none;
     /* Motion grows it out of its trigger (motion/presets.ts). */
     transform-origin: var(--transform-origin);
 
@@ -264,14 +264,14 @@
 
   .fieldHead {
     display: flex;
-    align-items: center;
     gap: 0.5rem;
+    align-items: center;
   }
 
   .value {
     margin-inline-start: auto;
-    color: var(--color-text-muted);
     font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
   }
 
   .reset {
@@ -279,17 +279,17 @@
     place-items: center;
     inline-size: 1.75rem;
     block-size: 1.75rem;
-    border-radius: 6px;
     color: var(--color-text-muted);
+    border-radius: 6px;
 
     &:hover:not(:disabled) {
-      background: var(--color-surface-hover);
       color: var(--color-text);
+      background: var(--color-surface-hover);
     }
 
     &:active:not(:disabled) {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
 
     &:disabled {
@@ -308,21 +308,21 @@
     position: relative;
     inline-size: 100%;
     block-size: 0.375rem;
-    border-radius: 999px;
     background: var(--color-surface-active);
+    border-radius: 999px;
   }
 
   .sliderIndicator {
-    border-radius: 999px;
     background: var(--color-accent);
+    border-radius: 999px;
   }
 
   .sliderThumb {
     inline-size: 1.125rem;
     block-size: 1.125rem;
-    border-radius: 50%;
     background: var(--white);
     border: 2px solid var(--color-accent);
+    border-radius: 50%;
     box-shadow: 0 1px 3px oklch(0% 0 0 / 0.3);
 
     &:has(:focus-visible) {
@@ -338,9 +338,9 @@
   /* Select */
   .selectTrigger {
     display: flex;
+    gap: 0.5rem;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
     text-align: start;
   }
 
@@ -352,25 +352,25 @@
   .selectPopup {
     min-inline-size: var(--anchor-width);
     padding: 0.25rem;
-    border-radius: 10px;
+    outline: none;
     background: var(--color-surface-raised);
     border: 1px solid var(--color-border);
+    border-radius: 10px;
     box-shadow: 0 12px 32px oklch(0% 0 0 / 0.2);
-    outline: none;
     /* Motion grows it out of its trigger (motion/presets.ts). */
     transform-origin: var(--transform-origin);
   }
 
   .selectItem {
     display: flex;
+    gap: 0.75rem;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
     min-block-size: 2.25rem;
     padding: 0.25rem 0.625rem;
-    border-radius: 6px;
     cursor: pointer;
     outline: none;
+    border-radius: 6px;
 
     /* Raised popup: hover would match its own surface in dark, so rows step up once more. */
     &[data-highlighted] {
@@ -386,9 +386,9 @@
   /* Switch */
   .switchRow {
     display: flex;
+    gap: 1rem;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
   }
 
   .switch {
@@ -396,8 +396,8 @@
     flex: none;
     inline-size: 2.5rem;
     block-size: 1.5rem;
-    border-radius: 999px;
     background: var(--color-surface-active);
+    border-radius: 999px;
     transition: background-color var(--duration-fast) var(--ease-out);
 
     &[data-checked] {
@@ -416,8 +416,8 @@
     inset-inline-start: 0.1875rem;
     inline-size: 1.125rem;
     block-size: 1.125rem;
-    border-radius: 50%;
     background: var(--white);
+    border-radius: 50%;
     box-shadow: 0 1px 2px oklch(0% 0 0 / 0.3);
     transition: translate var(--duration-fast) var(--ease-out);
 
@@ -431,15 +431,15 @@
     display: grid;
     gap: 0.5rem;
     padding: 0.75rem;
-    border-radius: 10px;
     background: var(--color-bg-subtle);
+    border-radius: 10px;
   }
 
   .ok,
   .warn {
     display: flex;
-    align-items: center;
     gap: 0.375rem;
+    align-items: center;
     font-weight: var(--font-weight-medium);
   }
 
@@ -463,8 +463,8 @@
     }
 
     & li[data-failing] {
-      color: var(--color-warning);
       font-weight: var(--font-weight-medium);
+      color: var(--color-warning);
     }
   }
 
@@ -478,17 +478,17 @@
     place-items: center;
     inline-size: 2.5rem;
     block-size: 2.5rem;
-    border-radius: 50%;
     color: var(--color-text-muted);
+    border-radius: 50%;
 
     &:hover {
-      background: var(--color-surface-hover);
       color: var(--color-text);
+      background: var(--color-surface-hover);
     }
 
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 
@@ -500,18 +500,18 @@
   .secondary,
   .danger {
     display: inline-flex;
-    align-items: center;
     gap: 0.375rem;
+    align-items: center;
     min-block-size: 2.5rem;
     padding-inline: 0.875rem;
-    border-radius: 8px;
     font-weight: var(--font-weight-medium);
+    border-radius: 8px;
     transition: background-color var(--duration-fast) var(--ease-out);
   }
 
   .primary {
-    background: var(--color-accent);
     color: var(--color-text-on-accent);
+    background: var(--color-accent);
 
     &:hover {
       background: var(--color-accent-hover);
@@ -530,8 +530,8 @@
     }
 
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 

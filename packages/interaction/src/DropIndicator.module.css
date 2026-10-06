@@ -4,9 +4,9 @@
   .indicator {
     --drop-offset: calc(-0.5 * (var(--drop-gap, 0px) + var(--border-width-thick)));
     position: absolute;
-    background: var(--color-accent);
-    pointer-events: none;
     z-index: var(--z-drag);
+    pointer-events: none;
+    background: var(--color-accent);
 
     &[data-edge="top"],
     &[data-edge="bottom"] {
@@ -41,8 +41,8 @@
 @layer components {
   /* The drag preview: a copy of the item, drawn away from its list, on a surface of its own. */
   .preview {
-    border-radius: var(--radius-md);
     background: var(--color-surface-raised);
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
   }
 }
