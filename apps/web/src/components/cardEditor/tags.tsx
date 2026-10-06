@@ -13,7 +13,6 @@ import styles from './CardEditor.module.css';
 import { Handle, IconSelect, TextField } from './fields.tsx';
 import { type EditTag, MAX_TAGS, newTag, tagProblem } from './model.ts';
 
-/** The card's focus areas as chips: reorder, add, remove, and each one's settings a click away. */
 /** The tag being typed, why it cannot be added yet, and the id tying its label and message to it. */
 const useTagDraft = () => {
   const [draft, setDraft] = useState('');
@@ -30,6 +29,7 @@ const showWithIcon = (icon: string | null, show: EditTag['show']): EditTag['show
   return show === 'label' ? 'both' : show;
 };
 
+/** The card's focus areas as chips: reorder, add, remove, and each one's settings a click away. */
 export const TagEditor = ({
   tags,
   errors,

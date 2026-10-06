@@ -29,7 +29,6 @@ const reduceMotion = (): boolean => {
   return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 };
 
-/** The view-transition types for one navigation, or false for none. */
 /** Deeper is forward, shallower is back, the same depth is across. */
 const directionOf = (from: number, to: number): 'forward' | 'back' | 'across' => {
   if (to === from) {
@@ -38,6 +37,7 @@ const directionOf = (from: number, to: number): 'forward' | 'back' | 'across' =>
   return to > from ? 'forward' : 'back';
 };
 
+/** The view-transition types for one navigation, or false for none. */
 export const pageTypes = (declared: PageEffect | undefined, info: ChangeInfo): string[] | false => {
   const from = info.fromLocation;
   if (!from || !info.pathChanged || declared === false || reduceMotion()) {

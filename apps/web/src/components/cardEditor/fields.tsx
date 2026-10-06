@@ -5,12 +5,12 @@ import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
 import styles from './CardEditor.module.css';
 import { ICON_CHOICES } from './model.ts';
 
-/** A labelled field in a popover or on the contact side. */
 /** Ties a field's label to its control. */
 const useLabelId = () => {
   return useId();
 };
 
+/** A labelled field in a popover or on the contact side. */
 export const TextField = ({
   label,
   value,

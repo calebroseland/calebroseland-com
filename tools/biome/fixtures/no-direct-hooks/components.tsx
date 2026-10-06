@@ -3,6 +3,7 @@ import { useHotkey } from '@tanstack/react-hotkeys';
 import { memo, use, useEffectEvent, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useItemRegistration } from '@crc/interaction';
+import useMeasure from 'react-use-measure';
 import { useLocalThing } from './local.ts';
 
 /* Each line ending in "expect" must be flagged; no other line may be. */
@@ -57,6 +58,11 @@ export function MemberHook({ form }: { form: { useStore: (f: (s: number) => numb
 export function TypeArguments() {
   const el = useRef<HTMLDivElement>(null); // expect
   return el;
+}
+
+export function DefaultImported() {
+  const [ref] = useMeasure(); // expect
+  return ref;
 }
 
 export function CustomHook() {

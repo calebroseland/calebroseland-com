@@ -136,7 +136,7 @@
   },
   "overrides": [
     {
-      "includes": ["apps/web/src/**/*.tsx", "!**/*.test.tsx"],
+      "includes": ["apps/web/src/**/*.tsx", "packages/*/src/**/*.tsx", "!**/*.test.tsx"],
       "plugins": ["./tools/biome/no-direct-hooks.grit"]
     },
     {
@@ -189,8 +189,7 @@
         "**/*.config.ts",
         "apps/web/src/theme/custom.ts",
         "apps/web/src/theme/contrast.ts",
-        "packages/ui/src/motionTokens.ts",
-        "packages/ui/src/contrast.ts"
+        "packages/ui/src/motionTokens.ts"
       ],
       "linter": {
         "rules": {

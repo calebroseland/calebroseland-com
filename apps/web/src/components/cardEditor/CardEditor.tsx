@@ -49,8 +49,6 @@ export type EditFaces = { front: ReactNode; back: ReactNode };
    drafts/profile branch, or the working tree), edits a copy, and saves it back as content/profile.yaml.
    Loaded only when an editor opens it, so readers never download it. */
 
-/** Loads what the editor needs before it is shown, so the card can turn editable in one step. */
-
 /** Whether the card has been turned in this session, so focus follows only a turn the editor made. */
 const useTurnOver = (onFlip: () => void) => {
   const [turned, setTurned] = useState(false);
@@ -63,6 +61,7 @@ const useTurnOver = (onFlip: () => void) => {
   };
 };
 
+/** Loads what the editor needs before it is shown, so the card can turn editable in one step. */
 export const prepareEdit = (published: Profile): Promise<ProfileSource> => {
   return loadProfile(clientFor(session.store.state), published);
 };

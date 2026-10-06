@@ -3,8 +3,8 @@ language js
 // Components call small, purpose-named custom hooks; library hooks are called only from inside those
 // hooks. A component is a PascalCase function: declared, default-exported, or assigned to a const
 // (arrow, function expression, or a wrapper such as memo). A library hook is a `use`/`use…` function
-// imported from a third-party package (not a relative path or the workspace's own `@crc/*`), or a
-// `use…` method on an object (`Route.useSearch`, `form.useStore`).
+// imported (named or default) from a third-party package (not a relative path or the workspace's own
+// `@crc/*`), or a `use…` method on an object (`Route.useSearch`, `form.useStore`).
 or {
   `function $name($params) { $body }`,
   `export default function $name($params) { $body }`,
@@ -21,10 +21,11 @@ or {
       `$hook<$types>($args)`
     } where {
       $hook <: r"^use(?:[A-Z]\w*)?$",
-      $program <: contains `import { $specs } from $source` where {
-        $specs <: contains $hook,
-        $source <: not r"^['\"](?:\.\.?/|@crc/).*"
-      }
+      $program <: contains or {
+        `import { $specs } from $source` where { $specs <: contains $hook },
+        `import $hook from $source`,
+        `import $hook, { $specs } from $source`
+      } where { $source <: not r"^['\"](?:\.\.?/|@crc/).*" }
     }
   } as $call where {
     register_diagnostic(span=$call, message="Components call a purpose-named custom hook; move this library hook call into one.", severity="error")

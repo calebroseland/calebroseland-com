@@ -25,8 +25,8 @@ const flagged = (dir: string): string[] => {
     const { stdout = '', stderr = '' } = error as { stdout?: string; stderr?: string };
     out = stdout + stderr;
   }
-  // A rule that fails to load reports nothing, which would read as a pass.
-  if (/during loading of plugins|configuration resulted in errors/.test(out)) {
+  // A rule that fails to load, or errors while running, reports nothing, which would read as a pass.
+  if (/during loading of plugins|configuration resulted in errors|errored:/.test(out)) {
     throw new Error(`Biome could not load the rule for ${dir}:\n${out}`);
   }
   const lines = [...out.matchAll(/(\S+\.tsx?):(\d+):\d+ plugin/g)].map(
