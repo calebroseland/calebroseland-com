@@ -62,7 +62,8 @@
           "options": {
             "allow": ["error", "warn"]
           }
-        }
+        },
+        "noShadow": "error"
       },
       "style": {
         "useImportType": "error",

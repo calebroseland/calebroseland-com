@@ -138,8 +138,8 @@ const useToolbarState = (editor: Editor) => {
   const fileInput = useRef<HTMLInputElement>(null);
   const active = useEditorState({
     editor,
-    selector: ({ editor }) =>
-      Object.fromEntries(commands.map((c) => [c.id, c.active?.(editor) ?? false])),
+    selector: ({ editor: current }) =>
+      Object.fromEntries(commands.map((c) => [c.id, c.active?.(current) ?? false])),
   });
   return { fileInput, active };
 };

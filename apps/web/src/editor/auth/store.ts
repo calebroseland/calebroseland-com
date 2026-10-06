@@ -39,7 +39,7 @@ const read = (storage: SessionEnv['storage']): Session => {
 
 export type SessionController = {
   store: Store<Session>;
-  signIn(session: Extract<Session, { status: 'authenticated' }>): void;
+  signIn(next: Extract<Session, { status: 'authenticated' }>): void;
   signOut(): void;
 };
 
@@ -58,8 +58,8 @@ export const createSessionStore = (env: SessionEnv): SessionController => {
   };
   return {
     store,
-    signIn(session: Extract<Session, { status: 'authenticated' }>) {
-      store.setState(() => session);
+    signIn(next: Extract<Session, { status: 'authenticated' }>) {
+      store.setState(() => next);
       persist();
     },
     signOut() {

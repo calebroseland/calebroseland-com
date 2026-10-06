@@ -101,7 +101,7 @@ const useMarkdownEditor = ({
         return true;
       },
     },
-    onUpdate: ({ editor }) => onChangeRef.current(editor.getMarkdown()),
+    onUpdate: ({ editor: updated }) => onChangeRef.current(updated.getMarkdown()),
   });
   useApiBinding(editor, apiRef);
   return { editor, pickImages: (files: File[]) => onImageFilesRef.current(files) };

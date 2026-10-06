@@ -224,9 +224,9 @@ export const createFakeClient = (
     async openPullRequest({ ref, title, body }) {
       await delay();
       branch(ref);
-      const existing = prFor(ref);
-      if (existing) {
-        return strip(existing);
+      const open = prFor(ref);
+      if (open) {
+        return strip(open);
       }
       const number = state.nextPr++;
       const pr = {

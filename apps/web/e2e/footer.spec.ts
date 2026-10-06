@@ -3,9 +3,9 @@ import { expect, test } from './fixtures.ts';
 
 /** Scrolls up from the very bottom by `by` pixels, the same way on touch and pointer devices. */
 const shortOfBottom = (page: Page, by: number) =>
-  page.evaluate((by) => {
+  page.evaluate((offset) => {
     const el = document.scrollingElement ?? document.documentElement;
-    el.scrollTo({ top: el.scrollHeight - el.clientHeight - by, behavior: 'instant' });
+    el.scrollTo({ top: el.scrollHeight - el.clientHeight - offset, behavior: 'instant' });
   }, by);
 
 const atBottom = (page: Page) =>

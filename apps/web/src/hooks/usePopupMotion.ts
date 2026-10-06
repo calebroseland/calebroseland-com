@@ -89,17 +89,17 @@ export const usePopupMotion = (kind: PopupKind, open?: boolean) => {
   return {
     ref,
     /** Call from the root's onOpenChange; reopening a kept-mounted popup springs it in again. */
-    onOpenChange: (open: boolean, details?: { reason?: string }) => {
+    onOpenChange: (next: boolean, details?: { reason?: string }) => {
       // A tip closed because a sibling in its group opened (reason "none") swaps out at once; Base UI
       // marks it data-instant only after this call.
-      if (!open && kind === 'tip' && details?.reason === 'none') {
+      if (!next && kind === 'tip' && details?.reason === 'none') {
         for (const a of running.current) {
           a.cancel();
         }
         running.current = [];
         return;
       }
-      play(open ? enterPopup : leavePopup);
+      play(next ? enterPopup : leavePopup);
     },
   };
 };

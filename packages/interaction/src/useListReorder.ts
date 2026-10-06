@@ -56,7 +56,7 @@ export const useDragMoves = (kind: string, onMove: (from: Slot, to: Slot) => voi
             return;
           }
           const from = { listId: source.data.listId, index: source.data.index };
-          const same = (listId: string) => listId === from.listId;
+          const same = (id: string) => id === from.listId;
           if (isListData(target.data)) {
             const { listId, length } = target.data;
             onMoveRef.current(from, { listId, index: same(listId) ? length - 1 : length });

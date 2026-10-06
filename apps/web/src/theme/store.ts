@@ -171,11 +171,11 @@ export const createThemeStore = (env: ThemeEnv): ThemeController => {
       apply();
     },
     saveCustom(theme: CustomTheme) {
-      const themes = store.state.customThemes;
+      const saved = store.state.customThemes;
       saveThemes(
-        themes.some((t) => t.id === theme.id)
-          ? themes.map((t) => (t.id === theme.id ? theme : t))
-          : [...themes, theme],
+        saved.some((t) => t.id === theme.id)
+          ? saved.map((t) => (t.id === theme.id ? theme : t))
+          : [...saved, theme],
       );
       preview = null;
       this.setPreference(customPreference(theme.id));

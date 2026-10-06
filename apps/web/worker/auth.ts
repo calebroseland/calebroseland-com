@@ -88,12 +88,12 @@ export const authCallback = async (
       }),
       signal: AbortSignal.timeout(10_000),
     });
-  } catch (err) {
+  } catch (cause) {
     console.error(
       JSON.stringify({
         requestId,
         event: 'auth.exchange.network',
-        message: err instanceof Error ? err.message : String(err),
+        message: cause instanceof Error ? cause.message : String(cause),
       }),
     );
     return problem(502, 'GitHub unreachable', 'The token exchange did not complete. Try again.');
