@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="580" viewBox="0 0 1200 580" role="img" aria-labelledby="t d" font-family="IBM Plex Sans, system-ui, -apple-system, Segoe UI, sans-serif">
+  <title id="t">CR-COM v2 delivery</title>
+  <desc id="d">Pull requests run CI. Pushes to next deploy the staging Worker and pushes to master deploy the production Worker, both followed by smoke tests; both also publish a static GitHub Pages backup.</desc>
+  <style>
+    .bg{fill:#fbfaf7}.panel{fill:#f3f0ea;stroke:#e2ddd2}.box{fill:#fff;stroke:#c9c3b6}
+    .cf{fill:#fff7f1;stroke:#d9662a}.gh{fill:#f3f6fd;stroke:#4a6fc9}.ok{fill:#f2f8f4;stroke:#3f8a5c}
+    .ghost{fill:none;stroke:#b3ad9f;stroke-dasharray:5 4}
+    .t{fill:#1d1b17}.m{fill:#6b655a}.cfT{fill:#b4501b}.ghT{fill:#2f55b0}.okT{fill:#2f7a4b}
+    .ln{stroke:#8d8678;fill:none;stroke-width:1.6}.dash{stroke-dasharray:6 5}
+    .ah{fill:#8d8678}
+    .h{font-size:22px;font-weight:700}.sub{font-size:16px}.b{font-size:16px;font-weight:600}
+    .s{font-size:14.5px}.xs{font-size:13px}.cap{font-size:12.5px;font-weight:600;letter-spacing:.08em}
+    .mono{font-family:IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, monospace}
+    @media (prefers-color-scheme:dark){
+      .bg{fill:#16151a}.panel{fill:#1d1c22;stroke:#2c2a33}.box{fill:#24232a;stroke:#46434e}
+      .cf{fill:#2a1f19;stroke:#e07a3e}.gh{fill:#1a2030;stroke:#6f93f0}.ok{fill:#18241d;stroke:#5fb582}
+      .ghost{stroke:#5b5865}
+      .t{fill:#ecebe7}.m{fill:#a29e95}.cfT{fill:#f19a62}.ghT{fill:#93b0ff}.okT{fill:#7fcf9e}
+      .ln{stroke:#8a8694}.ah{fill:#8a8694}
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="ah" d="M0 0L10 5L0 10z"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="580" rx="18"/>
+  <g transform="translate(0 -56)">
+  <!-- ───────── 1 · Delivery ───────── -->
+  <rect class="panel" x="20" y="76" width="1160" height="540" rx="14"/>
+  <text class="t h" x="40" y="112">1 · Delivery</text>
+  <text class="m sub" x="178" y="112">branch → GitHub Actions → where it lands</text>
+  <text class="m cap" x="40" y="146">BRANCH</text>
+  <text class="m cap" x="250" y="146">WORKFLOW</text>
+  <text class="m cap" x="720" y="146">LANDS ON</text>
+
+  <!-- r1 -->
+  <rect class="box" x="40" y="160" width="170" height="84" rx="10"/>
+  <text class="t b mono" x="125" y="196" text-anchor="middle">feature/*</text>
+  <text class="m s" x="125" y="220" text-anchor="middle">pull request</text>
+  <rect class="box" x="250" y="160" width="430" height="84" rx="10"/>
+  <text class="t b mono" x="268" y="186">ci.yml</text>
+  <text class="t s" x="268" y="210">check (lint · types · tests) · build · size · knip · audit</text>
+  <text class="m s" x="268" y="232">then e2e on Chromium, WebKit, mobile</text>
+  <rect class="ghost" x="720" y="160" width="440" height="84" rx="10"/>
+  <text class="t b" x="740" y="196">Checks on the PR</text>
+  <text class="m s" x="740" y="220">nothing deploys; squash-merge when green</text>
+  <path class="ln" d="M210 202H246" marker-end="url(#a)"/>
+  <path class="ln" d="M680 202H716" marker-end="url(#a)"/>
+
+  <!-- r2 -->
+  <rect class="box" x="40" y="260" width="170" height="84" rx="10"/>
+  <text class="t b mono" x="125" y="296" text-anchor="middle">next</text>
+  <text class="m s" x="125" y="320" text-anchor="middle">push</text>
+  <rect class="box" x="250" y="260" width="430" height="84" rx="10"/>
+  <text class="t b mono" x="268" y="286">staging.yml</text>
+  <text class="t s" x="268" y="310">ci → build → wrangler deploy → smoke</text>
+  <text class="m xs mono" x="268" y="332">CLOUDFLARE_ENV=staging  CONTENT_BRANCH=next</text>
+  <rect class="cf" x="720" y="260" width="440" height="84" rx="10"/>
+  <text class="cfT b" x="740" y="292">Worker  <tspan class="mono">calebroseland-com-staging</tspan></text>
+  <text class="t s" x="740" y="318">next.calebroseland.com</text>
+  <path class="ln" d="M210 302H246" marker-end="url(#a)"/>
+  <path class="ln" d="M680 302H716" marker-end="url(#a)"/>
+
+  <!-- r3 -->
+  <rect class="box" x="40" y="360" width="170" height="84" rx="10"/>
+  <text class="t b mono" x="125" y="396" text-anchor="middle">master</text>
+  <text class="m s" x="125" y="420" text-anchor="middle">push</text>
+  <rect class="box" x="250" y="360" width="430" height="84" rx="10"/>
+  <text class="t b mono" x="268" y="386">deploy.yml</text>
+  <text class="t s" x="268" y="410">ci → build → wrangler deploy → smoke</text>
+  <text class="m xs mono" x="268" y="432">environment: production  CONTENT_BRANCH=master</text>
+  <rect class="cf" x="720" y="360" width="440" height="84" rx="10"/>
+  <text class="cfT b" x="740" y="392">Worker  <tspan class="mono">calebroseland-com</tspan></text>
+  <text class="t s" x="740" y="418">calebroseland.com</text>
+  <path class="ln" d="M210 402H246" marker-end="url(#a)"/>
+  <path class="ln" d="M680 402H716" marker-end="url(#a)"/>
+
+  <!-- r4 -->
+  <rect class="ghost" x="40" y="460" width="170" height="84" rx="10"/>
+  <text class="m s" x="125" y="496" text-anchor="middle">called by</text>
+  <text class="m s" x="125" y="518" text-anchor="middle">staging + deploy</text>
+  <rect class="box" x="250" y="460" width="430" height="84" rx="10"/>
+  <text class="t b mono" x="268" y="486">pages.yml</text>
+  <text class="t s" x="268" y="510">build:pages → deploy-pages → smoke</text>
+  <text class="m xs mono" x="268" y="532">VITE_API_ORIGIN=https://calebroseland.com</text>
+  <rect class="gh" x="720" y="460" width="440" height="84" rx="10"/>
+  <text class="ghT b" x="740" y="492">GitHub Pages backup · static, no Worker</text>
+  <text class="t s" x="740" y="518">calebroseland.dev</text>
+  <path class="ln" d="M210 502H246" marker-end="url(#a)"/>
+  <path class="ln" d="M680 502H716" marker-end="url(#a)"/>
+
+  <text class="m s" x="40" y="586">Smoke tests run against the live URL after each deploy. <tspan class="mono">uptime.yml</tspan> probes / and /api/health and files an issue on failure (schedule off for now).</text>
+
+    </g>
+</svg>
