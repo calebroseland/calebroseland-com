@@ -137,9 +137,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
   const runSave = async (mode: 'save' | 'overwrite') => {
     const outcome = await save.run(mode);
     if (outcome.ok) {
-      if (!branches) {
-        notify(`Saved ${buffer.dir} to your working tree`, { kind: 'success' });
-      } else {
+      if (branches) {
         const { commitUrl } = outcome.value;
         notify(`Committed to ${buffer.ref}`, {
           kind: 'success',
@@ -148,6 +146,8 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
             onClick: () => window.open(commitUrl, '_blank', 'noopener'),
           },
         });
+      } else {
+        notify(`Saved ${buffer.dir} to your working tree`, { kind: 'success' });
       }
     } else if (outcome.reason === 'conflict') {
       conflict.open(outcome.error);
@@ -289,7 +289,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
               >
                 {p === 'meta'
                   ? 'Details'
-                  : `Images${buffer.assets.length ? ` (${buffer.assets.length})` : ''}`}
+                  : `Images${buffer.assets.length > 0 ? ` (${buffer.assets.length})` : ''}`}
               </button>
             ))}
           </div>
@@ -306,14 +306,14 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
         open={conflict.isOpen}
         onOpenChange={conflict.onOpenChange}
         title={
-          !branches
-            ? 'This file changed on disk since you opened it.'
-            : 'This post changed on GitHub since you opened it.'
+          branches
+            ? 'This post changed on GitHub since you opened it.'
+            : 'This file changed on disk since you opened it.'
         }
         description={
-          !branches
-            ? 'Reload to see what is on disk now (your unsaved edits are discarded), or overwrite the file with what you have here.'
-            : 'Reload to see the newer version (your local edits are discarded), or overwrite it with what you have here.'
+          branches
+            ? 'Reload to see the newer version (your local edits are discarded), or overwrite it with what you have here.'
+            : 'Reload to see what is on disk now (your unsaved edits are discarded), or overwrite the file with what you have here.'
         }
         actions={
           <>
@@ -321,7 +321,7 @@ function DraftEditor({ slug, bundle }: { slug: string; bundle: Bundle }) {
               Cancel
             </button>
             <button type="button" className={styles.secondary} onClick={reloadFromSource}>
-              {!branches ? 'Reload from disk' : 'Reload from GitHub'}
+              {branches ? 'Reload from GitHub' : 'Reload from disk'}
             </button>
             <button
               type="button"

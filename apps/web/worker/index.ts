@@ -25,7 +25,7 @@ async function api(request: Request, url: URL, env: Env): Promise<Response> {
   const requestId = crypto.randomUUID();
   if (request.method === 'OPTIONS') {
     const headers = corsHeaders(request, env);
-    return new Response(null, { status: Object.keys(headers).length ? 204 : 403, headers });
+    return new Response(null, { status: Object.keys(headers).length > 0 ? 204 : 403, headers });
   }
   if (!originAllowed(request, env)) {
     return problem(403, 'Origin not allowed');

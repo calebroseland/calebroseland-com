@@ -60,7 +60,7 @@ export class AuthError extends Error {
   }
 }
 
-export interface GitHubClient {
+export type GitHubClient = {
   readonly kind: 'octokit' | 'fake' | 'local';
   /** Branch entries are published to; drafts are cut from it. */
   readonly defaultBranch: string;
@@ -80,7 +80,7 @@ export interface GitHubClient {
   openPullRequest(input: { ref: string; title: string; body: string }): Promise<PullRequest>;
   getPullRequest(ref: string): Promise<PullRequest | null>;
   mergePullRequest(number: number): Promise<{ sha: string }>;
-}
+};
 
 export const DRAFT_PREFIX = 'drafts/';
 export const draftRef = (slug: string) => `${DRAFT_PREFIX}${slug}`;

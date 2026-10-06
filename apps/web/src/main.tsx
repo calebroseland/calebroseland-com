@@ -20,6 +20,7 @@ installPageTransitions(router);
 trackReturnPage(router);
 
 declare module '@tanstack/react-router' {
+  // biome-ignore lint/style/useConsistentTypeDefinitions: module augmentation merges into the library's interface
   interface Register {
     router: typeof router;
   }

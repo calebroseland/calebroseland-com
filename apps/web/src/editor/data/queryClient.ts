@@ -3,6 +3,7 @@ import { MutationCache, QueryCache, QueryClient, type QueryKey } from '@tanstack
 import { type Session, session } from '../auth/store.ts';
 
 declare module '@tanstack/react-query' {
+  // biome-ignore lint/style/useConsistentTypeDefinitions: module augmentation merges into the library's interface
   interface Register {
     mutationMeta: {
       /** Queries a successful write makes stale; refreshed before the mutation's own onSuccess runs. */

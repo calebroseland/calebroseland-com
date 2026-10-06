@@ -124,7 +124,7 @@ export function PublishDialog({ buffer, disabled }: { buffer: Buffer; disabled?:
                 className={styles.primary}
                 onClick={() => void mergeAndShow(state.pr.number)}
                 disabled={busy || state.mergeable !== true}
-                title={state.mergeable !== true ? 'Waiting for checks' : undefined}
+                title={state.mergeable === true ? undefined : 'Waiting for checks'}
               >
                 {merge.pending
                   ? merge.stage === 'deploying'

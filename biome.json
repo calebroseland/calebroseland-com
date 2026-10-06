@@ -66,7 +66,15 @@
         "useImportType": "error",
         "noNonNullAssertion": "warn",
         "noDescendingSpecificity": "off",
-        "useBlockStatements": "error"
+        "useBlockStatements": "error",
+        "useConsistentTypeDefinitions": {
+          "level": "error",
+          "options": {
+            "style": "type"
+          }
+        },
+        "useExplicitLengthCheck": "error",
+        "noNegationElse": "error"
       }
     }
   },

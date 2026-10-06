@@ -71,12 +71,12 @@ export function enterPopup(node: HTMLElement, kind: PopupKind): Animation[] {
   void entrance.then(() => resetPopup(node));
   const running = [entrance];
   const rows =
-    kind !== 'tip'
-      ? [...node.querySelectorAll<HTMLElement>('[role^="menuitem"], [role="option"]')].slice(
+    kind === 'tip'
+      ? []
+      : [...node.querySelectorAll<HTMLElement>('[role^="menuitem"], [role="option"]')].slice(
           0,
           STAGGERED_ROWS,
-        )
-      : [];
+        );
   if (rows.length > 0) {
     running.push(
       animate(

@@ -8,6 +8,7 @@ import type { AnyRouter, ParsedLocation } from '@tanstack/react-router';
 export type PageEffect = 'fade' | 'zoom' | false;
 
 declare module '@tanstack/react-router' {
+  // biome-ignore lint/style/useConsistentTypeDefinitions: module augmentation merges into the library's interface
   interface StaticDataRouteOption {
     /** How this page arrives. Unset: zoom between levels, fade between siblings. */
     transition?: PageEffect;

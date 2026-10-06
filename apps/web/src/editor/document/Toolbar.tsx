@@ -186,7 +186,7 @@ export function Toolbar({
         onChange={(e) => {
           const files = [...(e.target.files ?? [])];
           e.target.value = '';
-          if (files.length) {
+          if (files.length > 0) {
             onPickImage(files);
           }
         }}
