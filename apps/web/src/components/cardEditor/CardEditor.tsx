@@ -50,6 +50,19 @@ export type EditFaces = { front: ReactNode; back: ReactNode };
    Loaded only when an editor opens it, so readers never download it. */
 
 /** Loads what the editor needs before it is shown, so the card can turn editable in one step. */
+
+/** Whether the card has been turned in this session, so focus follows only a turn the editor made. */
+function useTurnOver(onFlip: () => void) {
+  const [turned, setTurned] = useState(false);
+  return {
+    turned,
+    flip: () => {
+      setTurned(true);
+      onFlip();
+    },
+  };
+}
+
 export function prepareEdit(published: Profile): Promise<ProfileSource> {
   return loadProfile(clientFor(session.store.state), published);
 }
@@ -88,11 +101,7 @@ function Session({
   children: (faces: EditFaces) => ReactNode;
 }) {
   const s = useEditSession(source, onDone);
-  const [turned, setTurned] = useState(false);
-  const flip = () => {
-    setTurned(true);
-    onFlip();
-  };
+  const { turned, flip } = useTurnOver(onFlip);
   const { leaving } = s;
   return (
     <>

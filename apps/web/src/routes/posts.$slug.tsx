@@ -42,8 +42,13 @@ export const Route = createFileRoute('/posts/$slug')({
   component: PostRoute,
 });
 
+/** The post this route loaded. */
+function usePost() {
+  return Route.useLoaderData();
+}
+
 function PostRoute() {
-  const entry = Route.useLoaderData();
+  const entry = usePost();
   return (
     <Page>
       <article>

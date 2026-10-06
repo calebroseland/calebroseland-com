@@ -6,6 +6,11 @@ import styles from './CardEditor.module.css';
 import { ICON_CHOICES } from './model.ts';
 
 /** A labelled field in a popover or on the contact side. */
+/** Ties a field's label to its control. */
+function useLabelId() {
+  return useId();
+}
+
 export function TextField({
   label,
   value,
@@ -23,7 +28,7 @@ export function TextField({
   type?: 'text' | 'url';
   visibleLabel?: boolean;
 }) {
-  const id = useId();
+  const id = useLabelId();
   return (
     <div className={styles.field}>
       <label htmlFor={id} className={visibleLabel ? styles.label : 'visually-hidden'}>
@@ -72,7 +77,7 @@ export function InlineText({
   leading?: ReactNode;
   trailing?: ReactNode;
 }) {
-  const id = useId();
+  const id = useLabelId();
   return (
     <span className={[styles.inlineField, className].filter(Boolean).join(' ')}>
       <label htmlFor={id} className="visually-hidden">

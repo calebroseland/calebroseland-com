@@ -35,8 +35,13 @@ export const Route = createFileRoute('/$slug')({
   component: PageRoute,
 });
 
+/** The page this route loaded. */
+function usePage() {
+  return Route.useLoaderData();
+}
+
 function PageRoute() {
-  const entry = Route.useLoaderData();
+  const entry = usePage();
   return (
     <Page width="measure">
       <article>

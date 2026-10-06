@@ -23,8 +23,13 @@ export const Route = createFileRoute('/posts/')({
   }),
 });
 
+/** The tag the list is narrowed to, from the URL. */
+function useTagFilter() {
+  return Route.useSearch().tag;
+}
+
 function PostsIndex() {
-  const { tag } = Route.useSearch();
+  const tag = useTagFilter();
   const shown = tag ? posts.filter((p) => p.tags.includes(tag)) : posts;
   return (
     // The measure, like the header and list inside it, so the column sits on the page's axis.

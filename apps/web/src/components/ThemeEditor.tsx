@@ -100,6 +100,11 @@ function SliderField({
   );
 }
 
+/** Ties a field's visible label to the control it names. */
+function useLabelId() {
+  return useId();
+}
+
 function ColorField({
   label,
   value,
@@ -109,7 +114,7 @@ function ColorField({
   value: string;
   onChange: (hex: string) => void;
 }) {
-  const labelId = useId();
+  const labelId = useLabelId();
   const motion = usePopupMotion('dropdown');
   return (
     <div className={styles.colorField}>
@@ -266,6 +271,26 @@ const textFonts = TEXT_FONTS.map((id) => ({
   font: FONTS[id].stack,
 }));
 
+/** The theme being edited, previewed live on the page and put back when the editor closes. */
+function useThemeDraft(initial: CustomTheme) {
+  const [theme, setTheme] = useState(initial);
+  useEffect(() => {
+    themeController.preview(theme);
+  }, [theme]);
+  useEffect(() => () => themeController.preview(null), []);
+  return {
+    theme,
+    set: <K extends keyof CustomTheme>(key: K, value: CustomTheme[K]) =>
+      setTheme((t) => ({ ...t, [key]: value })),
+  };
+}
+
+/** Delete takes a second press, so one click cannot throw a theme away. */
+function useDeleteConfirm() {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  return { confirmDelete, setConfirmDelete };
+}
+
 /* The page behind the sheet is the preview: every change applies to it at once, Save keeps it, and
    Cancel, Escape or the close button put back what was showing. Clicks on the page do not dismiss the
    sheet, so a stray click cannot throw away an edit. */
@@ -278,16 +303,9 @@ export default function ThemeEditor({
   isNew: boolean;
   onClose: () => void;
 }) {
-  const [theme, setTheme] = useState(initial);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const { theme, set } = useThemeDraft(initial);
+  const { confirmDelete, setConfirmDelete } = useDeleteConfirm();
   const defaults = defaultTheme(theme.base, theme.id, theme.name, siteFonts);
-  const set = <K extends keyof CustomTheme>(key: K, value: CustomTheme[K]) =>
-    setTheme((t) => ({ ...t, [key]: value }));
-
-  useEffect(() => {
-    themeController.preview(theme);
-  }, [theme]);
-  useEffect(() => () => themeController.preview(null), []);
   const contrast = useContrast(theme);
 
   const nameFonts = NAME_FONTS.map((id) =>

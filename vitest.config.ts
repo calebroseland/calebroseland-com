@@ -18,6 +18,7 @@ export default defineConfig({
             'packages/**/*.test.ts',
             'apps/web/src/**/*.test.ts',
             'apps/web/vite/**/*.test.ts',
+            'tools/**/*.test.ts',
           ],
           environment: 'node',
         },

@@ -12,7 +12,8 @@
       "!**/dist",
       "!**/coverage",
       "!**/.wrangler",
-      "!**/worker-configuration.d.ts"
+      "!**/worker-configuration.d.ts",
+      "!**/tools/biome/fixtures"
     ]
   },
   "formatter": {
@@ -80,17 +81,7 @@
   },
   "overrides": [
     {
-      "includes": [
-        "apps/web/src/routes/editor*.tsx",
-        "apps/web/src/routes/login*.tsx",
-        "apps/web/src/editor/**",
-        "apps/web/src/components/Article.tsx",
-        "apps/web/src/components/Page.tsx",
-        "apps/web/src/components/SiteFooter.tsx",
-        "apps/web/src/components/UserMenu.tsx",
-        "apps/web/src/components/CommandPalette*.tsx",
-        "apps/web/src/components/SearchButton.tsx"
-      ],
+      "includes": ["apps/web/src/**/*.tsx", "!**/*.test.tsx"],
       "plugins": ["./tools/biome/no-direct-hooks.grit"]
     }
   ],

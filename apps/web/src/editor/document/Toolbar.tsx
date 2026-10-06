@@ -122,6 +122,17 @@ const commands: Cmd[] = [
   },
 ];
 
+/** Which commands are on at the cursor, and the hidden file input the image button opens. */
+function useToolbarState(editor: Editor) {
+  const fileInput = useRef<HTMLInputElement>(null);
+  const active = useEditorState({
+    editor,
+    selector: ({ editor }) =>
+      Object.fromEntries(commands.map((c) => [c.id, c.active?.(editor) ?? false])),
+  });
+  return { fileInput, active };
+}
+
 export function Toolbar({
   editor,
   onPickImage,
@@ -129,12 +140,7 @@ export function Toolbar({
   editor: Editor;
   onPickImage: (files: File[]) => void;
 }) {
-  const fileInput = useRef<HTMLInputElement>(null);
-  const active = useEditorState({
-    editor,
-    selector: ({ editor }) =>
-      Object.fromEntries(commands.map((c) => [c.id, c.active?.(editor) ?? false])),
-  });
+  const { fileInput, active } = useToolbarState(editor);
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') {
       return;

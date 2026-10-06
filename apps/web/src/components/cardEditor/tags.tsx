@@ -14,6 +14,14 @@ import { Handle, IconSelect, TextField } from './fields.tsx';
 import { type EditTag, MAX_TAGS, newTag, tagProblem } from './model.ts';
 
 /** The card's focus areas as chips: reorder, add, remove, and each one's settings a click away. */
+/** The tag being typed, why it cannot be added yet, and the id tying its label and message to it. */
+function useTagDraft() {
+  const [draft, setDraft] = useState('');
+  const [problem, setProblem] = useState<string | null>(null);
+  const inputId = useId();
+  return { draft, setDraft, problem, setProblem, inputId };
+}
+
 export function TagEditor({
   tags,
   errors,
@@ -25,9 +33,7 @@ export function TagEditor({
   onChange: (tags: EditTag[]) => void;
   onMove: (from: number, to: number) => void;
 }) {
-  const [draft, setDraft] = useState('');
-  const [problem, setProblem] = useState<string | null>(null);
-  const inputId = useId();
+  const { draft, setDraft, problem, setProblem, inputId } = useTagDraft();
   useListReorder(
     tags.map((t) => ({ ...t, id: t.key })),
     (next) => onChange(next.map(({ id: _id, ...t }) => t)),

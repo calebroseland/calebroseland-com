@@ -135,10 +135,15 @@ function IconRow({ links, group }: { links: readonly ProfileLink[]; group: numbe
 
 const TAGS_SHOWN = 6;
 
+/** Whether every focus area shows, and the id the "+N more" button controls. */
+function useTagsShown() {
+  const [all, setAll] = useState(false);
+  return { all, setAll, listId: useId() };
+}
+
 /** Focus areas (see FocusChip); past a handful, the rest wait behind "+N more". */
 function Tags({ tags }: { tags: readonly ProfileTag[] }) {
-  const [all, setAll] = useState(false);
-  const listId = useId();
+  const { all, setAll, listId } = useTagsShown();
   const hidden = tags.length - TAGS_SHOWN;
   return (
     <div className={`${styles.tags} ${styles.vt}`} style={vtName('card-tags')}>
@@ -165,6 +170,11 @@ function Tags({ tags }: { tags: readonly ProfileTag[] }) {
   );
 }
 
+/** The id the toggle's aria-controls points at. */
+function useLinksId() {
+  return useId();
+}
+
 function Front({
   profile,
   expanded,
@@ -182,7 +192,7 @@ function Front({
   opening: boolean;
   focusOnMount: 'flip' | 'edit' | null;
 }) {
-  const linksId = useId();
+  const linksId = useLinksId();
   const flipRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === 'flip');
   const editRef = useFocusOnMount<HTMLButtonElement>(focusOnMount === 'edit');
   return (
@@ -412,36 +422,58 @@ function useCardSide(): 'front' | 'back' {
   return useMatch({ from: '/_card/contact', shouldThrow: false }) ? 'back' : 'front';
 }
 
-export function Landing({ profile: published }: { profile: Profile }) {
-  // After a save to the working tree the file on disk is the new profile; show it without a reload.
+/** The profile on show: after a save to the working tree the file on disk is the new profile, shown
+    without a reload. */
+function useShownProfile(published: Profile) {
   const [saved, setSaved] = useState<Profile | null>(null);
-  const profile = saved ?? published;
-  const reduce = useReduceMotion();
+  return { profile: saved ?? published, setSaved };
+}
+
+/** Turns the card by changing the URL, so back and forward turn it too. */
+function useFlipCard(side: 'front' | 'back') {
   const navigate = useNavigate();
-  const go = useSiteGo();
-  const side = useCardSide();
-  const { expanded, toggle: toggleDetails } = useDetailsExpanded();
-  // Focus follows the card only after the visitor has turned it; the first paint leaves focus alone.
-  const [turned, setTurned] = useState(false);
-  const signedIn = useSignedIn();
+  return () => void navigate({ to: side === 'front' ? '/contact' : '/' });
+}
+
+/** The card's edit session, the face it shows (its own: /contact would redirect a card with no contact
+    yet), and whether it is loading. Signing out (the palette can, mid-edit) ends it: its backend is gone. */
+function useEditSession(signedIn: boolean) {
   const [editing, setEditing] = useState<OpenEditor | null>(null);
-  // While editing, the face is the session's own: /contact would redirect a card with no contact yet.
   const [editSide, setEditSide] = useState<'front' | 'back'>('front');
-  // Signing out (the palette can, mid-edit) ends the edit: its backend is gone.
+  const [opening, setOpening] = useState(false);
   if (editing && !signedIn) {
     setEditing(null);
   }
-  const [opening, setOpening] = useState(false);
-  // After the editor closes, focus goes back to the Edit button once the front face has turned back.
+  return { editing, setEditing, editSide, setEditSide, opening, setOpening };
+}
+
+/** Where focus goes when a face appears. It follows the card only after the visitor has turned it, by
+    the buttons or by back and forward; the first paint leaves focus alone. After the editor closes, it
+    goes back to the Edit button instead. */
+function useFaceFocus(side: 'front' | 'back') {
+  const [turned, setTurned] = useState(false);
   const [returnToEdit, setReturnToEdit] = useState(false);
-  const contact = profile.contact;
-  // Turning by the buttons or by back and forward alike, the new face takes focus.
   const [shownSide, setShownSide] = useState(side);
   if (side !== shownSide) {
     setShownSide(side);
     setTurned(true);
     setReturnToEdit(false);
   }
+  return { turned, returnToEdit, setReturnToEdit };
+}
+
+export function Landing({ profile: published }: { profile: Profile }) {
+  const { profile, setSaved } = useShownProfile(published);
+  const reduce = useReduceMotion();
+  const go = useSiteGo();
+  const side = useCardSide();
+  const flip = useFlipCard(side);
+  const { expanded, toggle: toggleDetails } = useDetailsExpanded();
+  const signedIn = useSignedIn();
+  const { editing, setEditing, editSide, setEditSide, opening, setOpening } =
+    useEditSession(signedIn);
+  const { turned, returnToEdit, setReturnToEdit } = useFaceFocus(side);
+  const contact = profile.contact;
 
   /* The editor's code and the profile both load first, so the card turns editable in one step, where it
      stands: an in-place morph, like "show more". Readers never load either. */
@@ -476,8 +508,6 @@ export function Landing({ profile: published }: { profile: Profile }) {
       },
       reduce,
     );
-
-  const flip = () => void navigate({ to: side === 'front' ? '/contact' : '/' });
 
   /* The card's two faces, read-only or the edit session's, turned by the same flip. */
   const faces = ({ front, back }: { front: ReactNode; back: ReactNode | null }) => {
