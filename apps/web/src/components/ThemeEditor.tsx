@@ -383,6 +383,7 @@ export const ThemeEditor = ({
             >
               <Fieldset.Legend className={styles.label}>Built on</Fieldset.Legend>
               {(['light', 'dark'] as const).map((base) => (
+                // biome-ignore lint/a11y/noLabelWithoutControl: Radio.Root renders the radio inside this label
                 <label key={base} className={styles.segment}>
                   <Radio.Root value={base} className={styles.radio}>
                     <Radio.Indicator className={styles.radioDot} />

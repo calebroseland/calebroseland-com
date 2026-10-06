@@ -93,7 +93,7 @@ export const ArticleBody = ({ entry }: { entry: LoadedEntry }) => {
 
 export const ArticleSkeleton = () => {
   return (
-    <div className={styles.skeleton} aria-busy="true" aria-label="Loading">
+    <div className={styles.skeleton} role="status" aria-busy="true" aria-label="Loading">
       <span />
       <span />
       <span />

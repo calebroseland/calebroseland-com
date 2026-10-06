@@ -13,7 +13,8 @@
       "!**/coverage",
       "!**/.wrangler",
       "!**/worker-configuration.d.ts",
-      "!**/tools/biome/fixtures"
+      "!**/tools/biome/fixtures",
+      "!**/__fixtures__"
     ]
   },
   "plugins": ["./tools/biome/array-type.grit", "./tools/biome/exported-return-types.grit"],
@@ -48,7 +49,8 @@
     "rules": {
       "preset": "recommended",
       "a11y": {
-        "preset": "none"
+        "preset": "recommended",
+        "noRedundantRoles": "off"
       },
       "correctness": {
         "noUnusedImports": "error",

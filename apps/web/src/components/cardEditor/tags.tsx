@@ -230,6 +230,7 @@ const TagSettings = ({
             >
               <Fieldset.Legend className={styles.label}>Show</Fieldset.Legend>
               {SHOW_OPTIONS.map((o) => (
+                // biome-ignore lint/a11y/noLabelWithoutControl: Radio.Root renders the radio inside this label
                 <label key={o.value} className={styles.segment}>
                   <Radio.Root value={o.value} className={styles.radio}>
                     <Radio.Indicator className={styles.radioDot} />

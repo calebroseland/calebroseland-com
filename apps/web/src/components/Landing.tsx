@@ -558,6 +558,7 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
   const enter = () => go(returnPage());
 
   return (
+    // biome-ignore lint/a11y: a pointer shortcut onto the page; the Enter button does the same by keyboard
     <div
       className={styles.page}
       {...backdrop}
