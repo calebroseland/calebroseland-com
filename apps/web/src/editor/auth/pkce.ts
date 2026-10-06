@@ -14,8 +14,8 @@ export function randomString(length: number, random: RandomSource = defaultRando
   return out;
 }
 
-export const createVerifier = (random?: RandomSource) => randomString(64, random);
-export const createState = (random?: RandomSource) => randomString(32, random);
+export const createVerifier = (random?: RandomSource): string => randomString(64, random);
+export const createState = (random?: RandomSource): string => randomString(32, random);
 
 export function base64Url(bytes: ArrayBuffer | Uint8Array): string {
   const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);

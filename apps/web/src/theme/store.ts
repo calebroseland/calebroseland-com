@@ -54,7 +54,7 @@ function readCustomThemes(storage: ThemeEnv['storage']): CustomTheme[] {
 
 function readPreference(storage: ThemeEnv['storage'], themes: CustomTheme[]): ThemePreference {
   const v = read(storage, KEY);
-  if ((builtInThemes as readonly (string | null)[]).includes(v)) {
+  if ((builtInThemes as ReadonlyArray<string | null>).includes(v)) {
     return v as BuiltInTheme;
   }
   const id = v && customId(v as ThemePreference);
@@ -83,7 +83,19 @@ type ThemeState = {
 };
 
 /** Holds the preference and saved custom themes; the result lives on <html> (data-theme + variables). */
-export function createThemeStore(env: ThemeEnv) {
+export type ThemeController = {
+  store: Store<ThemeState>;
+  setPreference(pref: ThemePreference): void;
+  /** Shows a theme without saving it (the editor's live preview); null returns to the preference. */
+  preview(theme: CustomTheme | null): void;
+  /** Adds or replaces a theme and selects it. */
+  saveCustom(theme: CustomTheme): void;
+  /** Removes a theme; if it was selected, the preference falls back to auto. */
+  deleteCustom(id: string): void;
+  dispose(): void;
+};
+
+export function createThemeStore(env: ThemeEnv): ThemeController {
   const themes = readCustomThemes(env.storage);
   const store = new Store<ThemeState>({
     preference: readPreference(env.storage, themes),
@@ -151,12 +163,10 @@ export function createThemeStore(env: ThemeEnv) {
       write(env.storage, KEY, pref);
       apply();
     },
-    /** Shows a theme without saving it (the editor's live preview); null returns to the preference. */
     preview(theme: CustomTheme | null) {
       preview = theme;
       apply();
     },
-    /** Adds or replaces a theme and selects it. */
     saveCustom(theme: CustomTheme) {
       const themes = store.state.customThemes;
       saveThemes(
@@ -167,7 +177,6 @@ export function createThemeStore(env: ThemeEnv) {
       preview = null;
       this.setPreference(customPreference(theme.id));
     },
-    /** Removes a theme; if it was selected, the preference falls back to auto. */
     deleteCustom(id: string) {
       saveThemes(store.state.customThemes.filter((t) => t.id !== id));
       preview = null;
@@ -182,8 +191,6 @@ export function createThemeStore(env: ThemeEnv) {
     },
   };
 }
-
-export type ThemeController = ReturnType<typeof createThemeStore>;
 
 export const newThemeId = (): string =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto

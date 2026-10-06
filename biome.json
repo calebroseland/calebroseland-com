@@ -16,6 +16,7 @@
       "!**/tools/biome/fixtures"
     ]
   },
+  "plugins": ["./tools/biome/array-type.grit", "./tools/biome/exported-return-types.grit"],
   "formatter": {
     "enabled": true,
     "indentStyle": "space",

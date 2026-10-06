@@ -10,7 +10,7 @@ function endpoint(): string {
 export function reportError(
   input: { message: string; stack?: string | undefined; kind?: 'error' | 'unhandledrejection' },
   deps: { random?: () => number; send?: (url: string, body: string) => void } = {},
-) {
+): void {
   const random = deps.random ?? Math.random;
   if (random() >= SAMPLE_RATE) {
     return;
@@ -39,7 +39,7 @@ export function reportError(
   send(endpoint(), body);
 }
 
-export function installErrorReporting(target: Window = window) {
+export function installErrorReporting(target: Window = window): void {
   target.addEventListener('error', (event) => {
     reportError({
       message: event.message || 'Unknown error',

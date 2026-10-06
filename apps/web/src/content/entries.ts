@@ -27,5 +27,5 @@ export async function loadEntry(id: string): Promise<LoadedEntry> {
   return (await load()).default;
 }
 
-export const formatDate = (iso: string) =>
+export const formatDate = (iso: string): string =>
   new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(iso));

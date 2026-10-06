@@ -16,6 +16,9 @@ const tokenSchema = z.object({
   expiresAt: z.optional(z.string()),
   refreshToken: z.optional(z.string()),
 });
+export type AuthConfig = z.infer<typeof configSchema>;
+export type TokenGrant = z.infer<typeof tokenSchema>;
+
 const problemSchema = z.object({
   title: z.string(),
   status: z.number(),
@@ -42,7 +45,7 @@ async function readProblem(res: Response): Promise<ApiError> {
     : new ApiError(res.status, `HTTP ${res.status}`);
 }
 
-export async function fetchAuthConfig(fetchImpl: typeof fetch = fetch) {
+export async function fetchAuthConfig(fetchImpl: typeof fetch = fetch): Promise<AuthConfig> {
   const res = await fetchImpl(`${apiOrigin()}/api/auth/config`);
   if (!res.ok) {
     throw await readProblem(res);
@@ -53,7 +56,7 @@ export async function fetchAuthConfig(fetchImpl: typeof fetch = fetch) {
 export async function exchangeCode(
   input: { code: string; codeVerifier: string; redirectUri: string },
   fetchImpl: typeof fetch = fetch,
-) {
+): Promise<TokenGrant> {
   const res = await fetchImpl(`${apiOrigin()}/api/auth/callback`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

@@ -3,7 +3,7 @@ import { fetchAuthConfig } from './api.ts';
 import { authorizeUrl, createChallenge, createState, createVerifier } from './pkce.ts';
 import { saveHandshake } from './store.ts';
 
-export const callbackUrl = () =>
+export const callbackUrl = (): string =>
   new URL(
     `${import.meta.env.BASE_URL.replace(/\/$/, '')}/login/callback`,
     window.location.origin,
@@ -13,7 +13,7 @@ export const callbackUrl = () =>
 export async function startGitHubLogin(
   returnTo: string,
   navigate: (url: string) => void = (url) => window.location.assign(url),
-) {
+): Promise<void> {
   const config = await fetchAuthConfig();
   if (!config.oauth || !config.clientId) {
     throw new Error('GitHub sign-in is not configured for this environment.');

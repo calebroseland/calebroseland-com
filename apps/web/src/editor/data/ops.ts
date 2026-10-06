@@ -75,7 +75,10 @@ export async function saveDraft(
 }
 
 /** Throws the draft away: its branch, or on the working tree the entry's files. */
-export async function discardEntry(gh: GitHubClient, row: { ref: string; dir: string }) {
+export async function discardEntry(
+  gh: GitHubClient,
+  row: { ref: string; dir: string },
+): Promise<void> {
   if (capabilitiesOf(gh.kind).branches) {
     await gh.deleteDraft(row.ref);
   } else {

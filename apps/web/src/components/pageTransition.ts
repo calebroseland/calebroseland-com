@@ -43,7 +43,9 @@ export function pageTypes(declared: PageEffect | undefined, info: ChangeInfo): s
 }
 
 /** For one link or navigate call: `viewTransition={pageTransition("fade")}`; false turns it off. */
-export function pageTransition(effect: PageEffect) {
+export function pageTransition(
+  effect: PageEffect,
+): false | { types: (info: ChangeInfo) => string[] | false } {
   return effect === false
     ? false
     : { types: (info: ChangeInfo): string[] | false => pageTypes(effect, info) };

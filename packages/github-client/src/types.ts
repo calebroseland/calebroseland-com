@@ -83,6 +83,6 @@ export type GitHubClient = {
 };
 
 export const DRAFT_PREFIX = 'drafts/';
-export const draftRef = (slug: string) => `${DRAFT_PREFIX}${slug}`;
-export const slugFromRef = (ref: string) =>
+export const draftRef = (slug: string): string => `${DRAFT_PREFIX}${slug}`;
+export const slugFromRef = (ref: string): string =>
   ref.replace(/^refs\/heads\//, '').slice(DRAFT_PREFIX.length);

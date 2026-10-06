@@ -25,6 +25,10 @@ const flagged = (dir: string): string[] => {
     const { stdout = '', stderr = '' } = error as { stdout?: string; stderr?: string };
     out = stdout + stderr;
   }
+  // A rule that fails to load reports nothing, which would read as a pass.
+  if (/during loading of plugins|configuration resulted in errors/.test(out)) {
+    throw new Error(`Biome could not load the rule for ${dir}:\n${out}`);
+  }
   const lines = [...out.matchAll(/(\S+\.tsx?):(\d+):\d+ plugin/g)].map(
     ([, file = '', line = '']) => `${relative(dir, resolve(root, file))}:${line}`,
   );
@@ -45,7 +49,9 @@ describe('custom Biome rules', () => {
   for (const rule of readdirSync(fixtures)) {
     it(`${rule} flags exactly the marked lines`, () => {
       const dir = join(fixtures, rule);
-      expect(flagged(dir)).toEqual(expected(dir));
+      const marked = expected(dir);
+      expect(marked.length, 'a fixture folder needs at least one marked line').toBeGreaterThan(0);
+      expect(flagged(dir)).toEqual(marked);
     });
   }
 });

@@ -7,7 +7,7 @@ import { session } from './auth/store.ts';
 import { EditorProvider } from './EditorProvider.tsx';
 
 /** Route guard for the editing routes: no usable session, no entry; /login sends the visitor back. */
-export async function requireEditor({ location }: { location: { href: string } }) {
+export async function requireEditor({ location }: { location: { href: string } }): Promise<void> {
   await dropUnavailableSession();
   if (session.store.state.status !== 'authenticated') {
     throw redirect({ to: '/login', search: { returnTo: location.href } });

@@ -75,7 +75,7 @@ export function readLocalBuffer(ref: string, storage: BufferStorage | undefined)
   }
 }
 
-export function writeLocalBuffer(b: Buffer, storage: BufferStorage | undefined) {
+export function writeLocalBuffer(b: Buffer, storage: BufferStorage | undefined): void {
   try {
     if (b.dirty) {
       // Only the text is kept. Serialising images here would blow the storage quota and take the
@@ -98,7 +98,20 @@ export function writeLocalBuffer(b: Buffer, storage: BufferStorage | undefined) 
   }
 }
 
-export function createBufferStore(initial: Buffer) {
+export type BufferController = {
+  store: Store<Buffer>;
+  setMarkdown: (markdown: string) => void;
+  setMeta: (meta: Partial<Buffer['meta']>) => void;
+  addAsset: (asset: BufferAsset) => void;
+  setAlt: (name: string, alt: string) => void;
+  removeAsset: (name: string) => void;
+  markSaved: (headSha: string) => void;
+  rebase: (headSha: string) => void;
+  /** Drop everything local and start again from a freshly loaded buffer. */
+  replace: (next: Buffer) => void;
+};
+
+export function createBufferStore(initial: Buffer): BufferController {
   const store = new Store<Buffer>(initial);
   const touch = (patch: Partial<Buffer>) =>
     store.setState((s) => ({
@@ -149,13 +162,10 @@ export function createBufferStore(initial: Buffer) {
       }));
     },
     rebase: (headSha: string) => store.setState((s) => ({ ...s, baseHeadSha: headSha })),
-    /** Drop everything local and start again from a freshly loaded buffer. */
     replace: (next: Buffer) =>
       store.setState(() => ({ ...next, dirty: false, restoredFromLocal: false })),
   };
 }
-
-export type BufferController = ReturnType<typeof createBufferStore>;
 
 /** Alt text is required for every new image before save. */
 export function missingAlt(b: Buffer): BufferAsset[] {

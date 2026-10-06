@@ -30,7 +30,7 @@ let nextId = 1;
 export function notify(
   message: string,
   opts: { kind?: Kind; action?: Toast['action']; ttl?: number } = {},
-) {
+): number {
   const id = nextId++;
   const kind = opts.kind ?? 'info';
   toasts.setState((t) => [

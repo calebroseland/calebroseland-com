@@ -32,5 +32,5 @@ export function useSiteGo() {
 }
 
 /** A plain click; a modified one (new tab, new window) is left to the browser. */
-export const isPlainClick = (e: MouseEvent) =>
+export const isPlainClick = (e: MouseEvent): boolean =>
   e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;

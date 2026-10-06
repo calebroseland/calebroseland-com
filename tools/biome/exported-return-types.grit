@@ -1,0 +1,16 @@
+language js
+
+// A module's exported functions state what they return, so a change inside one cannot quietly change
+// its callers' types; local functions infer. Exempt: components (PascalCase), which return JSX; hooks
+// (`use…`), whose view-and-command shapes are defined by what they return; and TanStack query and
+// mutation option factories (`…Query`, `…Mutation`), whose inferred types carry the typed query key.
+or {
+  `export function $name($params) { $body }`,
+  `export default function $name($params) { $body }`,
+  `export const $name = ($params) => $body`,
+  `export const $name = async ($params) => $body`,
+  `export const $name = function ($params) { $body }`
+} where {
+  $name <: not r"^(?:[A-Z]|use[A-Z]).*|.*(?:Query|Mutation)$",
+  register_diagnostic(span=$name, message="Exported functions state their return type.", severity="error")
+}

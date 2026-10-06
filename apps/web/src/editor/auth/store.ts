@@ -37,7 +37,13 @@ function read(storage: SessionEnv['storage']): Session {
   return { status: 'anonymous' };
 }
 
-export function createSessionStore(env: SessionEnv) {
+export type SessionController = {
+  store: Store<Session>;
+  signIn(session: Extract<Session, { status: 'authenticated' }>): void;
+  signOut(): void;
+};
+
+export function createSessionStore(env: SessionEnv): SessionController {
   const store = new Store<Session>(read(env.storage));
   const persist = () => {
     try {
@@ -63,8 +69,6 @@ export function createSessionStore(env: SessionEnv) {
   };
 }
 
-export type SessionController = ReturnType<typeof createSessionStore>;
-
 export const session: SessionController = createSessionStore(
   typeof window === 'undefined' ? {} : { storage: safeSessionStorage() },
 );
@@ -81,7 +85,10 @@ function safeSessionStorage(): SessionEnv['storage'] {
 const HANDSHAKE = 'crc:oauth-handshake';
 export type Handshake = { verifier: string; state: string; returnTo: string };
 
-export function saveHandshake(h: Handshake, storage: SessionEnv['storage'] = safeSessionStorage()) {
+export function saveHandshake(
+  h: Handshake,
+  storage: SessionEnv['storage'] = safeSessionStorage(),
+): void {
   storage?.setItem(HANDSHAKE, JSON.stringify(h));
 }
 export function takeHandshake(

@@ -48,11 +48,14 @@ export type PullRequestInput = {
   slug: string;
 };
 
-export function openPr(gh: GitHubClient, input: PullRequestInput) {
+export function openPr(gh: GitHubClient, input: PullRequestInput): Promise<PullRequest> {
   return gh.openPullRequest({ ref: input.ref, title: input.title, body: pullRequestBody(input) });
 }
 
-export async function mergeAndCleanUp(gh: GitHubClient, input: { ref: string; number: number }) {
+export async function mergeAndCleanUp(
+  gh: GitHubClient,
+  input: { ref: string; number: number },
+): Promise<{ sha: string }> {
   const merged = await gh.mergePullRequest(input.number);
   // GitHub's delete_branch_on_merge may already have removed it; ignore a missing ref.
   await gh.deleteDraft(input.ref).catch(() => undefined);

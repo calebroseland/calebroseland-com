@@ -1,6 +1,6 @@
 /* Runs in the page: at each view transition, samples the old and new page snapshots through the
    animation and records any moment they leave part of the page uncovered. */
-export function probeTransitionCoverage() {
+export function probeTransitionCoverage(): void {
   const w = window as unknown as { __vtGaps: string[] };
   w.__vtGaps = [];
   if (typeof document.startViewTransition !== 'function') {

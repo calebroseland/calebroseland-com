@@ -9,7 +9,8 @@ export function contentDirFor(root: string): string {
 }
 
 /** Whether `abs` is `dir` or inside it. A bare prefix match would also admit a sibling like `content-old/`. */
-export const within = (dir: string, abs: string) => abs === dir || abs.startsWith(dir + sep);
+export const within = (dir: string, abs: string): boolean =>
+  abs === dir || abs.startsWith(dir + sep);
 
 /** Dev routes answer only this site's own pages; any other page open in the browser could otherwise write content. */
 export function sameOrigin(req: Pick<IncomingMessage, 'headers'>): boolean {
@@ -33,7 +34,8 @@ export function sameOrigin(req: Pick<IncomingMessage, 'headers'>): boolean {
    still invalidates its modules on every change, and only skips the reload when the tree on disk is
    exactly what the editor wrote. Anything else, including an edit in your code editor, still reloads. */
 let editorTreeHash = '';
-export const recordEditorTree = (headSha: string) => {
+export const recordEditorTree = (headSha: string): void => {
   editorTreeHash = headSha;
 };
-export const isEditorTree = (headSha: string) => headSha !== '' && headSha === editorTreeHash;
+export const isEditorTree = (headSha: string): boolean =>
+  headSha !== '' && headSha === editorTreeHash;
