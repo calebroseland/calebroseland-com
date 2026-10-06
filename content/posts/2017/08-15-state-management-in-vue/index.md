@@ -33,7 +33,7 @@ We should know: what it is — a Schema, where to find it — a home, or
 
 > …provides simplified access to data stored in a persistent storage of some kind
 
-Sometimes we might use just Vue core and grab a library like [Axios](https://github.com/mzabriskie/axios).   
+Sometimes we might use just Vue core and grab a library like [Axios](https://github.com/mzabriskie/axios).
 This might be sufficient for small projects, but for large ones, we might benefit from a little more structure and flow control in our data pipelines.
 
 In less volatile languages, standard patterns have solidified. But in JS land, architecting a solid solution can be a wild ride. Things are getting better though.. and Data Lifecycle Management is still a good investment.
