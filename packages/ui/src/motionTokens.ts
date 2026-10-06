@@ -1,4 +1,4 @@
-/* Mirrors --duration-* and --ease-* in tokens/primitives.css. motion-tokens.test.ts asserts parity. Seconds, not ms. */
+/* Mirrors --duration-* and --ease-* in tokens/primitives.css. motionTokens.test.ts asserts parity. Seconds, not ms. */
 export const durations = {
   instant: 0.05,
   fast: 0.12,

@@ -145,7 +145,7 @@
     --z-drag: 700;
     --z-tooltip: 800;
 
-    /* Motion: mirrored in motion-tokens.ts; a test keeps them in sync */
+    /* Motion: mirrored in motionTokens.ts; a test keeps them in sync */
     --duration-instant: 50ms;
     --duration-fast: 120ms;
     --duration-normal: 200ms;

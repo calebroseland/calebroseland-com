@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { durations, eases } from './motion-tokens.ts';
+import { durations, eases } from './motionTokens.ts';
 
 const css = readFileSync(new URL('./tokens/primitives.css', import.meta.url), 'utf8');
 // Only the un-reduced block: take everything before the reduced-motion media query.
