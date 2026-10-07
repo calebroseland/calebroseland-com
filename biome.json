@@ -13,9 +13,12 @@
       "!**/coverage",
       "!**/.wrangler",
       "!**/worker-configuration.d.ts",
+      "!**/tools/biome/fixtures",
+      "!**/__fixtures__",
       "!**/*.drawio.svg"
     ]
   },
+  "plugins": ["./tools/biome/array-type.grit", "./tools/biome/exported-return-types.grit"],
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
@@ -24,9 +27,11 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double",
+      "quoteStyle": "single",
       "semicolons": "always",
-      "trailingCommas": "all"
+      "trailingCommas": "all",
+      "jsxQuoteStyle": "double",
+      "operatorLinebreak": "before"
     }
   },
   "css": {
@@ -45,7 +50,8 @@
     "rules": {
       "preset": "recommended",
       "a11y": {
-        "preset": "none"
+        "preset": "recommended",
+        "noRedundantRoles": "off"
       },
       "correctness": {
         "noUnusedImports": "error",
@@ -59,35 +65,147 @@
           "options": {
             "allow": ["error", "warn"]
           }
-        }
+        },
+        "noShadow": "error",
+        "noImportCycles": "error"
       },
       "style": {
         "useImportType": "error",
         "noNonNullAssertion": "warn",
-        "noDescendingSpecificity": "off"
+        "noDescendingSpecificity": "off",
+        "useBlockStatements": "error",
+        "useConsistentTypeDefinitions": {
+          "level": "error",
+          "options": {
+            "style": "type"
+          }
+        },
+        "useExplicitLengthCheck": "error",
+        "noNegationElse": "error",
+        "noNestedTernary": "error",
+        "noDefaultExport": "error",
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false,
+            "conventions": [
+              {
+                "selector": {
+                  "kind": "objectLiteralMember"
+                },
+                "match": "_*(.+?)_*",
+                "formats": ["camelCase", "PascalCase", "CONSTANT_CASE", "snake_case"]
+              },
+              {
+                "selector": {
+                  "kind": "typeMember"
+                },
+                "match": "_*(.+?)_*",
+                "formats": ["camelCase", "PascalCase", "CONSTANT_CASE", "snake_case"]
+              }
+            ]
+          }
+        },
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["camelCase", "PascalCase", "export"]
+          }
+        },
+        "noMagicNumbers": "warn"
+      },
+      "nursery": {
+        "useConsistentFunctionStyle": {
+          "level": "error",
+          "options": {
+            "style": "expression"
+          }
+        },
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error",
+        "useExhaustiveSwitchCases": "error"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 15
+          }
+        }
       }
     }
   },
   "overrides": [
     {
-      "includes": [
-        "apps/web/src/routes/editor*.tsx",
-        "apps/web/src/routes/login*.tsx",
-        "apps/web/src/editor/**",
-        "apps/web/src/components/Article.tsx",
-        "apps/web/src/components/Page.tsx",
-        "apps/web/src/components/SiteFooter.tsx",
-        "apps/web/src/components/UserMenu.tsx",
-        "apps/web/src/components/CommandPalette*.tsx",
-        "apps/web/src/components/SearchButton.tsx"
-      ],
+      "includes": ["apps/web/src/**/*.tsx", "packages/*/src/**/*.tsx", "!**/*.test.tsx"],
       "plugins": ["./tools/biome/no-direct-hooks.grit"]
+    },
+    {
+      "includes": ["**/*.config.ts", "**/*.d.ts", "apps/web/worker/index.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/web/e2e/**",
+        "apps/web/vite/**",
+        "apps/web/public/**",
+        "tools/**",
+        "**/*.d.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "filenameCases": ["kebab-case", "camelCase", "PascalCase", "export"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web/src/routes/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "apps/web/e2e/**",
+        "tools/**",
+        "**/*.config.ts",
+        "apps/web/src/theme/custom.ts",
+        "apps/web/src/theme/contrast.ts",
+        "packages/ui/src/motionTokens.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noMagicNumbers": "off"
+          }
+        }
+      }
     }
   ],
   "assist": {
     "actions": {
       "source": {
-        "organizeImports": "on"
+        "organizeImports": "on",
+        "useSortedProperties": "on"
       }
     }
   }

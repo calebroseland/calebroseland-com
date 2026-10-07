@@ -1,4 +1,4 @@
-import { toBase64 } from "./base64.ts";
+import { toBase64 } from './base64.ts';
 import {
   type Bundle,
   DRAFT_PREFIX,
@@ -11,7 +11,7 @@ import {
   slugFromRef,
   toBytes,
   type Viewer,
-} from "./types.ts";
+} from './types.ts';
 
 /* In-memory GitHub with just enough git semantics for the editor: branches with a head sha, a flat
    file map per branch, pull requests, and squash merges into the default branch. Used by tests and by
@@ -19,7 +19,7 @@ import {
 
 type Branch = {
   headSha: string;
-  files: Map<string, { content: string; encoding: "utf-8" | "base64"; sha: string }>;
+  files: Map<string, { content: string; encoding: 'utf-8' | 'base64'; sha: string }>;
 };
 
 export type FakeState = {
@@ -29,7 +29,7 @@ export type FakeState = {
     string,
     {
       headSha: string;
-      files: Record<string, { content: string; encoding: "utf-8" | "base64"; sha: string }>;
+      files: Record<string, { content: string; encoding: 'utf-8' | 'base64'; sha: string }>;
     }
   >;
   pulls: Array<PullRequest & { base: string; title: string; body: string }>;
@@ -44,46 +44,50 @@ let counter = 0;
 const sha = (seed: string) => {
   counter += 1;
   let h = 2166136261;
-  for (const c of `${seed}:${counter}`) h = (h ^ c.charCodeAt(0)) * 16777619;
-  return (h >>> 0).toString(16).padStart(8, "0").repeat(5);
+  for (const c of `${seed}:${counter}`) {
+    h = (h ^ c.charCodeAt(0)) * 16777619;
+  }
+  return (h >>> 0).toString(16).padStart(8, '0').repeat(5);
 };
 
-export function initialFakeState(): FakeState {
+export const initialFakeState = (): FakeState => {
   return {
     viewer: {
-      login: "fake-user",
-      name: "Fake User",
+      login: 'fake-user',
+      name: 'Fake User',
       avatarUrl:
-        "data:image/svg+xml," +
-        encodeURIComponent(
+        'data:image/svg+xml,'
+        + encodeURIComponent(
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#1c7a84"/></svg>',
         ),
     },
-    defaultBranch: "master",
-    branches: { master: { headSha: sha("master"), files: {} } },
+    defaultBranch: 'master',
+    branches: { master: { headSha: sha('master'), files: {} } },
     pulls: [],
     nextPr: 1,
   };
-}
+};
 
-export function createFakeClient(
+export const createFakeClient = (
   opts: {
     storage?: FakeStorage;
     state?: FakeState;
     latencyMs?: number;
     /** Files for a fresh default branch, so a new fake repository starts with the content the site
         already shows instead of empty. Not consulted once the default branch has files. */
-    seed?: () => Promise<Bundle["files"]>;
+    seed?: () => Promise<Bundle['files']>;
   } = {},
-): GitHubClient & { state: FakeState; reset(): void } {
+): GitHubClient & { state: FakeState; reset(): void } => {
   const existing = opts.state ?? opts.storage?.load();
   let state: FakeState = existing ?? initialFakeState();
   const persist = () => opts.storage?.save(state);
   const seedOnce = async () => {
     const files = await opts.seed?.().catch(() => []);
-    if (!files?.length) return;
+    if (!files?.length) {
+      return;
+    }
     state.branches[state.defaultBranch] = {
-      headSha: sha("seed"),
+      headSha: sha('seed'),
       files: Object.fromEntries(
         files.map((f) => [f.path, { content: f.content, encoding: f.encoding, sha: f.sha }]),
       ),
@@ -96,20 +100,24 @@ export function createFakeClient(
   const delay = async () => {
     seeded ??= seedOnce();
     await seeded;
-    if (opts.latencyMs) await new Promise((r) => setTimeout(r, opts.latencyMs));
+    if (opts.latencyMs) {
+      await new Promise((r) => setTimeout(r, opts.latencyMs));
+    }
   };
 
   const branch = (ref: string): Branch => {
     const b = state.branches[ref];
-    if (!b) throw new Error(`Not Found: branch ${ref}`);
+    if (!b) {
+      throw new Error(`Not Found: branch ${ref}`);
+    }
     return { headSha: b.headSha, files: new Map(Object.entries(b.files)) };
   };
   const writeBranch = (ref: string, b: Branch) => {
     state.branches[ref] = { headSha: b.headSha, files: Object.fromEntries(b.files) };
   };
   const prFor = (ref: string) =>
-    state.pulls.find((p) => p.headRef === ref && p.state === "open") ?? null;
-  const strip = (p: FakeState["pulls"][number]): PullRequest => ({
+    state.pulls.find((p) => p.headRef === ref && p.state === 'open') ?? null;
+  const strip = (p: FakeState['pulls'][number]): PullRequest => ({
     number: p.number,
     url: p.url,
     state: p.state,
@@ -119,7 +127,7 @@ export function createFakeClient(
   });
 
   return {
-    kind: "fake",
+    kind: 'fake',
     get defaultBranch() {
       return state.defaultBranch;
     },
@@ -155,7 +163,9 @@ export function createFakeClient(
     async createDraft(slug) {
       await delay();
       const ref = draftRef(slug);
-      if (state.branches[ref]) throw new Error(`Reference already exists: ${ref}`);
+      if (state.branches[ref]) {
+        throw new Error(`Reference already exists: ${ref}`);
+      }
       const base = branch(state.defaultBranch);
       writeBranch(ref, { headSha: base.headSha, files: base.files });
       persist();
@@ -176,19 +186,21 @@ export function createFakeClient(
       const b = branch(ref);
       if (state.conflictOnce) {
         state.conflictOnce = false;
-        const moved = sha("conflict");
+        const moved = sha('conflict');
         writeBranch(ref, { ...b, headSha: moved });
         persist();
         throw new StaleRefError(ref, expectedHeadSha, moved);
       }
-      if (b.headSha !== expectedHeadSha) throw new StaleRefError(ref, expectedHeadSha, b.headSha);
+      if (b.headSha !== expectedHeadSha) {
+        throw new StaleRefError(ref, expectedHeadSha, b.headSha);
+      }
       for (const f of files) {
         const raw = f.content;
         const binary = isBinaryContent(raw);
         const content = binary ? toBase64(await toBytes(raw)) : raw;
         b.files.set(`${dir}/${f.path}`, {
           content,
-          encoding: binary || f.encoding === "base64" ? "base64" : "utf-8",
+          encoding: binary || f.encoding === 'base64' ? 'base64' : 'utf-8',
           sha: sha(content),
         });
       }
@@ -201,20 +213,26 @@ export function createFakeClient(
     async deleteDraft(ref) {
       await delay();
       delete state.branches[ref];
-      for (const p of state.pulls) if (p.headRef === ref && p.state === "open") p.state = "closed";
+      for (const p of state.pulls) {
+        if (p.headRef === ref && p.state === 'open') {
+          p.state = 'closed';
+        }
+      }
       persist();
     },
 
     async openPullRequest({ ref, title, body }) {
       await delay();
       branch(ref);
-      const existing = prFor(ref);
-      if (existing) return strip(existing);
+      const open = prFor(ref);
+      if (open) {
+        return strip(open);
+      }
       const number = state.nextPr++;
       const pr = {
         number,
         url: `https://github.example/pull/${number}`,
-        state: "open" as const,
+        state: 'open' as const,
         merged: false,
         mergeable: true,
         headRef: ref,
@@ -236,17 +254,23 @@ export function createFakeClient(
     async mergePullRequest(number) {
       await delay();
       const pr = state.pulls.find((p) => p.number === number);
-      if (pr?.state !== "open") throw new Error(`Not Found: pull ${number}`);
-      if (pr.mergeable === false) throw new Error("Pull Request is not mergeable");
+      if (pr?.state !== 'open') {
+        throw new Error(`Not Found: pull ${number}`);
+      }
+      if (pr.mergeable === false) {
+        throw new Error('Pull Request is not mergeable');
+      }
       const head = branch(pr.headRef);
       const base = branch(pr.base);
-      for (const [p, f] of head.files) base.files.set(p, f);
+      for (const [p, f] of head.files) {
+        base.files.set(p, f);
+      }
       const mergeSha = sha(`merge:${number}`);
       writeBranch(pr.base, { headSha: mergeSha, files: base.files });
-      pr.state = "closed";
+      pr.state = 'closed';
       pr.merged = true;
       persist();
       return { sha: mergeSha };
     },
   };
-}
+};

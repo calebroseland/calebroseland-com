@@ -1,8 +1,8 @@
-import type { GitHubClient } from "@crc/github-client";
+import type { GitHubClient } from '@crc/github-client';
 
 /* What each backend can do, so screens ask about a capability instead of naming a backend. */
 
-export type BackendKind = GitHubClient["kind"];
+export type BackendKind = GitHubClient['kind'];
 
 export type Capabilities = {
   /** How the backend is named to the person signed in. */
@@ -16,9 +16,9 @@ export type Capabilities = {
 };
 
 const CAPABILITIES: Record<BackendKind, Capabilities> = {
-  local: { label: "working tree", branches: false, publishes: false, deploys: false },
-  fake: { label: "local fake GitHub", branches: true, publishes: true, deploys: false },
-  octokit: { label: "GitHub", branches: true, publishes: true, deploys: true },
+  local: { label: 'working tree', branches: false, publishes: false, deploys: false },
+  fake: { label: 'local fake GitHub', branches: true, publishes: true, deploys: false },
+  octokit: { label: 'GitHub', branches: true, publishes: true, deploys: true },
 };
 
 export const capabilitiesOf = (kind: BackendKind): Capabilities => CAPABILITIES[kind];

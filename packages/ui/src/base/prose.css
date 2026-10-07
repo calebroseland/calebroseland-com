@@ -1,10 +1,10 @@
 /* Rendered-markdown styles. The one file worth writing carefully: it is where posts are read. */
 @layer base {
   .prose {
+    max-inline-size: var(--measure);
     font-family: var(--font-prose);
     font-size: var(--font-size-md);
     line-height: var(--leading-relaxed);
-    max-inline-size: var(--measure);
     color: var(--color-text);
 
     & > * + * {
@@ -20,18 +20,18 @@
     }
 
     & h2 {
-      font-size: var(--font-size-2xl);
       margin-block-start: var(--space-12);
+      font-size: var(--font-size-2xl);
     }
 
     & h3 {
-      font-size: var(--font-size-xl);
       margin-block-start: var(--space-10);
+      font-size: var(--font-size-xl);
     }
 
     & h4 {
-      font-size: var(--font-size-lg);
       margin-block-start: var(--space-8);
+      font-size: var(--font-size-lg);
     }
 
     & h2 + *,
@@ -63,8 +63,8 @@
     }
 
     & .contains-task-list {
-      list-style: none;
       padding-inline-start: var(--space-1);
+      list-style: none;
     }
 
     & .task-list-item input {
@@ -74,15 +74,15 @@
 
     & blockquote {
       padding-inline-start: var(--space-5);
-      border-inline-start: var(--border-width-thick) solid var(--color-accent-border);
-      color: var(--color-text-muted);
       font-style: italic;
+      color: var(--color-text-muted);
+      border-inline-start: var(--border-width-thick) solid var(--color-accent-border);
     }
 
     & hr {
+      margin-block: var(--space-10);
       border: 0;
       border-block-start: var(--border-width) solid var(--color-border);
-      margin-block: var(--space-10);
     }
 
     & img,
@@ -111,25 +111,25 @@
 
     & :not(pre) > code {
       padding: 0.1em 0.35em;
-      border-radius: var(--radius-sm);
       background: var(--color-surface-sunken);
+      border-radius: var(--radius-sm);
     }
 
     & pre code {
+      padding: 0;
       font-size: inherit;
       background: none;
-      padding: 0;
     }
 
     & pre {
       position: relative;
       padding: var(--space-4);
-      border-radius: var(--radius-md);
-      border: var(--border-width) solid var(--color-border);
       overflow-x: auto;
-      line-height: var(--leading-normal);
       font-size: var(--font-size-sm);
+      line-height: var(--leading-normal);
       background: var(--color-surface-sunken);
+      border: var(--border-width) solid var(--color-border);
+      border-radius: var(--radius-md);
     }
 
     /* Shiki dual themes: colours and backgrounds come from --shiki-light(-bg) / --shiki-dark(-bg) set inline.
@@ -145,17 +145,17 @@
 
     & table {
       inline-size: 100%;
-      border-collapse: collapse;
       font-family: var(--font-sans);
       font-size: var(--font-size-sm);
+      border-collapse: collapse;
     }
 
     & th,
     & td {
       padding: var(--space-2) var(--space-3);
-      border-block-end: var(--border-width) solid var(--color-border);
-      text-align: start;
       vertical-align: top;
+      text-align: start;
+      border-block-end: var(--border-width) solid var(--color-border);
     }
 
     & th {
@@ -164,9 +164,9 @@
     }
 
     & kbd {
+      padding: 0.1em 0.4em;
       font-family: var(--font-mono);
       font-size: 0.8em;
-      padding: 0.1em 0.4em;
       border: var(--border-width) solid var(--color-border-strong);
       border-block-end-width: var(--border-width-thick);
       border-radius: var(--radius-sm);

@@ -2,28 +2,28 @@
   .header {
     display: grid;
     gap: var(--space-3);
-    margin-block-end: var(--space-10);
     max-inline-size: var(--measure);
+    margin-block-end: var(--space-10);
   }
 
   .titleRow {
     display: flex;
     flex-wrap: wrap;
+    gap: var(--space-3);
     align-items: baseline;
     justify-content: space-between;
-    gap: var(--space-3);
   }
 
   .edit {
     display: inline-flex;
-    align-items: center;
     gap: var(--space-1);
+    align-items: center;
     min-block-size: 2.25rem;
     padding-inline: var(--space-2);
-    border-radius: var(--radius-md);
-    color: var(--color-link);
     font-size: var(--font-size-sm);
+    color: var(--color-link);
     text-decoration: none;
+    border-radius: var(--radius-md);
 
     &:hover {
       background: var(--color-surface-hover);
@@ -38,8 +38,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
-    color: var(--color-text-muted);
     font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
   }
 
   .tags {
@@ -49,13 +49,13 @@
   }
 
   .tag {
-    font-size: var(--font-size-xs);
     padding: var(--space-px) var(--space-2);
-    border-radius: var(--radius-full);
-    background: var(--color-accent-subtle);
+    font-size: var(--font-size-xs);
     color: var(--color-accent-text);
-    border: var(--border-width) solid var(--color-accent-border);
     text-decoration: none;
+    background: var(--color-accent-subtle);
+    border: var(--border-width) solid var(--color-accent-border);
+    border-radius: var(--radius-full);
 
     /* The fill stays light on hover, where the text keeps its contrast; the current tag is solid. */
     &:hover {
@@ -63,9 +63,9 @@
     }
 
     &[data-status="active"] {
+      color: var(--color-text-on-accent);
       background: var(--color-accent);
       border-color: var(--color-accent);
-      color: var(--color-text-on-accent);
     }
   }
 
@@ -77,13 +77,13 @@
     & > span {
       display: block;
       block-size: 1em;
-      border-radius: var(--radius-sm);
       background: var(--color-surface-sunken);
+      border-radius: var(--radius-sm);
     }
 
     & > span:first-child {
-      block-size: 2.5em;
       inline-size: 70%;
+      block-size: 2.5em;
     }
   }
 }

@@ -1,20 +1,36 @@
-import { Field } from "@base-ui/react/field";
-import { Fieldset } from "@base-ui/react/fieldset";
-import { Popover } from "@base-ui/react/popover";
-import { Radio } from "@base-ui/react/radio";
-import { RadioGroup } from "@base-ui/react/radio-group";
-import { Switch } from "@base-ui/react/switch";
-import { DropIndicator, useItemRegistration, useListReorder } from "@crc/interaction";
-import { Icon } from "@crc/ui";
-import { type RefObject, useId, useState } from "react";
-import { usePopupMotion } from "../../hooks/usePopupMotion.ts";
-import { Tip } from "../Tip.tsx";
-import styles from "./CardEditor.module.css";
-import { Handle, IconSelect, TextField } from "./fields.tsx";
-import { type EditTag, MAX_TAGS, newTag, tagProblem } from "./model.ts";
+import { Field } from '@base-ui/react/field';
+import { Fieldset } from '@base-ui/react/fieldset';
+import { Popover } from '@base-ui/react/popover';
+import { Radio } from '@base-ui/react/radio';
+import { RadioGroup } from '@base-ui/react/radio-group';
+import { Switch } from '@base-ui/react/switch';
+import { DropIndicator, useItemRegistration, useListReorder } from '@crc/interaction';
+import { Icon } from '@crc/ui';
+import { type RefObject, useId, useState } from 'react';
+import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
+import { Tip } from '../Tip.tsx';
+import styles from './CardEditor.module.css';
+import { Handle, IconSelect, TextField } from './fields.tsx';
+import { type EditTag, MAX_TAGS, newTag, tagProblem } from './model.ts';
+
+/** The tag being typed, why it cannot be added yet, and the id tying its label and message to it. */
+const useTagDraft = () => {
+  const [draft, setDraft] = useState('');
+  const [problem, setProblem] = useState<string | null>(null);
+  const inputId = useId();
+  return { draft, setDraft, problem, setProblem, inputId };
+};
+
+/** A tag without an icon can only show its label; one gaining an icon shows both until told otherwise. */
+const showWithIcon = (icon: string | null, show: EditTag['show']): EditTag['show'] => {
+  if (!icon) {
+    return 'label';
+  }
+  return show === 'label' ? 'both' : show;
+};
 
 /** The card's focus areas as chips: reorder, add, remove, and each one's settings a click away. */
-export function TagEditor({
+export const TagEditor = ({
   tags,
   errors,
   onChange,
@@ -24,22 +40,22 @@ export function TagEditor({
   errors: Map<string, string>;
   onChange: (tags: EditTag[]) => void;
   onMove: (from: number, to: number) => void;
-}) {
-  const [draft, setDraft] = useState("");
-  const [problem, setProblem] = useState<string | null>(null);
-  const inputId = useId();
+}) => {
+  const { draft, setDraft, problem, setProblem, inputId } = useTagDraft();
   useListReorder(
     tags.map((t) => ({ ...t, id: t.key })),
     (next) => onChange(next.map(({ id: _id, ...t }) => t)),
-    { listId: "tags" },
+    { listId: 'tags' },
   );
 
   const add = () => {
     const issue = tagProblem(tags, draft);
     setProblem(issue);
-    if (issue) return;
+    if (issue) {
+      return;
+    }
     onChange([...tags, newTag(draft.trim())]);
-    setDraft("");
+    setDraft('');
   };
 
   return (
@@ -74,7 +90,7 @@ export function TagEditor({
               setProblem(null);
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === ",") {
+              if (e.key === 'Enter' || e.key === ',') {
                 e.preventDefault();
                 add();
               }
@@ -89,11 +105,11 @@ export function TagEditor({
       )}
     </fieldset>
   );
-}
+};
 
 /* A focus area as the card will show it (icon, label, or both), marked when it links, with its
    settings a click away. */
-function TagChip({
+const TagChip = ({
   tag,
   index,
   error,
@@ -107,14 +123,14 @@ function TagChip({
   onChange: (tag: EditTag) => void;
   onMove: (delta: -1 | 1) => void;
   onRemove: () => void;
-}) {
+}) => {
   const { ref, handleRef, state } = useItemRegistration(tag.key, index, {
-    listId: "tags",
-    axis: "horizontal",
+    listId: 'tags',
+    axis: 'horizontal',
   });
-  const name = tag.label.trim() || "Untitled focus area";
-  const iconOnly = tag.icon !== null && tag.show === "icon";
-  const withIcon = tag.icon !== null && tag.show !== "label";
+  const name = tag.label.trim() || 'Untitled focus area';
+  const iconOnly = tag.icon !== null && tag.show === 'icon';
+  const withIcon = tag.icon !== null && tag.show !== 'label';
   return (
     <li
       ref={ref as RefObject<HTMLLIElement>}
@@ -129,7 +145,7 @@ function TagChip({
         onMove={onMove}
         handleRef={handleRef}
       >
-        {withIcon && tag.icon && <Icon name={tag.icon} size={iconOnly ? "md" : "sm"} />}
+        {withIcon && tag.icon && <Icon name={tag.icon} size={iconOnly ? 'md' : 'sm'} />}
         {!iconOnly && name}
         {tag.link && (
           <Tip label="Links to its posts">
@@ -151,15 +167,15 @@ function TagChip({
       <DropIndicator edge={state.edge} />
     </li>
   );
-}
+};
 
 const SHOW_OPTIONS = [
-  { value: "icon", label: "Icon" },
-  { value: "label", label: "Label" },
-  { value: "both", label: "Both" },
+  { value: 'icon', label: 'Icon' },
+  { value: 'label', label: 'Label' },
+  { value: 'both', label: 'Both' },
 ] as const;
 
-function TagSettings({
+const TagSettings = ({
   tag,
   name,
   error,
@@ -169,8 +185,8 @@ function TagSettings({
   name: string;
   error: string | undefined;
   onChange: (tag: EditTag) => void;
-}) {
-  const motion = usePopupMotion("dropdown");
+}) => {
+  const motion = usePopupMotion('dropdown');
   return (
     <Popover.Root onOpenChange={motion.onOpenChange}>
       <Popover.Trigger className={styles.remove} aria-label={`Settings for ${name}`}>
@@ -197,7 +213,7 @@ function TagSettings({
                   onChange({
                     ...tag,
                     icon,
-                    show: icon ? (tag.show === "label" ? "both" : tag.show) : "label",
+                    show: showWithIcon(icon, tag.show),
                   })
                 }
               />
@@ -207,13 +223,14 @@ function TagSettings({
               disabled={tag.icon === null}
               render={
                 <RadioGroup
-                  value={tag.icon === null ? "label" : tag.show}
-                  onValueChange={(show) => onChange({ ...tag, show: show as EditTag["show"] })}
+                  value={tag.icon === null ? 'label' : tag.show}
+                  onValueChange={(show) => onChange({ ...tag, show: show as EditTag['show'] })}
                 />
               }
             >
               <Fieldset.Legend className={styles.label}>Show</Fieldset.Legend>
               {SHOW_OPTIONS.map((o) => (
+                // biome-ignore lint/a11y/noLabelWithoutControl: Radio.Root renders the radio inside this label
                 <label key={o.value} className={styles.segment}>
                   <Radio.Root value={o.value} className={styles.radio}>
                     <Radio.Indicator className={styles.radioDot} />
@@ -237,4 +254,4 @@ function TagSettings({
       </Popover.Portal>
     </Popover.Root>
   );
-}
+};

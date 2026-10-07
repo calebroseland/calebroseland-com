@@ -1,18 +1,18 @@
-import { Dialog } from "@base-ui/react/dialog";
-import { Field } from "@base-ui/react/field";
-import { Fieldset } from "@base-ui/react/fieldset";
-import { Popover } from "@base-ui/react/popover";
-import { Radio } from "@base-ui/react/radio";
-import { RadioGroup } from "@base-ui/react/radio-group";
-import { Select } from "@base-ui/react/select";
-import { Slider } from "@base-ui/react/slider";
-import { Switch } from "@base-ui/react/switch";
-import { Icon } from "@crc/ui";
-import { type CSSProperties, type ReactNode, useEffect, useId, useState } from "react";
-import { HexColorInput, HexColorPicker } from "react-colorful";
-import { siteFonts } from "../content/theme.ts";
-import { usePopupMotion } from "../hooks/usePopupMotion.ts";
-import { contrastRatio, parseColor } from "../theme/contrast.ts";
+import { Dialog } from '@base-ui/react/dialog';
+import { Field } from '@base-ui/react/field';
+import { Fieldset } from '@base-ui/react/fieldset';
+import { Popover } from '@base-ui/react/popover';
+import { Radio } from '@base-ui/react/radio';
+import { RadioGroup } from '@base-ui/react/radio-group';
+import { Select } from '@base-ui/react/select';
+import { Slider } from '@base-ui/react/slider';
+import { Switch } from '@base-ui/react/switch';
+import { Icon } from '@crc/ui';
+import { type CSSProperties, type ReactNode, useEffect, useId, useState } from 'react';
+import { HexColorInput, HexColorPicker } from 'react-colorful';
+import { siteFonts } from '../content/theme.ts';
+import { usePopupMotion } from '../hooks/usePopupMotion.ts';
+import { contrastRatio, parseColor } from '../theme/contrast.ts';
 import {
   type CustomTheme,
   customTheme,
@@ -22,34 +22,34 @@ import {
   RANGES,
   READING_FONTS,
   TEXT_FONTS,
-} from "../theme/custom.ts";
-import { themeController } from "../theme/store.ts";
-import styles from "./ThemeEditor.module.css";
-import { Tip } from "./Tip.tsx";
+} from '../theme/custom.ts';
+import { themeController } from '../theme/store.ts';
+import styles from './ThemeEditor.module.css';
+import { Tip } from './Tip.tsx';
 
 type Range = { min: number; max: number; step: number };
 
 const pct = (v: number) => `${Number((v * 100).toFixed(1))}%`;
 /** Rounds to the step's own decimals, so 0.025 steps land on 1.025, not 1.0249999. */
 const fixed = (v: number, step: number) =>
-  Number(v.toFixed((String(step).split(".")[1] ?? "").length));
+  Number(v.toFixed((String(step).split('.')[1] ?? '').length));
 
 /** react-colorful's input can emit #abc; the theme stores #aabbcc. */
 const sixDigit = (hex: string) =>
   /^#[0-9a-f]{3}$/i.test(hex)
-    ? `#${[...hex.slice(1)].map((ch) => ch + ch).join("")}`.toLowerCase()
+    ? `#${[...hex.slice(1)].map((ch) => ch + ch).join('')}`.toLowerCase()
     : hex.toLowerCase();
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+const Section = ({ title, children }: { title: string; children: ReactNode }) => {
   return (
     <Fieldset.Root className={styles.section}>
       <Fieldset.Legend className={styles.sectionTitle}>{title}</Fieldset.Legend>
       {children}
     </Fieldset.Root>
   );
-}
+};
 
-function SliderField({
+const SliderField = ({
   label,
   value,
   range,
@@ -65,7 +65,7 @@ function SliderField({
   format: (v: number) => string;
   onChange: (v: number) => void;
   trackStyle?: CSSProperties;
-}) {
+}) => {
   return (
     <Slider.Root
       className={styles.slider}
@@ -98,9 +98,14 @@ function SliderField({
       </Slider.Control>
     </Slider.Root>
   );
-}
+};
 
-function ColorField({
+/** Ties a field's visible label to the control it names. */
+const useLabelId = () => {
+  return useId();
+};
+
+const ColorField = ({
   label,
   value,
   onChange,
@@ -108,9 +113,9 @@ function ColorField({
   label: string;
   value: string;
   onChange: (hex: string) => void;
-}) {
-  const labelId = useId();
-  const motion = usePopupMotion("dropdown");
+}) => {
+  const labelId = useLabelId();
+  const motion = usePopupMotion('dropdown');
   return (
     <div className={styles.colorField}>
       <span id={labelId} className={styles.label}>
@@ -142,9 +147,9 @@ function ColorField({
       />
     </div>
   );
-}
+};
 
-function SelectField<V extends string>({
+const SelectField = <V extends string>({
   label,
   value,
   options,
@@ -154,8 +159,8 @@ function SelectField<V extends string>({
   value: V;
   options: ReadonlyArray<{ value: V; label: string; font: string }>;
   onChange: (v: V) => void;
-}) {
-  const motion = usePopupMotion("dropdown");
+}) => {
+  const motion = usePopupMotion('dropdown');
   return (
     <Field.Root className={styles.field}>
       <Select.Root
@@ -194,25 +199,25 @@ function SelectField<V extends string>({
       </Select.Root>
     </Field.Root>
   );
-}
+};
 
 const PAIRS: ReadonlyArray<[label: string, fg: string, bg: string, min: number]> = [
-  ["Body text", "--color-text", "--color-bg", 4.5],
-  ["Muted text", "--color-text-muted", "--color-surface", 4.5],
-  ["Links", "--color-link", "--color-bg", 4.5],
-  ["Button text", "--color-text-on-accent", "--color-accent", 4.5],
-  ["Accent on page", "--color-accent", "--color-bg", 3],
+  ['Body text', '--color-text', '--color-bg', 4.5],
+  ['Muted text', '--color-text-muted', '--color-surface', 4.5],
+  ['Links', '--color-link', '--color-bg', 4.5],
+  ['Button text', '--color-text-on-accent', '--color-accent', 4.5],
+  ['Accent on page', '--color-accent', '--color-bg', 3],
 ];
 
 type ContrastRow = { label: string; ratio: number; min: number };
 
 /* Reads the semantic colours the page is actually showing (the preview is already applied), so the
    numbers include every derivation step. Renders nothing where colours cannot be computed. */
-function useContrast(theme: CustomTheme): ContrastRow[] {
+const useContrast = (theme: CustomTheme): ContrastRow[] => {
   const [rows, setRows] = useState<ContrastRow[]>([]);
   useEffect(() => {
     void theme;
-    const probe = document.createElement("span");
+    const probe = document.createElement('span');
     probe.hidden = true;
     document.body.append(probe);
     const read = (token: string) => {
@@ -228,18 +233,20 @@ function useContrast(theme: CustomTheme): ContrastRow[] {
     setRows(next);
   }, [theme]);
   return rows;
-}
+};
 
-function ContrastReadout({ rows }: { rows: ContrastRow[] }) {
-  if (rows.length === 0) return null;
+const ContrastReadout = ({ rows }: { rows: ContrastRow[] }) => {
+  if (rows.length === 0) {
+    return null;
+  }
   const failing = rows.filter((r) => r.ratio < r.min).length;
   return (
     <section className={styles.contrast} aria-label="Contrast">
       <p role="status" className={failing ? styles.warn : styles.ok}>
-        <Icon name={failing ? "lucide:triangle-alert" : "lucide:check"} size="sm" />
+        <Icon name={failing ? 'lucide:triangle-alert' : 'lucide:check'} size="sm" />
         {failing === 0
-          ? "Every checked pair meets WCAG AA."
-          : `${failing} ${failing === 1 ? "pair is" : "pairs are"} below WCAG AA.`}
+          ? 'Every checked pair meets WCAG AA.'
+          : `${failing} ${failing === 1 ? 'pair is' : 'pairs are'} below WCAG AA.`}
       </p>
       <ul className={styles.contrastList} role="list">
         {rows.map((r) => (
@@ -256,7 +263,7 @@ function ContrastReadout({ rows }: { rows: ContrastRow[] }) {
       </ul>
     </section>
   );
-}
+};
 
 const textFonts = TEXT_FONTS.map((id) => ({
   value: id,
@@ -264,10 +271,30 @@ const textFonts = TEXT_FONTS.map((id) => ({
   font: FONTS[id].stack,
 }));
 
+/** The theme being edited, previewed live on the page and put back when the editor closes. */
+const useThemeDraft = (initial: CustomTheme) => {
+  const [theme, setTheme] = useState(initial);
+  useEffect(() => {
+    themeController.preview(theme);
+  }, [theme]);
+  useEffect(() => () => themeController.preview(null), []);
+  return {
+    theme,
+    set: <K extends keyof CustomTheme>(key: K, value: CustomTheme[K]) =>
+      setTheme((t) => ({ ...t, [key]: value })),
+  };
+};
+
+/** Delete takes a second press, so one click cannot throw a theme away. */
+const useDeleteConfirm = () => {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  return { confirmDelete, setConfirmDelete };
+};
+
 /* The page behind the sheet is the preview: every change applies to it at once, Save keeps it, and
    Cancel, Escape or the close button put back what was showing. Clicks on the page do not dismiss the
    sheet, so a stray click cannot throw away an edit. */
-export default function ThemeEditor({
+export const ThemeEditor = ({
   initial,
   isNew,
   onClose,
@@ -275,21 +302,14 @@ export default function ThemeEditor({
   initial: CustomTheme;
   isNew: boolean;
   onClose: () => void;
-}) {
-  const [theme, setTheme] = useState(initial);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+}) => {
+  const { theme, set } = useThemeDraft(initial);
+  const { confirmDelete, setConfirmDelete } = useDeleteConfirm();
   const defaults = defaultTheme(theme.base, theme.id, theme.name, siteFonts);
-  const set = <K extends keyof CustomTheme>(key: K, value: CustomTheme[K]) =>
-    setTheme((t) => ({ ...t, [key]: value }));
-
-  useEffect(() => {
-    themeController.preview(theme);
-  }, [theme]);
-  useEffect(() => () => themeController.preview(null), []);
   const contrast = useContrast(theme);
 
   const nameFonts = NAME_FONTS.map((id) =>
-    id === "text"
+    id === 'text'
       ? {
           value: id,
           label: `Same as text (${FONTS[theme.fontText].label})`,
@@ -299,7 +319,7 @@ export default function ThemeEditor({
   );
 
   const readingFonts = READING_FONTS.map((id) =>
-    id === "text"
+    id === 'text'
       ? {
           value: id,
           label: `Same as text (${FONTS[theme.fontText].label})`,
@@ -320,7 +340,9 @@ export default function ThemeEditor({
       open
       disablePointerDismissal
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) {
+          onClose();
+        }
       }}
     >
       <Dialog.Portal>
@@ -328,7 +350,7 @@ export default function ThemeEditor({
           <header className={styles.header}>
             <div>
               <Dialog.Title className={styles.title}>
-                {isNew ? "New theme" : "Edit theme"}
+                {isNew ? 'New theme' : 'Edit theme'}
               </Dialog.Title>
               <Dialog.Description className={styles.description}>
                 Changes preview on the page as you make them.
@@ -346,7 +368,7 @@ export default function ThemeEditor({
                 className={styles.input}
                 value={theme.name}
                 maxLength={40}
-                onValueChange={(v) => set("name", v)}
+                onValueChange={(v) => set('name', v)}
               />
             </Field.Root>
 
@@ -354,24 +376,25 @@ export default function ThemeEditor({
               render={
                 <RadioGroup
                   value={theme.base}
-                  onValueChange={(v) => set("base", v as CustomTheme["base"])}
+                  onValueChange={(v) => set('base', v as CustomTheme['base'])}
                 />
               }
               className={styles.segmented}
             >
               <Fieldset.Legend className={styles.label}>Built on</Fieldset.Legend>
-              {(["light", "dark"] as const).map((base) => (
+              {(['light', 'dark'] as const).map((base) => (
+                // biome-ignore lint/a11y/noLabelWithoutControl: Radio.Root renders the radio inside this label
                 <label key={base} className={styles.segment}>
                   <Radio.Root value={base} className={styles.radio}>
                     <Radio.Indicator className={styles.radioDot} />
                   </Radio.Root>
-                  {base === "light" ? "Light" : "Dark"}
+                  {base === 'light' ? 'Light' : 'Dark'}
                 </label>
               ))}
             </Fieldset.Root>
 
             <Section title="Color">
-              <ColorField label="Accent" value={theme.accent} onChange={(v) => set("accent", v)} />
+              <ColorField label="Accent" value={theme.accent} onChange={(v) => set('accent', v)} />
               <p className={styles.hint}>
                 Sets the accent's hue and vividness. Each shade keeps the lightness that holds its
                 contrast.
@@ -382,10 +405,10 @@ export default function ThemeEditor({
                 range={{ min: 0, max: 359, step: 1 }}
                 initial={defaults.neutralHue}
                 format={(v) => `${v}°`}
-                onChange={(v) => set("neutralHue", v)}
+                onChange={(v) => set('neutralHue', v)}
                 trackStyle={{
                   background:
-                    "linear-gradient(to right in oklch longer hue, oklch(0.7 0.12 0), oklch(0.7 0.12 0))",
+                    'linear-gradient(to right in oklch longer hue, oklch(0.7 0.12 0), oklch(0.7 0.12 0))',
                 }}
               />
               <SliderField
@@ -394,14 +417,14 @@ export default function ThemeEditor({
                 range={RANGES.neutralTint}
                 initial={defaults.neutralTint}
                 format={(v) => pct(v / RANGES.neutralTint.max)}
-                onChange={(v) => set("neutralTint", v)}
+                onChange={(v) => set('neutralTint', v)}
               />
               <Field.Root className={styles.switchRow}>
                 <Field.Label className={styles.label}>Landing backdrop matches accent</Field.Label>
                 <Switch.Root
                   className={styles.switch}
                   checked={theme.backdrop === null}
-                  onCheckedChange={(match) => set("backdrop", match ? null : theme.accent)}
+                  onCheckedChange={(match) => set('backdrop', match ? null : theme.accent)}
                 >
                   <Switch.Thumb className={styles.switchThumb} />
                 </Switch.Root>
@@ -410,7 +433,7 @@ export default function ThemeEditor({
                 <ColorField
                   label="Backdrop"
                   value={theme.backdrop}
-                  onChange={(v) => set("backdrop", v)}
+                  onChange={(v) => set('backdrop', v)}
                 />
               )}
             </Section>
@@ -420,19 +443,19 @@ export default function ThemeEditor({
                 label="Text font"
                 value={theme.fontText}
                 options={textFonts}
-                onChange={(v) => set("fontText", v)}
+                onChange={(v) => set('fontText', v)}
               />
               <SelectField
                 label="Reading font"
                 value={theme.fontReading}
                 options={readingFonts}
-                onChange={(v) => set("fontReading", v)}
+                onChange={(v) => set('fontReading', v)}
               />
               <SelectField
                 label="Name font"
                 value={theme.fontName}
                 options={nameFonts}
-                onChange={(v) => set("fontName", v)}
+                onChange={(v) => set('fontName', v)}
               />
               <SliderField
                 label="Text size"
@@ -440,7 +463,7 @@ export default function ThemeEditor({
                 range={RANGES.textScale}
                 initial={defaults.textScale}
                 format={pct}
-                onChange={(v) => set("textScale", v)}
+                onChange={(v) => set('textScale', v)}
               />
               <SliderField
                 label="Line height"
@@ -448,7 +471,7 @@ export default function ThemeEditor({
                 range={RANGES.leading}
                 initial={defaults.leading}
                 format={(v) => v.toFixed(2)}
-                onChange={(v) => set("leading", v)}
+                onChange={(v) => set('leading', v)}
               />
             </Section>
 
@@ -459,7 +482,7 @@ export default function ThemeEditor({
                 range={RANGES.spaceScale}
                 initial={defaults.spaceScale}
                 format={pct}
-                onChange={(v) => set("spaceScale", v)}
+                onChange={(v) => set('spaceScale', v)}
               />
               <SliderField
                 label="Corner radius"
@@ -467,7 +490,7 @@ export default function ThemeEditor({
                 range={RANGES.radiusScale}
                 initial={defaults.radiusScale}
                 format={pct}
-                onChange={(v) => set("radiusScale", v)}
+                onChange={(v) => set('radiusScale', v)}
               />
               <SliderField
                 label="Content width"
@@ -475,7 +498,7 @@ export default function ThemeEditor({
                 range={RANGES.measure}
                 initial={defaults.measure}
                 format={(v) => `${v} characters`}
-                onChange={(v) => set("measure", v)}
+                onChange={(v) => set('measure', v)}
               />
               <SliderField
                 label="Shadow depth"
@@ -483,7 +506,7 @@ export default function ThemeEditor({
                 range={RANGES.shadowScale}
                 initial={defaults.shadowScale}
                 format={pct}
-                onChange={(v) => set("shadowScale", v)}
+                onChange={(v) => set('shadowScale', v)}
               />
             </Section>
 
@@ -496,13 +519,15 @@ export default function ThemeEditor({
                 type="button"
                 className={styles.danger}
                 onClick={() => {
-                  if (!confirmDelete) return setConfirmDelete(true);
+                  if (!confirmDelete) {
+                    return setConfirmDelete(true);
+                  }
                   themeController.deleteCustom(initial.id);
                   onClose();
                 }}
               >
                 <Icon name="lucide:trash-2" size="sm" />
-                {confirmDelete ? "Delete for good" : "Delete"}
+                {confirmDelete ? 'Delete for good' : 'Delete'}
               </button>
             )}
             <span className={styles.spacer} />
@@ -515,4 +540,4 @@ export default function ThemeEditor({
       </Dialog.Portal>
     </Dialog.Root>
   );
-}
+};

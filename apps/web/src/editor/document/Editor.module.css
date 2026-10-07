@@ -2,23 +2,22 @@
   .frame {
     display: grid;
     grid-template-rows: auto 1fr;
+    min-block-size: 24rem;
+    background: var(--color-surface);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    min-block-size: 24rem;
   }
 
   .toolbar {
+    position: sticky;
+    inset-block-start: var(--sticky-top, 0px);
+    z-index: var(--z-sticky);
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
     padding: var(--space-2);
-    border-block-end: var(--border-width) solid var(--color-border);
-    /* Below the site's bar while that is pinned (--sticky-top, set by Page). */
-    position: sticky;
-    inset-block-start: var(--sticky-top, 0px);
     background: var(--color-surface);
-    z-index: var(--z-sticky);
+    border-block-end: var(--border-width) solid var(--color-border);
     border-start-start-radius: var(--radius-lg);
     border-start-end-radius: var(--radius-lg);
   }
@@ -29,32 +28,32 @@
     justify-content: center;
     inline-size: 2.25rem;
     block-size: 2.25rem;
-    border-radius: var(--radius-sm);
     color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
 
     &:hover {
-      background: var(--color-surface-hover);
       color: var(--color-text);
+      background: var(--color-surface-hover);
     }
 
     &[aria-pressed="true"] {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 
   .content {
-    padding: var(--space-6);
     min-block-size: 20rem;
-    outline: none;
+    padding: var(--space-6);
     font-size: var(--font-size-base);
+    outline: none;
 
     & p.is-editor-empty:first-child::before {
-      content: attr(data-placeholder);
-      color: var(--color-text-subtle);
       float: inline-start;
-      pointer-events: none;
       block-size: 0;
+      color: var(--color-text-subtle);
+      pointer-events: none;
+      content: attr(data-placeholder);
     }
 
     & img.ProseMirror-selectednode {

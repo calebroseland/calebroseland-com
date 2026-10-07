@@ -9,26 +9,26 @@ export type RepoRef = { owner: string; repo: string; defaultBranch: string };
 export type FileInput = {
   path: string;
   content: string | Uint8Array | Blob;
-  encoding?: "utf-8" | "base64";
+  encoding?: 'utf-8' | 'base64';
 };
 
-export const isBinaryContent = (content: FileInput["content"]): content is Uint8Array | Blob =>
+export const isBinaryContent = (content: FileInput['content']): content is Uint8Array | Blob =>
   content instanceof Uint8Array || content instanceof Blob;
 
-export async function toBytes(content: Uint8Array | Blob): Promise<Uint8Array> {
+export const toBytes = async (content: Uint8Array | Blob): Promise<Uint8Array> => {
   return content instanceof Uint8Array ? content : new Uint8Array(await content.arrayBuffer());
-}
+};
 
 export type Bundle = {
   ref: string;
   headSha: string;
-  files: Array<{ path: string; content: string; sha: string; encoding: "utf-8" | "base64" }>;
+  files: Array<{ path: string; content: string; sha: string; encoding: 'utf-8' | 'base64' }>;
 };
 
 export type PullRequest = {
   number: number;
   url: string;
-  state: "open" | "closed";
+  state: 'open' | 'closed';
   merged: boolean;
   mergeable: boolean | null;
   headRef: string;
@@ -49,19 +49,19 @@ export class StaleRefError extends Error {
     public readonly actual: string,
   ) {
     super(`Branch ${ref} moved: expected ${expected}, found ${actual}`);
-    this.name = "StaleRefError";
+    this.name = 'StaleRefError';
   }
 }
 
 export class AuthError extends Error {
-  constructor(message = "GitHub rejected the token") {
+  constructor(message = 'GitHub rejected the token') {
     super(message);
-    this.name = "AuthError";
+    this.name = 'AuthError';
   }
 }
 
-export interface GitHubClient {
-  readonly kind: "octokit" | "fake" | "local";
+export type GitHubClient = {
+  readonly kind: 'octokit' | 'fake' | 'local';
   /** Branch entries are published to; drafts are cut from it. */
   readonly defaultBranch: string;
   getViewer(): Promise<Viewer>;
@@ -80,9 +80,9 @@ export interface GitHubClient {
   openPullRequest(input: { ref: string; title: string; body: string }): Promise<PullRequest>;
   getPullRequest(ref: string): Promise<PullRequest | null>;
   mergePullRequest(number: number): Promise<{ sha: string }>;
-}
+};
 
-export const DRAFT_PREFIX = "drafts/";
-export const draftRef = (slug: string) => `${DRAFT_PREFIX}${slug}`;
-export const slugFromRef = (ref: string) =>
-  ref.replace(/^refs\/heads\//, "").slice(DRAFT_PREFIX.length);
+export const DRAFT_PREFIX = 'drafts/';
+export const draftRef = (slug: string): string => `${DRAFT_PREFIX}${slug}`;
+export const slugFromRef = (ref: string): string =>
+  ref.replace(/^refs\/heads\//, '').slice(DRAFT_PREFIX.length);

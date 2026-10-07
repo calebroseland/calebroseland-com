@@ -1,14 +1,33 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { ArticleBody, ArticleSkeleton, EntryHeader } from "../components/Article.tsx";
-import { CenteredMessage, Page } from "../components/Page.tsx";
-import { findBySlug, loadEntry } from "../content/entries.ts";
-import { siteProfile } from "../content/profile.ts";
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { ArticleBody, ArticleSkeleton, EntryHeader } from '../components/Article.tsx';
+import { CenteredMessage, Page } from '../components/Page.tsx';
+import { findBySlug, loadEntry } from '../content/entries.ts';
+import { siteProfile } from '../content/profile.ts';
+
+/** The page this route loaded. */
+const usePage = () => {
+  return Route.useLoaderData();
+};
+
+const PageRoute = () => {
+  const entry = usePage();
+  return (
+    <Page width="measure">
+      <article>
+        <EntryHeader meta={entry.meta} showMeta={false} />
+        <ArticleBody entry={entry} />
+      </article>
+    </Page>
+  );
+};
 
 /* Top-level pages such as /about. Editor routes are more specific and win. */
-export const Route = createFileRoute("/$slug")({
+export const Route = createFileRoute('/$slug')({
   loader: async ({ params }) => {
-    const meta = findBySlug("page", params.slug);
-    if (!meta) throw notFound();
+    const meta = findBySlug('page', params.slug);
+    if (!meta) {
+      throw notFound();
+    }
     return loadEntry(meta.id);
   },
   pendingComponent: () => (
@@ -28,19 +47,7 @@ export const Route = createFileRoute("/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [{ title: `${loaderData.meta.title} · ${siteProfile.name}` }]
-      : [{ name: "robots", content: "noindex" }],
+      : [{ name: 'robots', content: 'noindex' }],
   }),
   component: PageRoute,
 });
-
-function PageRoute() {
-  const entry = Route.useLoaderData();
-  return (
-    <Page width="measure">
-      <article>
-        <EntryHeader meta={entry.meta} showMeta={false} />
-        <ArticleBody entry={entry} />
-      </article>
-    </Page>
-  );
-}

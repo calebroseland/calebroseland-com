@@ -14,11 +14,11 @@
   .popup {
     position: relative;
     padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
-    background: var(--color-text);
-    color: var(--color-bg);
     font-size: var(--font-size-sm);
     line-height: var(--leading-tight);
+    color: var(--color-bg);
+    background: var(--color-text);
+    border-radius: var(--radius-sm);
     /* Motion pops it from the arrow (motion/presets.ts). */
     transform-origin: var(--transform-origin);
   }
@@ -31,14 +31,14 @@
     overflow: clip;
 
     &::before {
-      content: "";
       position: absolute;
       inset-inline-start: 50%;
       inline-size: 7px;
       block-size: 7px;
+      content: "";
       background: var(--color-text);
-      translate: -50% -50%;
       rotate: 45deg;
+      translate: -50% -50%;
     }
 
     &[data-side="top"] {

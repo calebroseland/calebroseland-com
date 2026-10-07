@@ -1,0 +1,18 @@
+language js
+
+// Array types read best as `T[]` while the element is a plain name, and as `Array<…>` once it is a
+// union, intersection, function or generic, where the shorthand needs parentheses or hides `[]` after
+// angle brackets. `readonly T[]` and `ReadonlyArray<…>` follow the same split.
+or {
+  `$elem[]` as $type where {
+    $elem <: r"^\(.*|.*<.*",
+    register_diagnostic(span=$type, message="Use Array<…> (or ReadonlyArray<…>) when the element type is a union, intersection, function or generic.", severity="error")
+  },
+  or {
+    `Array<$elem>`,
+    `ReadonlyArray<$elem>`
+  } as $type where {
+    $elem <: r"^[\w.$]+$",
+    register_diagnostic(span=$type, message="Use the T[] shorthand (or readonly T[]) when the element type is a plain name.", severity="error")
+  }
+}

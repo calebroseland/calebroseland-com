@@ -1,11 +1,11 @@
-import type { Bundle, PullRequest } from "@crc/github-client";
-import { parseEntry } from "@crc/markdown";
-import { CONTENT_ROOT, type EntryKind } from "./drafts/paths.ts";
+import type { Bundle, PullRequest } from '@crc/github-client';
+import { parseEntry } from '@crc/markdown';
+import { CONTENT_ROOT, type EntryKind } from './drafts/paths.ts';
 
 /* One list for everything the editor can open, whatever backend is behind it: entries already on the
    default branch (or, in working-tree mode, on disk) plus the draft branches in flight. */
 
-export type EntryStatus = "draft" | "pull-request" | "published" | "working-tree";
+export type EntryStatus = 'draft' | 'pull-request' | 'published' | 'working-tree';
 
 export type EditorEntry = {
   /** Unknown for a draft branch with nothing published under the same slug: reading every draft
@@ -23,17 +23,19 @@ export type EditorEntry = {
 };
 
 /** Reads every index.md in a content tree. Invalid frontmatter is skipped rather than failing the board. */
-export function entriesFromBundle(bundle: Bundle, status: EntryStatus): EditorEntry[] {
+export const entriesFromBundle = (bundle: Bundle, status: EntryStatus): EditorEntry[] => {
   const out: EditorEntry[] = [];
   for (const file of bundle.files) {
-    if (!file.path.endsWith("/index.md")) continue;
-    const kind: EntryKind = file.path.startsWith(`${CONTENT_ROOT}/pages/`) ? "page" : "post";
+    if (!file.path.endsWith('/index.md')) {
+      continue;
+    }
+    const kind: EntryKind = file.path.startsWith(`${CONTENT_ROOT}/pages/`) ? 'page' : 'post';
     try {
       const { meta } = parseEntry(file.content);
       out.push({
         kind,
         slug: meta.slug,
-        dir: file.path.slice(0, -"/index.md".length),
+        dir: file.path.slice(0, -'/index.md'.length),
         title: meta.title,
         date: meta.date.toISOString().slice(0, 10),
         draft: meta.draft,
@@ -47,13 +49,13 @@ export function entriesFromBundle(bundle: Bundle, status: EntryStatus): EditorEn
   return out.sort((a, b) =>
     a.date === b.date ? a.slug.localeCompare(b.slug) : b.date.localeCompare(a.date),
   );
-}
+};
 
 /** Draft branches shadow the published entry with the same slug, so only one row appears per slug. */
-export function mergeEntries(
+export const mergeEntries = (
   published: readonly EditorEntry[],
   drafts: readonly { ref: string; slug: string; pr: PullRequest | null }[],
-): EditorEntry[] {
+): EditorEntry[] => {
   const bySlug = new Map(published.map((e) => [e.slug, e]));
   const rows: EditorEntry[] = [];
   for (const draft of drafts) {
@@ -62,14 +64,14 @@ export function mergeEntries(
     rows.push({
       ...(base?.kind ? { kind: base.kind } : {}),
       slug: draft.slug,
-      dir: base?.dir ?? "",
+      dir: base?.dir ?? '',
       title: base?.title ?? draft.slug,
-      date: base?.date ?? "",
+      date: base?.date ?? '',
       draft: base?.draft ?? true,
-      status: draft.pr ? "pull-request" : "draft",
+      status: draft.pr ? 'pull-request' : 'draft',
       ref: draft.ref,
       pr: draft.pr,
     });
   }
   return [...rows, ...bySlug.values()];
-}
+};

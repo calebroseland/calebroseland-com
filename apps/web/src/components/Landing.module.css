@@ -7,9 +7,9 @@
 
   .stage {
     display: grid;
+    gap: var(--space-8);
     align-content: center;
     justify-items: center;
-    gap: var(--space-8);
     min-block-size: 100dvh;
     padding: var(--space-12) var(--space-4);
   }
@@ -20,19 +20,19 @@
   .card {
     --card-width: 34rem;
     position: relative;
+    inline-size: min(100%, var(--card-width));
+    padding: var(--space-2) var(--space-4) var(--space-3);
+    container-type: inline-size;
     /* clip, not hidden: it clips the flip without making the card a scroll container, so the editor's
        save bar can stick to the viewport. */
     overflow: clip;
-    container-type: inline-size;
-    inline-size: min(100%, var(--card-width));
-    padding: var(--space-2) var(--space-4) var(--space-3);
-    background: var(--color-surface);
     color: var(--color-text);
+    text-align: center;
+    background: var(--color-surface);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg);
-    text-align: center;
-    view-transition-name: site-card;
     transition: background-color var(--duration-slow) var(--ease-in-out);
+    view-transition-name: site-card;
 
     &[data-expanded] {
       --card-width: 54rem;
@@ -54,14 +54,14 @@
     inset-block-start: var(--space-2);
     inset-inline: var(--space-2);
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
   }
 
   .cornerStart {
     display: flex;
-    align-items: center;
     gap: var(--space-1);
+    align-items: center;
   }
 
   .cornerSlot {
@@ -75,22 +75,22 @@
     min-inline-size: 2.75rem;
     min-block-size: 2.75rem;
     padding-inline: var(--space-2);
-    border-radius: var(--radius-md);
     color: var(--color-text-muted);
     text-decoration: none;
+    border-radius: var(--radius-md);
     transition:
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
 
     &:hover {
-      background: var(--color-surface-hover);
       color: var(--color-text);
+      background: var(--color-surface-hover);
     }
 
     /* Pressed reads as the accent, not just a darker grey, so a tap is unmistakable. */
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 
@@ -123,9 +123,9 @@
   .tagList {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
     gap: var(--space-3);
+    align-items: center;
+    justify-content: center;
   }
 
   .tags {
@@ -137,14 +137,14 @@
     align-items: center;
     min-block-size: 2.25rem;
     padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-sm);
     font-size: var(--font-size-base);
+    border-radius: var(--radius-sm);
     transition: background-color var(--duration-fast) var(--ease-out);
   }
 
   .tagMore {
-    border: var(--border-width) solid var(--color-accent-border);
     color: var(--color-accent-text);
+    border: var(--border-width) solid var(--color-accent-border);
 
     &:hover {
       background: var(--color-accent-subtle);
@@ -159,8 +159,8 @@
   .links {
     display: grid;
     grid-template-columns: repeat(var(--faces), 1fr);
-    justify-items: center;
     gap: var(--space-4);
+    justify-items: center;
     padding-block: var(--space-6) var(--space-2);
 
     &[data-expanded] {
@@ -189,20 +189,20 @@
 
   .groupTitle {
     display: flex;
-    align-items: center;
     gap: var(--space-2);
+    align-items: center;
     padding: var(--space-1) var(--space-3) var(--space-2);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-normal);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
     color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
   }
 
   .headingText {
     display: inline-flex;
-    align-items: center;
     gap: var(--space-2);
+    align-items: center;
   }
 
   .list {
@@ -233,18 +233,18 @@
       inline-size: 1px;
       block-size: 1px;
       overflow: hidden;
-      clip-path: inset(50%);
       white-space: nowrap;
+      clip-path: inset(50%);
     }
   }
 
   /* Out of the layout; marks a hidden link's row for the transition. */
   .linkAnchor {
     position: absolute;
-    inset-inline-start: 0;
     inset-block-start: calc(var(--row) * 100%);
-    inline-size: max-content;
+    inset-inline-start: 0;
     visibility: hidden;
+    inline-size: max-content;
     pointer-events: none;
   }
 
@@ -252,15 +252,15 @@
   .link,
   .detail {
     display: flex;
-    align-items: center;
     gap: var(--space-2);
+    align-items: center;
     min-block-size: 2.75rem;
     padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
     font-size: var(--font-size-lg);
     line-height: var(--leading-tight);
+    color: var(--color-text);
     text-decoration: none;
+    border-radius: var(--radius-md);
 
     &:focus-visible {
       outline-offset: calc(-1 * var(--focus-ring-width));
@@ -269,8 +269,8 @@
 
   /* A fixed slot keeps every label on the same line down a column, whatever the icon's shape. */
   .linkIcon {
-    flex: none;
     display: inline-flex;
+    flex: none;
     inline-size: var(--icon-xl);
   }
 
@@ -287,13 +287,13 @@
       color var(--duration-fast) var(--ease-out);
 
     &:hover {
-      background: var(--color-surface-hover);
       color: var(--color-text);
+      background: var(--color-surface-hover);
     }
 
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 
@@ -310,21 +310,21 @@
       inline-size: 1px;
       block-size: 1px;
       overflow: hidden;
-      clip-path: inset(50%);
       white-space: nowrap;
+      clip-path: inset(50%);
     }
   }
 
   .more {
     display: block;
     inline-size: 100%;
-    margin-block-start: var(--space-2);
     min-block-size: 2.75rem;
     padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-md);
-    background: var(--color-surface-sunken);
-    color: var(--color-text);
+    margin-block-start: var(--space-2);
     font-size: var(--font-size-lg);
+    color: var(--color-text);
+    background: var(--color-surface-sunken);
+    border-radius: var(--radius-md);
     transition:
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
@@ -335,8 +335,8 @@
     }
 
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 
@@ -350,9 +350,9 @@
 
   .back {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
     gap: var(--space-4);
+    align-items: flex-start;
+    justify-content: space-between;
     padding: var(--space-2) 0 var(--space-4) var(--space-2);
   }
 
@@ -381,14 +381,14 @@
 
   .enter {
     display: inline-flex;
-    align-items: center;
     gap: var(--space-3);
+    align-items: center;
     min-block-size: 3.5rem;
     padding: var(--space-3) var(--space-8);
-    border-radius: var(--radius-full);
-    background: var(--color-accent);
-    color: var(--color-text-on-accent);
     font-size: var(--font-size-xl);
+    color: var(--color-text-on-accent);
+    background: var(--color-accent);
+    border-radius: var(--radius-full);
     box-shadow: var(--shadow-md);
     transition: background-color var(--duration-fast) var(--ease-out);
 

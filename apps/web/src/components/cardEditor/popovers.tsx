@@ -1,13 +1,13 @@
-import { Field } from "@base-ui/react/field";
-import { Popover } from "@base-ui/react/popover";
-import { Switch } from "@base-ui/react/switch";
-import { Icon } from "@crc/ui";
-import { usePopupMotion } from "../../hooks/usePopupMotion.ts";
-import styles from "./CardEditor.module.css";
-import type { EditGroup } from "./model.ts";
+import { Field } from '@base-ui/react/field';
+import { Popover } from '@base-ui/react/popover';
+import { Switch } from '@base-ui/react/switch';
+import { Icon } from '@crc/ui';
+import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
+import styles from './CardEditor.module.css';
+import type { EditGroup } from './model.ts';
 
 /** A group's settings, and moving or removing it without a drag. */
-export function GroupPopover({
+export const GroupPopover = ({
   group,
   name,
   canRemove,
@@ -21,8 +21,8 @@ export function GroupPopover({
   onChange: (group: EditGroup) => void;
   onMove: (delta: -1 | 1) => void;
   onRemove: () => void;
-}) {
-  const motion = usePopupMotion("dropdown");
+}) => {
+  const motion = usePopupMotion('dropdown');
   return (
     <Popover.Root onOpenChange={motion.onOpenChange}>
       <Popover.Trigger className={styles.options} aria-label={`Options for group ${name}`}>
@@ -60,4 +60,4 @@ export function GroupPopover({
       </Popover.Portal>
     </Popover.Root>
   );
-}
+};

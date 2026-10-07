@@ -6,7 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./icons": "./src/icons.ts",
-    "./motion-tokens": "./src/motion-tokens.ts",
+    "./motion-tokens": "./src/motionTokens.ts",
     "./index.css": "./src/index.css",
     "./fonts.css": "./src/fonts.css"
   },

@@ -1,33 +1,35 @@
-import type { Profile, ProfileLink } from "@crc/content-schema";
-import { Icon } from "@crc/ui";
-import { Link } from "@tanstack/react-router";
-import type { MouseEvent, ReactElement } from "react";
-import { pages } from "../content/entries.ts";
-import { hasContact } from "../content/profile.ts";
-import { useLinkHover } from "../hooks/useLinkHover.ts";
-import { useReduceMotion } from "../hooks/useReduceMotion.ts";
-import { useSectionHeading } from "../hooks/useSectionHeading.ts";
-import { isPlainClick, useBackToCard } from "./backToCard.ts";
-import { oncePerPress, useDetailsExpanded } from "./detailsState.ts";
-import styles from "./SiteFooter.module.css";
-import { Tip } from "./Tip.tsx";
-import { footerHeadingName, footerLinkName, withViewTransition } from "./viewTransition.ts";
+import type { Profile, ProfileLink } from '@crc/content-schema';
+import { Icon } from '@crc/ui';
+import { Link } from '@tanstack/react-router';
+import type { MouseEvent, ReactElement } from 'react';
+import { pages } from '../content/entries.ts';
+import { hasContact } from '../content/profile.ts';
+import { useLinkHover } from '../hooks/useLinkHover.ts';
+import { useReduceMotion } from '../hooks/useReduceMotion.ts';
+import { useSectionHeading } from '../hooks/useSectionHeading.ts';
+import { isPlainClick, useBackToCard } from './backToCard.ts';
+import { oncePerPress, useDetailsExpanded } from './detailsState.ts';
+import styles from './SiteFooter.module.css';
+import { Tip } from './Tip.tsx';
+import { footerHeadingName, footerLinkName, withViewTransition } from './viewTransition.ts';
 
-const LINKS_ID = "site-footer-links";
+const LINKS_ID = 'site-footer-links';
 // Shown once each page exists in content/pages, so the footer never links to a missing page.
-const footerPages = ["privacy", "about"].flatMap((slug) => pages.filter((p) => p.slug === slug));
+const footerPages = ['privacy', 'about'].flatMap((slug) => pages.filter((p) => p.slug === slug));
 
 /* The card's links, kept at hand past the card. Collapsed, one line of icons by group; expanded, a
    column per group with labels, except an inline group, which stays a row of icons. Each link shares a view-transition name with its place on the card. */
-export function SiteFooter({ profile }: { profile: Profile }) {
+export const SiteFooter = ({ profile }: { profile: Profile }) => {
   const { expanded, toggle } = useDetailsExpanded();
   const reduce = useReduceMotion();
   const toCard = useBackToCard();
   // The same morph as the brand's way back to the card, onto its contact side.
   const openContact = (e: MouseEvent) => {
-    if (!isPlainClick(e)) return;
+    if (!isPlainClick(e)) {
+      return;
+    }
     e.preventDefault();
-    void toCard("/contact");
+    void toCard('/contact');
   };
   const iconOnly = !expanded;
   return (
@@ -44,17 +46,17 @@ export function SiteFooter({ profile }: { profile: Profile }) {
         ))}
       </nav>
       <div className={styles.actions}>
-        <Tip label={expanded ? "Fewer details" : "More details"}>
+        <Tip label={expanded ? 'Fewer details' : 'More details'}>
           <button
             type="button"
             className={styles.toggle}
             aria-expanded={expanded}
             aria-controls={LINKS_ID}
-            aria-label={expanded ? "Collapse the footer" : "Expand the footer"}
+            aria-label={expanded ? 'Collapse the footer' : 'Expand the footer'}
             onKeyDown={oncePerPress}
-            onClick={() => void withViewTransition("footer", () => toggleAtBottom(toggle), reduce)}
+            onClick={() => void withViewTransition('footer', () => toggleAtBottom(toggle), reduce)}
           >
-            <Icon name={expanded ? "lucide:fold-vertical" : "lucide:unfold-vertical"} size="sm" />
+            <Icon name={expanded ? 'lucide:fold-vertical' : 'lucide:unfold-vertical'} size="sm" />
           </button>
         </Tip>
       </div>
@@ -79,39 +81,44 @@ export function SiteFooter({ profile }: { profile: Profile }) {
       </div>
     </footer>
   );
-}
+};
 
 /* The toggle sits at the foot of the page, so the page stays pinned to its bottom edge while the footer
    grows or shrinks. The scroll lands before the new snapshot, so the transition morphs in place. */
-function toggleAtBottom(toggle: () => void): Promise<void> {
+const toggleAtBottom = (toggle: () => void): Promise<void> => {
   toggle();
   // After the render the caller flushes, before the transition's new snapshot.
   return Promise.resolve().then(latchToBottom);
-}
+};
 
 const LATCH_MS = 1000;
 
 /* Pins now, and again whenever the page's height changes (a font the new layout uses arriving late),
    until the reader scrolls, touches or types, or the layout has had a second to settle. */
-function latchToBottom() {
+const latchToBottom = () => {
   const root = document.documentElement;
-  const pin = () => window.scrollTo({ top: root.scrollHeight, behavior: "instant" });
+  const pin = () => window.scrollTo({ top: root.scrollHeight, behavior: 'instant' });
   pin();
-  if (typeof ResizeObserver === "undefined") return;
+  if (typeof ResizeObserver === 'undefined') {
+    return;
+  }
   const resized = new ResizeObserver(pin);
   resized.observe(root);
   const release = () => {
     resized.disconnect();
     clearTimeout(timer);
-    for (const type of ["wheel", "touchstart", "keydown"]) removeEventListener(type, release);
+    for (const type of ['wheel', 'touchstart', 'keydown']) {
+      removeEventListener(type, release);
+    }
   };
   const timer = setTimeout(release, LATCH_MS);
-  for (const type of ["wheel", "touchstart", "keydown"])
+  for (const type of ['wheel', 'touchstart', 'keydown']) {
     addEventListener(type, release, { passive: true, once: true });
-}
+  }
+};
 
 /** An icon-only control gets its name as a tooltip; the control keeps its own accessible name. */
-function Named({
+const Named = ({
   label,
   when,
   children,
@@ -119,7 +126,7 @@ function Named({
   label: string;
   when: boolean;
   children: ReactElement;
-}) {
+}) => {
   return when ? (
     <Tip label={label}>
       <span className={styles.tipTarget}>{children}</span>
@@ -127,9 +134,9 @@ function Named({
   ) : (
     children
   );
-}
+};
 
-function FooterGroup({
+const FooterGroup = ({
   title,
   links,
   index,
@@ -139,7 +146,7 @@ function FooterGroup({
   links: readonly ProfileLink[];
   index: number;
   iconOnly: boolean;
-}) {
+}) => {
   const named = useSectionHeading();
   return (
     <section {...named.region} className={styles.group} data-icons={iconOnly || undefined}>
@@ -157,10 +164,18 @@ function FooterGroup({
       </ul>
     </section>
   );
-}
+};
 
-function FooterLink({ link, group, index }: { link: ProfileLink; group: number; index: number }) {
-  const hoverRef = useLinkHover("icon");
+const FooterLink = ({
+  link,
+  group,
+  index,
+}: {
+  link: ProfileLink;
+  group: number;
+  index: number;
+}) => {
+  const hoverRef = useLinkHover('icon');
   const props = { ref: hoverRef, className: styles.link, style: footerLinkName(group, index) };
   const body = (
     <>
@@ -172,7 +187,7 @@ function FooterLink({ link, group, index }: { link: ProfileLink; group: number; 
       </span>
     </>
   );
-  return link.url.startsWith("/") ? (
+  return link.url.startsWith('/') ? (
     <Link to={link.url} {...props}>
       {body}
     </Link>
@@ -182,4 +197,4 @@ function FooterLink({ link, group, index }: { link: ProfileLink; group: number; 
       <span className="visually-hidden"> (opens in new tab)</span>
     </a>
   );
-}
+};

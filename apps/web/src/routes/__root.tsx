@@ -4,21 +4,15 @@ import {
   HeadContent,
   Outlet,
   useRouter,
-} from "@tanstack/react-router";
-import { useEffect } from "react";
-import { CommandPalette } from "../components/CommandPalette.tsx";
-import { MotionProvider } from "../components/MotionProvider.tsx";
-import { CenteredMessage, Page } from "../components/Page.tsx";
-import { TipProvider } from "../components/Tip.tsx";
-import { Toasts } from "../editor/Toast.tsx";
+} from '@tanstack/react-router';
+import { useEffect } from 'react';
+import { CommandPalette } from '../components/CommandPalette.tsx';
+import { MotionProvider } from '../components/MotionProvider.tsx';
+import { CenteredMessage, Page } from '../components/Page.tsx';
+import { TipProvider } from '../components/Tip.tsx';
+import { Toasts } from '../editor/Toast.tsx';
 
-export const Route = createRootRoute({
-  component: RootLayout,
-  notFoundComponent: NotFound,
-  errorComponent: RootError,
-});
-
-function RootLayout() {
+const RootLayout = () => {
   useFocusHeadingOnNavigate();
   return (
     <>
@@ -35,16 +29,18 @@ function RootLayout() {
       <CommandPalette />
     </>
   );
-}
+};
 
 /* After a client-side navigation, move focus to the new page's h1 so keyboard and screen-reader users land on content. */
-function useFocusHeadingOnNavigate() {
+const useFocusHeadingOnNavigate = () => {
   const router = useRouter();
   useEffect(
     () =>
-      router.subscribe("onResolved", ({ pathChanged }) => {
-        if (!pathChanged) return;
-        const h1 = document.querySelector<HTMLElement>("main h1");
+      router.subscribe('onResolved', ({ pathChanged }) => {
+        if (!pathChanged) {
+          return;
+        }
+        const h1 = document.querySelector<HTMLElement>('main h1');
         if (h1) {
           h1.tabIndex = -1;
           h1.focus({ preventScroll: true });
@@ -52,9 +48,9 @@ function useFocusHeadingOnNavigate() {
       }),
     [router],
   );
-}
+};
 
-function NotFound() {
+const NotFound = () => {
   return (
     <Page>
       <CenteredMessage title="That page isn't here.">
@@ -64,9 +60,9 @@ function NotFound() {
       </CenteredMessage>
     </Page>
   );
-}
+};
 
-function RootError({ error }: ErrorComponentProps) {
+const RootError = ({ error }: ErrorComponentProps) => {
   console.error(error);
   return (
     <Page>
@@ -79,4 +75,10 @@ function RootError({ error }: ErrorComponentProps) {
       </CenteredMessage>
     </Page>
   );
-}
+};
+
+export const Route = createRootRoute({
+  component: RootLayout,
+  notFoundComponent: NotFound,
+  errorComponent: RootError,
+});

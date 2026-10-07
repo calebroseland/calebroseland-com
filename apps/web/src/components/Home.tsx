@@ -1,13 +1,13 @@
-import { Link } from "@tanstack/react-router";
-import { posts } from "../content/entries.ts";
-import styles from "./Home.module.css";
-import { Page } from "./Page.tsx";
-import { PostList } from "./PostList.tsx";
+import { Link } from '@tanstack/react-router';
+import { posts } from '../content/entries.ts';
+import styles from './Home.module.css';
+import { Page } from './Page.tsx';
+import { PostList } from './PostList.tsx';
 
 const LATEST = 3;
 
 /* The site past the card: where "Enter" lands. Placeholder until real home copy exists. */
-export function Home() {
+export const Home = () => {
   return (
     <Page>
       <h1 className={styles.title}>Latest writing</h1>
@@ -23,4 +23,4 @@ export function Home() {
       )}
     </Page>
   );
-}
+};

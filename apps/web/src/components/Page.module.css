@@ -2,10 +2,10 @@
   /* minmax(0, 1fr): wide content (a code block, a table) scrolls inside itself instead of widening the
      column, which would push the bar's controls off a phone screen. */
   .page {
-    min-block-size: 100dvh;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto 1fr auto;
+    grid-template-columns: minmax(0, 1fr);
+    min-block-size: 100dvh;
   }
 
   /* Anchored to the top while the page scrolls, on the page's own background so content passes under it.
@@ -14,14 +14,14 @@
     position: sticky;
     inset-block-start: 0;
     z-index: var(--z-sticky);
-    background: var(--color-bg);
-    border-block-end: 1px solid var(--color-border-subtle);
     display: flex;
     flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-1) var(--space-4);
     padding: var(--space-3) var(--space-4);
+    background: var(--color-bg);
+    border-block-end: 1px solid var(--color-border-subtle);
 
     @media (width < 30rem) {
       column-gap: var(--space-2);
@@ -41,8 +41,8 @@
 
   .brand {
     display: flex;
-    align-items: center;
     gap: var(--space-1);
+    align-items: center;
   }
 
   /* A back button: chevron first, mirroring the card's own flip button (card, then chevron right). The
@@ -53,33 +53,33 @@
     block-size: 2.75rem;
     padding-inline: var(--space-1) var(--space-2);
     margin-inline-start: calc(-1 * var(--space-2));
-    border-radius: var(--radius-md);
     color: var(--color-text-muted);
+    border-radius: var(--radius-md);
     transition:
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
 
     &:hover {
-      background: var(--color-surface-hover);
       color: var(--color-text);
+      background: var(--color-surface-hover);
     }
 
     /* Pressed reads as the accent, not just a darker grey, so a tap is unmistakable. */
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 
   .home {
-    view-transition-name: site-card;
     font-family: var(--font-brand);
     font-size: clamp(var(--font-size-lg), 0.75rem + 3vw, var(--font-size-2xl));
-    white-space: nowrap;
     font-weight: var(--font-weight-normal);
     line-height: var(--leading-snug);
     color: var(--color-text);
+    white-space: nowrap;
     text-decoration: none;
+    view-transition-name: site-card;
 
     &:hover {
       color: var(--color-link);
@@ -96,10 +96,10 @@
   }
 
   .nav {
-    view-transition-name: site-nav;
     display: flex;
     gap: var(--space-4);
     align-items: center;
+    view-transition-name: site-nav;
 
     @media (width < 30rem) {
       gap: var(--space-2);
@@ -107,13 +107,13 @@
   }
 
   .navLink {
-    color: var(--color-text-muted);
-    text-decoration: none;
-    padding: var(--space-2) var(--space-1);
-    min-block-size: 2.75rem;
+    position: relative;
     display: inline-flex;
     align-items: center;
-    position: relative;
+    min-block-size: 2.75rem;
+    padding: var(--space-2) var(--space-1);
+    color: var(--color-text-muted);
+    text-decoration: none;
     transition: color var(--duration-fast) var(--ease-out);
 
     &:hover,
@@ -126,8 +126,8 @@
      not a background, so forced-colors mode still shows which page is current. */
   .underline {
     position: absolute;
-    inset-inline: var(--space-1);
     inset-block-end: 0.55rem;
+    inset-inline: var(--space-1);
     border-block-end: 2px solid currentColor;
     transform-origin: left center;
     scale: 0 1;
@@ -170,10 +170,10 @@
   /* The title stands apart from what follows, and everything is centred on the page's axis. */
   .centered {
     display: grid;
-    justify-items: center;
     gap: var(--space-8);
-    text-align: center;
+    justify-items: center;
     padding-block: var(--space-16);
+    text-align: center;
   }
 
   /* Page transitions (pageTransition.ts): the page crossfades or zooms; the bar holds still. */
@@ -189,13 +189,13 @@
   }
 
   :root:active-view-transition-type(page-zoom)::view-transition-old(root) {
-    animation: var(--duration-slow) var(--ease-out) both page-out;
     mix-blend-mode: plus-lighter;
+    animation: var(--duration-slow) var(--ease-out) both page-out;
   }
 
   :root:active-view-transition-type(page-zoom)::view-transition-new(root) {
-    animation: var(--duration-slow) var(--ease-out) both page-in;
     mix-blend-mode: plus-lighter;
+    animation: var(--duration-slow) var(--ease-out) both page-in;
   }
 
   /* Deeper zooms in: the old page grows past you as the new one grows into place. Back up, the reverse. */

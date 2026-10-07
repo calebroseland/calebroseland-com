@@ -5,30 +5,30 @@
     --section-gap: var(--space-4);
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
     gap: var(--space-2) var(--section-gap);
+    align-items: center;
+    justify-content: center;
     padding: var(--space-3) max(var(--space-4), (100% - var(--measure-wide)) / 2);
-    border-block-start: var(--border-width) solid var(--color-border-subtle);
-    color: var(--color-text-muted);
     font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    border-block-start: var(--border-width) solid var(--color-border-subtle);
 
     &[data-expanded] {
       --section-gap: var(--space-12);
       display: grid;
       grid-template-areas: "links" "actions" "copy";
-      justify-items: center;
       gap: var(--space-6);
+      justify-items: center;
       padding-block: var(--space-10) var(--space-6);
     }
   }
 
   /* The way to the contact side of the card, beside the name it belongs to. */
   .copyright {
-    grid-area: copy;
     display: flex;
-    align-items: center;
+    grid-area: copy;
     gap: var(--space-1);
+    align-items: center;
     font-size: var(--font-size-xs);
     white-space: nowrap;
 
@@ -38,15 +38,15 @@
   }
 
   .groups {
-    grid-area: links;
     display: flex;
     flex-wrap: wrap;
+    grid-area: links;
     gap: var(--space-2) var(--section-gap);
 
     [data-expanded] > & {
-      justify-content: center;
-      align-items: start;
       gap: var(--space-6) var(--section-gap);
+      align-items: start;
+      justify-content: center;
     }
   }
 
@@ -66,10 +66,10 @@
     position: relative;
 
     &::before {
-      content: "";
       position: absolute;
       inset-block: 0;
       inset-inline-start: calc((var(--section-gap) + var(--border-width)) / -2);
+      content: "";
       border-inline-start: var(--border-width) solid var(--color-border-subtle);
     }
   }
@@ -88,8 +88,8 @@
     margin-block-end: var(--space-2);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-normal);
-    letter-spacing: 0.15em;
     text-transform: uppercase;
+    letter-spacing: 0.15em;
   }
 
   .list {
@@ -109,10 +109,10 @@
   }
 
   .actions {
-    grid-area: actions;
     display: flex;
-    align-items: center;
+    grid-area: actions;
     gap: var(--space-1);
+    align-items: center;
   }
 
   /* The site's own pages, on the copyright line once the footer shows everything. */
@@ -144,13 +144,13 @@
   /* Same padding in both layouts, so the icon stays put when the label comes and goes. */
   .link {
     display: inline-flex;
-    align-items: center;
     gap: var(--space-2);
+    align-items: center;
     min-block-size: 2rem;
     padding-inline: var(--space-2);
-    border-radius: var(--radius-md);
     color: var(--color-text-muted);
     text-decoration: none;
+    border-radius: var(--radius-md);
   }
 
   /* Only where a pointer hovers: a tap would leave the link lit on the next page. */
@@ -162,9 +162,9 @@
     }
 
     [data-expanded] .link:hover {
-      background: none;
       text-decoration: underline;
       text-underline-offset: 0.2em;
+      background: none;
     }
 
     [data-expanded] [data-icons] .link:hover {
@@ -177,12 +177,12 @@
     place-items: center;
     inline-size: 2rem;
     block-size: 2rem;
-    border-radius: var(--radius-md);
     color: var(--color-text-muted);
+    border-radius: var(--radius-md);
 
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 
@@ -194,8 +194,8 @@
     block-size: 1px;
     margin: -1px;
     overflow: hidden;
-    clip-path: inset(50%);
     white-space: nowrap;
+    clip-path: inset(50%);
   }
 
   /* Named only while entering or leaving, like the card side. A shown heading pairs its words; a hidden

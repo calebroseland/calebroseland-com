@@ -2,8 +2,6 @@
 @layer tokens {
   :root,
   [data-theme="light"] {
-    color-scheme: light;
-
     --color-bg: var(--gray-50);
     --color-bg-subtle: var(--gray-100);
     --color-surface: var(--white);
@@ -55,5 +53,6 @@
     --shadow-lg:
       0 4px 8px oklch(from var(--gray-950) l c h / 0.08),
       0 12px 32px oklch(from var(--gray-950) l c h / 0.12);
+    color-scheme: light;
   }
 }
