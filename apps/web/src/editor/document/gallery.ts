@@ -5,7 +5,9 @@ import { type JSONContent, type MarkdownToken, mergeAttributes, Node } from "@ti
    here are block nodes, so a paragraph cannot hold them; they load into a gallery node instead, which
    writes them back one per line. Blank-line-separated images stay separate images. */
 
-const isBlank = (t: MarkdownToken) => t.type === "text" && /^\s*$/.test(t.raw ?? "");
+// A line break between images (two trailing spaces or a trailing backslash) is still just a new line.
+const isBlank = (t: MarkdownToken) =>
+  t.type === "br" || (t.type === "text" && /^\s*$/.test(t.raw ?? ""));
 
 /** The images of a paragraph that holds two or more images and nothing else, or null. */
 function galleryImages(token: MarkdownToken): MarkdownToken[] | null {

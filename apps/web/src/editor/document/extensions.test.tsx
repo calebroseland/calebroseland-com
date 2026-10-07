@@ -32,6 +32,15 @@ describe("images in the editor's markdown", () => {
     expect(e.getMarkdown()).toBe("![A](a.webp)\n![B](b.webp)\n\nOutro. More.");
   });
 
+  it("keeps a gallery whose lines end in a hard break", () => {
+    for (const md of ["![A](a.webp)  \n![B](b.webp)", "![A](a.webp)\\\n![B](b.webp)"]) {
+      const e = load(md);
+      expect(() => e.state.doc.check()).not.toThrow();
+      expect(topLevel(e)).toEqual(["gallery"]);
+      expect(e.getMarkdown()).toBe("![A](a.webp)\n![B](b.webp)");
+    }
+  });
+
   it("leaves blank-line-separated images as separate images", () => {
     const e = load("![A](a.webp)\n\n![B](b.webp)");
     expect(() => e.state.doc.check()).not.toThrow();
