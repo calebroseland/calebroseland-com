@@ -113,6 +113,30 @@ test.describe("working-tree mode", () => {
     expect(file).toContain("Lorem ipsum");
   });
 
+  test("images on adjacent lines stay a gallery through an edit and a save", async ({ page }) => {
+    await signInLocal(page);
+    await page
+      .getByRole("region", { name: /^Files on this branch/ })
+      .getByRole("link", { name: "Hello, placeholder" })
+      .click();
+    const body = page.getByRole("textbox", { name: "Post body" });
+    await expect(body.locator("[data-gallery] img")).toHaveCount(2);
+    await expectLoaded(page, "A teal placeholder, second in a gallery");
+
+    // Typing beside the gallery is where the editor used to throw on its invalid paragraph.
+    await body.getByText("These two images are one gallery.").click();
+    await page.keyboard.press("End");
+    await page.keyboard.type(" Edited beside a gallery.");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "working tree" })).toBeVisible();
+
+    const file = onDisk("posts/2026/09-18-hello-placeholder/index.md");
+    expect(file).toContain("These two images are one gallery. Edited beside a gallery.");
+    expect(file).toContain(
+      "![A teal placeholder, first in a gallery](hero.png)\n![A teal placeholder, second in a gallery](hero.png)\n",
+    );
+  });
+
   test("a page is created on disk and renders on the site without a publish step", async ({
     page,
   }) => {
