@@ -1,18 +1,23 @@
-import { Select } from "@base-ui/react/select";
-import { Icon } from "@crc/ui";
-import { type KeyboardEvent, type ReactNode, type RefObject, useId } from "react";
-import { usePopupMotion } from "../../hooks/usePopupMotion.ts";
-import styles from "./CardEditor.module.css";
-import { ICON_CHOICES } from "./model.ts";
+import { Select } from '@base-ui/react/select';
+import { Icon } from '@crc/ui';
+import { type KeyboardEvent, type ReactNode, type RefObject, useId } from 'react';
+import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
+import styles from './CardEditor.module.css';
+import { ICON_CHOICES } from './model.ts';
+
+/** Ties a field's label to its control. */
+const useLabelId = () => {
+  return useId();
+};
 
 /** A labelled field in a popover or on the contact side. */
-export function TextField({
+export const TextField = ({
   label,
   value,
   error,
   onChange,
   className,
-  type = "text",
+  type = 'text',
   visibleLabel = false,
 }: {
   label: string;
@@ -20,20 +25,20 @@ export function TextField({
   error: string | undefined;
   onChange: (v: string) => void;
   className?: string | undefined;
-  type?: "text" | "url";
+  type?: 'text' | 'url';
   visibleLabel?: boolean;
-}) {
-  const id = useId();
+}) => {
+  const id = useLabelId();
   return (
     <div className={styles.field}>
-      <label htmlFor={id} className={visibleLabel ? styles.label : "visually-hidden"}>
+      <label htmlFor={id} className={visibleLabel ? styles.label : 'visually-hidden'}>
         {label}
       </label>
       <input
         id={id}
         type="text"
-        inputMode={type === "url" ? "url" : undefined}
-        className={[styles.input, className].filter(Boolean).join(" ")}
+        inputMode={type === 'url' ? 'url' : undefined}
+        className={[styles.input, className].filter(Boolean).join(' ')}
         value={value}
         placeholder={label}
         aria-invalid={error ? true : undefined}
@@ -47,12 +52,12 @@ export function TextField({
       )}
     </div>
   );
-}
+};
 
 /* Text on the card, editable where it stands: it keeps the type of whatever holds it, and shows a
    field's edge only on hover, focus, or when something is wrong. Leading and trailing content (a
    link's icon) sits inside that edge, beside the text. */
-export function InlineText({
+export const InlineText = ({
   label,
   value,
   error,
@@ -71,10 +76,10 @@ export function InlineText({
   focusKey?: string;
   leading?: ReactNode;
   trailing?: ReactNode;
-}) {
-  const id = useId();
+}) => {
+  const id = useLabelId();
   return (
-    <span className={[styles.inlineField, className].filter(Boolean).join(" ")}>
+    <span className={[styles.inlineField, className].filter(Boolean).join(' ')}>
       <label htmlFor={id} className="visually-hidden">
         {label}
       </label>
@@ -100,10 +105,10 @@ export function InlineText({
       )}
     </span>
   );
-}
+};
 
 /** A drag handle that also moves its item with the arrow keys. */
-export function Handle({
+export const Handle = ({
   label,
   focusKey,
   axis,
@@ -114,29 +119,31 @@ export function Handle({
 }: {
   label: string;
   focusKey: string;
-  axis: "vertical" | "horizontal" | "grid";
+  axis: 'vertical' | 'horizontal' | 'grid';
   onMove: (delta: -1 | 1) => void;
   handleRef: RefObject<HTMLElement | null>;
   className?: string;
   children: ReactNode;
-}) {
+}) => {
   const keys = {
-    vertical: { back: ["ArrowUp"], forward: ["ArrowDown"] },
-    horizontal: { back: ["ArrowLeft"], forward: ["ArrowRight"] },
-    grid: { back: ["ArrowUp", "ArrowLeft"], forward: ["ArrowDown", "ArrowRight"] },
+    vertical: { back: ['ArrowUp'], forward: ['ArrowDown'] },
+    horizontal: { back: ['ArrowLeft'], forward: ['ArrowRight'] },
+    grid: { back: ['ArrowUp', 'ArrowLeft'], forward: ['ArrowDown', 'ArrowRight'] },
   }[axis];
   return (
     <button
       type="button"
       ref={handleRef as RefObject<HTMLButtonElement>}
-      className={[styles.handle, className].filter(Boolean).join(" ")}
+      className={[styles.handle, className].filter(Boolean).join(' ')}
       data-focus-key={focusKey}
       aria-label={label}
       aria-roledescription="reorderable"
-      aria-keyshortcuts={[...keys.back, ...keys.forward].join(" ")}
+      aria-keyshortcuts={[...keys.back, ...keys.forward].join(' ')}
       onKeyDown={(e: KeyboardEvent) => {
         const back = keys.back.includes(e.key);
-        if (!back && !keys.forward.includes(e.key)) return;
+        if (!back && !keys.forward.includes(e.key)) {
+          return;
+        }
         e.preventDefault();
         onMove(back ? -1 : 1);
       }}
@@ -144,33 +151,33 @@ export function Handle({
       {children}
     </button>
   );
-}
+};
 
-const NO_ICON = "none";
+const NO_ICON = 'none';
 
-export function IconSelect({
+export const IconSelect = ({
   value,
   label,
   allowNone = false,
-  size = "md",
+  size = 'md',
   className = styles.iconTrigger,
   onChange,
 }: {
   value: string | null;
   label: string;
   allowNone?: boolean;
-  size?: "md" | "xl";
+  size?: 'md' | 'xl';
   /** The trigger's look: a bordered button, or the icon as it sits on the card. */
   className?: string | undefined;
   onChange: (icon: string | null) => void;
-}) {
+}) => {
   const known = value === null || ICON_CHOICES.some((c) => c.value === value);
   const choices = [
-    ...(allowNone ? [{ value: NO_ICON, label: "No icon" }] : []),
+    ...(allowNone ? [{ value: NO_ICON, label: 'No icon' }] : []),
     ...(known || value === null ? [] : [{ value, label: value }]),
     ...ICON_CHOICES,
   ];
-  const motion = usePopupMotion("dropdown");
+  const motion = usePopupMotion('dropdown');
   return (
     <Select.Root
       onOpenChange={motion.onOpenChange}
@@ -208,4 +215,4 @@ export function IconSelect({
       </Select.Portal>
     </Select.Root>
   );
-}
+};

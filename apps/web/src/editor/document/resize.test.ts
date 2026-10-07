@@ -1,9 +1,9 @@
-import fc from "fast-check";
-import { describe, expect, it } from "vitest";
-import { MAX_EDGE, targetSize } from "./resize.ts";
+import fc from 'fast-check';
+import { describe, expect, it } from 'vitest';
+import { MAX_EDGE, targetSize } from './resize.ts';
 
-describe("targetSize", () => {
-  it("never exceeds the max edge and keeps the aspect ratio within integer rounding", () => {
+describe('targetSize', () => {
+  it('never exceeds the max edge and keeps the aspect ratio within integer rounding', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 12000 }),
@@ -30,7 +30,7 @@ describe("targetSize", () => {
     );
   });
 
-  it("scales a 4000×3000 photo to 1600×1200", () => {
+  it('scales a 4000×3000 photo to 1600×1200', () => {
     expect(targetSize(4000, 3000)).toEqual({ width: 1600, height: 1200 });
   });
 });

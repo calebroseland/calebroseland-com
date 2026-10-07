@@ -1,5 +1,5 @@
-import { fetchAuthConfig } from "./api.ts";
-import { type Backend, session } from "./store.ts";
+import { fetchAuthConfig } from './api.ts';
+import { type Backend, session } from './store.ts';
 
 /* The ways to sign in here. Editing files on disk needs the dev server; everything through GitHub
    (OAuth, a pasted token, the fake GitHub that stands in for it) is experimental and needs the
@@ -18,23 +18,27 @@ export type SignInMethods = {
 let pending: Promise<SignInMethods> | undefined;
 
 /** Asked of the Worker once per page load, and only when something needs to know. */
-export function signInMethods(): Promise<SignInMethods> {
+export const signInMethods = (): Promise<SignInMethods> => {
   pending ??= fetchAuthConfig().then(
     (c) => ({ workingTree: import.meta.env.DEV, github: c.github, oauth: c.oauth }),
     () => ({ workingTree: import.meta.env.DEV, github: false, oauth: false }),
   );
   return pending;
-}
+};
 
 export const canSignIn = (m: SignInMethods): boolean => m.workingTree || m.github;
 
 const allows = (m: SignInMethods, backend: Backend): boolean =>
-  backend === "local" ? m.workingTree : m.github;
+  backend === 'local' ? m.workingTree : m.github;
 
 /** Ends a session kept from before a flag changed, or from another environment, that this site can
     no longer serve. */
-export async function dropUnavailableSession(): Promise<void> {
+export const dropUnavailableSession = async (): Promise<void> => {
   const current = session.store.state;
-  if (current.status !== "authenticated") return;
-  if (!allows(await signInMethods(), current.backend)) session.signOut();
-}
+  if (current.status !== 'authenticated') {
+    return;
+  }
+  if (!allows(await signInMethods(), current.backend)) {
+    session.signOut();
+  }
+};

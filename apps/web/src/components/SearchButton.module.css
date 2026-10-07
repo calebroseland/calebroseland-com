@@ -5,20 +5,20 @@
     justify-content: center;
     inline-size: 2.75rem;
     block-size: 2.75rem;
-    border-radius: var(--radius-md);
     color: var(--color-text-muted);
+    border-radius: var(--radius-md);
     transition:
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
 
     &:hover {
-      background: var(--color-surface-hover);
       color: var(--color-text);
+      background: var(--color-surface-hover);
     }
 
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 }

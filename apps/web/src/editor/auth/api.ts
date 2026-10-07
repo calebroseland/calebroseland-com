@@ -1,8 +1,8 @@
-import * as z from "zod/mini";
+import * as z from 'zod/mini';
 
 /* Client for the Worker's /api/auth routes. Same-origin in production; the Pages backup points at the production Worker. */
 
-const apiOrigin = (): string => (typeof __API_ORIGIN__ === "string" && __API_ORIGIN__) || "";
+const apiOrigin = (): string => (typeof __API_ORIGIN__ === 'string' && __API_ORIGIN__) || '';
 
 const configSchema = z.object({
   github: z.boolean(),
@@ -16,6 +16,9 @@ const tokenSchema = z.object({
   expiresAt: z.optional(z.string()),
   refreshToken: z.optional(z.string()),
 });
+export type AuthConfig = z.infer<typeof configSchema>;
+export type TokenGrant = z.infer<typeof tokenSchema>;
+
 const problemSchema = z.object({
   title: z.string(),
   status: z.number(),
@@ -23,7 +26,7 @@ const problemSchema = z.object({
   code: z.optional(z.string()),
 });
 
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(
     public readonly status: number,
     public readonly title: string,
@@ -31,32 +34,36 @@ export class ApiError extends Error {
     public readonly code?: string,
   ) {
     super(detail ? `${title}: ${detail}` : title);
-    this.name = "ApiError";
+    this.name = 'ApiError';
   }
 }
 
-async function readProblem(res: Response): Promise<ApiError> {
+const readProblem = async (res: Response): Promise<ApiError> => {
   const parsed = problemSchema.safeParse(await res.json().catch(() => null));
   return parsed.success
     ? new ApiError(parsed.data.status, parsed.data.title, parsed.data.detail, parsed.data.code)
     : new ApiError(res.status, `HTTP ${res.status}`);
-}
+};
 
-export async function fetchAuthConfig(fetchImpl: typeof fetch = fetch) {
+export const fetchAuthConfig = async (fetchImpl: typeof fetch = fetch): Promise<AuthConfig> => {
   const res = await fetchImpl(`${apiOrigin()}/api/auth/config`);
-  if (!res.ok) throw await readProblem(res);
+  if (!res.ok) {
+    throw await readProblem(res);
+  }
   return configSchema.parse(await res.json());
-}
+};
 
-export async function exchangeCode(
+export const exchangeCode = async (
   input: { code: string; codeVerifier: string; redirectUri: string },
   fetchImpl: typeof fetch = fetch,
-) {
+): Promise<TokenGrant> => {
   const res = await fetchImpl(`${apiOrigin()}/api/auth/callback`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify(input),
   });
-  if (!res.ok) throw await readProblem(res);
+  if (!res.ok) {
+    throw await readProblem(res);
+  }
   return tokenSchema.parse(await res.json());
-}
+};

@@ -1,9 +1,9 @@
-import type { GitHubClient } from "@crc/github-client";
-import { queryOptions } from "@tanstack/react-query";
-import { CONTENT_ROOT } from "../drafts/paths.ts";
-import { entriesFromBundle } from "../entries.ts";
-import { capabilitiesOf } from "./backend.ts";
-import { editorKeys } from "./keys.ts";
+import type { GitHubClient } from '@crc/github-client';
+import { queryOptions } from '@tanstack/react-query';
+import { CONTENT_ROOT } from '../drafts/paths.ts';
+import { entriesFromBundle } from '../entries.ts';
+import { capabilitiesOf } from './backend.ts';
+import { editorKeys } from './keys.ts';
 
 /* Every read the editor makes, as query options. Hooks and loaders take these; nothing else builds a
    query key. */
@@ -29,7 +29,7 @@ export const publishedQuery = (gh: GitHubClient) =>
     queryFn: async () =>
       entriesFromBundle(
         await gh.readBundle(gh.defaultBranch, CONTENT_ROOT),
-        capabilitiesOf(gh.kind).branches ? "published" : "working-tree",
+        capabilitiesOf(gh.kind).branches ? 'published' : 'working-tree',
       ),
     staleTime: 15_000,
   });

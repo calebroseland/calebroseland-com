@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 /** A dialog that opens about something (a row, an error) and closes back to nothing. */
-export function useDialogState<T>() {
+export const useDialogState = <T>() => {
   const [subject, setSubject] = useState<T | null>(null);
   return {
     subject,
@@ -10,7 +10,9 @@ export function useDialogState<T>() {
     close: () => setSubject(null),
     /** For components that report open changes: only closing is theirs to decide. */
     onOpenChange: (open: boolean) => {
-      if (!open) setSubject(null);
+      if (!open) {
+        setSubject(null);
+      }
     },
   };
-}
+};

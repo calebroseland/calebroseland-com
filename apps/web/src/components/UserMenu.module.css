@@ -5,22 +5,22 @@
     justify-content: center;
     inline-size: 2.75rem;
     block-size: 2.75rem;
-    border-radius: var(--radius-md);
     color: var(--color-text-muted);
+    border-radius: var(--radius-md);
     transition:
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
 
     &:hover,
     &[data-popup-open] {
-      background: var(--color-surface-hover);
       color: var(--color-text);
+      background: var(--color-surface-hover);
     }
 
     /* Pressed reads as the accent, not just a darker grey, so a tap is unmistakable. */
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 
@@ -32,48 +32,48 @@
   .menu {
     display: grid;
     gap: var(--space-px);
-    padding: var(--space-1);
     min-inline-size: 13rem;
     max-block-size: var(--available-height);
+    padding: var(--space-1);
     overflow-y: auto;
-    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    text-align: start;
+    outline: none;
     background: var(--color-surface-raised);
     border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    color: var(--color-text);
-    font-size: var(--font-size-base);
-    text-align: start;
     /* Motion lifts it out of the trigger and staggers the rows (motion/presets.ts). */
     transform-origin: var(--transform-origin);
-    outline: none;
   }
 
   .groupLabel {
     padding: var(--space-2) var(--space-3) var(--space-1);
-    color: var(--color-text-muted);
     font-size: var(--font-size-xs);
-    letter-spacing: 0.12em;
+    color: var(--color-text-muted);
     text-transform: uppercase;
+    letter-spacing: 0.12em;
   }
 
   .item {
     display: flex;
-    align-items: center;
     gap: var(--space-3);
+    align-items: center;
     min-block-size: 2.5rem;
     padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-md);
     color: var(--color-text-muted);
     cursor: pointer;
     outline: none;
+    border-radius: var(--radius-md);
     transition:
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
 
     /* The menu is already a raised surface (the same tone as hover in dark), so rows step up once more. */
     &[data-highlighted] {
-      background: var(--color-surface-active);
       color: var(--color-text);
+      background: var(--color-surface-active);
     }
 
     &[data-checked] {
@@ -81,17 +81,17 @@
     }
 
     &:active {
-      background: var(--color-accent-subtle);
       color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
     }
   }
 
   .itemLabel {
     flex: 1;
-    white-space: nowrap;
+    max-inline-size: 14rem;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-inline-size: 14rem;
+    white-space: nowrap;
   }
 
   .indicator {

@@ -1,9 +1,9 @@
-import { Stack } from "@crc/ui";
-import type { Buffer, BufferController } from "../drafts/buffer.ts";
-import styles from "../editor.module.css";
+import { Stack } from '@crc/ui';
+import type { Buffer, BufferController } from '../drafts/buffer.ts';
+import styles from '../editor.module.css';
 
 /* New images awaiting save need alt text; existing ones are listed for reference. */
-export function AssetsPanel({
+export const AssetsPanel = ({
   buffer,
   controller,
   onAltChange,
@@ -11,7 +11,7 @@ export function AssetsPanel({
   buffer: Buffer;
   controller: BufferController;
   onAltChange: (name: string, alt: string) => void;
-}) {
+}) => {
   return (
     <Stack gap="4" className={styles.panel} aria-label="Images">
       {buffer.assets.length === 0 && buffer.existingAssets.length === 0 && (
@@ -21,7 +21,7 @@ export function AssetsPanel({
         <div key={a.name} className={styles.asset}>
           <img
             src={a.objectUrl}
-            alt={a.alt || ""}
+            alt={a.alt || ''}
             width={64}
             height={64}
             className={styles.thumb}
@@ -60,4 +60,4 @@ export function AssetsPanel({
       )}
     </Stack>
   );
-}
+};

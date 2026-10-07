@@ -1,27 +1,27 @@
-import type { Profile } from "@crc/content-schema";
+import type { Profile } from '@crc/content-schema';
 import {
   DropIndicator,
   reorder,
   useDragMoves,
   useItemRegistration,
   useListTarget,
-} from "@crc/interaction";
-import { Icon } from "@crc/ui";
-import { type FormEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
-import { session } from "../../editor/auth/store.ts";
-import { ConfirmDialog } from "../../editor/Dialogs.tsx";
-import { useSaveProfile } from "../../editor/data/hooks.ts";
-import { EditorProvider, useCapabilities } from "../../editor/EditorProvider.tsx";
-import editor from "../../editor/editor.module.css";
-import { clientFor } from "../../editor/github/client.ts";
-import { loadProfile, PROFILE_REF, type ProfileSource } from "../../editor/profile.ts";
-import { notify } from "../../editor/Toast.tsx";
-import card from "../Landing.module.css";
-import { Tip } from "../Tip.tsx";
-import { vtName } from "../viewTransition.ts";
-import styles from "./CardEditor.module.css";
-import { Handle, IconSelect, InlineText } from "./fields.tsx";
-import { useAnnouncer, useFocusByKey, useProfileDraft, useUnsavedGuard } from "./hooks.ts";
+} from '@crc/interaction';
+import { Icon } from '@crc/ui';
+import { type FormEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from 'react';
+import { session } from '../../editor/auth/store.ts';
+import { ConfirmDialog } from '../../editor/Dialogs.tsx';
+import { useSaveProfile } from '../../editor/data/hooks.ts';
+import { EditorProvider, useCapabilities } from '../../editor/EditorProvider.tsx';
+import editor from '../../editor/editor.module.css';
+import { clientFor } from '../../editor/github/client.ts';
+import { loadProfile, PROFILE_REF, type ProfileSource } from '../../editor/profile.ts';
+import { notify } from '../../editor/Toast.tsx';
+import card from '../Landing.module.css';
+import { Tip } from '../Tip.tsx';
+import { vtName } from '../viewTransition.ts';
+import styles from './CardEditor.module.css';
+import { Handle, IconSelect, InlineText } from './fields.tsx';
+import { useAnnouncer, useFocusByKey, useProfileDraft, useUnsavedGuard } from './hooks.ts';
 import {
   type EditGroup,
   type EditLink,
@@ -30,12 +30,12 @@ import {
   newGroup,
   newLink,
   nextLinkSlot,
-} from "./model.ts";
-import { GroupPopover } from "./popovers.tsx";
-import { TagEditor } from "./tags.tsx";
+} from './model.ts';
+import { GroupPopover } from './popovers.tsx';
+import { TagEditor } from './tags.tsx';
 
-const LINKS = "links";
-const GROUPS = "groups";
+const LINKS = 'links';
+const GROUPS = 'groups';
 const linkListId = (group: EditGroup) => `links-${group.key}`;
 
 /** What a save produced; the card shows it when it is already the site's source (the working tree). */
@@ -49,14 +49,26 @@ export type EditFaces = { front: ReactNode; back: ReactNode };
    drafts/profile branch, or the working tree), edits a copy, and saves it back as content/profile.yaml.
    Loaded only when an editor opens it, so readers never download it. */
 
+/** Whether the card has been turned in this session, so focus follows only a turn the editor made. */
+const useTurnOver = (onFlip: () => void) => {
+  const [turned, setTurned] = useState(false);
+  return {
+    turned,
+    flip: () => {
+      setTurned(true);
+      onFlip();
+    },
+  };
+};
+
 /** Loads what the editor needs before it is shown, so the card can turn editable in one step. */
-export function prepareEdit(published: Profile): Promise<ProfileSource> {
+export const prepareEdit = (published: Profile): Promise<ProfileSource> => {
   return loadProfile(clientFor(session.store.state), published);
-}
+};
 
 /** One edit session across both faces of the card; brings its own editor context, since the landing
     sits outside /editor. The landing places the faces, so the flip between them stays its own. */
-export default function CardEditSession({
+export const CardEditSession = ({
   source,
   onFlip,
   onDone,
@@ -66,7 +78,7 @@ export default function CardEditSession({
   onFlip: () => void;
   onDone: (result: EditResult) => void;
   children: (faces: EditFaces) => ReactNode;
-}) {
+}) => {
   return (
     <EditorProvider>
       <Session source={source} onFlip={onFlip} onDone={onDone}>
@@ -74,9 +86,9 @@ export default function CardEditSession({
       </Session>
     </EditorProvider>
   );
-}
+};
 
-function Session({
+const Session = ({
   source,
   onFlip,
   onDone,
@@ -86,13 +98,9 @@ function Session({
   onFlip: () => void;
   onDone: (result: EditResult) => void;
   children: (faces: EditFaces) => ReactNode;
-}) {
+}) => {
   const s = useEditSession(source, onDone);
-  const [turned, setTurned] = useState(false);
-  const flip = () => {
-    setTurned(true);
-    onFlip();
-  };
+  const { turned, flip } = useTurnOver(onFlip);
   const { leaving } = s;
   return (
     <>
@@ -101,9 +109,11 @@ function Session({
         back: <EditBack s={s} onFlip={flip} focusFlip={turned} />,
       })}
       <ConfirmDialog
-        open={leaving.status === "blocked"}
+        open={leaving.status === 'blocked'}
         onOpenChange={(open) => {
-          if (!open) leaving.reset?.();
+          if (!open) {
+            leaving.reset?.();
+          }
         }}
         title="Discard your changes to the card?"
         description="You have edits you haven't saved. Leaving this page throws them away."
@@ -124,12 +134,12 @@ function Session({
       />
     </>
   );
-}
+};
 
 type EditSession = ReturnType<typeof useEditSession>;
 
 /** The draft, its moves, additions and removals (each announced), and saving it. */
-function useEditSession(source: ProfileSource, onDone: (result: EditResult) => void) {
+const useEditSession = (source: ProfileSource, onDone: (result: EditResult) => void) => {
   const working = !useCapabilities().branches;
   const { state, dirty, next, errors, update } = useProfileDraft(source.profile);
   const announcer = useAnnouncer();
@@ -142,18 +152,20 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
     if (outcome.ok) {
       notify(
         working
-          ? "Saved content/profile.yaml."
+          ? 'Saved content/profile.yaml.'
           : `Saved to ${PROFILE_REF}. Publish it from the editor to update the site.`,
-        { kind: "success" },
+        { kind: 'success' },
       );
       onDone({ profile: outcome.value.profile, workingTree: working });
-    } else if (outcome.reason === "expired")
-      notify("Your sign-in expired. Sign in again to save.", { kind: "error" });
-    else if (outcome.reason === "conflict")
-      notify("The profile changed since you opened it. Close the editor and open it again.", {
-        kind: "error",
+    } else if (outcome.reason === 'expired') {
+      notify('Your sign-in expired. Sign in again to save.', { kind: 'error' });
+    } else if (outcome.reason === 'conflict') {
+      notify('The profile changed since you opened it. Close the editor and open it again.', {
+        kind: 'error',
       });
-    else notify("Couldn't save the profile.", { kind: "error" });
+    } else {
+      notify("Couldn't save the profile.", { kind: 'error' });
+    }
   };
 
   const groupName = (g: number) => state.groups[g]?.title.trim() || `Group ${g + 1}`;
@@ -162,7 +174,9 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
 
   const moveTag = (from: number, to: number) => {
     const tag = state.tags[from];
-    if (!tag || to < 0 || to >= state.tags.length) return;
+    if (!tag || to < 0 || to >= state.tags.length) {
+      return;
+    }
     focusByKey(`tag:${tag.key}`);
     announcer.announce(`${tag.label} moved to position ${to + 1} of ${state.tags.length}`);
     update((s) => ({ ...s, tags: reorder(s.tags, from, to) }));
@@ -170,25 +184,31 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
 
   const relocateLink = (from: LinkSlot, to: LinkSlot) => {
     const link = state.groups[from.group]?.links[from.index];
-    if (!link) return;
+    if (!link) {
+      return;
+    }
     const groups = moveLink(state.groups, from, to);
     const length = groups[to.group]?.links.length ?? 0;
     focusByKey(link.key);
     announcer.announce(
       from.group === to.group
-        ? `${link.label || "Link"} moved to position ${to.index + 1} of ${length}`
-        : `${link.label || "Link"} moved to ${groupName(to.group)}, position ${to.index + 1} of ${length}`,
+        ? `${link.label || 'Link'} moved to position ${to.index + 1} of ${length}`
+        : `${link.label || 'Link'} moved to ${groupName(to.group)}, position ${to.index + 1} of ${length}`,
     );
     update((s) => ({ ...s, groups }));
   };
   const stepLink = (g: number, index: number, delta: -1 | 1) => {
     const to = nextLinkSlot(state.groups, { group: g, index }, delta);
-    if (to) relocateLink({ group: g, index }, to);
+    if (to) {
+      relocateLink({ group: g, index }, to);
+    }
   };
 
   const moveGroup = (from: number, to: number) => {
     const group = state.groups[from];
-    if (!group || to < 0 || to >= state.groups.length) return;
+    if (!group || to < 0 || to >= state.groups.length) {
+      return;
+    }
     focusByKey(`group:${group.key}`);
     announcer.announce(`${groupName(from)} moved to position ${to + 1} of ${state.groups.length}`);
     update((s) => ({ ...s, groups: reorder(s.groups, from, to) }));
@@ -205,7 +225,9 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
 
   const addLink = (g: number) => {
     const group = state.groups[g];
-    if (!group) return;
+    if (!group) {
+      return;
+    }
     const link = newLink();
     focusByKey(`label:${link.key}`);
     announcer.announce(`Added a link to ${groupName(g)}`);
@@ -214,14 +236,16 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
   const removeLink = (g: number, index: number) => {
     const group = state.groups[g];
     const link = group?.links[index];
-    if (!group || !link) return;
-    announcer.announce(`Removed ${link.label || "the link"}`);
+    if (!group || !link) {
+      return;
+    }
+    announcer.announce(`Removed ${link.label || 'the link'}`);
     setGroup(g, { ...group, links: group.links.filter((_, i) => i !== index) });
   };
   const addGroup = () => {
     const group = newGroup();
     focusByKey(`title:${group.key}`);
-    announcer.announce("Added a group");
+    announcer.announce('Added a group');
     update((s) => ({ ...s, groups: [...s.groups, group] }));
   };
   const removeGroup = (g: number) => {
@@ -239,7 +263,9 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
     saving: save.pending,
     onSubmit: (e: FormEvent) => {
       e.preventDefault();
-      if (dirty && errors.size === 0 && !save.pending) void submit();
+      if (dirty && errors.size === 0 && !save.pending) {
+        void submit();
+      }
     },
     cancel: () => onDone(null),
     leaving,
@@ -253,20 +279,22 @@ function useEditSession(source: ProfileSource, onDone: (result: EditResult) => v
     addGroup,
     removeGroup,
   };
-}
+};
 
 /** Focuses the element once it mounts, when the mount was caused by turning the card. */
-function useFocusWhen<T extends HTMLElement>(when: boolean): RefObject<T | null> {
+const useFocusWhen = <T extends HTMLElement>(when: boolean): RefObject<T | null> => {
   const ref = useRef<T>(null);
   useEffect(() => {
-    if (when) ref.current?.focus();
+    if (when) {
+      ref.current?.focus();
+    }
   }, [when]);
   return ref;
-}
+};
 
 /* The front, editable in place: the card's own classes for its look, and its view-transition names on
    what both states share, so turning editable morphs the card rather than swapping it. */
-function EditFront({
+const EditFront = ({
   s,
   onFlip,
   focusFlip,
@@ -274,7 +302,7 @@ function EditFront({
   s: EditSession;
   onFlip: () => void;
   focusFlip: boolean;
-}) {
+}) => {
   const { state, errors, update } = s;
   const flipRef = useFocusWhen<HTMLButtonElement>(focusFlip);
   return (
@@ -286,7 +314,7 @@ function EditFront({
             ref={flipRef}
             type="button"
             className={`${card.cornerButton} ${card.vt}`}
-            style={vtName("card-flip")}
+            style={vtName('card-flip')}
             aria-label="Contact details"
             onClick={onFlip}
           >
@@ -296,24 +324,24 @@ function EditFront({
         </Tip>
       </div>
 
-      <div className={`${card.name} ${card.vt}`} style={vtName("site-name")}>
+      <div className={`${card.name} ${card.vt}`} style={vtName('site-name')}>
         <InlineText
           label="Name"
           value={state.name}
-          error={errors.get("name")}
+          error={errors.get('name')}
           onChange={(name) => update((d) => ({ ...d, name }))}
         />
       </div>
-      <div className={`${card.tagline} ${card.vt}`} style={vtName("card-tagline")}>
+      <div className={`${card.tagline} ${card.vt}`} style={vtName('card-tagline')}>
         <InlineText
           label="Tagline"
           value={state.tagline}
-          error={errors.get("tagline")}
+          error={errors.get('tagline')}
           onChange={(tagline) => update((d) => ({ ...d, tagline }))}
         />
       </div>
 
-      <div className={`${card.tags} ${card.vt}`} style={vtName("card-tags")}>
+      <div className={`${card.tags} ${card.vt}`} style={vtName('card-tags')}>
         <TagEditor
           tags={state.tags}
           errors={errors}
@@ -338,13 +366,21 @@ function EditFront({
       <SaveBar s={s} />
     </form>
   );
-}
+};
 
-function EditGroupColumn({ s, group, index }: { s: EditSession; group: EditGroup; index: number }) {
+const EditGroupColumn = ({
+  s,
+  group,
+  index,
+}: {
+  s: EditSession;
+  group: EditGroup;
+  index: number;
+}) => {
   const listId = linkListId(group);
   const { ref, handleRef, state } = useItemRegistration(group.key, index, {
     listId: GROUPS,
-    axis: "grid",
+    axis: 'grid',
   });
   const list = useListTarget({ listId, kind: LINKS, length: group.links.length });
   const name = s.groupName(index);
@@ -416,9 +452,9 @@ function EditGroupColumn({ s, group, index }: { s: EditSession; group: EditGroup
       <DropIndicator edge={state.edge} />
     </fieldset>
   );
-}
+};
 
-function EditLinkRow({
+const EditLinkRow = ({
   s,
   link,
   group,
@@ -434,9 +470,9 @@ function EditLinkRow({
   listId: string;
   canRemove: boolean;
   onChange: (l: EditLink) => void;
-}) {
+}) => {
   const { ref, handleRef, state } = useItemRegistration(link.key, index, { listId, kind: LINKS });
-  const name = link.label.trim() || "new link";
+  const name = link.label.trim() || 'new link';
   const path = `groups.${group}.links.${index}`;
   return (
     <li
@@ -495,17 +531,17 @@ function EditLinkRow({
       <DropIndicator edge={state.edge} />
     </li>
   );
-}
+};
 
 const CONTACT_FIELDS = [
-  ["email", "Email", "lucide:mail", "contact.email"],
-  ["phone", "Phone", "lucide:phone", "contact.phone"],
-  ["location", "Location", "lucide:map-pin", "contact.location.label"],
-  ["locationUrl", "Map link", "lucide:link", "contact.location.url"],
+  ['email', 'Email', 'lucide:mail', 'contact.email'],
+  ['phone', 'Phone', 'lucide:phone', 'contact.phone'],
+  ['location', 'Location', 'lucide:map-pin', 'contact.location.label'],
+  ['locationUrl', 'Map link', 'lucide:link', 'contact.location.url'],
 ] as const;
 
 /** The contact side, editable the same way; empty fields are left out of the file. */
-function EditBack({
+const EditBack = ({
   s,
   onFlip,
   focusFlip,
@@ -513,7 +549,7 @@ function EditBack({
   s: EditSession;
   onFlip: () => void;
   focusFlip: boolean;
-}) {
+}) => {
   const { state, errors, update } = s;
   const closeRef = useFocusWhen<HTMLButtonElement>(focusFlip);
   return (
@@ -558,19 +594,19 @@ function EditBack({
       <SaveBar s={s} />
     </form>
   );
-}
+};
 
 /** Where "show more" is on the read card: where the save goes, what needs fixing, Cancel and Save. */
-function SaveBar({ s }: { s: EditSession }) {
+const SaveBar = ({ s }: { s: EditSession }) => {
   const problems = s.errors.size;
   return (
-    <div className={`${styles.bar} ${card.vt}`} style={vtName("card-more")}>
+    <div className={`${styles.bar} ${card.vt}`} style={vtName('card-more')}>
       <p className={styles.where}>
-        {s.working ? "Saves to content/profile.yaml on this branch." : `Saves to ${PROFILE_REF}.`}
+        {s.working ? 'Saves to content/profile.yaml on this branch.' : `Saves to ${PROFILE_REF}.`}
         {problems > 0 && (
           <span className={styles.problems}>
-            {" "}
-            {problems === 1 ? "1 field needs attention." : `${problems} fields need attention.`}
+            {' '}
+            {problems === 1 ? '1 field needs attention.' : `${problems} fields need attention.`}
           </span>
         )}
       </p>
@@ -579,9 +615,9 @@ function SaveBar({ s }: { s: EditSession }) {
           Cancel
         </button>
         <button type="submit" className={styles.primary} disabled={!s.canSave} aria-busy={s.saving}>
-          {s.saving ? "Saving…" : "Save card"}
+          {s.saving ? 'Saving…' : 'Save card'}
         </button>
       </div>
     </div>
   );
-}
+};

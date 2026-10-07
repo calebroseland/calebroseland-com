@@ -1,6 +1,6 @@
-import { Octokit } from "@octokit/core";
-import { restEndpointMethods } from "@octokit/plugin-rest-endpoint-methods";
-import { toBase64 } from "./base64.ts";
+import { Octokit } from '@octokit/core';
+import { restEndpointMethods } from '@octokit/plugin-rest-endpoint-methods';
+import { toBase64 } from './base64.ts';
 import {
   AuthError,
   type Bundle,
@@ -16,30 +16,30 @@ import {
   slugFromRef,
   toBytes,
   type Viewer,
-} from "./types.ts";
+} from './types.ts';
 
 const MyOctokit = Octokit.plugin(restEndpointMethods);
 
-function toPr(pr: {
+const toPr = (pr: {
   number: number;
   html_url: string;
   state: string;
   merged_at?: string | null;
   mergeable?: boolean | null;
   head: { ref: string };
-}): PullRequest {
+}): PullRequest => {
   return {
     number: pr.number,
     url: pr.html_url,
-    state: pr.state === "open" ? "open" : "closed",
+    state: pr.state === 'open' ? 'open' : 'closed',
     merged: Boolean(pr.merged_at),
     mergeable: pr.mergeable ?? null,
     headRef: pr.head.ref,
   };
-}
+};
 
 /** Real GitHub through @octokit/core + REST plugin. Subrequest counts per method are noted for the Worker budget, though calls run in the browser. */
-export function createOctokitClient(token: string, repo: RepoRef): GitHubClient {
+export const createOctokitClient = (token: string, repo: RepoRef): GitHubClient => {
   const octokit = new MyOctokit({ auth: token });
   const base = { owner: repo.owner, repo: repo.repo };
 
@@ -47,14 +47,20 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
     try {
       return await fn();
     } catch (err) {
-      if (typeof err === "object" && err && "status" && (err as { status?: number }).status === 401)
+      if (
+        typeof err === 'object'
+        && err
+        && 'status'
+        && (err as { status?: number }).status === 401
+      ) {
         throw new AuthError();
+      }
       throw err;
     }
   };
 
   return {
-    kind: "octokit",
+    kind: 'octokit',
     defaultBranch: repo.defaultBranch,
 
     getViewer: () =>
@@ -67,10 +73,10 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
       wrap(async () => {
         const [{ data: refs }, { data: prs }] = await Promise.all([
           octokit.rest.git.listMatchingRefs({ ...base, ref: `heads/${DRAFT_PREFIX}` }),
-          octokit.rest.pulls.list({ ...base, state: "open", per_page: 100 }),
+          octokit.rest.pulls.list({ ...base, state: 'open', per_page: 100 }),
         ]);
         return refs.map((r) => {
-          const ref = r.ref.replace(/^refs\/heads\//, "");
+          const ref = r.ref.replace(/^refs\/heads\//, '');
           const pr = prs.find((p) => p.head.ref === ref);
           return {
             ref,
@@ -102,9 +108,9 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
         const { data: tree } = await octokit.rest.git.getTree({
           ...base,
           tree_sha: head.object.sha,
-          recursive: "1",
+          recursive: '1',
         });
-        const inDir = tree.tree.filter((t) => t.type === "blob" && t.path?.startsWith(`${dir}/`));
+        const inDir = tree.tree.filter((t) => t.type === 'blob' && t.path?.startsWith(`${dir}/`));
         const files = await Promise.all(
           inDir.map(async (t) => {
             const { data: blob } = await octokit.rest.git.getBlob({
@@ -115,12 +121,12 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
             return {
               path: t.path as string,
               sha: t.sha as string,
-              encoding: isText ? ("utf-8" as const) : ("base64" as const),
+              encoding: isText ? ('utf-8' as const) : ('base64' as const),
               content: isText
                 ? new TextDecoder().decode(
-                    Uint8Array.from(atob(blob.content.replace(/\n/g, "")), (c) => c.charCodeAt(0)),
+                    Uint8Array.from(atob(blob.content.replace(/\n/g, '')), (c) => c.charCodeAt(0)),
                   )
-                : blob.content.replace(/\n/g, ""),
+                : blob.content.replace(/\n/g, ''),
             };
           }),
         );
@@ -131,8 +137,9 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
       wrap(async () => {
         // 1 getRef + N blobs + 1 tree + 1 commit + 1 updateRef ≈ N + 4 requests
         const { data: head } = await octokit.rest.git.getRef({ ...base, ref: `heads/${ref}` });
-        if (head.object.sha !== expectedHeadSha)
+        if (head.object.sha !== expectedHeadSha) {
           throw new StaleRefError(ref, expectedHeadSha, head.object.sha);
+        }
         const { data: headCommit } = await octokit.rest.git.getCommit({
           ...base,
           commit_sha: head.object.sha,
@@ -144,12 +151,12 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
             const { data } = await octokit.rest.git.createBlob({
               ...base,
               content: binary ? toBase64(await toBytes(raw)) : raw,
-              encoding: binary || f.encoding === "base64" ? "base64" : "utf-8",
+              encoding: binary || f.encoding === 'base64' ? 'base64' : 'utf-8',
             });
             return {
               path: `${dir}/${f.path}`,
-              mode: "100644" as const,
-              type: "blob" as const,
+              mode: '100644' as const,
+              type: 'blob' as const,
               sha: data.sha,
             };
           }),
@@ -169,7 +176,9 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
           await octokit.rest.git.updateRef({ ...base, ref: `heads/${ref}`, sha: commit.sha });
         } catch (err) {
           // 422 is a non-fast-forward: another save moved the branch after the check above.
-          if ((err as { status?: number }).status !== 422) throw err;
+          if ((err as { status?: number }).status !== 422) {
+            throw err;
+          }
           const { data: now } = await octokit.rest.git.getRef({ ...base, ref: `heads/${ref}` });
           throw new StaleRefError(ref, expectedHeadSha, now.object.sha);
         }
@@ -196,11 +205,13 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
         const { data } = await octokit.rest.pulls.list({
           ...base,
           head: `${repo.owner}:${ref}`,
-          state: "open",
+          state: 'open',
           per_page: 1,
         });
         const first = data[0];
-        if (!first) return null;
+        if (!first) {
+          return null;
+        }
         const { data: full } = await octokit.rest.pulls.get({ ...base, pull_number: first.number });
         return toPr(full);
       }),
@@ -210,9 +221,9 @@ export function createOctokitClient(token: string, repo: RepoRef): GitHubClient 
         const { data } = await octokit.rest.pulls.merge({
           ...base,
           pull_number: number,
-          merge_method: "squash",
+          merge_method: 'squash',
         });
         return { sha: data.sha };
       }),
   };
-}
+};

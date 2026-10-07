@@ -1,12 +1,12 @@
-import { Menu } from "@base-ui/react/menu";
-import { Icon } from "@crc/ui";
-import type { ReactNode } from "react";
-import { usePopupMotion } from "../../hooks/usePopupMotion.ts";
-import styles from "../editor.module.css";
+import { Menu } from '@base-ui/react/menu';
+import { Icon } from '@crc/ui';
+import type { ReactNode } from 'react';
+import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
+import styles from '../editor.module.css';
 
 /* APG menu button via Base UI. Items are passed in so the board and the profile list share the pattern. */
-export function RowMenu({ label, children }: { label: string; children: ReactNode }) {
-  const motion = usePopupMotion("dropdown");
+export const RowMenu = ({ label, children }: { label: string; children: ReactNode }) => {
+  const motion = usePopupMotion('dropdown');
   return (
     <Menu.Root onOpenChange={motion.onOpenChange}>
       <Menu.Trigger className={styles.handle} aria-label={label}>
@@ -21,9 +21,9 @@ export function RowMenu({ label, children }: { label: string; children: ReactNod
       </Menu.Portal>
     </Menu.Root>
   );
-}
+};
 
-export function RowMenuItem({
+export const RowMenuItem = ({
   onClick,
   danger,
   disabled,
@@ -33,7 +33,7 @@ export function RowMenuItem({
   danger?: boolean;
   disabled?: boolean;
   children: ReactNode;
-}) {
+}) => {
   return (
     <Menu.Item
       className={danger ? `${styles.menuItem} ${styles.menuDanger}` : styles.menuItem}
@@ -43,4 +43,4 @@ export function RowMenuItem({
       {children}
     </Menu.Item>
   );
-}
+};

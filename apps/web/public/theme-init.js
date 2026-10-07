@@ -7,29 +7,38 @@
   var root = document.documentElement;
   var kit = document.querySelector('meta[name="adobe-fonts"]');
   var adobe = (needed) => {
-    if (!needed || !kit || document.getElementById("adobe-fonts")) return;
-    var link = document.createElement("link");
-    link.id = "adobe-fonts";
-    link.rel = "stylesheet";
+    if (!needed || !kit || document.getElementById('adobe-fonts')) {
+      return;
+    }
+    var link = document.createElement('link');
+    link.id = 'adobe-fonts';
+    link.rel = 'stylesheet';
     link.href = kit.content;
     document.head.appendChild(link);
   };
   var t;
   var custom;
   try {
-    t = localStorage.getItem("theme");
-    if (t && t.indexOf("custom:") === 0) custom = JSON.parse(localStorage.getItem("theme-vars"));
+    t = localStorage.getItem('theme');
+    if (t && t.indexOf('custom:') === 0) {
+      custom = JSON.parse(localStorage.getItem('theme-vars'));
+    }
   } catch (_) {}
-  if (custom && (custom.base === "light" || custom.base === "dark") && custom.vars) {
+  if (custom && (custom.base === 'light' || custom.base === 'dark') && custom.vars) {
     root.dataset.theme = custom.base;
-    for (var name in custom.vars)
-      if (name.indexOf("--") === 0) root.style.setProperty(name, String(custom.vars[name]));
+    for (var name in custom.vars) {
+      if (name.indexOf('--') === 0) {
+        root.style.setProperty(name, String(custom.vars[name]));
+      }
+    }
     // Saved before themes recorded this: assume the kit, as every theme loaded it then.
     adobe(custom.adobe !== false);
     return;
   }
-  adobe(kit && kit.dataset.default === "on");
-  t = t === "light" || t === "dark" ? t : "auto";
-  root.dataset.theme =
-    t === "auto" ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : t;
+  adobe(kit && kit.dataset.default === 'on');
+  // Anything but an explicit choice follows the system.
+  if (t !== 'light' && t !== 'dark') {
+    t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  root.dataset.theme = t;
 })();

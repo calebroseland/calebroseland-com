@@ -1,14 +1,33 @@
 language js
 
-// Components call small, purpose-named custom hooks; built-in and library hooks are called only
-// from inside those hooks. A component is a function or arrow function with a PascalCase name.
+// Components call small, purpose-named custom hooks; library hooks are called only from inside those
+// hooks. A component is a PascalCase function: declared, default-exported, or assigned to a const
+// (arrow, function expression, or a wrapper such as memo). A library hook is a `use`/`use…` function
+// imported (named or default) from a third-party package (not a relative path or the workspace's own
+// `@crc/*`), or a `use…` method on an object (`Route.useSearch`, `form.useStore`).
 or {
   `function $name($params) { $body }`,
-  `const $name = ($params) => { $body }`
+  `export default function $name($params) { $body }`,
+  `const $name = $body`
 } where {
   $name <: r"^[A-Z].*",
-  $body <: contains bubble `$hook($args)` as $call where {
-    $hook <: r"^(?:React\.|Route\.)?use(?:State|Effect|LayoutEffect|InsertionEffect|Reducer|Memo|Callback|Ref|Context|SyncExternalStore|Transition|DeferredValue|ActionState|Optimistic|Id|ImperativeHandle|Query|SuspenseQuery|Queries|Mutation|QueryClient|Store|Navigate|Router|RouterState|Location|Search|Params|LoaderData|Match|Form|Editor|ReducedMotion)$",
-    register_diagnostic(span=$call, message="Components call a purpose-named custom hook; move this hook call into one.", severity="error")
+  $body <: contains bubble($program) or {
+    or {
+      `$obj.$hook($args)`,
+      `$obj.$hook<$types>($args)`
+    } where { $hook <: r"^use[A-Z]\w*$" },
+    or {
+      `$hook($args)`,
+      `$hook<$types>($args)`
+    } where {
+      $hook <: r"^use(?:[A-Z]\w*)?$",
+      $program <: contains or {
+        `import { $specs } from $source` where { $specs <: contains $hook },
+        `import $hook from $source`,
+        `import $hook, { $specs } from $source`
+      } where { $source <: not r"^['\"](?:\.\.?/|@crc/).*" }
+    }
+  } as $call where {
+    register_diagnostic(span=$call, message="Components call a purpose-named custom hook; move this library hook call into one.", severity="error")
   }
 }

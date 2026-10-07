@@ -5,9 +5,9 @@
 
 type Rgb = readonly [number, number, number];
 
-const num = (s: string) => (s.endsWith("%") ? Number.parseFloat(s) / 100 : Number.parseFloat(s));
+const num = (s: string) => (s.endsWith('%') ? Number.parseFloat(s) / 100 : Number.parseFloat(s));
 
-function oklchToSrgb(l: number, c: number, hDeg: number): Rgb {
+const oklchToSrgb = (l: number, c: number, hDeg: number): Rgb => {
   const h = (hDeg * Math.PI) / 180;
   const a = c * Math.cos(h);
   const b = c * Math.sin(h);
@@ -21,31 +21,36 @@ function oklchToSrgb(l: number, c: number, hDeg: number): Rgb {
   ];
   const gamma = (x: number) => (x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055);
   return lin.map((x) => Math.min(1, Math.max(0, gamma(x)))) as unknown as Rgb;
-}
+};
 
 /** Parses a computed colour to sRGB channels in 0–1, or null if it is not one we understand. */
-export function parseColor(css: string): Rgb | null {
+export const parseColor = (css: string): Rgb | null => {
   const m = css.trim().match(/^(rgba?|oklch|color)\(\s*([^)]*)\)$/i);
-  if (!m) return null;
+  if (!m) {
+    return null;
+  }
   const fn = (m[1] as string).toLowerCase();
   const parts = (m[2] as string).split(/[\s,/]+/).filter(Boolean);
-  if (fn === "color") {
-    if (parts[0] !== "srgb") return null;
+  if (fn === 'color') {
+    if (parts[0] !== 'srgb') {
+      return null;
+    }
     const [r, g, b] = parts.slice(1, 4).map(num);
     return r === undefined || g === undefined || b === undefined ? null : [r, g, b];
   }
-  const [x, y, z] = parts.slice(0, 3).map((p) => (p === "none" ? 0 : num(p)));
-  if (x === undefined || y === undefined || z === undefined || [x, y, z].some(Number.isNaN))
+  const [x, y, z] = parts.slice(0, 3).map((p) => (p === 'none' ? 0 : num(p)));
+  if (x === undefined || y === undefined || z === undefined || [x, y, z].some(Number.isNaN)) {
     return null;
-  return fn === "oklch" ? oklchToSrgb(x, y, z) : [x / 255, y / 255, z / 255];
-}
+  }
+  return fn === 'oklch' ? oklchToSrgb(x, y, z) : [x / 255, y / 255, z / 255];
+};
 
 const luminance = ([r, g, b]: Rgb) => {
   const lin = (v: number) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
   return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
 };
 
-export function contrastRatio(fg: Rgb, bg: Rgb): number {
+export const contrastRatio = (fg: Rgb, bg: Rgb): number => {
   const [hi, lo] = [luminance(fg), luminance(bg)].sort((p, q) => q - p) as [number, number];
   return (hi + 0.05) / (lo + 0.05);
-}
+};
