@@ -14,7 +14,8 @@
       "!**/.wrangler",
       "!**/worker-configuration.d.ts",
       "!**/tools/biome/fixtures",
-      "!**/__fixtures__"
+      "!**/__fixtures__",
+      "!**/*.drawio.svg"
     ]
   },
   "plugins": ["./tools/biome/array-type.grit", "./tools/biome/exported-return-types.grit"],
