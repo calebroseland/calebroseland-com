@@ -1,4 +1,5 @@
 import { Dialog } from '@base-ui/react/dialog';
+import { ScrollArea } from '@base-ui/react/scroll-area';
 import { Icon } from '@crc/ui';
 import { m } from 'motion/react';
 import { Tip } from '../Tip.tsx';
@@ -35,7 +36,6 @@ export const ImageViewer = (props: ViewerProps) => {
           onFocus={v.onFocusWithin}
           data-controls={v.controls ? 'shown' : 'hidden'}
           data-zoomed={v.zoom > 1.01 ? '' : undefined}
-          data-touch={v.touch ? '' : undefined}
         >
           <m.div className={styles.scrim} style={{ opacity: v.scrimOpacity }} />
           <Dialog.Title className="visually-hidden">{title}</Dialog.Title>
@@ -134,6 +134,29 @@ export const ImageViewer = (props: ViewerProps) => {
           )}
 
           <m.div className={styles.bottom} style={{ opacity: v.values.fade }}>
+            {count > 2 && (
+              <ScrollArea.Root className={styles.thumbs}>
+                <ScrollArea.Viewport ref={v.thumbs} className={styles.thumbsViewport}>
+                  <ul role="list" className={styles.thumbList}>
+                    {props.set.items.map((it, i) => (
+                      <li key={it.key}>
+                        <Tip label={it.alt || `Image ${i + 1}`}>
+                          <button
+                            type="button"
+                            className={styles.thumb}
+                            onClick={() => props.onIndexChange(i)}
+                            aria-current={i === index ? 'true' : undefined}
+                            aria-label={`Show image ${i + 1}${it.alt ? `: ${it.alt}` : ''}`}
+                          >
+                            <img src={it.src} alt="" loading="lazy" decoding="async" />
+                          </button>
+                        </Tip>
+                      </li>
+                    ))}
+                  </ul>
+                </ScrollArea.Viewport>
+              </ScrollArea.Root>
+            )}
             {item.alt && (
               <Dialog.Description className={styles.caption}>{item.alt}</Dialog.Description>
             )}

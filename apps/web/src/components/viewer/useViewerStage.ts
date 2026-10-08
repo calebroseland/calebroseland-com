@@ -12,6 +12,7 @@ import {
 } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
 import { useReduceMotion } from '../../hooks/useReduceMotion.ts';
+import { useStripFollow } from '../gallery/useStripFollow.ts';
 import { revealNow } from '../motion/reveal.ts';
 import type { ViewerItem, ViewerSet } from './sets.ts';
 import { createStage, type StageValues } from './stage.ts';
@@ -311,6 +312,8 @@ export const useViewerStage = (props: ViewerProps) => {
     }
   };
 
+  const thumbs = useStripFollow(index);
+
   const neighbour = (offset: number) => {
     const it = set.items[index + offset];
     if (!it || !box) {
@@ -340,6 +343,7 @@ export const useViewerStage = (props: ViewerProps) => {
     announcement,
     failed: item ? failed.has(item.src) : false,
     attachStage,
+    thumbs,
     popup,
     onKeyDown,
     onFocusWithin: () => wake(),

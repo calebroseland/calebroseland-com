@@ -40,6 +40,8 @@ const setup = (overrides: Partial<ViewerProps> = {}) => {
 };
 
 beforeEach(() => {
+  // jsdom has no Web Animations; Base UI's scroll area asks for them.
+  Element.prototype.getAnimations ??= () => [];
   // jsdom has no layout observer; nothing here resizes.
   vi.stubGlobal(
     'ResizeObserver',

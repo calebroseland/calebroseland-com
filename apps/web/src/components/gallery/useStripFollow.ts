@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useReduceMotion } from '../../hooks/useReduceMotion.ts';
 
 // Room left beside a thumbnail scrolled into view, so its outline shows.
@@ -7,9 +7,10 @@ const PAD = 8;
 /** A ref for a thumbnail strip that keeps its current thumbnail (`aria-current`) in view, scrolling no further than it must. */
 export const useStripFollow = (index: number) => {
   const reduce = useReduceMotion();
-  const strip = useRef<HTMLDivElement | null>(null);
+  // State, not a ref: a strip that mounts after the index is set (inside a dialog's portal) still follows.
+  const [strip, setStrip] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
-    const v = strip.current;
+    const v = strip;
     const t = v?.querySelector<HTMLElement>('[aria-current="true"]');
     if (!(v && t) || index < 0) {
       return;
@@ -35,6 +36,6 @@ export const useStripFollow = (index: number) => {
     if (target !== null) {
       v.scrollTo({ left: target, behavior: reduce ? 'instant' : 'smooth' });
     }
-  }, [index, reduce]);
-  return strip;
+  }, [strip, index, reduce]);
+  return setStrip;
 };

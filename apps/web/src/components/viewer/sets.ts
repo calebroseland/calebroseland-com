@@ -3,6 +3,8 @@
 
 type ImageItem = {
   kind: 'image';
+  /** Its place in the set, for React: two items may show the same file. */
+  key: string;
   src: string;
   alt: string;
   width: number | null;
@@ -31,11 +33,12 @@ const dimension = (img: HTMLImageElement | null, name: 'width' | 'height'): numb
   return n > 0 ? n : null;
 };
 
-const imageItem = (source: HTMLAnchorElement): ImageItem => {
+const imageItem = (source: HTMLAnchorElement, key: string): ImageItem => {
   const img = source.querySelector('img');
   const src = source.getAttribute('href') ?? '';
   return {
     kind: 'image',
+    key,
     src,
     alt: img?.getAttribute('alt') ?? '',
     width: dimension(img, 'width'),
@@ -47,12 +50,17 @@ const imageItem = (source: HTMLAnchorElement): ImageItem => {
 
 const links = (el: Element) => [...el.querySelectorAll<HTMLAnchorElement>('a.zoom')];
 
+const setOf = (id: string, el: Element): ViewerSet => ({
+  id,
+  items: links(el).map((a, n) => imageItem(a, `${id}.${n + 1}`)),
+});
+
 const allSets = (root: HTMLElement): ViewerSet[] => {
   const galleries = [...root.querySelectorAll('figure.gallery')];
   const singles = [...root.querySelectorAll('figure.media')].filter((f) => !f.closest('.gallery'));
   return [
-    ...galleries.map((g, i) => ({ id: `g${i + 1}`, items: links(g).map(imageItem) })),
-    ...singles.map((f, i) => ({ id: `s${i + 1}`, items: links(f).map(imageItem) })),
+    ...galleries.map((g, i) => setOf(`g${i + 1}`, g)),
+    ...singles.map((f, i) => setOf(`s${i + 1}`, f)),
   ];
 };
 

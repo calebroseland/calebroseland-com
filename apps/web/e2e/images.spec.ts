@@ -170,6 +170,32 @@ test.describe('image viewer', () => {
     await expect(viewer(page)).toHaveCount(0);
   });
 
+  test("shows a gallery's thumbnails, which move the viewer and follow it", async ({ page }) => {
+    const inView = (name: RegExp) =>
+      strip.getByRole('button', { name }).evaluate((b) => {
+        const v = b.closest('ul')?.parentElement?.getBoundingClientRect();
+        const r = b.getBoundingClientRect();
+        return Boolean(v && r.left >= v.left - 1 && r.right <= v.right + 1);
+      });
+    // Opened on an image deep in the set, the strip starts there.
+    await openPage(page, '?view=g2.20');
+    await expect(viewer(page)).toHaveAccessibleName('Image 20 of 30');
+    const strip = viewer(page).getByRole('list');
+    await expect.poll(() => inView(/^Show image 20:/)).toBe(true);
+    await strip.getByRole('button', { name: /^Show image 3:/ }).click();
+    await expect(viewer(page)).toHaveAccessibleName('Image 3 of 30');
+    await expect(strip.getByRole('button', { name: /^Show image 3:/ })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+    await page.keyboard.press('End');
+    await expect(viewer(page)).toHaveAccessibleName('Image 30 of 30');
+    await expect.poll(() => inView(/^Show image 30:/)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  });
+
   test('has no serious accessibility violations while open', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await openPage(page, '?view=g1.1');
@@ -237,7 +263,7 @@ test.describe('inline gallery', () => {
       .getByRole('link', { name: /first in the gallery/ })
       .click();
     await expect(viewer(page)).toHaveAccessibleName('Image 1 of 3');
-    await expect(page.locator('figure.gallery')).toHaveCSS('visibility', 'hidden');
+    await expect(page.locator('figure.gallery').first()).toHaveCSS('visibility', 'hidden');
     await expect(viewer(page)).toBeFocused();
     await page.keyboard.press('End');
     await expect(viewer(page)).toHaveAccessibleName('Image 3 of 3');
@@ -379,6 +405,32 @@ test.describe('image viewer on a touch screen', () => {
     await gesture(cdp, [mid], [[mid[0], mid[1] + 260]]);
     await expect(viewer(page)).toHaveCount(0);
     await expect(page).toHaveURL(/\/images$/);
+  });
+
+  test('keeps previous and next in the bottom corners, whatever input arrives', async ({
+    page,
+  }) => {
+    await openPage(page, '?view=g1.2');
+    const next = viewer(page).getByRole('button', { name: 'Next image' });
+    const where = async () => {
+      const box = await next.boundingBox();
+      const h = await page.evaluate(() => innerHeight);
+      return box ? Math.round(h - (box.y + box.height)) : null;
+    };
+    const first = await where();
+    expect(first).not.toBeNull();
+    expect(first).toBeLessThan(80);
+    // A mouse event on a phone (a paired mouse, or an emulated click) must not move them.
+    const center = await page.evaluate(() => [innerWidth / 2, innerHeight / 2]);
+    await page.mouse.click(center[0] ?? 0, center[1] ?? 0);
+    await expect(viewer(page)).toBeVisible();
+    expect(await where()).toBe(first);
+    const cdp = await page.context().newCDPSession(page);
+    const { w, h } = await page.evaluate(() => ({ w: innerWidth, h: innerHeight }));
+    // A touch tap after it.
+    await gesture(cdp, [[w * 0.5, h * 0.4]], [[w * 0.5, h * 0.4]], 1);
+    await expect(viewer(page)).toBeVisible();
+    expect(await where()).toBe(first);
   });
 
   test('a gallery swipes natively, and its counter follows', async ({ page }) => {

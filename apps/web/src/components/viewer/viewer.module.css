@@ -102,6 +102,7 @@
 
   .bottom {
     inset-block-end: 0;
+    flex-direction: column;
     justify-content: center;
     min-block-size: 4rem;
     padding-block-end: max(var(--space-3), env(safe-area-inset-bottom));
@@ -177,14 +178,69 @@
     clip-path: inset(50%);
   }
 
-  /* On a phone the side buttons move to the bottom corners, beside the caption, clear of the thumb. */
-  .viewer[data-touch] .side {
-    inset-block: auto max(var(--space-3), env(safe-area-inset-bottom));
-    translate: none;
+  /* A gallery's thumbnails, above the caption. The strip scrolls within the screen's width. */
+  .thumbs {
+    display: flex;
+    inline-size: 100%;
+    min-inline-size: 0;
+    pointer-events: auto;
   }
 
-  .viewer[data-touch] .bottom {
-    padding-inline: 4rem;
+  .thumbsViewport {
+    flex: 1;
+    min-inline-size: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    scrollbar-width: none;
+  }
+
+  .thumbList {
+    display: flex;
+    gap: var(--space-2);
+    inline-size: max-content;
+    padding: var(--space-1);
+    margin-block: 0;
+    margin-inline: auto;
+    list-style: none;
+  }
+
+  .thumb {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    border: var(--border-width-thick) solid transparent;
+    border-radius: var(--radius-sm);
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &[aria-current="true"] {
+      border-color: var(--color-viewer-on-scrim);
+      opacity: 1;
+    }
+
+    & img {
+      display: block;
+      inline-size: 3.5rem;
+      block-size: 2.5rem;
+      object-fit: cover;
+    }
+  }
+
+  /* On a phone (by what the device is, never by the last input, so they cannot move mid-view) the side
+     buttons sit in the bottom corners, beside the caption, within reach of the thumb. */
+  @media (hover: none) and (pointer: coarse) {
+    .side {
+      inset-block: auto max(var(--space-3), env(safe-area-inset-bottom));
+      translate: none;
+    }
+
+    .bottom {
+      padding-inline: 4rem;
+    }
   }
 
   /* Hidden controls take no taps but stay in the tab order, and come back on focus. */
