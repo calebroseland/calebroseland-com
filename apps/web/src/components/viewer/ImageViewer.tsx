@@ -1,6 +1,7 @@
 import { Dialog } from '@base-ui/react/dialog';
 import { Icon } from '@crc/ui';
 import { m } from 'motion/react';
+import { Tip } from '../Tip.tsx';
 import { SLIDE_GAP } from './stage.ts';
 import { useViewerStage, type ViewerProps } from './useViewerStage.ts';
 import styles from './viewer.module.css';
@@ -81,44 +82,54 @@ export const ImageViewer = (props: ViewerProps) => {
               {many ? `${index + 1} / ${count}` : ''}
             </span>
             <div className={styles.tools}>
-              <button type="button" className={styles.button} onClick={v.zoomOut}>
-                <Icon name="lucide:minus" size="sm" />
-                <span className="visually-hidden">Zoom out</span>
-              </button>
+              <Tip label="Zoom out" side="bottom">
+                <button type="button" className={styles.button} onClick={v.zoomOut}>
+                  <Icon name="lucide:minus" size="sm" />
+                  <span className="visually-hidden">Zoom out</span>
+                </button>
+              </Tip>
               <span className={styles.zoom} aria-hidden="true">
                 {Math.round(v.zoom * 100)}%
               </span>
-              <button type="button" className={styles.button} onClick={v.zoomIn}>
-                <Icon name="lucide:plus" size="sm" />
-                <span className="visually-hidden">Zoom in</span>
-              </button>
-              <Dialog.Close className={styles.button}>
-                <Icon name="lucide:x" size="sm" />
-                <span className="visually-hidden">Close</span>
-              </Dialog.Close>
+              <Tip label="Zoom in" side="bottom">
+                <button type="button" className={styles.button} onClick={v.zoomIn}>
+                  <Icon name="lucide:plus" size="sm" />
+                  <span className="visually-hidden">Zoom in</span>
+                </button>
+              </Tip>
+              <Tip label="Close" side="bottom">
+                <Dialog.Close className={styles.button}>
+                  <Icon name="lucide:x" size="sm" />
+                  <span className="visually-hidden">Close</span>
+                </Dialog.Close>
+              </Tip>
             </div>
           </m.div>
 
           {many && (
             <>
-              <button
-                type="button"
-                className={`${styles.button} ${styles.side} ${styles.previous}`}
-                onClick={v.previous}
-                aria-disabled={index === 0}
-              >
-                <Icon name="lucide:chevron-left" />
-                <span className="visually-hidden">Previous image</span>
-              </button>
-              <button
-                type="button"
-                className={`${styles.button} ${styles.side} ${styles.next}`}
-                onClick={v.next}
-                aria-disabled={index === count - 1}
-              >
-                <Icon name="lucide:chevron-right" />
-                <span className="visually-hidden">Next image</span>
-              </button>
+              <Tip label="Previous image" side="right">
+                <button
+                  type="button"
+                  className={`${styles.button} ${styles.side} ${styles.previous}`}
+                  onClick={v.previous}
+                  aria-disabled={index === 0}
+                >
+                  <Icon name="lucide:chevron-left" />
+                  <span className="visually-hidden">Previous image</span>
+                </button>
+              </Tip>
+              <Tip label="Next image" side="left">
+                <button
+                  type="button"
+                  className={`${styles.button} ${styles.side} ${styles.next}`}
+                  onClick={v.next}
+                  aria-disabled={index === count - 1}
+                >
+                  <Icon name="lucide:chevron-right" />
+                  <span className="visually-hidden">Next image</span>
+                </button>
+              </Tip>
             </>
           )}
 
