@@ -46,20 +46,14 @@ export const ImageViewer = (props: ViewerProps) => {
                     This image couldn't be loaded. <a href={item.src}>Open the file</a>
                   </p>
                 ) : (
-                  <m.img
+                  <img
                     key={item.src}
+                    ref={v.image}
                     className={styles.image}
                     src={item.src}
                     alt=""
                     draggable={false}
                     onError={() => v.onImageError(item.src)}
-                    style={{
-                      x: v.values.x,
-                      y: v.values.y,
-                      scale: v.visualScale,
-                      width: v.width,
-                      height: v.height,
-                    }}
                   />
                 )}
               </div>

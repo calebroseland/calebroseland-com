@@ -1,4 +1,5 @@
 import { recognize, type Size } from '@crc/interaction/gestures';
+import { cancelFrame, frame } from 'motion';
 import { useMotionValue, useTransform } from 'motion/react';
 import {
   type KeyboardEvent,
@@ -266,9 +267,35 @@ export const useViewerStage = (props: ViewerProps) => {
   }, [open, stage, latest, hide]);
 
   const fit = box && item ? stage.fit() : null;
-  const visualScale = useTransform(() => values.scale.get() / values.layout.get());
-  const width = useTransform(values.layout, (l) => (fit?.width ?? 0) * l);
-  const height = useTransform(values.layout, (l) => (fit?.height ?? 0) * l);
+  // The image's box and transform are written here, from all four values at once, once per frame.
+  // Bound as separate Motion styles, some of them run as accelerated Web Animations and the rest
+  // inline, and the two disagree about the transform: the image jumped when a zoom settled.
+  const image = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    const v = valuesRef.current;
+    const paint = () => {
+      const el = image.current;
+      const f = fit;
+      if (!(el && f)) {
+        return;
+      }
+      const l = v.layout.get();
+      el.style.width = `${f.width * l}px`;
+      el.style.height = `${f.height * l}px`;
+      el.style.transform = `translate(${v.x.get()}px, ${v.y.get()}px) scale(${v.scale.get() / l})`;
+    };
+    paint();
+    const offs = [v.x, v.y, v.scale, v.layout].map((value) =>
+      value.on('change', () => frame.render(paint)),
+    );
+    return () => {
+      for (const off of offs) {
+        off();
+      }
+      cancelFrame(paint);
+    };
+    // Again for a new fit (a resize) or a new image element.
+  }, [fit]);
   const scrimOpacity = useTransform(() => values.backdrop.get() * values.fade.get());
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -313,9 +340,7 @@ export const useViewerStage = (props: ViewerProps) => {
     index,
     shown,
     values,
-    visualScale,
-    width,
-    height,
+    image,
     scrimOpacity,
     neighbours: [neighbour(-1), neighbour(1)].filter((n) => n !== null),
     controls,
