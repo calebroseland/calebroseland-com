@@ -2,30 +2,36 @@ import { useRouterState } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
 import { preloadable } from '../lazy/preloadable.ts';
 
-// The viewer, its URL state and its gestures load on first use, or ahead of it when a pointer or focus reaches an image.
-const hostChunk = preloadable(() => import('../components/viewer/ViewerHost.tsx'));
+/* The viewer and the gallery controls load together: at once for a body with a gallery, else on
+   first use or ahead of it when a pointer or focus reaches an image. */
+const mediaChunk = preloadable(() => import('../components/viewer/BodyMedia.tsx'));
 
-type HostModule = Awaited<ReturnType<typeof hostChunk.load>>;
+type MediaModule = Awaited<ReturnType<typeof mediaChunk.load>>;
 
 const zoomLink = (e: Event): HTMLAnchorElement | null =>
   e.target instanceof Element ? e.target.closest<HTMLAnchorElement>('a.zoom') : null;
 
-/* The body's images open the viewer. Only this listener is in first load; the rest arrives with the
-   viewer, and until then (or if it never does) an image is a link to its file. */
-export const useImageViewer = (entryId: string) => {
+/* A rendered body's images. Only this listener is in first load; until the rest arrives (or if it
+   never does) an image is a link to its file and a gallery a row that scrolls and snaps. */
+export const useBodyMedia = (entryId: string) => {
   const [body, setBody] = useState<HTMLDivElement | null>(null);
   const viewing = useRouterState({
     select: (s) => Boolean((s.location.search as { view?: unknown }).view),
   });
   const [request, setRequest] = useState<HTMLAnchorElement | null>(null);
-  const [mod, setMod] = useState<HostModule | null>(hostChunk.peek);
+  const [mod, setMod] = useState<MediaModule | null>(mediaChunk.peek);
+  // Read from the DOM once the entry's HTML is in it.
+  const [gallery, setGallery] = useState<string | null>(null);
+  useEffect(() => {
+    setGallery(body?.querySelector('figure.gallery') ? entryId : null);
+  }, [body, entryId]);
 
   useEffect(() => {
-    if (mod || !(viewing || request)) {
+    if (mod || !(viewing || request || gallery)) {
       return;
     }
     let live = true;
-    hostChunk.load().then(
+    mediaChunk.load().then(
       (m) => live && setMod(m),
       () => {
         if (live && request) {
@@ -36,7 +42,7 @@ export const useImageViewer = (entryId: string) => {
     return () => {
       live = false;
     };
-  }, [mod, viewing, request]);
+  }, [mod, viewing, request, gallery]);
 
   useEffect(() => {
     if (!body) {
@@ -60,7 +66,7 @@ export const useImageViewer = (entryId: string) => {
     };
     const prefetch = (e: Event) => {
       if (zoomLink(e)) {
-        hostChunk.prefetch();
+        mediaChunk.prefetch();
       }
     };
     body.addEventListener('click', open);
@@ -74,9 +80,18 @@ export const useImageViewer = (entryId: string) => {
   }, [body]);
 
   const handled = useCallback(() => setRequest(null), []);
-  const host =
+  const media =
     mod && body
-      ? { Host: mod.ViewerHost, props: { body, entryId, request, onRequestHandled: handled } }
+      ? {
+          Media: mod.BodyMedia,
+          props: {
+            body,
+            entryId,
+            request,
+            onRequestHandled: handled,
+            galleries: gallery === entryId,
+          },
+        }
       : null;
-  return { ref: setBody, host };
+  return { ref: setBody, media };
 };

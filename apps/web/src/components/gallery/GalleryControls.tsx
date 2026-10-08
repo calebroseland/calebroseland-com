@@ -1,0 +1,63 @@
+import { ScrollArea } from '@base-ui/react/scroll-area';
+import { Icon } from '@crc/ui';
+import { createPortal } from 'react-dom';
+import styles from './GalleryControls.module.css';
+import { useGalleries } from './useGalleries.ts';
+import { useGallery } from './useGallery.ts';
+
+/** Controls for every gallery in a body, each rendered into its own figure under the track. */
+export const GalleryControls = ({ body }: { body: HTMLElement }) => {
+  const figures = useGalleries(body);
+  return figures.map((figure, i) => createPortal(<Gallery figure={figure} />, figure, `g${i}`));
+};
+
+const Gallery = ({ figure }: { figure: HTMLElement }) => {
+  const g = useGallery(figure);
+  const count = g.slides.length;
+  return (
+    <div className={styles.controls}>
+      <div className={styles.row}>
+        <button
+          type="button"
+          className={styles.step}
+          onClick={() => g.go(g.index - 1)}
+          aria-disabled={g.index === 0}
+        >
+          <Icon name="lucide:chevron-left" size="sm" />
+          <span className="visually-hidden">Previous image</span>
+        </button>
+        <span className={styles.counter} aria-live="polite">
+          {g.index + 1} of {count}
+        </span>
+        <button
+          type="button"
+          className={styles.step}
+          onClick={() => g.go(g.index + 1)}
+          aria-disabled={g.index === count - 1}
+        >
+          <Icon name="lucide:chevron-right" size="sm" />
+          <span className="visually-hidden">Next image</span>
+        </button>
+      </div>
+      <ScrollArea.Root className={styles.thumbs}>
+        <ScrollArea.Viewport className={styles.thumbsViewport}>
+          <ul role="list" className={styles.thumbList}>
+            {g.slides.map((s, i) => (
+              <li key={s.key}>
+                <button
+                  type="button"
+                  className={styles.thumb}
+                  onClick={() => g.go(i)}
+                  aria-current={i === g.index ? 'true' : undefined}
+                  aria-label={`Show image ${i + 1}${s.alt ? `: ${s.alt}` : ''}`}
+                >
+                  <img src={s.src} alt="" loading="lazy" decoding="async" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </ScrollArea.Viewport>
+      </ScrollArea.Root>
+    </div>
+  );
+};

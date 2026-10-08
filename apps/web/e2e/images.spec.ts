@@ -29,7 +29,7 @@ test.describe('images in a body', () => {
       page.locator('figcaption', { hasText: 'A wide orange checkerboard' }).first(),
     ).toBeVisible();
     const gallery = page.getByRole('figure', { name: 'Gallery, 3 images' });
-    await expect(gallery.getByRole('listitem')).toHaveCount(3);
+    await expect(gallery.getByRole('list').first().getByRole('listitem')).toHaveCount(3);
     await expect(page.getByRole('link', { name: 'Open image 6' })).toBeVisible();
     // An image in running text stays inline and opens nothing.
     await expect(page.getByRole('img', { name: 'a tiny square' })).toBeVisible();
@@ -187,6 +187,69 @@ test.describe('image viewer', () => {
   });
 });
 
+test.describe('inline gallery', () => {
+  const gallery = (page: Page) => page.getByRole('figure', { name: 'Gallery, 3 images' });
+  const counter = (page: Page) => gallery(page).getByText(/^\d of 3$/);
+
+  test('moves by buttons, thumbnails and keys, with focus following the slide', async ({
+    page,
+  }) => {
+    await openPage(page);
+    await gallery(page).scrollIntoViewIfNeeded();
+    await expect(counter(page)).toHaveText('1 of 3');
+    await expect(gallery(page).getByRole('button', { name: 'Previous image' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+    await gallery(page).getByRole('button', { name: 'Next image' }).click();
+    await expect(counter(page)).toHaveText('2 of 3');
+    await expect(gallery(page).getByRole('button', { name: /^Show image 2/ })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+    await gallery(page)
+      .getByRole('button', { name: /^Show image 3/ })
+      .click();
+    await expect(counter(page)).toHaveText('3 of 3');
+    await expect(gallery(page).getByRole('button', { name: 'Next image' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+    await page.keyboard.press('Home');
+    await expect(counter(page)).toHaveText('1 of 3');
+    await expect(gallery(page).getByRole('link', { name: /first in the gallery/ })).toBeFocused();
+    await page.keyboard.press('ArrowRight');
+    await expect(counter(page)).toHaveText('2 of 3');
+    await expect(gallery(page).getByRole('link', { name: /second in the gallery/ })).toBeFocused();
+  });
+
+  test('closing the viewer leaves the gallery on the image it ended on', async ({ page }) => {
+    await openPage(page);
+    await gallery(page)
+      .getByRole('link', { name: /first in the gallery/ })
+      .click();
+    await expect(viewer(page)).toHaveAccessibleName('Image 1 of 3');
+    await expect(viewer(page)).toBeFocused();
+    await page.keyboard.press('End');
+    await expect(viewer(page)).toHaveAccessibleName('Image 3 of 3');
+    await page.keyboard.press('Escape');
+    await expect(viewer(page)).toHaveCount(0);
+    await expect(counter(page)).toHaveText('3 of 3');
+    await expect(gallery(page).getByRole('link', { name: /third in the gallery/ })).toBeFocused();
+  });
+
+  test('prints as its figures, without controls', async ({ page }) => {
+    await openPage(page);
+    await expect(counter(page)).toHaveText('1 of 3');
+    await page.emulateMedia({ media: 'print' });
+    await expect(gallery(page).getByRole('button', { name: 'Next image' })).toBeHidden();
+    const display = await gallery(page)
+      .locator('.gallery-track')
+      .evaluate((el) => getComputedStyle(el).display);
+    expect(display).toBe('block');
+  });
+});
+
 /* Touch, through Chromium's DevTools protocol: Playwright has no multi-touch of its own. */
 test.describe('image viewer on a touch screen', () => {
   test.skip(
@@ -257,5 +320,20 @@ test.describe('image viewer on a touch screen', () => {
     await gesture(cdp, [mid], [[mid[0], mid[1] + 260]]);
     await expect(viewer(page)).toHaveCount(0);
     await expect(page).toHaveURL(/\/images$/);
+  });
+
+  test('a gallery swipes natively, and its counter follows', async ({ page }) => {
+    await openPage(page);
+    const gallery = page.getByRole('figure', { name: 'Gallery, 3 images' });
+    await gallery.scrollIntoViewIfNeeded();
+    await expect(gallery.getByText('1 of 3')).toBeVisible();
+    const box = await gallery.locator('.gallery-track').boundingBox();
+    if (!box) {
+      throw new Error('no track');
+    }
+    const cdp = await page.context().newCDPSession(page);
+    const y = box.y + box.height / 2;
+    await gesture(cdp, [[box.x + box.width * 0.85, y]], [[box.x + box.width * 0.1, y]]);
+    await expect(gallery.getByText('2 of 3')).toBeVisible();
   });
 });
