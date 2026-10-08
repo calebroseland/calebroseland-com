@@ -13,7 +13,7 @@ import { useLatest } from '../../hooks/useLatest.ts';
 import { useReduceMotion } from '../../hooks/useReduceMotion.ts';
 import { revealNow } from '../motion/reveal.ts';
 import type { ViewerItem, ViewerSet } from './sets.ts';
-import { createStage, type Stage, type StageValues } from './stage.ts';
+import { createStage, type StageValues } from './stage.ts';
 
 export type ViewerProps = {
   set: ViewerSet;
@@ -98,7 +98,6 @@ export const useViewerStage = (props: ViewerProps) => {
   const [failed, setFailed] = useState<ReadonlySet<string>>(new Set());
   const stageEl = useRef<HTMLDivElement | null>(null);
   const popup = useRef<HTMLDivElement | null>(null);
-  const stageRef = useRef<Stage | null>(null);
   const idle = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const zoomNote = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -124,57 +123,57 @@ export const useViewerStage = (props: ViewerProps) => {
     }
   }, []);
 
-  const stage = useMemo(() => {
-    const s = createStage({
-      values: valuesRef.current,
-      rect: () =>
-        stageEl.current?.getBoundingClientRect() ?? new DOMRect(0, 0, innerWidth, innerHeight),
-      item: () => {
-        const { props: p } = latest.current;
-        const it = p.set.items[p.index];
-        return {
-          natural: it ? naturalSize(it) : { width: 1, height: 1 },
-          vector: it?.vector ?? false,
-        };
-      },
-      can: (dir) => {
-        const { props: p } = latest.current;
-        const to = p.index + (dir === 'next' ? 1 : -1);
-        return to >= 0 && to < p.set.items.length;
-      },
-      step,
-      close: () => latest.current.props.onCloseRequest(),
-      toggleControls: () => {
-        clearTimeout(idle.current);
-        setControls((c) => !c);
-      },
-      input: (pointerType) => {
-        setTouch(pointerType !== 'mouse');
-        if (pointerType === 'mouse') {
-          setControls(true);
-        }
-      },
-      settled: (scale) => {
-        setZoom(scale);
-        const it = latest.current.props.set.items[latest.current.props.index];
-        // A vector is laid out again at its new size, so the browser draws it sharp, not scaled up.
-        if (it?.vector) {
-          valuesRef.current.layout.set(Math.max(1, scale));
-        }
-        if (scale > 1.01) {
-          setControls((c) => (latest.current.touch ? false : c));
-        }
-        clearTimeout(zoomNote.current);
-        zoomNote.current = setTimeout(
-          () => setAnnouncement(`Zoom ${Math.round(scale * 100)}%`),
-          ANNOUNCE_ZOOM_MS,
-        );
-      },
-      reduce: () => latest.current.reduce,
-    });
-    stageRef.current = s;
-    return s;
-  }, [latest, step]);
+  const stage = useMemo(
+    () =>
+      createStage({
+        values: valuesRef.current,
+        rect: () =>
+          stageEl.current?.getBoundingClientRect() ?? new DOMRect(0, 0, innerWidth, innerHeight),
+        item: () => {
+          const { props: p } = latest.current;
+          const it = p.set.items[p.index];
+          return {
+            natural: it ? naturalSize(it) : { width: 1, height: 1 },
+            vector: it?.vector ?? false,
+          };
+        },
+        can: (dir) => {
+          const { props: p } = latest.current;
+          const to = p.index + (dir === 'next' ? 1 : -1);
+          return to >= 0 && to < p.set.items.length;
+        },
+        step,
+        close: () => latest.current.props.onCloseRequest(),
+        toggleControls: () => {
+          clearTimeout(idle.current);
+          setControls((c) => !c);
+        },
+        input: (pointerType) => {
+          setTouch(pointerType !== 'mouse');
+          if (pointerType === 'mouse') {
+            setControls(true);
+          }
+        },
+        settled: (scale) => {
+          setZoom(scale);
+          const it = latest.current.props.set.items[latest.current.props.index];
+          // A vector is laid out again at its new size, so the browser draws it sharp, not scaled up.
+          if (it?.vector) {
+            valuesRef.current.layout.set(Math.max(1, scale));
+          }
+          if (scale > 1.01) {
+            setControls((c) => (latest.current.touch ? false : c));
+          }
+          clearTimeout(zoomNote.current);
+          zoomNote.current = setTimeout(
+            () => setAnnouncement(`Zoom ${Math.round(scale * 100)}%`),
+            ANNOUNCE_ZOOM_MS,
+          );
+        },
+        reduce: () => latest.current.reduce,
+      }),
+    [latest, step],
+  );
 
   useEffect(() => () => stage.dispose(), [stage]);
   useEffect(() => () => clearTimeout(idle.current), []);
