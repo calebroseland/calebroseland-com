@@ -8,13 +8,14 @@ import { canAnimate } from './presets.ts';
 
 type Animation = ReturnType<typeof animate>;
 
-const RISE = '0 14px';
-const DURATION = 0.45;
-const STEP = 0.06;
-// Past five deep, a cascade reads as lag rather than arrival.
-const DEEPEST = 4;
-// A block reveals once it is a little way into the screen, not as its first pixel appears.
-const MARGIN = '0px 0px -10% 0px';
+// Tuned with the owner: a settle, not an entrance. Small rise, short fade, a barely-there cascade.
+const RISE = '0 6px';
+const DURATION = 0.32;
+const STEP = 0.03;
+// Past four deep, a cascade reads as lag rather than arrival.
+const DEEPEST = 3;
+// A block starts as it reaches the screen's edge, so it is never seen waiting.
+const MARGIN = '0px';
 
 const reduceMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -92,12 +92,12 @@ describe('revealBlocks', () => {
     expect(animate).toHaveBeenCalledOnce();
   });
 
-  it('cascades blocks entering together, at most five deep', () => {
+  it('cascades blocks entering together, at most four deep', () => {
     setup();
     fire(blocks.slice(8, 14).map((b, i) => entry(b, 700 + i * 20, true)));
     frame();
     const delays = vi.mocked(animate).mock.calls.map((c) => (c[2] as { delay: number }).delay);
-    expect(delays).toEqual([0, 0.06, 0.12, 0.18, 0.24, 0.24]);
+    expect(delays).toEqual([0, 0.03, 0.06, 0.09, 0.09, 0.09]);
   });
 
   it('shows every hidden block above one that reveals, at once, after a jump', () => {
