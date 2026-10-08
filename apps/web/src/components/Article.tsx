@@ -5,6 +5,7 @@ import type { EntryMeta, LoadedEntry } from '../content/entries.ts';
 import { formatDate } from '../content/entries.ts';
 import { useSignedIn } from '../editor/auth/hooks.ts';
 import { useCurrentHref } from '../hooks/useCurrentHref.ts';
+import { useImageViewer } from '../hooks/useImageViewer.ts';
 import styles from './Article.module.css';
 
 /** An entry's title and meta; `action` takes the Edit link's place on a page that is not an entry. */
@@ -87,8 +88,19 @@ export const TagList = ({
 };
 
 export const ArticleBody = ({ entry }: { entry: LoadedEntry }) => {
-  // biome-ignore lint/security/noDangerouslySetInnerHtml: html is produced at build time by @crc/markdown through rehype-sanitize
-  return <div className="prose" dangerouslySetInnerHTML={{ __html: entry.html }} />;
+  const images = useImageViewer(entry.meta.id ?? entry.meta.slug);
+  const Host = images.host?.Host;
+  return (
+    <>
+      <div
+        ref={images.ref}
+        className="prose"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: html is produced at build time by @crc/markdown through rehype-sanitize
+        dangerouslySetInnerHTML={{ __html: entry.html }}
+      />
+      {Host && images.host && <Host {...images.host.props} />}
+    </>
+  );
 };
 
 export const ArticleSkeleton = () => {

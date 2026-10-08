@@ -85,7 +85,7 @@
       border-block-start: var(--border-width) solid var(--color-border);
     }
 
-    & img,
+    & img:not(.media img),
     & picture {
       inline-size: 100%;
       block-size: auto;
@@ -120,10 +120,14 @@
       outline-offset: var(--focus-ring-offset);
     }
 
+    /* Sized by its width and height attributes, so its box is right before it loads; a tall image
+       capped by the screen keeps its shape inside that box. */
     & .media img {
-      inline-size: auto;
       max-inline-size: 100%;
+      block-size: auto;
       max-block-size: 70vh;
+      object-fit: contain;
+      border-radius: var(--radius-lg);
     }
 
     /* Images on adjacent lines: one slide per column width, swiped by native scroll-snap. Slides

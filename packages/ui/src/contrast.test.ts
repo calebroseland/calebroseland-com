@@ -82,3 +82,20 @@ describe.each(Object.entries(themes))('%s theme', (_name, themeCss) => {
     expect(contrast(vars, fg, bg)).toBeGreaterThanOrEqual(3);
   });
 });
+
+// The scrim is translucent, so its worst case is over the lightest page beneath it.
+describe.each(Object.entries(themes))('%s theme: image viewer', (_name, themeCss) => {
+  const vars = new Map([...declarations(primitives), ...declarations(themeCss)]);
+
+  it('viewer controls are at least 7:1 on the scrim over a white page', () => {
+    const scrim = converter('rgb')(resolve(vars, 'var(--color-viewer-scrim)'));
+    const on = toRgb(resolve(vars, 'var(--color-viewer-on-scrim)'));
+    if (!scrim || !on) {
+      throw new Error('could not parse the viewer tokens');
+    }
+    const a = scrim.alpha ?? 1;
+    const over = (c: number) => c * a + (1 - a);
+    const shown = { mode: 'rgb' as const, r: over(scrim.r), g: over(scrim.g), b: over(scrim.b) };
+    expect(wcagContrast(on, shown)).toBeGreaterThanOrEqual(7);
+  });
+});
