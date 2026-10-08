@@ -93,5 +93,5 @@ export const useBodyMedia = (entryId: string) => {
           },
         }
       : null;
-  return { ref: setBody, media };
+  return { ref: setBody, body, media };
 };
