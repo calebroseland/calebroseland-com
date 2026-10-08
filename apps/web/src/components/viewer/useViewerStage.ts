@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
 import { useReduceMotion } from '../../hooks/useReduceMotion.ts';
+import { revealNow } from '../motion/reveal.ts';
 import type { ViewerItem, ViewerSet } from './sets.ts';
 import { createStage, type Stage, type StageValues } from './stage.ts';
 
@@ -165,7 +166,7 @@ export const useViewerStage = (props: ViewerProps) => {
         }
         clearTimeout(zoomNote.current);
         zoomNote.current = setTimeout(
-          () => setAnnouncement(`Zoom ${Math.round(scale * 100)} %`),
+          () => setAnnouncement(`Zoom ${Math.round(scale * 100)}%`),
           ANNOUNCE_ZOOM_MS,
         );
       },
@@ -200,6 +201,10 @@ export const useViewerStage = (props: ViewerProps) => {
       });
       observer.observe(el);
       const it = latest.current.props.set.items[latest.current.props.index];
+      // The page's image must be in place to grow from, not waiting to fade up.
+      if (it) {
+        revealNow(it.source);
+      }
       stage.open(sourceRect(it));
       wake();
       const stop = recognize(el, stage.handlers, { edge: EDGE });
@@ -212,14 +217,14 @@ export const useViewerStage = (props: ViewerProps) => {
   );
 
   // A new image starts at rest; the counter and alt are announced.
-  const first = useRef(true);
+  const shownIndex = useRef(index);
   useLayoutEffect(() => {
-    stage.rest();
-    setZoom(1);
-    if (first.current) {
-      first.current = false;
+    if (shownIndex.current === index) {
       return;
     }
+    shownIndex.current = index;
+    stage.rest();
+    setZoom(1);
     const it = latest.current.props.set.items[index];
     setAnnouncement(`Image ${index + 1} of ${count}${it?.alt ? `: ${it.alt}` : ''}`);
   }, [index, count, stage, latest]);
@@ -233,6 +238,7 @@ export const useViewerStage = (props: ViewerProps) => {
     leaving.current = true;
     const it = latest.current.props.set.items[latest.current.props.index];
     if (it) {
+      revealNow(it.source);
       revealInTrack(it.source);
     }
     void stage.close(sourceRect(it)).then(() => setShown(false));

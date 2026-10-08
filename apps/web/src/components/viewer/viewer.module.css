@@ -53,6 +53,20 @@
   .error {
     padding: var(--space-4);
     font-family: var(--font-sans);
+    pointer-events: auto;
+
+    & a {
+      color: inherit;
+      text-decoration: underline;
+    }
+  }
+
+  .viewer[data-zoomed] .image {
+    cursor: grab;
+  }
+
+  .viewer[data-zoomed] .image:active {
+    cursor: grabbing;
   }
 
   /* Bars sit on their own gradient plates, so their contrast never depends on the image beneath. */

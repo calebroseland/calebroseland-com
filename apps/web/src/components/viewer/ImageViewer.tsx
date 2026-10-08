@@ -33,6 +33,7 @@ export const ImageViewer = (props: ViewerProps) => {
           onKeyDown={v.onKeyDown}
           onFocus={v.onFocusWithin}
           data-controls={v.controls ? 'shown' : 'hidden'}
+          data-zoomed={v.zoom > 1.01 ? '' : undefined}
           data-touch={v.touch ? '' : undefined}
         >
           <m.div className={styles.scrim} style={{ opacity: v.scrimOpacity }} />
@@ -41,7 +42,9 @@ export const ImageViewer = (props: ViewerProps) => {
             <m.div className={styles.strip} style={{ x: v.values.strip }}>
               <div className={styles.slide}>
                 {v.failed ? (
-                  <p className={styles.error}>This image couldn't be loaded.</p>
+                  <p className={styles.error}>
+                    This image couldn't be loaded. <a href={item.src}>Open the file</a>
+                  </p>
                 ) : (
                   <m.img
                     key={item.src}

@@ -39,25 +39,28 @@ const Gallery = ({ figure }: { figure: HTMLElement }) => {
           <span className="visually-hidden">Next image</span>
         </button>
       </div>
-      <ScrollArea.Root className={styles.thumbs}>
-        <ScrollArea.Viewport className={styles.thumbsViewport}>
-          <ul role="list" className={styles.thumbList}>
-            {g.slides.map((s, i) => (
-              <li key={s.key}>
-                <button
-                  type="button"
-                  className={styles.thumb}
-                  onClick={() => g.go(i)}
-                  aria-current={i === g.index ? 'true' : undefined}
-                  aria-label={`Show image ${i + 1}${s.alt ? `: ${s.alt}` : ''}`}
-                >
-                  <img src={s.src} alt="" loading="lazy" decoding="async" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </ScrollArea.Viewport>
-      </ScrollArea.Root>
+      {/* Two images need no strip of thumbnails; the buttons and counter say it all. */}
+      {count > 2 && (
+        <ScrollArea.Root className={styles.thumbs}>
+          <ScrollArea.Viewport className={styles.thumbsViewport}>
+            <ul role="list" className={styles.thumbList}>
+              {g.slides.map((s, i) => (
+                <li key={s.key}>
+                  <button
+                    type="button"
+                    className={styles.thumb}
+                    onClick={() => g.go(i)}
+                    aria-current={i === g.index ? 'true' : undefined}
+                    aria-label={`Show image ${i + 1}${s.alt ? `: ${s.alt}` : ''}`}
+                  >
+                    <img src={s.src} alt="" loading="lazy" decoding="async" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </ScrollArea.Viewport>
+        </ScrollArea.Root>
+      )}
     </div>
   );
 };
