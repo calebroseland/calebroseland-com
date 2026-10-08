@@ -76,11 +76,15 @@ test.describe('image viewer', () => {
     await expect(viewer(page)).toHaveAccessibleName('Image');
     await expect(viewer(page)).toHaveAccessibleDescription('A wide orange checkerboard');
     await expect(page).toHaveURL(/\?view=s1\.1$/);
+    // Shown in the viewer, the image is not also shown on the page behind it.
+    // (By selector: with the modal open, the page is out of the accessibility tree.)
+    await expect(page.locator('.prose > figure.media').first()).toHaveCSS('visibility', 'hidden');
     // A lone image is a set of one: no counter, no previous or next.
     await expect(viewer(page).getByRole('button', { name: 'Next image' })).toHaveCount(0);
     await page.keyboard.press('Escape');
     await expect(viewer(page)).toHaveCount(0);
     await expect(page).toHaveURL(/\/images$/);
+    await expect(link).toHaveCSS('visibility', 'visible');
     await expect(link).toBeFocused();
     const after = await page.evaluate(() => ({ y: scrollY, length: history.length }));
     expect(after.y).toBe(before.y);
@@ -229,12 +233,14 @@ test.describe('inline gallery', () => {
       .getByRole('link', { name: /first in the gallery/ })
       .click();
     await expect(viewer(page)).toHaveAccessibleName('Image 1 of 3');
+    await expect(page.locator('figure.gallery')).toHaveCSS('visibility', 'hidden');
     await expect(viewer(page)).toBeFocused();
     await page.keyboard.press('End');
     await expect(viewer(page)).toHaveAccessibleName('Image 3 of 3');
     await page.keyboard.press('Escape');
     await expect(viewer(page)).toHaveCount(0);
     await expect(counter(page)).toHaveText('3 of 3');
+    await expect(gallery(page)).toHaveCSS('visibility', 'visible');
     await expect(gallery(page).getByRole('link', { name: /third in the gallery/ })).toBeFocused();
   });
 

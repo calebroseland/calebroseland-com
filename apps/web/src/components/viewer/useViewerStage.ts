@@ -68,6 +68,10 @@ const revealInTrack = (link: HTMLElement) => {
   }
 };
 
+/** The figure, or the whole gallery, an image sits in: what the viewer stands in for while open. */
+const blockOf = (link: HTMLElement): HTMLElement =>
+  link.closest<HTMLElement>('figure.gallery') ?? link.closest<HTMLElement>('figure') ?? link;
+
 const isCoarse = () => typeof matchMedia === 'function' && matchMedia('(hover: none)').matches;
 
 /** Everything the viewer component renders from: Motion values, the gesture-driven stage, and its commands. */
@@ -179,6 +183,18 @@ export const useViewerStage = (props: ViewerProps) => {
   useEffect(() => () => clearTimeout(idle.current), []);
   useEffect(() => () => clearTimeout(zoomNote.current), []);
 
+  // While the viewer shows an image, its place on the page is empty, so it is never seen twice.
+  const hidden = useRef<HTMLElement | null>(null);
+  const hide = useCallback((el: HTMLElement | null) => {
+    if (hidden.current && hidden.current !== el) {
+      delete hidden.current.dataset.viewing;
+    }
+    hidden.current = el;
+    if (el) {
+      el.dataset.viewing = '';
+    }
+  }, []);
+
   // Attaching the stage is the moment to measure: the image grows out of its place on the page.
   const attachStage = useCallback(
     (el: HTMLDivElement | null) => {
@@ -205,14 +221,16 @@ export const useViewerStage = (props: ViewerProps) => {
         revealNow(it.source);
       }
       stage.open(sourceRect(it));
+      hide(it ? blockOf(it.source) : null);
       wake();
       const stop = recognize(el, stage.handlers, { edge: EDGE });
       return () => {
+        hide(null);
         observer.disconnect();
         stop();
       };
     },
-    [stage, latest, wake],
+    [stage, latest, wake, hide],
   );
 
   // A new image starts at rest; the counter and alt are announced.
@@ -240,8 +258,12 @@ export const useViewerStage = (props: ViewerProps) => {
       revealNow(it.source);
       revealInTrack(it.source);
     }
-    void stage.close(sourceRect(it)).then(() => setShown(false));
-  }, [open, stage, latest]);
+    void stage.close(sourceRect(it)).then(() => {
+      // Landed: the page's own image takes over before focus returns to its link.
+      hide(null);
+      setShown(false);
+    });
+  }, [open, stage, latest, hide]);
 
   const fit = box && item ? stage.fit() : null;
   const visualScale = useTransform(() => values.scale.get() / values.layout.get());

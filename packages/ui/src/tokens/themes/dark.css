@@ -42,7 +42,7 @@
     --color-backdrop: var(--accent-1000);
 
     /* The image viewer is dark in every theme, and custom themes never reach it: plain values, no ramps. */
-    --color-viewer-scrim: oklch(14% 0 0 / 0.94);
+    --color-viewer-scrim: oklch(12% 0 0);
     --color-viewer-on-scrim: oklch(98% 0 0);
 
     --shadow-sm: 0 1px 2px oklch(from var(--black) l c h / 0.3);

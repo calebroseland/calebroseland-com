@@ -45,7 +45,7 @@
     --color-backdrop: var(--accent-600);
 
     /* The image viewer is dark in every theme, and custom themes never reach it: plain values, no ramps. */
-    --color-viewer-scrim: oklch(14% 0 0 / 0.94);
+    --color-viewer-scrim: oklch(12% 0 0);
     --color-viewer-on-scrim: oklch(98% 0 0);
     --focus-ring-width: 2px;
     --focus-ring-offset: 2px;

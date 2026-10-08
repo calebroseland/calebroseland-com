@@ -160,6 +160,11 @@
       padding-block-end: calc(var(--gallery-row) + var(--gallery-thumbs));
     }
 
+    /* The image viewer shows this one; the page keeps its place empty (apps/web viewer). */
+    & [data-viewing] {
+      visibility: hidden;
+    }
+
     & .gallery-track > li {
       flex: 0 0 100%;
       margin: 0;

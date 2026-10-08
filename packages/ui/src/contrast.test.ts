@@ -83,7 +83,7 @@ describe.each(Object.entries(themes))('%s theme', (_name, themeCss) => {
   });
 });
 
-// The scrim is translucent, so its worst case is over the lightest page beneath it.
+// Were the scrim translucent, its worst case would be over the lightest page beneath it.
 describe.each(Object.entries(themes))('%s theme: image viewer', (_name, themeCss) => {
   const vars = new Map([...declarations(primitives), ...declarations(themeCss)]);
 
