@@ -161,7 +161,10 @@ test.describe('image viewer', () => {
     await page.getByRole('link', { name: /second in the gallery/ }).click();
     const image = viewer(page).locator('img').first();
     await expect(image).toBeVisible();
-    expect(await image.evaluate((el) => getComputedStyle(el).transform)).toBe('none');
+    // At rest from the first frame: no grow from the page's image.
+    expect(await image.evaluate((el) => getComputedStyle(el).transform)).toMatch(
+      /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/,
+    );
     await page.keyboard.press('Escape');
     await expect(viewer(page)).toHaveCount(0);
   });
