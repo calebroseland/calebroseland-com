@@ -49,7 +49,7 @@ export const ImageViewer = (props: ViewerProps) => {
                   <img
                     key={item.src}
                     ref={v.image}
-                    className={styles.image}
+                    className={`${styles.image} ${styles.current}`}
                     src={item.src}
                     alt=""
                     draggable={false}

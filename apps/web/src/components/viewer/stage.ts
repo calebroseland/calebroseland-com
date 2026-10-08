@@ -27,8 +27,6 @@ export type StageValues = {
   x: MotionValue<number>;
   y: MotionValue<number>;
   scale: MotionValue<number>;
-  /** The scale the image is laid out at; a vector re-lays out when a zoom settles, so it stays sharp. */
-  layout: MotionValue<number>;
   /** The row of images, moved by a swipe between them. */
   strip: MotionValue<number>;
   /** The scrim's opacity, faded by a dismissing drag or pinch. */
@@ -357,7 +355,6 @@ export const createStage = (env: StageEnv): Stage => {
       v.x.jump(0);
       v.y.jump(0);
       v.scale.jump(1);
-      v.layout.jump(1);
       v.strip.jump(0);
       v.backdrop.jump(1);
     },
@@ -400,7 +397,6 @@ export const createStage = (env: StageEnv): Stage => {
       const x = source.left + source.width / 2 - (r.left + r.width / 2);
       const y = source.top + source.height / 2 - (r.top + r.height / 2);
       // No overshoot: a bounce past the page's image would show it twice.
-      v.layout.jump(1);
       return Promise.all([
         run(v.backdrop, 0, fadeTiming),
         run(v.x, x, { ...settlePx, bounce: 0 }),

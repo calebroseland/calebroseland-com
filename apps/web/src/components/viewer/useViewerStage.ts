@@ -88,7 +88,6 @@ export const useViewerStage = (props: ViewerProps) => {
     x: useMotionValue(0),
     y: useMotionValue(0),
     scale: useMotionValue(1),
-    layout: useMotionValue(1),
     strip: useMotionValue(0),
     backdrop: useMotionValue(1),
     fade: useMotionValue(1),
@@ -161,11 +160,6 @@ export const useViewerStage = (props: ViewerProps) => {
         },
         settled: (scale) => {
           setZoom(scale);
-          const it = latest.current.props.set.items[latest.current.props.index];
-          // A vector is laid out again at its new size, so the browser draws it sharp, not scaled up.
-          if (it?.vector) {
-            valuesRef.current.layout.set(Math.max(1, scale));
-          }
           if (scale > 1.01) {
             setControls((c) => (latest.current.touch ? false : c));
           }
@@ -267,7 +261,7 @@ export const useViewerStage = (props: ViewerProps) => {
   }, [open, stage, latest, hide]);
 
   const fit = box && item ? stage.fit() : null;
-  // The image's box and transform are written here, from all four values at once, once per frame.
+  // The image's box and transform are written here, from all three values at once, once per frame.
   // Bound as separate Motion styles, some of them run as accelerated Web Animations and the rest
   // inline, and the two disagree about the transform: the image jumped when a zoom settled.
   const image = useRef<HTMLImageElement | null>(null);
@@ -279,15 +273,12 @@ export const useViewerStage = (props: ViewerProps) => {
       if (!(el && f)) {
         return;
       }
-      const l = v.layout.get();
-      el.style.width = `${f.width * l}px`;
-      el.style.height = `${f.height * l}px`;
-      el.style.transform = `translate(${v.x.get()}px, ${v.y.get()}px) scale(${v.scale.get() / l})`;
+      el.style.width = `${f.width}px`;
+      el.style.height = `${f.height}px`;
+      el.style.transform = `translate(${v.x.get()}px, ${v.y.get()}px) translate(-50%, -50%) scale(${v.scale.get()})`;
     };
     paint();
-    const offs = [v.x, v.y, v.scale, v.layout].map((value) =>
-      value.on('change', () => frame.render(paint)),
-    );
+    const offs = [v.x, v.y, v.scale].map((value) => value.on('change', () => frame.render(paint)));
     return () => {
       for (const off of offs) {
         off();

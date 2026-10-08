@@ -50,6 +50,14 @@
     -webkit-user-drag: none;
   }
 
+  /* The image on show hangs from the stage's centre, so a box larger than the stage (a very tall
+     image fitted to the width) stays centred; grid centring gives way to the start edge on overflow. */
+  .current {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+  }
+
   .error {
     padding: var(--space-4);
     font-family: var(--font-sans);

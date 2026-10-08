@@ -161,10 +161,11 @@ test.describe('image viewer', () => {
     await page.getByRole('link', { name: /second in the gallery/ }).click();
     const image = viewer(page).locator('img').first();
     await expect(image).toBeVisible();
-    // At rest from the first frame: no grow from the page's image.
-    expect(await image.evaluate((el) => getComputedStyle(el).transform)).toMatch(
-      /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/,
+    // At rest from the first frame: drawn at its own size, not growing out of the page's image.
+    const drawn = await image.evaluate((el) =>
+      Math.round(el.getBoundingClientRect().width - Number.parseFloat(el.style.width)),
     );
+    expect(drawn).toBe(0);
     await page.keyboard.press('Escape');
     await expect(viewer(page)).toHaveCount(0);
   });
