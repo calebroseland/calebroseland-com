@@ -46,8 +46,8 @@ const Gallery = ({ figure }: { figure: HTMLElement }) => {
       </div>
       {/* Two images need no strip of thumbnails; the buttons and counter say it all. */}
       {count > 2 && (
-        <ScrollArea.Root className={styles.thumbs}>
-          <ScrollArea.Viewport className={styles.thumbsViewport}>
+        <ScrollArea.Root className={styles.thumbs} data-thumbs="">
+          <ScrollArea.Viewport ref={g.strip} className={styles.thumbsViewport}>
             <ul role="list" className={styles.thumbList}>
               {g.slides.map((s, i) => (
                 <li key={s.key}>

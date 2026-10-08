@@ -268,6 +268,35 @@ test.describe('inline gallery', () => {
     expect(after).toBe(before);
   });
 
+  test('a long gallery fits the screen, and its thumbnail strip scrolls to the image on show', async ({
+    page,
+  }) => {
+    await openPage(page);
+    const long = page.getByRole('figure', { name: 'Gallery, 30 images' });
+    await long.scrollIntoViewIfNeeded();
+    await expect(long.getByText(/^\d+ of 30$/)).toHaveText('1 of 30');
+    // Nothing widens the page, at any width.
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    const strip = long.locator('[data-thumbs]');
+    const inStrip = (name: RegExp) =>
+      strip.getByRole('button', { name }).evaluate((b) => {
+        const v = b.closest('[data-thumbs]')?.getBoundingClientRect();
+        const r = b.getBoundingClientRect();
+        return Boolean(v && r.left >= v.left - 1 && r.right <= v.right + 1);
+      });
+    // The strip starts at its first thumbnail, not centred with both ends cut off.
+    expect(await inStrip(/^Show image 1:/)).toBe(true);
+    await long.getByRole('link', { name: 'Open image: Long gallery image 1', exact: true }).focus();
+    await page.keyboard.press('End');
+    await expect(long.getByText(/^\d+ of 30$/)).toHaveText('30 of 30');
+    await expect.poll(() => inStrip(/^Show image 30:/)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  });
+
   test('prints as its figures, without controls', async ({ page }) => {
     await openPage(page);
     await expect(counter(page)).toHaveText('1 of 3');

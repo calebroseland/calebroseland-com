@@ -56,6 +56,41 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 
 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
 
+## A long gallery
+
+Thirty images, more than any screen fits as thumbnails.
+
+![Long gallery image 1](wide.png)
+![Long gallery image 2](tall.png)
+![Long gallery image 3](square.png)
+![Long gallery image 4](wide.png)
+![Long gallery image 5](tall.png)
+![Long gallery image 6](square.png)
+![Long gallery image 7](wide.png)
+![Long gallery image 8](tall.png)
+![Long gallery image 9](square.png)
+![Long gallery image 10](wide.png)
+![Long gallery image 11](tall.png)
+![Long gallery image 12](square.png)
+![Long gallery image 13](wide.png)
+![Long gallery image 14](tall.png)
+![Long gallery image 15](square.png)
+![Long gallery image 16](wide.png)
+![Long gallery image 17](tall.png)
+![Long gallery image 18](square.png)
+![Long gallery image 19](wide.png)
+![Long gallery image 20](tall.png)
+![Long gallery image 21](square.png)
+![Long gallery image 22](wide.png)
+![Long gallery image 23](tall.png)
+![Long gallery image 24](square.png)
+![Long gallery image 25](wide.png)
+![Long gallery image 26](tall.png)
+![Long gallery image 27](square.png)
+![Long gallery image 28](wide.png)
+![Long gallery image 29](tall.png)
+![Long gallery image 30](square.png)
+
 ## The end
 
 ![A tall blue checkerboard, last on the page](tall.png)

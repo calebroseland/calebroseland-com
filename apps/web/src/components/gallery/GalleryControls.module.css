@@ -1,6 +1,8 @@
 @layer components {
+  /* One column that never grows past the gallery: a long strip scrolls inside it, never widens the page. */
   .controls {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-2);
     margin-block-start: var(--space-2);
     font-family: var(--font-sans);
@@ -44,20 +46,26 @@
 
   .thumbs {
     display: flex;
+    min-inline-size: 0;
     block-size: calc(4rem + 2 * var(--border-width-thick) + 2 * var(--space-1));
   }
 
   .thumbsViewport {
     flex: 1;
+    min-inline-size: 0;
+    overflow-x: auto;
     overscroll-behavior-x: contain;
+    scrollbar-width: none;
   }
 
+  /* Centred while it fits; once it overflows, auto margins give way and it starts at its first thumbnail. */
   .thumbList {
     display: flex;
     gap: var(--space-2);
-    justify-content: center;
+    inline-size: max-content;
     padding: var(--space-1);
-    margin: 0;
+    margin-block: 0;
+    margin-inline: auto;
     list-style: none;
   }
 
@@ -82,10 +90,10 @@
       opacity: 1;
     }
 
+    /* A fixed box: thumbnails load lazily, and a strip whose items grow as they load cannot be scrolled to. */
     & img {
       display: block;
-      inline-size: auto;
-      max-inline-size: 8rem;
+      inline-size: 5.5rem;
       block-size: 4rem;
       object-fit: cover;
       border-radius: 0;

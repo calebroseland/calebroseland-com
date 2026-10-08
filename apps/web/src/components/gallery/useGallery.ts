@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
 import { useReduceMotion } from '../../hooks/useReduceMotion.ts';
+import { useStripFollow } from './useStripFollow.ts';
 
 /** `key` is the slide's place: a gallery's slides never move, and two may show the same file. */
 type Slide = { key: string; src: string; alt: string };
@@ -90,5 +91,7 @@ export const useGallery = (figure: HTMLElement) => {
     return () => figure.removeEventListener('keydown', onKeyDown);
   }, [figure, latest]);
 
-  return { index, slides, go };
+  const strip = useStripFollow(index);
+
+  return { index, slides, go, strip };
 };
