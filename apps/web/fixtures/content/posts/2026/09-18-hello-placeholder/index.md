@@ -27,6 +27,13 @@ export function greet(name: string): string {
 | Alpha | 1 |
 | Beta | 2 |
 
+## A gallery
+
+These two images are one gallery.
+
+![A teal placeholder, first in a gallery](hero.png)
+![A teal placeholder, second in a gallery](hero.png)
+
 ## A list
 
 - One

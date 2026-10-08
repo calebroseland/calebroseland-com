@@ -1,11 +1,8 @@
-import Image, { type ImageOptions } from '@tiptap/extension-image';
-import Placeholder from '@tiptap/extension-placeholder';
-import { Markdown } from '@tiptap/markdown';
 import { EditorContent, type Editor as TipTap, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
 import { type RefObject, useEffect, useRef } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
 import styles from './Editor.module.css';
+import { documentExtensions } from './extensions.ts';
 import { Toolbar } from './Toolbar.tsx';
 
 /* TipTap owns the document and its own drag handles. Storage is markdown, produced by @tiptap/markdown;
@@ -55,20 +52,7 @@ const useMarkdownEditor = ({
   const previewSrcRef = useLatest(previewSrc);
 
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-        codeBlock: { HTMLAttributes: { class: 'code' } },
-        link: { openOnClick: false, autolink: true, defaultProtocol: 'https' },
-      }),
-      Markdown,
-      PreviewImage.configure({
-        inline: false,
-        allowBase64: true,
-        previewSrc: (src) => previewSrcRef.current?.(src) ?? src,
-      }),
-      Placeholder.configure({ placeholder: 'Write. Type / for commands, paste or drop an image.' }),
-    ],
+    extensions: documentExtensions((src) => previewSrcRef.current?.(src) ?? src),
     content: initialMarkdown,
     contentType: 'markdown',
     editorProps: {
@@ -106,28 +90,6 @@ const useMarkdownEditor = ({
   useApiBinding(editor, apiRef);
   return { editor, pickImages: (files: File[]) => onImageFilesRef.current(files) };
 };
-
-/* Relative names ("hero.png") would resolve against the editor's own URL, so the rendered src is the
-   preview while data-src keeps the name, which is what copy and paste inside the editor read back. */
-const PreviewImage = Image.extend<ImageOptions & { previewSrc: (src: string) => string }>({
-  addOptions() {
-    return { ...this.parent?.(), previewSrc: (src: string) => src } as ImageOptions & {
-      previewSrc: (src: string) => string;
-    };
-  },
-  addAttributes() {
-    const previewSrc = this.options.previewSrc;
-    return {
-      ...this.parent?.(),
-      src: {
-        default: null,
-        parseHTML: (el) => el.getAttribute('data-src') ?? el.getAttribute('src'),
-        renderHTML: (attrs) =>
-          attrs.src ? { src: previewSrc(attrs.src as string), 'data-src': attrs.src } : {},
-      },
-    };
-  },
-});
 
 /** Exposes the editor's commands through `apiRef` for as long as the editor exists. */
 const useApiBinding = (editor: TipTap | null, apiRef: RefObject<EditorApi | null> | undefined) => {
