@@ -144,6 +144,22 @@
       scrollbar-width: thin;
     }
 
+    /* Room for the controls that arrive with script (GalleryControls), so their arrival moves no text:
+       a row of buttons, and thumbnails from three images up. */
+    & .gallery {
+      --gallery-row: calc(var(--space-2) + 2.75rem);
+      --gallery-thumb: calc(4rem + 2 * var(--border-width-thick));
+      --gallery-thumbs: calc(var(--space-2) + var(--gallery-thumb) + 2 * var(--space-1));
+    }
+
+    & .gallery:not(:has(> [data-controls])) {
+      padding-block-end: var(--gallery-row);
+    }
+
+    & .gallery:has(> .gallery-track > li:nth-child(3)):not(:has(> [data-controls])) {
+      padding-block-end: calc(var(--gallery-row) + var(--gallery-thumbs));
+    }
+
     & .gallery-track > li {
       flex: 0 0 100%;
       margin: 0;

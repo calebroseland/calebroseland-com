@@ -238,6 +238,26 @@ test.describe('inline gallery', () => {
     await expect(gallery(page).getByRole('link', { name: /third in the gallery/ })).toBeFocused();
   });
 
+  test('its controls arrive into room kept for them, moving nothing below', async ({ page }) => {
+    let release = () => undefined as void;
+    const held = new Promise<void>((r) => {
+      release = r;
+    });
+    await page.route(/components\/viewer\/BodyMedia\.tsx/, async (route) => {
+      await held;
+      await route.continue();
+    });
+    await openPage(page);
+    const heading = page.getByRole('heading', { level: 2, name: 'A diagram' });
+    const before = await heading.evaluate((h) => h.getBoundingClientRect().top + scrollY);
+    // Held back, the controls are not there yet.
+    await expect(page.locator('[data-controls]')).toHaveCount(0);
+    release();
+    await expect(counter(page)).toHaveText('1 of 3');
+    const after = await heading.evaluate((h) => h.getBoundingClientRect().top + scrollY);
+    expect(after).toBe(before);
+  });
+
   test('prints as its figures, without controls', async ({ page }) => {
     await openPage(page);
     await expect(counter(page)).toHaveText('1 of 3');

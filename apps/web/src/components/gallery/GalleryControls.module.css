@@ -7,11 +7,13 @@
     font-size: var(--font-size-sm);
   }
 
+  /* Fixed heights: prose.css reserves exactly this much room before the controls arrive. */
   .row {
     display: flex;
     gap: var(--space-2);
     align-items: center;
     justify-content: center;
+    block-size: 2.75rem;
   }
 
   .counter {
@@ -42,6 +44,7 @@
 
   .thumbs {
     display: flex;
+    block-size: calc(4rem + 2 * var(--border-width-thick) + 2 * var(--space-1));
   }
 
   .thumbsViewport {

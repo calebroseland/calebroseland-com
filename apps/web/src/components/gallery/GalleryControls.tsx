@@ -15,7 +15,7 @@ const Gallery = ({ figure }: { figure: HTMLElement }) => {
   const g = useGallery(figure);
   const count = g.slides.length;
   return (
-    <div className={styles.controls}>
+    <div className={styles.controls} data-controls="">
       <div className={styles.row}>
         <button
           type="button"
