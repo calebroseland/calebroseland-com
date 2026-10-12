@@ -79,3 +79,62 @@ test.describe('command palette', () => {
     expect(serious, JSON.stringify(serious, null, 2)).toEqual([]);
   });
 });
+
+/* The palette loads ahead of the first ⌘K, so it opens at once (no Suspense fallback, no wait). */
+test.describe('command palette loading', () => {
+  const dialogModule = /components\/CommandPaletteDialog\.tsx/;
+
+  test('is fetched once the page has settled, before any key', async ({ page }) => {
+    const fetched = page.waitForRequest(dialogModule, { timeout: 8000 });
+    await page.goto('/posts');
+    await fetched;
+  });
+
+  test('waits for intent from a visitor saving data', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'connection', {
+        value: { saveData: true },
+        configurable: true,
+      });
+    });
+    const requested: string[] = [];
+    page.on('request', (r) => dialogModule.test(r.url()) && requested.push(r.url()));
+    await page.goto('/posts');
+    await expect(page.getByRole('button', { name: 'Search and commands' })).toBeVisible();
+    await page.waitForTimeout(3500);
+    expect(requested).toEqual([]);
+    const hovered = page.waitForRequest(dialogModule);
+    await page.getByRole('button', { name: 'Search and commands' }).hover();
+    await hovered;
+  });
+
+  test.describe('after a failed fetch', () => {
+    test.use({ allowConsoleErrors: true });
+
+    test('a failed prefetch is silent, and ⌘K opens or offers a reload', async ({ page }) => {
+      let failedOnce = false;
+      await page.route(dialogModule, (route) => {
+        if (failedOnce) {
+          return route.continue();
+        }
+        failedOnce = true;
+        return route.abort();
+      });
+      await page.goto('/posts');
+      await expect.poll(() => failedOnce, { timeout: 8000 }).toBe(true);
+      await expect(page.getByRole('button', { name: 'Reload' })).toHaveCount(0);
+      const mac = await page.evaluate(() =>
+        /mac/i.test(`${navigator.platform} ${navigator.userAgent}`),
+      );
+      await page.keyboard.press(mac ? 'Meta+k' : 'Control+k');
+      // WebKit fetches the module again; Chromium keeps the failure until the page reloads.
+      const opened = page.getByRole('dialog', { name: 'Command palette' });
+      const reload = page.getByRole('button', { name: 'Reload' });
+      await expect(opened.or(reload)).toBeVisible();
+      if (await reload.isVisible()) {
+        await reload.click();
+        await openPalette(page);
+      }
+    });
+  });
+});
