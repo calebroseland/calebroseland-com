@@ -261,7 +261,13 @@ export const content = (opts: {
           resolveImage: (src) => {
             const url = assetUrl(e.dir, src);
             const file = resolve(e.dir, src);
-            return { src: url, ...imageSize(readFileSync(file), relative(opts.root, file)) };
+            try {
+              return { src: url, ...imageSize(readFileSync(file), relative(opts.root, file)) };
+            } catch (err) {
+              // A format the reader doesn't know (AVIF, say) still shows; it only loses its reserved box.
+              this.warn(err instanceof Error ? err.message : String(err));
+              return url;
+            }
           },
         });
         return `export default ${JSON.stringify({ meta: toMeta(e), html, headings })};`;
