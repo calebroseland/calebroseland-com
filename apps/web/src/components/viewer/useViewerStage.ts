@@ -266,16 +266,21 @@ export const useViewerStage = (props: ViewerProps) => {
   // Bound as separate Motion styles, some of them run as accelerated Web Animations and the rest
   // inline, and the two disagree about the transform: the image jumped when a zoom settled.
   const image = useRef<HTMLImageElement | null>(null);
-  useEffect(() => {
+  const fitWidth = fit?.width ?? 0;
+  const fitHeight = fit?.height ?? 0;
+  const src = item?.src;
+  // A layout effect, so a new image (or a new fit) is placed before the browser draws it.
+  useLayoutEffect(() => {
     const v = valuesRef.current;
     const paint = () => {
       const el = image.current;
-      const f = fit;
-      if (!(el && f)) {
+      if (!el) {
         return;
       }
-      el.style.width = `${f.width}px`;
-      el.style.height = `${f.height}px`;
+      // Until the stage is measured there is nowhere to put it: hidden, not drawn at natural size.
+      el.style.visibility = src && fitWidth ? '' : 'hidden';
+      el.style.width = `${fitWidth}px`;
+      el.style.height = `${fitHeight}px`;
       el.style.transform = `translate(${v.x.get()}px, ${v.y.get()}px) translate(-50%, -50%) scale(${v.scale.get()})`;
     };
     paint();
@@ -286,8 +291,7 @@ export const useViewerStage = (props: ViewerProps) => {
       }
       cancelFrame(paint);
     };
-    // Again for a new fit (a resize) or a new image element.
-  }, [fit]);
+  }, [fitWidth, fitHeight, src]);
   const scrimOpacity = useTransform(() => values.backdrop.get() * values.fade.get());
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -347,7 +351,7 @@ export const useViewerStage = (props: ViewerProps) => {
     popup,
     onKeyDown,
     onFocusWithin: () => wake(),
-    onImageError: (src: string) => setFailed((f) => new Set(f).add(src)),
+    onImageError: (failedSrc: string) => setFailed((f) => new Set(f).add(failedSrc)),
     previous: () => step('previous'),
     next: () => step('next'),
     zoomIn: () => stage.zoomBy(stage.keyZoom),
