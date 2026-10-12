@@ -1,0 +1,24 @@
+@layer components {
+  .bar {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: var(--z-toast);
+    block-size: 3px;
+    pointer-events: none;
+    background: var(--color-accent);
+    opacity: 0;
+    transform-origin: left center;
+    scale: 0 1;
+    view-transition-name: loading-bar;
+
+    &[data-phase="hidden"],
+    &[data-phase="waiting"] {
+      visibility: hidden;
+    }
+  }
+
+  :dir(rtl) .bar {
+    transform-origin: right center;
+  }
+}
