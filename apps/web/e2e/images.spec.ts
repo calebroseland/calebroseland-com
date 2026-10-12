@@ -255,6 +255,13 @@ test.describe('inline gallery', () => {
     await page.keyboard.press('ArrowRight');
     await expect(counter(page)).toHaveText('2 of 3');
     await expect(gallery(page).getByRole('link', { name: /second in the gallery/ })).toBeFocused();
+    // Presses faster than the track can glide still count, each one.
+    await page.keyboard.press('Home');
+    await expect(counter(page)).toHaveText('1 of 3');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await expect(counter(page)).toHaveText('3 of 3');
+    await expect(gallery(page).getByRole('link', { name: /third in the gallery/ })).toBeFocused();
   });
 
   test('closing the viewer leaves the gallery on the image it ended on', async ({ page }) => {

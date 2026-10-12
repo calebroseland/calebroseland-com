@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
 import { useReduceMotion } from '../../hooks/useReduceMotion.ts';
 import { useStripFollow } from './useStripFollow.ts';
@@ -17,6 +17,8 @@ const slidesOf = (figure: HTMLElement) => [
 export const useGallery = (figure: HTMLElement) => {
   const reduce = useReduceMotion();
   const [index, setIndex] = useState(0);
+  // Where a button or key last sent the track, until it arrives: presses during the glide count from here.
+  const heading = useRef<number | null>(null);
   const lis = slidesOf(figure);
   const slides: Slide[] = lis.map((li, i) => {
     const img = li.querySelector('img');
@@ -37,7 +39,11 @@ export const useGallery = (figure: HTMLElement) => {
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting) {
-            setIndex(items.indexOf(e.target as HTMLLIElement));
+            const at = items.indexOf(e.target as HTMLLIElement);
+            if (at === heading.current) {
+              heading.current = null;
+            }
+            setIndex(at);
           }
         }
       },
@@ -52,13 +58,17 @@ export const useGallery = (figure: HTMLElement) => {
   const go = useCallback(
     (to: number, focus = false) => {
       const items = slidesOf(figure);
-      const li = items[Math.max(0, Math.min(items.length - 1, to))];
+      const at = Math.max(0, Math.min(items.length - 1, to));
+      const li = items[at];
+      const first = items[0];
       const track = li?.parentElement;
-      if (!(li && track)) {
+      if (!(li && first && track)) {
         return;
       }
-      track.scrollBy({
-        left: li.getBoundingClientRect().left - track.getBoundingClientRect().left,
+      heading.current = at;
+      // An absolute target from layout offsets: boxes read mid-glide can be stale (WebKit).
+      track.scrollTo({
+        left: li.offsetLeft - first.offsetLeft,
         behavior: reduce ? 'instant' : 'smooth',
       });
       // Focus follows the slide, so it is never left on one scrolled out of view.
@@ -73,7 +83,8 @@ export const useGallery = (figure: HTMLElement) => {
   const latest = useLatest({ index, count: slides.length, go });
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      const { index: at, count, go: move } = latest.current;
+      const { index: shown, count, go: move } = latest.current;
+      const at = heading.current ?? shown;
       const keys: Record<string, number> = {
         ArrowLeft: at - 1,
         ArrowRight: at + 1,
