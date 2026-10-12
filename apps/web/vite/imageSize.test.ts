@@ -32,6 +32,34 @@ const jpeg = (sof: number, w: number, h: number) =>
     [3],
   );
 
+// An APP1 Exif segment carrying only an orientation tag, in either byte order.
+const exif = (orientation: number, order: 'MM' | 'II') => {
+  const u16 = order === 'MM' ? u16be : u16le;
+  const u32 = order === 'MM' ? u32be : u32le;
+  const tiff = [
+    ...u16(42),
+    ...u32(8),
+    ...u16(1),
+    ...u16(0x0112),
+    ...u16(3),
+    ...u32(1),
+    ...u16(orientation),
+    0,
+    0,
+    ...u32(0),
+  ];
+  return bytes([0xff, 0xe1], u16be(2 + 6 + 2 + tiff.length), 'Exif', [0, 0], order, tiff);
+};
+
+const rotated = (orientation: number, order: 'MM' | 'II') => {
+  const plain = jpeg(0xc0, 4032, 3024);
+  return Uint8Array.from([
+    ...plain.subarray(0, 2),
+    ...exif(orientation, order),
+    ...plain.subarray(2),
+  ]);
+};
+
 const riff = (chunk: string, body: number[]) =>
   bytes('RIFF', u32le(4 + 8 + body.length), 'WEBP', chunk, u32le(body.length), body);
 
@@ -43,6 +71,12 @@ describe('imageSize', () => {
   it('reads a baseline and a progressive JPEG past other segments', () => {
     expect(imageSize(jpeg(0xc0, 1280, 800), 'a.jpg')).toEqual({ width: 1280, height: 800 });
     expect(imageSize(jpeg(0xc2, 390, 3600), 'b.jpg')).toEqual({ width: 390, height: 3600 });
+  });
+
+  it('swaps width and height for a JPEG its Exif orientation turns on its side', () => {
+    expect(imageSize(rotated(6, 'MM'), 'phone.jpg')).toEqual({ width: 3024, height: 4032 });
+    expect(imageSize(rotated(8, 'II'), 'phone.jpg')).toEqual({ width: 3024, height: 4032 });
+    expect(imageSize(rotated(3, 'II'), 'upside-down.jpg')).toEqual({ width: 4032, height: 3024 });
   });
 
   it('reads a GIF header', () => {

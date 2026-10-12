@@ -20,18 +20,50 @@ const gifSize = (b: Uint8Array, v: DataView): ImageSize | null => {
 // Start-of-frame markers; C4 (DHT), C8 (JPG) and CC (DAC) share the range but carry no size.
 const isFrame = (m: number) => m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc;
 
+const APP1 = 0xe1;
+const ORIENTATION = 0x0112;
+
+/** The Exif orientation in an APP1 segment starting at `at`, or 1 (as stored). */
+const exifOrientation = (b: Uint8Array, v: DataView, at: number): number => {
+  if (ascii(b, at + 4, 4) !== 'Exif') {
+    return 1;
+  }
+  const tiff = at + 10;
+  const little = ascii(b, tiff, 2) === 'II';
+  const ifd = tiff + v.getUint32(tiff + 4, little);
+  const count = v.getUint16(ifd, little);
+  for (let i = 0; i < count; i++) {
+    const entry = ifd + 2 + i * 12;
+    if (v.getUint16(entry, little) === ORIENTATION) {
+      return v.getUint16(entry + 8, little);
+    }
+  }
+  return 1;
+};
+
 const jpegSize = (b: Uint8Array, v: DataView): ImageSize | null => {
   if (b[0] !== 0xff || b[1] !== 0xd8) {
     return null;
   }
+  let orientation = 1;
   let at = 2;
   while (at + 9 <= b.length) {
     if (b[at] !== 0xff) {
       return null;
     }
     const marker = b[at + 1] ?? 0;
+    if (marker === APP1) {
+      try {
+        orientation = exifOrientation(b, v, at);
+      } catch {
+        // A damaged Exif block says nothing about the size; read the frame as stored.
+      }
+    }
     if (isFrame(marker)) {
-      return { width: v.getUint16(at + 7), height: v.getUint16(at + 5) };
+      const width = v.getUint16(at + 7);
+      const height = v.getUint16(at + 5);
+      // Orientations 5–8 turn the image on its side, and browsers draw it that way.
+      return orientation >= 5 ? { width: height, height: width } : { width, height };
     }
     at += 2 + v.getUint16(at + 2);
   }
