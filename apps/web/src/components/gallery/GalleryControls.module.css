@@ -18,11 +18,16 @@
     block-size: 2.75rem;
   }
 
+  /* As wide as its longest label ("30 of 30": twice the digits, plus " of "), in the font's own digit
+     width, so the buttons beside it never move as the number grows, whatever the platform's font. */
   .counter {
-    min-inline-size: 4.5rem;
+    flex: none;
+    inline-size: calc((var(--digits, 1) * 2 + 5) * 1ch);
+    overflow: hidden;
     font-variant-numeric: tabular-nums;
     color: var(--color-text-muted);
     text-align: center;
+    white-space: nowrap;
   }
 
   .step {

@@ -37,9 +37,8 @@ test.describe('images in a body', () => {
   });
 
   test('do not shift the body as they load', async ({ page }) => {
-    // Shifts of nodes inside the body, recorded with where they happened. The page arriving moves the
-    // footer, and a web font arriving late (CI) reflows text; neither is an image. Images are what this
-    // checks, and they load after the fonts here, so shifts count from the moment the fonts are ready.
+    // Shifts of nodes inside the body, recorded with where they happened so a failure names them. The
+    // page arriving moves the footer; nothing inside the body may move.
     await page.addInitScript(() => {
       type Shift = PerformanceEntry & {
         value: number;
@@ -49,13 +48,9 @@ test.describe('images in a body', () => {
           currentRect: DOMRectReadOnly;
         }>;
       };
-      const w = window as unknown as { __shifts: string[]; __cls: number; __fontsAt: number };
+      const w = window as unknown as { __shifts: string[]; __cls: number };
       w.__shifts = [];
       w.__cls = 0;
-      w.__fontsAt = Number.POSITIVE_INFINITY;
-      void document.fonts.ready.then(() => {
-        w.__fontsAt = performance.now();
-      });
       new PerformanceObserver((list) => {
         for (const e of list.getEntries() as Shift[]) {
           const inBody = e.sources.filter(
@@ -64,24 +59,21 @@ test.describe('images in a body', () => {
           if (inBody.length === 0) {
             continue;
           }
-          const after = e.startTime > w.__fontsAt;
           w.__shifts.push(
-            `${e.value.toFixed(4)} @${Math.round(e.startTime)}ms${after ? '' : ' (before fonts)'}: `
+            `${e.value.toFixed(4)} @${Math.round(e.startTime)}ms: `
               + inBody
                 .map((s) => {
                   const el = s.node as Element;
-                  return `${el.tagName.toLowerCase()}.${el.className} ${Math.round(s.previousRect.y)}→${Math.round(s.currentRect.y)}`;
+                  const at = (r: DOMRectReadOnly) => `${Math.round(r.x)},${Math.round(r.y)}`;
+                  return `${el.tagName.toLowerCase()}.${el.className} ${at(s.previousRect)}→${at(s.currentRect)}`;
                 })
                 .join(', '),
           );
-          if (after) {
-            w.__cls += e.value;
-          }
+          w.__cls += e.value;
         }
       }).observe({ type: 'layout-shift', buffered: true });
     });
     await openPage(page);
-    await page.evaluate(() => document.fonts.ready);
     for (const img of await page.locator('.prose img').all()) {
       await img.scrollIntoViewIfNeeded();
       await expect(img).toHaveJSProperty('complete', true);
@@ -362,6 +354,32 @@ test.describe('inline gallery', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
+  });
+
+  test('its counter keeps its width as the number grows, so the buttons never move', async ({
+    page,
+  }) => {
+    await openPage(page);
+    // A wide font, as Linux's system font is: the counter must not depend on the platform's metrics.
+    await page.addStyleTag({
+      content: '[data-controls] [aria-live] { font: 20px "Courier New", monospace; }',
+    });
+    const long = page.getByRole('figure', { name: 'Gallery, 30 images' });
+    await long.scrollIntoViewIfNeeded();
+    // Where Next sits within its gallery: the page itself may scroll as focus moves.
+    const nextAt = () =>
+      long.evaluate((f) => {
+        const b = [...f.querySelectorAll('button')].find((x) =>
+          x.textContent?.includes('Next image'),
+        );
+        return Math.round((b?.getBoundingClientRect().left ?? 0) - f.getBoundingClientRect().left);
+      });
+    await expect(long.getByText('1 of 30')).toBeVisible();
+    const before = await nextAt();
+    await long.getByRole('link', { name: 'Open image: Long gallery image 1', exact: true }).focus();
+    await page.keyboard.press('End');
+    await expect(long.getByText('30 of 30')).toBeVisible();
+    expect(await nextAt()).toBe(before);
   });
 
   test('prints as its figures, without controls', async ({ page }) => {

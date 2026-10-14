@@ -1,5 +1,6 @@
 import { ScrollArea } from '@base-ui/react/scroll-area';
 import { Icon } from '@crc/ui';
+import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { Tip } from '../Tip.tsx';
 import styles from './GalleryControls.module.css';
@@ -29,7 +30,11 @@ const Gallery = ({ figure }: { figure: HTMLElement }) => {
             <span className="visually-hidden">Previous image</span>
           </button>
         </Tip>
-        <span className={styles.counter} aria-live="polite">
+        <span
+          className={styles.counter}
+          style={{ '--digits': String(count).length } as CSSProperties}
+          aria-live="polite"
+        >
           {g.index + 1} of {count}
         </span>
         <Tip label="Next image">
