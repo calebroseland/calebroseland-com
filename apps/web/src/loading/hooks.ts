@@ -14,7 +14,7 @@ const DELAY_MS = 300;
 const SHOWN_MS = 400;
 const FINISH_MS = (durations.fast + durations.normal) * 1000;
 
-/** The loading bar's phase, from the count of pending loads; also marks `<html>` busy while it shows. */
+/** The loading bar's phase, from the count of pending loads; also marks `<body>` busy while it shows. */
 export const useBarPhase = (): BarPhase => {
   const count = useStore(loading.store);
   const [phase, setPhase] = useState<BarPhase>('hidden');
@@ -62,8 +62,8 @@ export const useBarPhase = (): BarPhase => {
   const busy = phase === 'running' || phase === 'finishing';
   useEffect(() => {
     if (busy) {
-      document.documentElement.setAttribute('aria-busy', 'true');
-      return () => document.documentElement.removeAttribute('aria-busy');
+      document.body.setAttribute('aria-busy', 'true');
+      return () => document.body.removeAttribute('aria-busy');
     }
   }, [busy]);
 

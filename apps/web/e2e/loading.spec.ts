@@ -51,10 +51,10 @@ test.describe('loading bar', () => {
       .getByRole('link', { name: 'Second placeholder' })
       .click();
     await expect(bar(page)).toHaveAttribute('data-phase', 'running');
-    await expect(page.locator('html')).toHaveAttribute('aria-busy', 'true');
+    await expect(page.locator('body')).toHaveAttribute('aria-busy', 'true');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Second placeholder');
     await expect(bar(page)).toHaveAttribute('data-phase', 'hidden');
-    await expect(page.locator('html')).not.toHaveAttribute('aria-busy', 'true');
+    await expect(page.locator('body')).not.toHaveAttribute('aria-busy', 'true');
     expect(await phases(page)).toContain('finishing');
   });
 

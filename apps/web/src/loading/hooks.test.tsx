@@ -6,7 +6,7 @@ import { loading } from './tracker.ts';
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => {
   vi.useRealTimers();
-  document.documentElement.removeAttribute('aria-busy');
+  document.body.removeAttribute('aria-busy');
 });
 
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
@@ -24,7 +24,7 @@ describe('useBarPhase', () => {
     expect(result.current).toBe('hidden');
     advance(1000);
     expect(result.current).toBe('hidden');
-    expect(document.documentElement.hasAttribute('aria-busy')).toBe(false);
+    expect(document.body.hasAttribute('aria-busy')).toBe(false);
   });
 
   it('runs from 300 ms, and once shown stays at least 400 ms before finishing', () => {
@@ -35,16 +35,16 @@ describe('useBarPhase', () => {
     });
     advance(300);
     expect(result.current).toBe('running');
-    expect(document.documentElement.getAttribute('aria-busy')).toBe('true');
+    expect(document.body.getAttribute('aria-busy')).toBe('true');
     advance(50);
     act(() => end());
     expect(result.current).toBe('running');
     advance(350);
     expect(result.current).toBe('finishing');
-    expect(document.documentElement.getAttribute('aria-busy')).toBe('true');
+    expect(document.body.getAttribute('aria-busy')).toBe('true');
     advance(400);
     expect(result.current).toBe('hidden');
-    expect(document.documentElement.hasAttribute('aria-busy')).toBe(false);
+    expect(document.body.hasAttribute('aria-busy')).toBe(false);
   });
 
   it('goes back to running when a new load starts while finishing', () => {
