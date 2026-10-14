@@ -144,6 +144,14 @@
       "plugins": ["./tools/biome/no-direct-hooks.grit"]
     },
     {
+      "includes": [
+        "apps/web/src/**/*.{ts,tsx}",
+        "packages/*/src/**/*.{ts,tsx}",
+        "!**/*.test.{ts,tsx}"
+      ],
+      "plugins": ["./tools/biome/no-react-lazy.grit"]
+    },
+    {
       "includes": ["**/*.config.ts", "**/*.d.ts", "apps/web/worker/index.ts"],
       "linter": {
         "rules": {
