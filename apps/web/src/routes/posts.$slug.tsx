@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { ArticleBody, ArticleSkeleton, EntryHeader } from '../components/Article.tsx';
 import { CenteredMessage, Page } from '../components/Page.tsx';
+import { viewSearch } from '../components/viewer/search.ts';
 import { findBySlug, loadEntry } from '../content/entries.ts';
 import { siteProfile } from '../content/profile.ts';
 
@@ -22,6 +23,7 @@ const PostRoute = () => {
 };
 
 export const Route = createFileRoute('/posts/$slug')({
+  validateSearch: viewSearch,
   loader: async ({ params }) => {
     const meta = findBySlug('post', params.slug);
     if (!meta) {

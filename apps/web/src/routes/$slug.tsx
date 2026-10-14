@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { ArticleBody, ArticleSkeleton, EntryHeader } from '../components/Article.tsx';
 import { CenteredMessage, Page } from '../components/Page.tsx';
+import { viewSearch } from '../components/viewer/search.ts';
 import { findBySlug, loadEntry } from '../content/entries.ts';
 import { siteProfile } from '../content/profile.ts';
 
@@ -23,6 +24,7 @@ const PageRoute = () => {
 
 /* Top-level pages such as /about. Editor routes are more specific and win. */
 export const Route = createFileRoute('/$slug')({
+  validateSearch: viewSearch,
   loader: async ({ params }) => {
     const meta = findBySlug('page', params.slug);
     if (!meta) {

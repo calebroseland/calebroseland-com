@@ -4,7 +4,9 @@ import type { ReactNode } from 'react';
 import type { EntryMeta, LoadedEntry } from '../content/entries.ts';
 import { formatDate } from '../content/entries.ts';
 import { useSignedIn } from '../editor/auth/hooks.ts';
+import { useBodyMedia } from '../hooks/useBodyMedia.ts';
 import { useCurrentHref } from '../hooks/useCurrentHref.ts';
+import { useScrollReveal } from '../hooks/useScrollReveal.ts';
 import styles from './Article.module.css';
 
 /** An entry's title and meta; `action` takes the Edit link's place on a page that is not an entry. */
@@ -87,8 +89,21 @@ export const TagList = ({
 };
 
 export const ArticleBody = ({ entry }: { entry: LoadedEntry }) => {
-  // biome-ignore lint/security/noDangerouslySetInnerHtml: html is produced at build time by @crc/markdown through rehype-sanitize
-  return <div className="prose" dangerouslySetInnerHTML={{ __html: entry.html }} />;
+  const id = entry.meta.id ?? entry.meta.slug;
+  const images = useBodyMedia(id);
+  useScrollReveal(images.body, id);
+  const Media = images.media?.Media;
+  return (
+    <>
+      <div
+        ref={images.ref}
+        className="prose"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: html is produced at build time by @crc/markdown through rehype-sanitize
+        dangerouslySetInnerHTML={{ __html: entry.html }}
+      />
+      {Media && images.media && <Media {...images.media.props} />}
+    </>
+  );
 };
 
 export const ArticleSkeleton = () => {

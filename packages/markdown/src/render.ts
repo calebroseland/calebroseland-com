@@ -8,11 +8,15 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import { visit } from 'unist-util-visit';
+import { media } from './media.ts';
 import { sanitizeSchema } from './sanitize.ts';
 
+export type ResolvedImage = { src: string; width?: number; height?: number };
+
 export type RenderOptions = {
-  /** Called for every relative image src; return the URL to use instead. Build time rewrites to hashed assets. */
-  resolveImage?: (src: string) => string;
+  /** Called for every relative image src; returns the URL to use instead, and the size when known.
+      Build time rewrites to hashed assets and reads each file's size. */
+  resolveImage?: (src: string) => string | ResolvedImage;
 };
 
 export type Rendered = {
@@ -45,8 +49,12 @@ const collect = (
         const src = node.properties.src;
         if (!/^(https?:)?\/\//.test(src) && !src.startsWith('data:')) {
           images.push(src);
-          if (resolveImage) {
-            node.properties.src = resolveImage(src);
+          const resolved = resolveImage?.(src) ?? src;
+          const image = typeof resolved === 'string' ? { src: resolved } : resolved;
+          node.properties.src = image.src;
+          if (image.width && image.height) {
+            node.properties.width = image.width;
+            node.properties.height = image.height;
           }
         }
         node.properties.loading = 'lazy';
@@ -100,6 +108,7 @@ export const renderMarkdown = async (
       ],
     })
     .use(collect(images, headings, opts.resolveImage))
+    .use(media)
     .use(rehypeSanitize, sanitizeSchema)
     .use(rehypeStringify)
     .process(markdown);

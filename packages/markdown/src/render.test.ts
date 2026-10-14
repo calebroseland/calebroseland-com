@@ -69,6 +69,80 @@ describe('renderMarkdown', () => {
   });
 });
 
+describe('images as figures and galleries', () => {
+  const sizes: Record<string, { width: number; height: number }> = {
+    'a.png': { width: 800, height: 600 },
+    'b.png': { width: 400, height: 900 },
+  };
+  const render = (md: string) =>
+    renderMarkdown(md, {
+      resolveImage: (src) => ({ src: `/assets/${src}`, ...sizes[src] }),
+    }).then((r) => r.html);
+
+  it('wraps an image alone in its paragraph in a figure, a link to the file, and a caption from its alt', async () => {
+    expect(await render('![A diagram](a.png)')).toBe(
+      '<figure class="media"><a class="zoom" href="/assets/a.png" aria-label="Open image: A diagram">'
+        + '<img src="/assets/a.png" alt="A diagram" width="800" height="600" loading="lazy" decoding="async"></a>'
+        + '<figcaption aria-hidden="true">A diagram</figcaption></figure>',
+    );
+  });
+
+  it('groups images on adjacent lines into one gallery, with or without a hard break', async () => {
+    for (const md of [
+      '![A](a.png)\n![B](b.png)',
+      '![A](a.png)  \n![B](b.png)',
+      '![A](a.png)\\\n![B](b.png)',
+    ]) {
+      const html = await render(md);
+      expect(html).toMatch(
+        /^<figure class="gallery" aria-label="Gallery, 2 images"><ul role="list" class="gallery-track">(<li><figure class="media">.*?<\/figure><\/li>){2}<\/ul><\/figure>$/,
+      );
+      expect(html).toContain('href="/assets/b.png" aria-label="Open image: B"');
+      expect(html).toContain('width="400" height="900"');
+      expect(html).not.toContain('<br>');
+    }
+  });
+
+  it('keeps images separated by a blank line as separate figures', async () => {
+    const html = await render('![A](a.png)\n\n![B](b.png)');
+    expect(html.match(/<figure class="media">/g)).toHaveLength(2);
+    expect(html).not.toContain('gallery');
+  });
+
+  it('gives an image without alt no caption, and names its link by position', async () => {
+    const html = await render('![A](a.png)\n\n![](b.png)');
+    expect(html).toContain('aria-label="Open image 2"');
+    expect(html.match(/<figcaption/g)).toHaveLength(1);
+  });
+
+  it('leaves an image inside text inline, with its size, and not zoomable', async () => {
+    expect(await render('Text ![icon](a.png) more.')).toBe(
+      '<p>Text <img src="/assets/a.png" alt="icon" width="800" height="600" loading="lazy" decoding="async"> more.</p>',
+    );
+  });
+
+  it('leaves an image that is already a link alone', async () => {
+    const html = await render('[![A](a.png)](https://example.com)');
+    expect(html).not.toContain('figure');
+    expect(html).not.toContain('zoom');
+    expect(html).toContain('href="https://example.com"');
+  });
+
+  it('wraps a remote image without dimensions', async () => {
+    const html = await render('![Remote](https://cdn.example.com/x.jpg)');
+    expect(html).toContain('<a class="zoom" href="https://cdn.example.com/x.jpg"');
+    expect(html).not.toContain('width=');
+  });
+
+  it('keeps a title on the image, and a string from resolveImage still works', async () => {
+    const { html } = await renderMarkdown('![A](a.png "Shown on hover")', {
+      resolveImage: (src) => `/r/${src}`,
+    });
+    expect(html).toContain('<img src="/r/a.png" alt="A" title="Shown on hover"');
+    expect(html).toContain('href="/r/a.png"');
+  });
+});
+
 describe('retired frontmatter', () => {
   it('still loads a file with the old placeholder flag, and saving it drops the flag', () => {
     const old =
