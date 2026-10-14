@@ -15,7 +15,16 @@ export const sanitizeSchema: Options = {
     span: ['className', 'style'],
     img: ['src', 'alt', 'title', 'width', 'height', 'loading', 'decoding'],
     source: ['srcSet', 'type', 'sizes'],
-    a: ['href', 'title', 'rel', 'target'],
+    a: ['href', 'title', 'rel', 'target', 'ariaLabel'],
+    // Figures and galleries from media.ts: a named gallery, a list that keeps its role, a caption read once.
+    figure: ['ariaLabel'],
+    figcaption: ['ariaHidden'],
+    // The default limits a list's class to task lists; a gallery's track needs its own.
+    ul: [
+      ...(defaultSchema.attributes?.ul ?? []).filter((a) => !Array.isArray(a)),
+      'className',
+      'role',
+    ],
     input: ['type', 'checked', 'disabled', 'ariaLabel'],
   },
   protocols: { ...defaultSchema.protocols, src: ['http', 'https', 'data'] },

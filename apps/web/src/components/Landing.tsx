@@ -25,6 +25,8 @@ import type { ProfileSource } from '../editor/profile.ts';
 import { notify } from '../editor/Toast.tsx';
 import { useLinkHover } from '../hooks/useLinkHover.ts';
 import { useReduceMotion } from '../hooks/useReduceMotion.ts';
+import { preloadable } from '../lazy/preloadable.ts';
+import { loading } from '../loading/tracker.ts';
 import { backdrop, isBackdropClick } from './backdrop.ts';
 import { useSiteGo } from './backToCard.ts';
 import type { EditFaces, EditResult } from './cardEditor/CardEditor.tsx';
@@ -69,6 +71,8 @@ const faceMotion = (reduce: boolean) => {
   };
 };
 
+// The card editor and the profile it edits load only for someone signed in, and readers never.
+const cardEditorChunk = preloadable(() => import('./cardEditor/CardEditor.tsx'));
 /** Moves focus to the element once it mounts, when the mount was caused by the user turning the card. */
 const useFocusOnMount = <T extends HTMLElement>(when: boolean): RefObject<T | null> => {
   const ref = useRef<T>(null);
@@ -213,6 +217,8 @@ const Front = ({
                 aria-busy={opening || undefined}
                 disabled={opening}
                 onClick={onEdit}
+                onPointerEnter={cardEditorChunk.prefetch}
+                onFocus={cardEditorChunk.prefetch}
               >
                 <Icon name="lucide:pencil" size="md" />
               </button>
@@ -489,8 +495,12 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
   const openEditor = async () => {
     setOpening(true);
     try {
-      const mod = await import('./cardEditor/CardEditor.tsx');
-      const source = await mod.prepareEdit(profile);
+      // Loaded on Edit's hover or focus already, usually; the bar covers whatever is left.
+      const { mod, source } = await loading.track(
+        cardEditorChunk
+          .load()
+          .then(async (editor) => ({ mod: editor, source: await editor.prepareEdit(profile) })),
+      );
       await withViewTransition(
         'edit',
         () => {

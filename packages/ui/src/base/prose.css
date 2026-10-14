@@ -85,7 +85,7 @@
       border-block-start: var(--border-width) solid var(--color-border);
     }
 
-    & img,
+    & img:not(.media img),
     & picture {
       inline-size: 100%;
       block-size: auto;
@@ -94,6 +94,81 @@
 
     & figure {
       margin-inline: 0;
+    }
+
+    /* An image alone in its paragraph (media.ts): never upscaled, never taller than most of the screen,
+       centred in a full-width link to its file that the viewer intercepts. */
+    & .media {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      block-size: 100%;
+    }
+
+    & .zoom {
+      display: grid;
+      place-items: center;
+      cursor: zoom-in;
+      border-radius: var(--radius-lg);
+    }
+
+    & .zoom:focus-visible {
+      outline: none;
+    }
+
+    & .zoom:focus-visible img {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: var(--focus-ring-offset);
+    }
+
+    /* Sized by its width and height attributes, so its box is right before it loads; a tall image
+       capped by the screen keeps its shape inside that box. */
+    & .media img {
+      max-inline-size: 100%;
+      block-size: auto;
+      max-block-size: 70vh;
+      object-fit: contain;
+      border-radius: var(--radius-lg);
+    }
+
+    /* Images on adjacent lines: one slide per column width, swiped by native scroll-snap. Slides
+       stretch to the tallest, so the gallery's height never changes as it moves. */
+    & .gallery-track {
+      display: flex;
+      gap: var(--space-4);
+      padding: 0;
+      margin: 0;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      list-style: none;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+    }
+
+    /* Room for the controls that arrive with script (GalleryControls), so their arrival moves no text:
+       a row of buttons, and thumbnails from three images up. */
+    & .gallery {
+      --gallery-row: calc(var(--space-2) + 2.75rem);
+      --gallery-thumb: calc(4rem + 2 * var(--border-width-thick));
+      --gallery-thumbs: calc(var(--space-2) + var(--gallery-thumb) + 2 * var(--space-1));
+    }
+
+    & .gallery:not(:has(> [data-controls])) {
+      padding-block-end: var(--gallery-row);
+    }
+
+    & .gallery:has(> .gallery-track > li:nth-child(3)):not(:has(> [data-controls])) {
+      padding-block-end: calc(var(--gallery-row) + var(--gallery-thumbs));
+    }
+
+    /* The image viewer shows this one; the page keeps its place empty (apps/web viewer). */
+    & [data-viewing] {
+      visibility: hidden;
+    }
+
+    & .gallery-track > li {
+      flex: 0 0 100%;
+      margin: 0;
+      scroll-snap-align: center;
     }
 
     & figcaption {
@@ -170,6 +245,30 @@
       border: var(--border-width) solid var(--color-border-strong);
       border-block-end-width: var(--border-width-thick);
       border-radius: var(--radius-sm);
+    }
+  }
+
+  /* A block below the screen waits, unseen, to fade up as it scrolls in (apps/web reveal.ts sets the
+     attribute). Only on screens, and only when motion is welcome. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .prose > [data-reveal="waiting"] {
+      opacity: 0;
+    }
+  }
+
+  /* On paper a gallery is its figures, one after another, and every block is there. */
+  @media print {
+    .prose > [data-reveal] {
+      opacity: 1 !important;
+    }
+
+    .prose .gallery-track {
+      display: block;
+      overflow: visible;
+    }
+
+    .prose .gallery-track > li + li {
+      margin-block-start: var(--space-5);
     }
   }
 

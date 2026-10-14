@@ -1,0 +1,257 @@
+@layer components {
+  /* Dark in every theme, the photo-viewing convention; custom themes cannot reach these tokens. */
+  .viewer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    overflow: hidden;
+    color: var(--color-viewer-on-scrim);
+    outline: none;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .scrim {
+    position: absolute;
+    inset: 0;
+    background: var(--color-viewer-scrim);
+  }
+
+  /* The browser's own pinch, scroll and back swipe stay out of it; the stage handles every touch. */
+  .stage {
+    position: absolute;
+    inset: 0;
+    overscroll-behavior: contain;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .strip {
+    position: absolute;
+    inset: 0;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: visible;
+  }
+
+  /* Transparent images sit on the page's own surface, so a diagram drawn for the theme stays readable. */
+  .image {
+    max-inline-size: none;
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    cursor: zoom-in;
+    -webkit-user-drag: none;
+  }
+
+  /* The image on show hangs from the stage's centre, so a box larger than the stage (a very tall
+     image fitted to the width) stays centred; grid centring gives way to the start edge on overflow. */
+  .current {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+  }
+
+  .error {
+    padding: var(--space-4);
+    font-family: var(--font-sans);
+    pointer-events: auto;
+
+    & a {
+      color: inherit;
+      text-decoration: underline;
+    }
+  }
+
+  .viewer[data-zoomed] .image {
+    cursor: grab;
+  }
+
+  .viewer[data-zoomed] .image:active {
+    cursor: grabbing;
+  }
+
+  /* Bars sit on their own gradient plates, so their contrast never depends on the image beneath. */
+  .top,
+  .bottom {
+    position: absolute;
+    inset-inline: 0;
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    padding: var(--space-2) max(var(--space-3), env(safe-area-inset-right)) var(--space-2)
+      max(var(--space-3), env(safe-area-inset-left));
+    font-family: var(--font-sans);
+    font-size: var(--font-size-sm);
+    pointer-events: none;
+    transition: opacity var(--duration-normal) var(--ease-out);
+  }
+
+  .top {
+    inset-block-start: 0;
+    justify-content: space-between;
+    padding-block-start: max(var(--space-2), env(safe-area-inset-top));
+    background: linear-gradient(var(--color-viewer-scrim), transparent);
+  }
+
+  .bottom {
+    inset-block-end: 0;
+    flex-direction: column;
+    justify-content: center;
+    min-block-size: 4rem;
+    padding-block-end: max(var(--space-3), env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--color-viewer-scrim));
+  }
+
+  .tools {
+    display: flex;
+    gap: var(--space-1);
+    align-items: center;
+  }
+
+  .counter,
+  .zoom {
+    min-inline-size: 3.5rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  .button {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    color: inherit;
+    pointer-events: auto;
+    border-radius: var(--radius-full);
+
+    &:hover {
+      background: oklch(from var(--color-viewer-on-scrim) l c h / 0.12);
+    }
+
+    &:focus-visible {
+      outline-color: var(--color-viewer-on-scrim);
+    }
+
+    &[aria-disabled="true"] {
+      pointer-events: none;
+      opacity: 0.35;
+    }
+  }
+
+  .side {
+    position: absolute;
+    inset-block-start: 50%;
+    background: oklch(from var(--color-viewer-scrim) l c h / 0.6);
+    translate: 0 -50%;
+    transition: opacity var(--duration-normal) var(--ease-out);
+  }
+
+  .previous {
+    inset-inline-start: max(var(--space-3), env(safe-area-inset-left));
+  }
+
+  .next {
+    inset-inline-end: max(var(--space-3), env(safe-area-inset-right));
+  }
+
+  .caption {
+    max-inline-size: 60ch;
+    max-block-size: 4.5lh;
+    margin: 0;
+    overflow-y: auto;
+    text-align: center;
+    pointer-events: auto;
+  }
+
+  .live {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  /* A gallery's thumbnails, above the caption. The strip scrolls within the screen's width. */
+  .thumbs {
+    display: flex;
+    inline-size: 100%;
+    min-inline-size: 0;
+    pointer-events: auto;
+  }
+
+  .thumbsViewport {
+    flex: 1;
+    min-inline-size: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    scrollbar-width: none;
+  }
+
+  .thumbList {
+    display: flex;
+    gap: var(--space-2);
+    inline-size: max-content;
+    padding: var(--space-1);
+    margin-block: 0;
+    margin-inline: auto;
+    list-style: none;
+  }
+
+  .thumb {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    border: var(--border-width-thick) solid transparent;
+    border-radius: var(--radius-sm);
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &[aria-current="true"] {
+      border-color: var(--color-viewer-on-scrim);
+      opacity: 1;
+    }
+
+    & img {
+      display: block;
+      inline-size: 3.5rem;
+      block-size: 2.5rem;
+      object-fit: cover;
+    }
+  }
+
+  /* On a phone (by what the device is, never by the last input, so they cannot move mid-view) the side
+     buttons sit in the bottom corners, beside the caption, within reach of the thumb. */
+  @media (hover: none) and (pointer: coarse) {
+    .side {
+      inset-block: auto max(var(--space-3), env(safe-area-inset-bottom));
+      translate: none;
+    }
+
+    .bottom {
+      padding-inline: 4rem;
+    }
+  }
+
+  /* Hidden controls take no taps but stay in the tab order, and come back on focus. */
+  .viewer[data-controls="hidden"] :is(.top, .bottom, .side, .button) {
+    pointer-events: none;
+    opacity: 0 !important;
+  }
+
+  @media (width < 30rem) {
+    .zoom {
+      display: none;
+    }
+  }
+}

@@ -17,6 +17,7 @@ import { isAppHref } from '../editor/navigation.ts';
 import { PublishDialog } from '../editor/publish/PublishDialog.tsx';
 import { notify } from '../editor/Toast.tsx';
 import { useDialogState } from '../hooks/useDialogState.ts';
+import { useTrackLoading } from '../loading/hooks.ts';
 
 type Panel = 'meta' | 'media';
 
@@ -42,6 +43,8 @@ const useClose = () => {
 const DraftRoute = () => {
   const slug = useSlug();
   const entry = useEntry(slug);
+  // The drafts list and the content tree arrive before the editor can show; the bar covers the wait.
+  useTrackLoading(entry.status === 'loading');
   switch (entry.status) {
     case 'loading':
       return (

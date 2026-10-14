@@ -15,6 +15,7 @@ import {
 import { parseEntry, renderMarkdown } from '@crc/markdown';
 import type { Plugin } from 'vite';
 import { contentDirFor, isEditorTree, sameOrigin, within } from './content-dir.ts';
+import { imageSize } from './imageSize.ts';
 import { readTree } from './local-store.ts';
 
 /* Parses, validates, and renders everything under content/ at build time.
@@ -256,7 +257,18 @@ export const content = (opts: {
         }
         this.addWatchFile(join(e.dir, 'index.md'));
         const { html, headings } = await renderMarkdown(e.body, {
-          resolveImage: (src) => assetUrl(e.dir, src),
+          // assetUrl first, so a missing file fails with its own message.
+          resolveImage: (src) => {
+            const url = assetUrl(e.dir, src);
+            const file = resolve(e.dir, src);
+            try {
+              return { src: url, ...imageSize(readFileSync(file), relative(opts.root, file)) };
+            } catch (err) {
+              // A format the reader doesn't know (AVIF, say) still shows; it only loses its reserved box.
+              this.warn(err instanceof Error ? err.message : String(err));
+              return url;
+            }
+          },
         });
         return `export default ${JSON.stringify({ meta: toMeta(e), html, headings })};`;
       }

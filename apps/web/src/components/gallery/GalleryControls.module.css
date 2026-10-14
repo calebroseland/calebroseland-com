@@ -1,0 +1,113 @@
+@layer components {
+  /* One column that never grows past the gallery: a long strip scrolls inside it, never widens the page. */
+  .controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+    margin-block-start: var(--space-2);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-sm);
+  }
+
+  /* Fixed heights: prose.css reserves exactly this much room before the controls arrive. */
+  .row {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    block-size: 2.75rem;
+  }
+
+  /* As wide as its longest label ("30 of 30": twice the digits, plus " of "), in the font's own digit
+     width, so the buttons beside it never move as the number grows, whatever the platform's font. */
+  .counter {
+    flex: none;
+    inline-size: calc((var(--digits, 1) * 2 + 5) * 1ch);
+    overflow: hidden;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .step {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    color: var(--color-text-muted);
+    border-radius: var(--radius-full);
+
+    &:hover {
+      color: var(--color-text);
+      background: var(--color-surface-hover);
+    }
+
+    &[aria-disabled="true"] {
+      pointer-events: none;
+      opacity: 0.4;
+    }
+  }
+
+  .thumbs {
+    display: flex;
+    min-inline-size: 0;
+    block-size: calc(4rem + 2 * var(--border-width-thick) + 2 * var(--space-1));
+  }
+
+  .thumbsViewport {
+    flex: 1;
+    min-inline-size: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  /* Centred while it fits; once it overflows, auto margins give way and it starts at its first thumbnail. */
+  .thumbList {
+    display: flex;
+    gap: var(--space-2);
+    inline-size: max-content;
+    padding: var(--space-1);
+    margin-block: 0;
+    margin-inline: auto;
+    list-style: none;
+  }
+
+  .thumbList > li {
+    margin: 0;
+  }
+
+  .thumb {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    border: var(--border-width-thick) solid transparent;
+    border-radius: var(--radius-md);
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &[aria-current="true"] {
+      border-color: var(--color-accent);
+      opacity: 1;
+    }
+
+    /* A fixed box: thumbnails load lazily, and a strip whose items grow as they load cannot be scrolled to. */
+    & img {
+      display: block;
+      inline-size: 5.5rem;
+      block-size: 4rem;
+      object-fit: cover;
+      border-radius: 0;
+    }
+  }
+
+  @media print {
+    .controls {
+      display: none;
+    }
+  }
+}

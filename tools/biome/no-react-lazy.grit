@@ -1,0 +1,10 @@
+language js
+
+// A chunk that code loads (a key, a click, a menu, an effect) loads through `preloadable` and renders
+// with `useLoaded` once loaded. `React.lazy` with `Suspense` would hold a revealed boundary back for
+// 300 ms, which made the command palette's first open feel slow. Route chunks are the router's own.
+// Matched on the statement's text, so aliases (`lazy as later`) and default-plus-named imports count.
+JsImport() as $import where {
+  $import <: r"(?s)import\s[^;]*\{[^}]*\b(?:lazy|Suspense)\b[^}]*\}\s*from\s*['\"]react['\"].*",
+  register_diagnostic(span=$import, message="Load code-initiated chunks with preloadable and useLoaded (apps/web/src/lazy), not React.lazy or Suspense, whose fallback adds a 300 ms delay.", severity="error")
+}
