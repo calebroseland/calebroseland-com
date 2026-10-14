@@ -480,8 +480,9 @@ test.describe('image viewer on a touch screen', () => {
     expect(first).not.toBeNull();
     expect(first).toBeLessThan(80);
     // A mouse event on a phone (a paired mouse, or an emulated click) must not move them.
-    const center = await page.evaluate(() => [innerWidth / 2, innerHeight / 2]);
-    await page.mouse.click(center[0] ?? 0, center[1] ?? 0);
+    // On the image once it has finished growing open (Playwright waits for it to hold still): a click
+    // on the backdrop would close the viewer instead.
+    await viewer(page).locator('img').first().click();
     await expect(viewer(page)).toBeVisible();
     expect(await where()).toBe(first);
     const cdp = await page.context().newCDPSession(page);
