@@ -84,4 +84,24 @@ test.describe('loading bar', () => {
     await page.waitForTimeout(3500);
     expect(editorCode).toEqual([]);
   });
+
+  test('leaves nothing animating once it hides, under reduced motion too', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/posts');
+    await expect(page.getByRole('heading', { level: 1, name: 'Posts' })).toBeVisible();
+    await page.route(/virtual:content\/entry/, async (route) => {
+      await new Promise((r) => setTimeout(r, 900));
+      await route.continue();
+    });
+    for (const name of ['Second placeholder', 'Hello, placeholder']) {
+      await page.goto('/posts');
+      await page.getByRole('heading', { level: 2 }).getByRole('link', { name }).click();
+      await expect(bar(page)).toHaveAttribute('data-phase', 'running');
+      await expect(bar(page)).toHaveAttribute('data-phase', 'hidden');
+    }
+    const left = await bar(page).evaluate(
+      (el) => el.getAnimations().filter((a) => a.playState === 'running').length,
+    );
+    expect(left).toBe(0);
+  });
 });

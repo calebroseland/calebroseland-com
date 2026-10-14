@@ -76,36 +76,57 @@ export const useLoadingBar = () => {
   const phase = useBarPhase();
   const reduce = useReduceMotion();
   const node = useRef<HTMLDivElement | null>(null);
+  const running = useRef<Array<ReturnType<typeof animate>>>([]);
   const run = useCallback(
     (el: HTMLElement | null, p: BarPhase) => {
       if (!el || !canAnimate) {
         return;
       }
+      // One phase's motion at a time: stop where it is (stop keeps that frame), then carry on from it.
+      for (const a of running.current) {
+        a.stop();
+      }
+      running.current = [];
+      const play = (...args: Parameters<typeof animate>) => {
+        const a = animate(...args);
+        running.current.push(a);
+        return a;
+      };
       if (p === 'running') {
+        el.style.opacity = '1';
         if (reduce) {
-          animate(
+          play(
             el,
             { opacity: [0.4, 1] },
             { duration: 0.9, repeat: Infinity, repeatType: 'reverse' },
           );
           return;
         }
-        el.style.opacity = '1';
-        // Quick to a fifth, then ever slower toward nine tenths: it never claims to be done.
-        animate(
+        const at = Number.parseFloat(getComputedStyle(el).scale) || 0;
+        // From nothing: quick to a fifth, then ever slower toward nine tenths. Back from finishing:
+        // on from where it got to. It never claims to be done.
+        play(
           el,
-          { scale: ['0 1', '0.2 1', '0.9 1'] },
-          { duration: 12, times: [0, 0.03, 1], ease: [...eases.out] },
+          { scale: at > 0.2 ? [`${at} 1`, '0.9 1'] : ['0 1', '0.2 1', '0.9 1'] },
+          at > 0.2
+            ? { duration: 8, ease: [...eases.out] }
+            : { duration: 12, times: [0, 0.03, 1], ease: [...eases.out] },
         );
         return;
       }
       if (p === 'finishing') {
-        const fade = () => animate(el, { opacity: 0 }, { duration: durations.normal });
+        const fade = () => play(el, { opacity: 0 }, { duration: durations.normal });
         if (reduce) {
           fade();
           return;
         }
-        void animate(el, { scale: '1 1' }, { duration: durations.fast }).then(fade);
+        const grow = play(el, { scale: '1 1' }, { duration: durations.fast });
+        // Only if nothing has started since: a new load stops the grow, and must not then see a fade.
+        void grow.then(() => running.current.includes(grow) && fade());
+        return;
+      }
+      if (p === 'hidden') {
+        el.style.removeProperty('scale');
       }
     },
     [reduce],
