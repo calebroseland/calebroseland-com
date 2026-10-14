@@ -77,4 +77,14 @@ test.describe('scroll reveal', () => {
     );
     expect(hidden).toBe(0);
   });
+
+  test('a link to a heading lands on visible text, with nothing hidden above it', async ({
+    page,
+  }) => {
+    await page.goto('/images#the-end');
+    await expect(page.locator('h1')).toHaveText('Images');
+    await expect(page.locator('#the-end')).toBeInViewport();
+    await expect.poll(async () => (await state(page)).waitingOnScreen).toBe(0);
+    expect((await state(page)).waitingAbove).toBe(0);
+  });
 });
