@@ -68,4 +68,20 @@ test.describe('loading bar', () => {
     await page.waitForTimeout(600);
     expect(await phases(page)).not.toContain('running');
   });
+
+  test('a reader never fetches editor code, even after the page idles', async ({ page }) => {
+    const editorCode: string[] = [];
+    page.on('request', (r) => {
+      // The dev server serves editor routes whole with the route tree (it splits them only in a
+      // build), so the chunks that load on their own here are the card and theme editors.
+      if (/cardEditor\/|ThemeEditor/.test(r.url())) {
+        editorCode.push(r.url());
+      }
+    });
+    await page.goto('/');
+    await page.waitForTimeout(3500);
+    await page.goto('/posts/hello-placeholder');
+    await page.waitForTimeout(3500);
+    expect(editorCode).toEqual([]);
+  });
 });
