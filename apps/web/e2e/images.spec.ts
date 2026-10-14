@@ -37,26 +37,60 @@ test.describe('images in a body', () => {
   });
 
   test('do not shift the body as they load', async ({ page }) => {
-    // Only shifts of nodes inside the body count: the page arriving moves the footer, images must not move text.
+    // Shifts of nodes inside the body, recorded with where they happened. The page arriving moves the
+    // footer, and a web font arriving late (CI) reflows text; neither is an image. Images are what this
+    // checks, and they load after the fonts here, so shifts count from the moment the fonts are ready.
     await page.addInitScript(() => {
-      const w = window as unknown as { __cls: number };
+      type Shift = PerformanceEntry & {
+        value: number;
+        sources: Array<{
+          node?: Node;
+          previousRect: DOMRectReadOnly;
+          currentRect: DOMRectReadOnly;
+        }>;
+      };
+      const w = window as unknown as { __shifts: string[]; __cls: number; __fontsAt: number };
+      w.__shifts = [];
       w.__cls = 0;
+      w.__fontsAt = Number.POSITIVE_INFINITY;
+      void document.fonts.ready.then(() => {
+        w.__fontsAt = performance.now();
+      });
       new PerformanceObserver((list) => {
-        for (const e of list.getEntries() as Array<
-          PerformanceEntry & { value: number; sources: Array<{ node?: Node }> }
-        >) {
-          if (e.sources.some((s) => s.node instanceof Element && s.node.closest('.prose'))) {
+        for (const e of list.getEntries() as Shift[]) {
+          const inBody = e.sources.filter(
+            (s) => s.node instanceof Element && s.node.closest('.prose'),
+          );
+          if (inBody.length === 0) {
+            continue;
+          }
+          const after = e.startTime > w.__fontsAt;
+          w.__shifts.push(
+            `${e.value.toFixed(4)} @${Math.round(e.startTime)}ms${after ? '' : ' (before fonts)'}: `
+              + inBody
+                .map((s) => {
+                  const el = s.node as Element;
+                  return `${el.tagName.toLowerCase()}.${el.className} ${Math.round(s.previousRect.y)}→${Math.round(s.currentRect.y)}`;
+                })
+                .join(', '),
+          );
+          if (after) {
             w.__cls += e.value;
           }
         }
       }).observe({ type: 'layout-shift', buffered: true });
     });
     await openPage(page);
+    await page.evaluate(() => document.fonts.ready);
     for (const img of await page.locator('.prose img').all()) {
       await img.scrollIntoViewIfNeeded();
       await expect(img).toHaveJSProperty('complete', true);
     }
-    expect(await page.evaluate(() => (window as unknown as { __cls: number }).__cls)).toBe(0);
+    const result = await page.evaluate(() => {
+      const w = window as unknown as { __shifts: string[]; __cls: number };
+      return { cls: w.__cls, shifts: w.__shifts };
+    });
+    expect(result.cls, result.shifts.join('\n')).toBe(0);
   });
 });
 
