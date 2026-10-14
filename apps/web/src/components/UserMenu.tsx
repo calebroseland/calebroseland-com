@@ -1,6 +1,6 @@
 import { Menu } from '@base-ui/react/menu';
 import { Icon } from '@crc/ui';
-import { lazy, Suspense } from 'react';
+import { useEffect } from 'react';
 import { siteFonts } from '../content/theme.ts';
 import { useSession, useSignInMethods, useSignOut } from '../editor/auth/hooks.ts';
 import { canSignIn } from '../editor/auth/methods.ts';
@@ -9,6 +9,9 @@ import { useAccountLinks } from '../editor/navigation.ts';
 import { useDialogState } from '../hooks/useDialogState.ts';
 import { useDisclosure } from '../hooks/useDisclosure.ts';
 import { usePopupMotion } from '../hooks/usePopupMotion.ts';
+import { notifyLoadFailed } from '../lazy/failed.ts';
+import { useLoaded } from '../lazy/hooks.ts';
+import { preloadable } from '../lazy/preloadable.ts';
 import { type CustomTheme, defaultTheme } from '../theme/custom.ts';
 import { useThemeState } from '../theme/hooks.ts';
 import {
@@ -20,10 +23,23 @@ import {
 import { Tip } from './Tip.tsx';
 import styles from './UserMenu.module.css';
 
-// The editor and its colour picker load only when someone opens it.
-const ThemeEditor = lazy(() =>
-  import('./ThemeEditor.tsx').then((m) => ({ default: m.ThemeEditor })),
-);
+// The editor and its colour picker load apart from the site shell: as the menu that offers them opens.
+const themeEditorChunk = preloadable(() => import('./ThemeEditor.tsx'));
+
+/** The theme editor component, loaded ahead while the account menu is open, so choosing New theme or
+    Edit opens it at once; a failed load closes the request and says so. */
+const useThemeEditor = (menuOpen: boolean, wanted: boolean, close: () => void) => {
+  useEffect(() => {
+    if (menuOpen) {
+      themeEditorChunk.prefetch();
+    }
+  }, [menuOpen]);
+  const mod = useLoaded(themeEditorChunk, wanted, () => {
+    notifyLoadFailed('the theme editor');
+    close();
+  });
+  return mod?.ThemeEditor;
+};
 
 const builtIns = [
   { value: 'auto', label: 'Auto', icon: 'lucide:sun-moon' },
@@ -42,6 +58,7 @@ export const UserMenu = () => {
   const signOut = useSignOut();
   const menu = useDisclosure();
   const motion = usePopupMotion('dropdown');
+  const ThemeEditor = useThemeEditor(menu.open, editing.isOpen, editing.close);
   const signedIn = current.status === 'authenticated';
   // Asked only once the menu opens, so readers who never open it never call the Worker for it.
   const methods = useSignInMethods(menu.open && !signedIn);
@@ -162,15 +179,13 @@ export const UserMenu = () => {
           </Menu.Positioner>
         </Menu.Portal>
       </Menu.Root>
-      {editing.subject && (
-        <Suspense fallback={null}>
-          <ThemeEditor
-            key={editing.subject.theme.id}
-            initial={editing.subject.theme}
-            isNew={editing.subject.isNew}
-            onClose={editing.close}
-          />
-        </Suspense>
+      {editing.subject && ThemeEditor && (
+        <ThemeEditor
+          key={editing.subject.theme.id}
+          initial={editing.subject.theme}
+          isNew={editing.subject.isNew}
+          onClose={editing.close}
+        />
       )}
     </>
   );

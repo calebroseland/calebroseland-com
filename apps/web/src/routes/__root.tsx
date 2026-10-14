@@ -7,13 +7,16 @@ import {
 } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { CommandPalette } from '../components/CommandPalette.tsx';
+import { LoadingBar } from '../components/LoadingBar.tsx';
 import { MotionProvider } from '../components/MotionProvider.tsx';
 import { CenteredMessage, Page } from '../components/Page.tsx';
 import { TipProvider } from '../components/Tip.tsx';
 import { Toasts } from '../editor/Toast.tsx';
+import { useRouterLoading } from '../loading/hooks.ts';
 
 const RootLayout = () => {
   useFocusHeadingOnNavigate();
+  useRouterLoading();
   return (
     <>
       <HeadContent />
@@ -27,6 +30,7 @@ const RootLayout = () => {
       </TipProvider>
       <Toasts />
       <CommandPalette />
+      <LoadingBar />
     </>
   );
 };
