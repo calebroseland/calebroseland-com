@@ -9,6 +9,7 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  "routes": [{ "pattern": "calebroseland.com", "custom_domain": true }],
   "vars": {
     "ENVIRONMENT": "production",
     "SITE_ORIGIN": "https://calebroseland.com",
@@ -19,7 +20,6 @@
     // experimental; the working tree in dev is the editor until it is not.
     "FEATURE_GITHUB_EDITING": "off"
   },
-  // The apex custom domain is added here at cutover (spec §10.3). Until then production is workers.dev only.
   "env": {
     "staging": {
       "name": "calebroseland-com-staging",
