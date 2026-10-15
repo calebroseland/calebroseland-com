@@ -41,8 +41,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: mise run smoke
         env:
-          # Until cutover the production Worker is only reachable on workers.dev; switch to the apex in Phase C.
-          BASE_URL: ${{ vars.PRODUCTION_URL || 'https://calebroseland.com' }}
+          BASE_URL: https://calebroseland.com
           EXPECTED_SHA: ${{ github.sha }}
 
   pages:
