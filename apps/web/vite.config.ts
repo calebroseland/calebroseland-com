@@ -49,7 +49,15 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     // Transform every route and editor module at startup so dependency discovery finishes before the first request.
-    warmup: { clientFiles: ['./src/main.tsx', './src/routes/**/*.tsx', './src/editor/**/*.tsx'] },
+    // Tests stay out: their deps (vitest) are found late and force a re-optimize that reloads open pages.
+    warmup: {
+      clientFiles: [
+        './src/main.tsx',
+        './src/routes/**/*.tsx',
+        './src/editor/**/*.tsx',
+        '!./src/**/*.test.tsx',
+      ],
+    },
   },
   // Editor routes are lazy; pre-bundle their deps so the first visit in dev does not trigger a re-optimize reload.
   optimizeDeps: {
