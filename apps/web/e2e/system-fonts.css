@@ -1,2 +1,0 @@
-/* Stands in for @crc/ui/fonts.css under the E2E server (CRC_FONTS=system): no self-hosted faces, so text
-   is drawn in the platform's fonts from the first paint and never swaps mid-test. */
