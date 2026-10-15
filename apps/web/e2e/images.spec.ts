@@ -86,6 +86,43 @@ test.describe('images in a body', () => {
   });
 });
 
+test.describe('text font', () => {
+  test('a slow font never moves the body: the page waits for it before it first draws', async ({
+    page,
+  }) => {
+    // As on CI: the face arrives late, and the fallback in its place (Times) is narrower, so a page
+    // drawn before it would widen its column (68ch) and move everything below when it arrives.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.route(/\.woff2(\?|$)/, async (route) => {
+      await new Promise((r) => setTimeout(r, 1200));
+      await route.continue();
+    });
+    await page.addInitScript(() => {
+      const w = window as unknown as { __cls: number };
+      w.__cls = 0;
+      document.addEventListener('DOMContentLoaded', () => {
+        const style = document.createElement('style');
+        style.textContent =
+          ':root { --font-prose: "IBM Plex Serif", "Times New Roman", serif !important; }';
+        document.head.append(style);
+      });
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries() as Array<
+          PerformanceEntry & { value: number; sources: Array<{ node?: Node }> }
+        >) {
+          if (e.sources.some((x) => x.node instanceof Element && x.node.closest('.prose'))) {
+            w.__cls += e.value;
+          }
+        }
+      }).observe({ type: 'layout-shift', buffered: true });
+    });
+    await page.goto('/images');
+    await expect(page.locator('h1')).toHaveText('Images');
+    await page.waitForTimeout(2000);
+    expect(await page.evaluate(() => (window as unknown as { __cls: number }).__cls)).toBe(0);
+  });
+});
+
 test.describe('image viewer', () => {
   test('opens from an image, lives in the URL, and closes back to the image with focus and scroll intact', async ({
     page,
