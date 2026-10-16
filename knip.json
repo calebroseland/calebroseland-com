@@ -10,7 +10,8 @@
         "src/**/*.test.{ts,tsx}",
         "worker/**/*.test.ts",
         "vite/**/*.ts",
-        "e2e/**/*.ts"
+        "e2e/**/*.ts",
+        "public/service-worker.js"
       ]
     },
     "packages/*": {

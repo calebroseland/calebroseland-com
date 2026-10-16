@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { installPageTransitions, pageViewTransition } from './components/pageTransition.ts';
 import { trackReturnPage } from './components/returnPage.ts';
 import { dropUnavailableSession } from './editor/auth/methods.ts';
+import { removeLegacyServiceWorker } from './legacyServiceWorker.ts';
 import { installErrorReporting } from './reportError.ts';
 import { routeTree } from './routeTree.gen.ts';
 
@@ -29,6 +30,9 @@ declare module '@tanstack/react-router' {
 installErrorReporting();
 // Only someone already signed in pays for the check; readers never call the Worker for it.
 void dropUnavailableSession();
+// public/service-worker.js removes the old site's worker on its own; this catches a visitor who reaches
+// a page of this site first.
+void removeLegacyServiceWorker();
 
 const rootEl = document.getElementById('root');
 if (!rootEl) {
