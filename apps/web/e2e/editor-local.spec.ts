@@ -130,13 +130,24 @@ test.describe('working-tree mode', () => {
     await expectLoaded(page, 'A teal placeholder, second in a gallery');
 
     // Typing beside the gallery is where the editor used to throw on its invalid paragraph.
-    // Under load the page can shift between Playwright measuring the line and pressing on it, and a
-    // press on the hero selects that image, which typing then replaces; so click until the caret is in.
+    // A press that lands on the hero selects it, and typing would replace it; so the caret must be in
+    // the line's own text. Selecting a node anchors on the editor itself, whose text holds every line.
+    await expectLoaded(page, 'A teal placeholder hero');
+    // Its size is on the element from the start, so its space is held before the file loads.
+    await expect(body.getByRole('img', { name: 'A teal placeholder hero' })).toHaveAttribute(
+      'width',
+      '64',
+    );
     const line = body.getByText('These two images are one gallery.');
     await expect(async () => {
       await line.click();
-      const anchor = await page.evaluate(() => getSelection()?.anchorNode?.textContent ?? '');
-      expect(anchor).toContain('These two images are one gallery.');
+      const at = await page.evaluate(() => {
+        const n = getSelection()?.anchorNode;
+        return n?.nodeType === Node.TEXT_NODE
+          ? (n.parentElement?.closest('p')?.textContent ?? '')
+          : '';
+      });
+      expect(at).toBe('These two images are one gallery.');
     }).toPass();
     await page.keyboard.press('End');
     await page.keyboard.type(' Edited beside a gallery.');
