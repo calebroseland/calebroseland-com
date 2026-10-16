@@ -1,10 +1,16 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Buffer } from './buffer.ts';
-import { previewSrc } from './images.ts';
+import { preview } from './images.ts';
+
+// A real 64 × 40 PNG, so its size can be read from the bytes.
+const hero = readFileSync(
+  new URL('../../../fixtures/content/posts/2026/09-18-hello-placeholder/hero.png', import.meta.url),
+).toString('base64');
 
 const buffer = {
   dir: 'posts/2026/09-18-hello',
-  assets: [{ name: 'new.webp', objectUrl: 'blob:pending' }],
+  assets: [{ name: 'new.webp', objectUrl: 'blob:pending', width: 800, height: 600 }],
 } as unknown as Buffer;
 const files = [
   {
@@ -15,25 +21,42 @@ const files = [
   },
   {
     path: 'posts/2026/09-18-hello/hero.png',
-    content: 'iVBO',
+    content: hero,
     sha: 'b',
     encoding: 'base64' as const,
   },
 ];
 
-describe('previewSrc', () => {
+const broken = [
+  {
+    path: 'posts/2026/09-18-hello/broken.png',
+    content: 'eA==',
+    sha: 'c',
+    encoding: 'base64' as const,
+  },
+];
+
+describe('preview', () => {
   it('shows a pending image from its object URL', () => {
-    expect(previewSrc('new.webp', buffer, files)).toBe('blob:pending');
+    expect(preview('new.webp', buffer, files)).toEqual({
+      src: 'blob:pending',
+      size: { width: 800, height: 600 },
+    });
   });
 
   it('shows an image on the branch from the loaded bundle, with or without ./', () => {
-    expect(previewSrc('hero.png', buffer, files)).toBe('data:image/png;base64,iVBO');
-    expect(previewSrc('./hero.png', buffer, files)).toBe('data:image/png;base64,iVBO');
+    expect(preview('hero.png', buffer, files).src).toBe(`data:image/png;base64,${hero}`);
+    expect(preview('./hero.png', buffer, files).src).toBe(`data:image/png;base64,${hero}`);
   });
 
   it('leaves absolute, remote and unknown sources as written', () => {
     for (const src of ['https://x.test/a.png', '/a.png', 'data:image/png;base64,x', 'gone.png']) {
-      expect(previewSrc(src, buffer, files)).toBe(src);
+      expect(preview(src, buffer, files)).toEqual({ src });
     }
+  });
+
+  it('gives the size of an image it can read, so its space is held before it loads', () => {
+    expect(preview('hero.png', buffer, files).size).toEqual({ width: 64, height: 40 });
+    expect(preview('broken.png', buffer, broken)).toEqual({ src: 'data:image/png;base64,eA==' });
   });
 });

@@ -130,7 +130,34 @@ test.describe('working-tree mode', () => {
     await expectLoaded(page, 'A teal placeholder, second in a gallery');
 
     // Typing beside the gallery is where the editor used to throw on its invalid paragraph.
-    await body.getByText('These two images are one gallery.').click();
+    // Typing goes where the editor's own selection is, which can still hold the hero after the browser's
+    // caret has moved; so the editor's selection must be a caret in the line before typing.
+    await expectLoaded(page, 'A teal placeholder hero');
+    // Its size is on the element from the start, so its space is held before the file loads.
+    await expect(body.getByRole('img', { name: 'A teal placeholder hero' })).toHaveAttribute(
+      'width',
+      '64',
+    );
+    const line = body.getByText('These two images are one gallery.');
+    await expect(async () => {
+      await line.click();
+      await expect
+        .poll(
+          () =>
+            body.evaluate((el) => {
+              type State = {
+                selection: { empty: boolean; from: number };
+                doc: { resolve: (pos: number) => { parent: { textContent: string } } };
+              };
+              const state = (el as HTMLElement & { editor?: { state: State } }).editor?.state;
+              return state?.selection.empty
+                ? state.doc.resolve(state.selection.from).parent.textContent
+                : '';
+            }),
+          { timeout: 2_000 },
+        )
+        .toBe('These two images are one gallery.');
+    }).toPass();
     await page.keyboard.press('End');
     await page.keyboard.type(' Edited beside a gallery.');
     await page.getByRole('button', { name: 'Save', exact: true }).click();

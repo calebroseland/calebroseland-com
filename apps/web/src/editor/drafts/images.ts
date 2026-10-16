@@ -1,4 +1,6 @@
 import type { Bundle } from '@crc/github-client';
+import { type ImageSize, imageSize } from '@crc/markdown';
+import type { ImagePreview } from '../document/extensions.ts';
 import { ImageTooLargeError, resizeImage, UnsupportedImageError } from '../document/resize.ts';
 import type { Buffer, BufferAsset, BufferController } from './buffer.ts';
 
@@ -41,23 +43,47 @@ const MIME: Record<string, string> = {
   svg: 'image/svg+xml',
 };
 
+type BundleFile = Bundle['files'][number];
+
+const sizes = new WeakMap<BundleFile, ImageSize | null>();
+
+const fileSize = (file: BundleFile): ImageSize | null => {
+  let size = sizes.get(file);
+  if (size === undefined) {
+    try {
+      const bytes =
+        file.encoding === 'base64'
+          ? Uint8Array.from(atob(file.content), (c) => c.charCodeAt(0))
+          : new TextEncoder().encode(file.content);
+      size = imageSize(bytes, file.path);
+    } catch {
+      size = null;
+    }
+    sizes.set(file, size);
+  }
+  return size;
+};
+
 /** Where the editor can show an image the markdown names relative to its entry: a pending image's
     object URL, else the file as loaded with the bundle. Anything else is shown as written. */
-export const previewSrc = (src: string, buffer: Buffer, files: Bundle['files']): string => {
+export const preview = (src: string, buffer: Buffer, files: Bundle['files']): ImagePreview => {
   if (/^([a-z][a-z\d+.-]*:|\/)/i.test(src)) {
-    return src;
+    return { src };
   }
   const name = src.replace(/^\.\//, '');
   const pending = buffer.assets.find((a) => a.name === name);
   if (pending) {
-    return pending.objectUrl;
+    return { src: pending.objectUrl, size: { width: pending.width, height: pending.height } };
   }
   const file = files.find((f) => f.path === `${buffer.dir}/${name}`);
   const type = MIME[name.split('.').pop()?.toLowerCase() ?? ''];
   if (!file || !type) {
-    return src;
+    return { src };
   }
-  return file.encoding === 'base64'
-    ? `data:${type};base64,${file.content}`
-    : `data:${type};charset=utf-8,${encodeURIComponent(file.content)}`;
+  const url =
+    file.encoding === 'base64'
+      ? `data:${type};base64,${file.content}`
+      : `data:${type};charset=utf-8,${encodeURIComponent(file.content)}`;
+  const size = fileSize(file);
+  return size ? { src: url, size } : { src: url };
 };

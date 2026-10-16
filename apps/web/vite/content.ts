@@ -12,10 +12,9 @@ import {
   siteTheme,
   usesAdobeFonts,
 } from '@crc/content-schema';
-import { parseEntry, renderMarkdown } from '@crc/markdown';
+import { imageSize, parseEntry, renderMarkdown } from '@crc/markdown';
 import type { Plugin } from 'vite';
 import { contentDirFor, isEditorTree, sameOrigin, within } from './content-dir.ts';
-import { imageSize } from './imageSize.ts';
 import { readTree } from './local-store.ts';
 
 /* Parses, validates, and renders everything under content/ at build time.
