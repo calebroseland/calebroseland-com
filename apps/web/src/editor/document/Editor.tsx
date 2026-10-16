@@ -2,7 +2,7 @@ import { EditorContent, type Editor as TipTap, useEditor } from '@tiptap/react';
 import { type RefObject, useEffect, useRef } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
 import styles from './Editor.module.css';
-import { documentExtensions } from './extensions.ts';
+import { documentExtensions, type ImagePreview } from './extensions.ts';
 import { Toolbar } from './Toolbar.tsx';
 
 /* TipTap owns the document and its own drag handles. Storage is markdown, produced by @tiptap/markdown;
@@ -25,7 +25,7 @@ type EditorProps = {
   onChange: (markdown: string) => void;
   onImageFiles: (files: File[]) => void;
   /** Where to load an image from; the document, and so the markdown, keeps the name as written. */
-  previewSrc?: (src: string) => string;
+  preview?: (src: string) => ImagePreview;
   apiRef?: RefObject<EditorApi | null>;
 };
 
@@ -44,15 +44,15 @@ const useMarkdownEditor = ({
   initialMarkdown,
   onChange,
   onImageFiles,
-  previewSrc,
+  preview,
   apiRef,
 }: EditorProps) => {
   const onChangeRef = useLatest(onChange);
   const onImageFilesRef = useLatest(onImageFiles);
-  const previewSrcRef = useLatest(previewSrc);
+  const previewRef = useLatest(preview);
 
   const editor = useEditor({
-    extensions: documentExtensions((src) => previewSrcRef.current?.(src) ?? src),
+    extensions: documentExtensions((src) => previewRef.current?.(src) ?? { src }),
     content: initialMarkdown,
     contentType: 'markdown',
     editorProps: {
