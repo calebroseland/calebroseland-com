@@ -8,6 +8,7 @@ import { trackReturnPage } from './components/returnPage.ts';
 import { dropUnavailableSession } from './editor/auth/methods.ts';
 import { installErrorReporting } from './reportError.ts';
 import { routeTree } from './routeTree.gen.ts';
+import { waitForThemeFonts } from './theme/fontsReady.ts';
 
 const router = createRouter({
   routeTree,
@@ -35,8 +36,11 @@ if (!rootEl) {
   throw new Error('#root missing from index.html');
 }
 
-createRoot(rootEl).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
-);
+// Text is drawn first in the theme's own faces, never in a fallback that a late font then reflows.
+void waitForThemeFonts().then(() => {
+  createRoot(rootEl).render(
+    <StrictMode>
+      <RouterProvider router={router} />
+    </StrictMode>,
+  );
+});

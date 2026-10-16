@@ -33,8 +33,6 @@ export default defineConfig({
       // The suite covers the experimental GitHub editing too, so the Worker gets its flag from here.
       CLOUDFLARE_INCLUDE_PROCESS_ENV: 'true',
       FEATURE_GITHUB_EDITING: 'on',
-      // System fonts only, present from the first paint (vite.config.ts).
-      CRC_FONTS: 'system',
     },
     url: `http://localhost:${port}/api/health`,
     reuseExistingServer: false,

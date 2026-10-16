@@ -10,22 +10,12 @@ import { localStore } from './vite/local-store.ts';
 const isPages = process.env.VITE_TARGET === 'pages';
 const base = process.env.VITE_BASE ?? '/';
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
-// The E2E server draws text in system fonts: a self-hosted face arriving after first paint reflows the
-// page at a time that depends on the machine, which no test should have to wait out.
-const systemFonts = process.env.CRC_FONTS === 'system';
 
 /* Two build targets from one config:
    - default: SPA + Worker via the Cloudflare plugin (production, staging, local dev)
    - pages:   SPA only, for the GitHub Pages backup at calebroseland.dev. No Worker. */
 export default defineConfig({
   base,
-  resolve: systemFonts
-    ? {
-        alias: {
-          '@crc/ui/fonts.css': fileURLToPath(new URL('./e2e/system-fonts.css', import.meta.url)),
-        },
-      }
-    : {},
   define: {
     __BUILD_SHA__: JSON.stringify(process.env.GITHUB_SHA ?? 'dev'),
     __API_ORIGIN__: JSON.stringify(process.env.VITE_API_ORIGIN ?? ''),
