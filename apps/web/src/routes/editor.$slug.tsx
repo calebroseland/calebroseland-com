@@ -128,7 +128,7 @@ const DraftEditor = ({ slug, bundle }: { slug: string; bundle: Bundle }) => {
   const { branches, publishes } = useCapabilities();
   const { panel, show } = usePanel();
   const close = useClose();
-  const { buffer, controller, previewSrc } = useDraftBuffer(bundle, slug);
+  const { buffer, controller, preview } = useDraftBuffer(bundle, slug);
   const save = useSaveDraft(controller);
   const reload = useReloadDraft(controller, slug);
   const conflict = useDialogState<StaleRefError>();
@@ -271,7 +271,7 @@ const DraftEditor = ({ slug, bundle }: { slug: string; bundle: Bundle }) => {
           initialMarkdown={buffer.markdown}
           onChange={controller.setMarkdown}
           onImageFiles={onImageFiles}
-          previewSrc={previewSrc}
+          preview={preview}
           apiRef={api}
         />
         <aside aria-label="Post details and images">

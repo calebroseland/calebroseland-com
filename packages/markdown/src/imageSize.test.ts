@@ -120,7 +120,7 @@ describe('imageSize', () => {
 
   it('reads a real fixture file', () => {
     const file = new URL(
-      '../fixtures/content/posts/2026/09-18-hello-placeholder/hero.png',
+      '../../../apps/web/fixtures/content/posts/2026/09-18-hello-placeholder/hero.png',
       import.meta.url,
     );
     expect(imageSize(readFileSync(file), 'hero.png')).toEqual({ width: 64, height: 40 });
