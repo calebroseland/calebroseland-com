@@ -45,6 +45,12 @@ After Netlify is gone, the standing fallback is the GitHub Pages backup at `cale
 2. Revert the offending commit on `master` by pull request and let the deploy workflow publish. Prefer a revert over a manual `wrangler rollback`, so the repository and production never disagree.
 3. If the site is down rather than wrong, follow the rollback above instead.
 
+## The old site's service worker
+
+The previous Vue site registered a Workbox service worker at `/service-worker.js` that serves `/` from its own cache, so a returning visitor can still see the old site after a deploy. `apps/web/public/service-worker.js` sits at that URL: the visitor's browser fetches it on its next update check, and it deletes the old caches, unregisters itself, and reloads open tabs into the current site. The app also unregisters the old worker when one of its own pages loads first (`src/legacyServiceWorker.ts`). Never delete or rename the file: without it the update check gets the HTML shell, fails, and the old worker stays for good. The smoke test checks it is served as JavaScript.
+
+For one stuck device: open the site, reload once. If it still shows the old site, clear the site's data in the browser settings.
+
 ## Reading errors
 
 - Worker errors: `npx wrangler tail` from `apps/web`, or the Workers Logs tab. All errors are structured JSON carrying a `requestId`.

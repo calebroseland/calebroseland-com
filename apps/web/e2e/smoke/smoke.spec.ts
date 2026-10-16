@@ -22,6 +22,17 @@ test.describe('@smoke', () => {
     }
   });
 
+  test('the old site’s service worker URL serves the script that removes it', async ({
+    request,
+    baseURL,
+  }) => {
+    const res = await request.get(new URL('service-worker.js', baseURL).toString());
+    expect(res.ok()).toBe(true);
+    // An HTML shell here fails every returning visitor's update check, leaving the old site in place.
+    expect(res.headers()['content-type']).toMatch(/javascript/);
+    expect(await res.text()).toContain('registration.unregister()');
+  });
+
   test('theme toggle works', async ({ page }) => {
     await page.goto('./');
     await page.getByRole('button', { name: /Theme:/ }).click();
