@@ -130,8 +130,8 @@ test.describe('working-tree mode', () => {
     await expectLoaded(page, 'A teal placeholder, second in a gallery');
 
     // Typing beside the gallery is where the editor used to throw on its invalid paragraph.
-    // A press that lands on the hero selects it, and typing would replace it; so the caret must be in
-    // the line's own text. Selecting a node anchors on the editor itself, whose text holds every line.
+    // Typing goes where the editor's own selection is, which can still hold the hero after the browser's
+    // caret has moved; so the editor's selection must be a caret in the line before typing.
     await expectLoaded(page, 'A teal placeholder hero');
     // Its size is on the element from the start, so its space is held before the file loads.
     await expect(body.getByRole('img', { name: 'A teal placeholder hero' })).toHaveAttribute(
@@ -141,13 +141,22 @@ test.describe('working-tree mode', () => {
     const line = body.getByText('These two images are one gallery.');
     await expect(async () => {
       await line.click();
-      const at = await page.evaluate(() => {
-        const n = getSelection()?.anchorNode;
-        return n?.nodeType === Node.TEXT_NODE
-          ? (n.parentElement?.closest('p')?.textContent ?? '')
-          : '';
-      });
-      expect(at).toBe('These two images are one gallery.');
+      await expect
+        .poll(
+          () =>
+            body.evaluate((el) => {
+              type State = {
+                selection: { empty: boolean; from: number };
+                doc: { resolve: (pos: number) => { parent: { textContent: string } } };
+              };
+              const state = (el as HTMLElement & { editor?: { state: State } }).editor?.state;
+              return state?.selection.empty
+                ? state.doc.resolve(state.selection.from).parent.textContent
+                : '';
+            }),
+          { timeout: 2_000 },
+        )
+        .toBe('These two images are one gallery.');
     }).toPass();
     await page.keyboard.press('End');
     await page.keyboard.type(' Edited beside a gallery.');
