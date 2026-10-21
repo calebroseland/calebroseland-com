@@ -71,7 +71,7 @@ const faceMotion = (reduce: boolean) => {
   };
 };
 
-// The card editor and the profile it edits load only for someone signed in, and readers never.
+// The card editor and the profile it edits load only in edit mode, and readers never.
 const cardEditorChunk = preloadable(() => import('./cardEditor/CardEditor.tsx'));
 /** Moves focus to the element once it mounts, when the mount was caused by the user turning the card. */
 const useFocusOnMount = <T extends HTMLElement>(when: boolean): RefObject<T | null> => {

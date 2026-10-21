@@ -59,11 +59,11 @@ For one stuck device: open the site, reload once. If it still shows the old site
 
 ## Secrets
 
-Set per Worker and never committed. Name the Worker: after a build, wrangler reads the generated deploy config and ignores `--env`, so `--env staging` would set the production secret.
+The Worker has none. If `GITHUB_CLIENT_SECRET` was ever set for the removed GitHub sign-in, delete it per Worker (name the Worker: after a build, wrangler reads the generated deploy config and ignores `--env`):
 
 ```bash
-npx wrangler secret put GITHUB_CLIENT_SECRET --name calebroseland-com            # production
-npx wrangler secret put GITHUB_CLIENT_SECRET --name calebroseland-com-staging    # staging
+npx wrangler secret delete GITHUB_CLIENT_SECRET --name calebroseland-com            # production
+npx wrangler secret delete GITHUB_CLIENT_SECRET --name calebroseland-com-staging    # staging
 ```
 
-Locally they live in `apps/web/.dev.vars`, which is git-ignored. `apps/web/.dev.vars.example` documents the names. No `VITE_`-prefixed variable may ever hold a credential, because those are inlined into the client bundle.
+Local Worker vars live in `apps/web/.dev.vars`, which is git-ignored; `apps/web/.dev.vars.example` documents them. No `VITE_`-prefixed variable may ever hold a credential, because those are inlined into the client bundle.

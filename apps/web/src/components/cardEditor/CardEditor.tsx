@@ -42,9 +42,9 @@ export type EditResult = { profile: Profile } | null;
 /** The card's two faces while editing, for the landing to place where its own faces go. */
 export type EditFaces = { front: ReactNode; back: ReactNode };
 
-/* The landing card, editable where it stands for a signed-in editor: the same card, its text turned
-   into fields, its links and groups draggable. It loads content/profile.yaml from the working tree, edits
-   a copy, and saves it back.
+/* The landing card, editable where it stands in edit mode: the same card, its text turned into fields,
+   its links and groups draggable. It loads content/profile.yaml from the working tree, edits a copy,
+   and saves it back.
    Loaded only when an editor opens it, so readers never download it. */
 
 /** Whether the card has been turned in this session, so focus follows only a turn the editor made. */

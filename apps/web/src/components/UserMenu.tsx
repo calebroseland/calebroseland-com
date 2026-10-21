@@ -78,7 +78,7 @@ export const UserMenu = () => {
           menu.setOpen(open);
         }}
       >
-        <Tip label={editMode.available ? 'Theme and editing' : 'Theme'} side="bottom">
+        <Tip label="Theme" side="bottom">
           <Menu.Trigger
             className={styles.button}
             aria-label={`Theme: ${label}.${editOn ? ' Edit mode on.' : ''}`}

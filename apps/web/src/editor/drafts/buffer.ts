@@ -1,11 +1,11 @@
 import type { Entry } from '@crc/content-schema';
 import { Store } from '@tanstack/store';
 
-/* The editor's working copy for one draft. Mirrored to localStorage (debounced by the caller) so a
-   reload or a lost session restores unsaved work. Nothing here commits; explicit save does. */
+/* The editor's working copy for one entry. Mirrored to localStorage (debounced by the caller) so a
+   reload or a closed tab restores unsaved work. Nothing here writes to disk; explicit save does. */
 
-/* A pending image is held as the file itself, not as a base64 string: it goes to disk or to a commit
-   as bytes, and the preview is an object URL rather than a copy of the image inside the document. */
+/* A pending image is held as the file itself, not as a base64 string: it goes to disk as bytes,
+   and the preview is an object URL rather than a copy of the image inside the document. */
 export type BufferAsset = {
   name: string;
   type: string;
