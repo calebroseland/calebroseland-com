@@ -75,6 +75,15 @@ export const readLocalBuffer = (dir: string, storage: BufferStorage | undefined)
   }
 };
 
+/** Drops the unsaved copy kept for an entry's directory. */
+export const forgetLocalBuffer = (dir: string, storage: BufferStorage | undefined): void => {
+  try {
+    storage?.removeItem(key(dir));
+  } catch {
+    // storage blocked: nothing was kept there
+  }
+};
+
 export const writeLocalBuffer = (b: Buffer, storage: BufferStorage | undefined): void => {
   try {
     if (b.dirty) {

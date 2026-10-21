@@ -1,8 +1,8 @@
 import type { Entry } from '@crc/content-schema';
 import { serializeEntry } from '@crc/markdown';
-import type { Buffer } from '../drafts/buffer.ts';
-import { bundleDirFor, type EntryKind } from '../drafts/paths.ts';
-import { type FileInput, readTree, writeFiles } from '../workingTree.ts';
+import { type Buffer, type BufferStorage, forgetLocalBuffer } from '../drafts/buffer.ts';
+import { bundleDirFor, type EntryKind, findEntryDir } from '../drafts/paths.ts';
+import { deleteDir, type FileInput, readTree, writeFiles } from '../workingTree.ts';
 
 /* The editor's writes, as plain async functions. Caching is not their concern: the mutation options in
    mutations.ts say what each write makes stale. */
@@ -34,7 +34,17 @@ export const createEntry = async (input: NewEntry): Promise<{ slug: string; dir:
     draft: true,
     tags: [],
   } as Entry;
-  const { headSha } = await readTree();
+  const { headSha, files } = await readTree();
+  // A slug opens one entry, so a second one with it would be unreachable; and writing over an
+  // existing index.md would throw its body away.
+  if (
+    findEntryDir(
+      files.map((f) => f.path),
+      input.slug,
+    )
+  ) {
+    throw new Error(`An entry with the slug "${input.slug}" already exists.`);
+  }
   await writeFiles({
     dir,
     files: [{ path: 'index.md', content: serializeEntry({ meta, body: '' }) }],
@@ -45,4 +55,13 @@ export const createEntry = async (input: NewEntry): Promise<{ slug: string; dir:
 
 export const saveEntry = (b: Buffer): Promise<{ headSha: string }> => {
   return writeFiles({ dir: b.dir, files: bundleFiles(b), expectedHeadSha: b.baseHeadSha });
+};
+
+/** Removes an entry's files, and its unsaved copy so a new entry in the same place starts clean. */
+export const deleteEntry = async (
+  dir: string,
+  storage: BufferStorage | undefined,
+): Promise<void> => {
+  await deleteDir(dir);
+  forgetLocalBuffer(dir, storage);
 };

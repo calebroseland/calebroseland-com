@@ -135,6 +135,12 @@ test.describe('unsaved work', () => {
 
     await page.goto('/editor/hello-placeholder');
     await expect(body(page)).toContainText('Only in hello');
+
+    // In the app, the same way: back to the list, then the other entry.
+    await page.getByRole('link', { name: '← Editor' }).click();
+    await page.getByRole('link', { name: 'Second placeholder' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Second placeholder' })).toBeVisible();
+    await expect(body(page)).not.toContainText('Only in hello');
   });
 });
 

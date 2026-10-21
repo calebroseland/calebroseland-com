@@ -64,11 +64,13 @@ export const useEditMode = (): boolean => {
 };
 
 /** Route guard for the editing routes: a built site has none; in dev, opening one turns edit mode on,
-    since the address says that is what the visitor wants. Kept apart from the editor's render guard,
+    since the address says that is what the visitor wants; a hover preload does not. Kept apart from the editor's render guard,
     so a route's beforeLoad does not pull the editor's data layer onto every page. */
-export const requireEditor = (): void => {
+export const requireEditor = ({ preload }: { preload: boolean }): void => {
   if (!editMode.available) {
     throw notFound();
   }
-  editMode.set(true);
+  if (!preload) {
+    editMode.set(true);
+  }
 };

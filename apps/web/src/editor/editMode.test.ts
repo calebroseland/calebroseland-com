@@ -55,17 +55,19 @@ describe('requireEditor', () => {
     const { requireEditor } = await load(false);
     let thrown: unknown;
     try {
-      requireEditor();
+      requireEditor({ preload: false });
     } catch (e) {
       thrown = e;
     }
     expect(isNotFound(thrown)).toBe(true);
   });
 
-  it('turns edit mode on under the dev server, since the address asks for the editor', async () => {
+  it('turns edit mode on under the dev server when the editor is opened, not when it is preloaded', async () => {
     const { requireEditor, editMode } = await load(true);
     expect(editMode.store.state).toBe(false);
-    requireEditor();
+    requireEditor({ preload: true });
+    expect(editMode.store.state).toBe(false);
+    requireEditor({ preload: false });
     expect(editMode.store.state).toBe(true);
   });
 });
