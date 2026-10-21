@@ -1,81 +1,9 @@
 @layer components {
-  .shell {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    min-block-size: 100dvh;
-  }
-
-  .bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-surface);
-    border-block-end: var(--border-width) solid var(--color-border);
-  }
-
   .barGroup {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-3);
     align-items: center;
-  }
-
-  .brand {
-    font-family: var(--font-brand);
-    font-size: var(--font-size-2xl);
-    line-height: var(--leading-snug);
-    color: var(--color-text);
-    white-space: nowrap;
-    text-decoration: none;
-
-    &:hover {
-      color: var(--color-link);
-    }
-  }
-
-  .siteNav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-    align-items: center;
-  }
-
-  .editorLink {
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-muted);
-    text-decoration: none;
-
-    &:hover,
-    &[data-status="active"] {
-      color: var(--color-text);
-    }
-  }
-
-  .badge {
-    padding: var(--space-px) var(--space-2);
-    font-size: var(--font-size-xs);
-    color: var(--color-warning);
-    background: var(--color-warning-subtle);
-    border-radius: var(--radius-full);
-  }
-
-  .viewer {
-    display: inline-flex;
-    gap: var(--space-2);
-    align-items: center;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-  }
-
-  .avatar {
-    border-radius: var(--radius-full);
-  }
-
-  .main {
-    padding-block: var(--space-8) var(--space-16);
   }
 
   .pageHead {
