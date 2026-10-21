@@ -145,6 +145,18 @@ test.describe('unsaved work', () => {
 });
 
 test.describe('editor', () => {
+  test('an empty document shows the placeholder that says what to do', async ({ page }) => {
+    await page.goto('/editor/about');
+    await body(page).click();
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    const placeholder = await body(page)
+      .locator('p')
+      .first()
+      .evaluate((p) => getComputedStyle(p, '::before').content);
+    expect(placeholder).toContain('Write. Type / for commands');
+  });
+
   test('an unknown slug says so instead of failing to load', async ({ page }) => {
     await page.goto('/editor/no-such-entry');
     await expect(page.getByRole('alert').filter({ hasText: 'No entry' })).toContainText(

@@ -28,7 +28,8 @@
     font-size: var(--font-size-base);
     outline: none;
 
-    & p.is-editor-empty:first-child::before {
+    /* TipTap's own classes: global, or CSS Modules would rename them and nothing would match. */
+    & :global(p.is-editor-empty:first-child)::before {
       float: inline-start;
       block-size: 0;
       color: var(--color-text-subtle);
@@ -45,7 +46,7 @@
       overflow-x: auto;
     }
 
-    & img.ProseMirror-selectednode {
+    & :global(img.ProseMirror-selectednode) {
       outline: var(--focus-ring-width) solid var(--color-focus-ring);
     }
   }
