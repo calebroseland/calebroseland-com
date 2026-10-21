@@ -7,6 +7,23 @@ import { defineConfig } from 'vitest/config';
    on violations). Kept apart from the root projects, so `mise run check` stays fast. */
 export default defineConfig({
   plugins: [storybookTest({ configDir: fileURLToPath(new URL('.storybook', import.meta.url)) })],
+  // Bundled up front: a dependency found mid-run makes Vite reload the browser and fail the stories
+  // that were running.
+  optimizeDeps: {
+    include: [
+      '@base-ui/react/alert-dialog',
+      '@base-ui/react/menu',
+      '@base-ui/react/tooltip',
+      '@tanstack/react-store',
+      '@tanstack/store',
+      'motion',
+      'motion/mini',
+      'motion/react',
+      'react',
+      'react-dom',
+      'storybook/test',
+    ],
+  },
   test: {
     name: 'stories',
     browser: {

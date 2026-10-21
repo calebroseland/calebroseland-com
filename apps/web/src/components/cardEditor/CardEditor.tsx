@@ -6,9 +6,8 @@ import {
   useItemRegistration,
   useListTarget,
 } from '@crc/interaction';
-import { Button, Icon, IconButton, notify } from '@crc/ui';
+import { Button, ConfirmDialog, Icon, IconButton, notify } from '@crc/ui';
 import { type FormEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from 'react';
-import { ConfirmDialog } from '../../editor/Dialogs.tsx';
 import { useSaveProfile } from '../../editor/data/hooks.ts';
 import { EditorProvider } from '../../editor/EditorProvider.tsx';
 import { loadProfile, type ProfileSource } from '../../editor/profile.ts';
@@ -112,14 +111,8 @@ const Session = ({
         }}
         title="Discard your changes to the card?"
         description="You have edits you haven't saved. Leaving this page throws them away."
-        actions={
-          <>
-            <Button onClick={() => leaving.reset?.()}>Keep editing</Button>
-            <Button variant="primary" tone="danger" onClick={() => leaving.proceed?.()}>
-              Discard
-            </Button>
-          </>
-        }
+        cancelLabel="Keep editing"
+        confirm={{ label: 'Discard', tone: 'danger', onClick: () => leaving.proceed?.() }}
       />
     </>
   );

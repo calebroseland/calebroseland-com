@@ -1,7 +1,6 @@
-import { Button, button, notify } from '@crc/ui';
+import { Button, button, ConfirmDialog, notify } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
-import { ConfirmDialog } from '../editor/Dialogs.tsx';
 import { useEntry, useReloadEntry, useSaveEntry } from '../editor/data/hooks.ts';
 import { AssetsPanel } from '../editor/document/AssetsPanel.tsx';
 import { Editor, useEditorApi } from '../editor/document/Editor.tsx';
@@ -249,22 +248,15 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
         onOpenChange={conflict.onOpenChange}
         title="This file changed on disk since you opened it."
         description="Reload to see what is on disk now (your unsaved edits are discarded), or overwrite the file with what you have here."
-        actions={
-          <>
-            <Button onClick={conflict.close}>Cancel</Button>
-            <Button onClick={reloadFromSource}>Reload from disk</Button>
-            <Button
-              variant="primary"
-              tone="danger"
-              onClick={() => {
-                conflict.close();
-                void runSave('overwrite');
-              }}
-            >
-              Overwrite
-            </Button>
-          </>
-        }
+        alternative={{ label: 'Reload from disk', onClick: reloadFromSource }}
+        confirm={{
+          label: 'Overwrite',
+          tone: 'danger',
+          onClick: () => {
+            conflict.close();
+            void runSave('overwrite');
+          },
+        }}
       />
     </EditorShell>
   );

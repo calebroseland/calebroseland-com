@@ -1,7 +1,16 @@
-import { Button, button, Icon, iconButton, Menu, MenuItem, notify, Stack } from '@crc/ui';
+import {
+  Button,
+  button,
+  ConfirmDialog,
+  Icon,
+  iconButton,
+  Menu,
+  MenuItem,
+  notify,
+  Stack,
+} from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
-import { ConfirmDialog } from '../editor/Dialogs.tsx';
 import { useBoard, useBranch, useDeleteEntry } from '../editor/data/hooks.ts';
 import type { EntryKind } from '../editor/drafts/paths.ts';
 import { EditorShell } from '../editor/EditorShell.tsx';
@@ -98,23 +107,16 @@ const Board = () => {
         onOpenChange={deleting.onOpenChange}
         title={`Delete ‘${target?.slug}’?`}
         description={`This deletes ${target?.dir} from your working tree. It is an ordinary file deletion you can undo with git.`}
-        actions={
-          <>
-            <Button onClick={deleting.close}>Cancel</Button>
-            <Button
-              variant="primary"
-              tone="danger"
-              onClick={() => {
-                if (target) {
-                  void runDelete(target);
-                }
-                deleting.close();
-              }}
-            >
-              Delete
-            </Button>
-          </>
-        }
+        confirm={{
+          label: 'Delete',
+          tone: 'danger',
+          onClick: () => {
+            if (target) {
+              void runDelete(target);
+            }
+            deleting.close();
+          },
+        }}
       />
     </EditorShell>
   );

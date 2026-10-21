@@ -1,4 +1,5 @@
 export { Button, type ButtonStyle, button } from './components/Button/Button.tsx';
+export { ConfirmDialog } from './components/ConfirmDialog/ConfirmDialog.tsx';
 export {
   IconButton,
   type IconButtonStyle,
