@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import type { EntryMeta, LoadedEntry } from '../content/entries.ts';
 import { formatDate } from '../content/entries.ts';
-import { useSignedIn } from '../editor/auth/hooks.ts';
+import { useEditMode } from '../editor/editMode.ts';
 import { useBodyMedia } from '../hooks/useBodyMedia.ts';
 import { useCurrentHref } from '../hooks/useCurrentHref.ts';
 import { useScrollReveal } from '../hooks/useScrollReveal.ts';
@@ -35,11 +35,11 @@ export const EntryHeader = ({
   );
 };
 
-/** Signed in, an editor can open this entry in the editor from the page itself. */
+/** In edit mode, this entry opens in the editor from the page itself. */
 const EditEntry = ({ slug, title }: { slug: string; title: string }) => {
-  const signedIn = useSignedIn();
+  const editing = useEditMode();
   const here = useCurrentHref();
-  if (!signedIn) {
+  if (!editing) {
     return null;
   }
   return (

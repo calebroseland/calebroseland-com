@@ -68,11 +68,10 @@ const drag = async (
   await page.mouse.up();
 };
 
-const signInLocal = async (page: import('@playwright/test').Page) => {
-  await page.goto('/login');
+/** Opening the editor turns edit mode on; unsaved copies from earlier tests are cleared first. */
+const openBoard = async (page: import('@playwright/test').Page) => {
+  await page.goto('/editor');
   await page.evaluate(() => localStorage.clear());
-  await page.getByText('Developer options').click();
-  await page.getByRole('button', { name: 'Edit files on this branch' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Editor' })).toBeVisible();
 };
 
@@ -82,7 +81,7 @@ test.describe.configure({ mode: 'serial' });
 
 test.describe('working-tree mode', () => {
   test('lists the files on this branch and names the branch it is editing', async ({ page }) => {
-    await signInLocal(page);
+    await openBoard(page);
     // The board names the checked-out branch it is editing.
     await expect(page.getByText(/Editing .+ · working tree/)).toBeVisible();
     const files = page.getByRole('region', { name: /^Files on this branch/ });
@@ -93,7 +92,7 @@ test.describe('working-tree mode', () => {
   });
 
   test('editing a post writes the markdown straight to the file', async ({ page }) => {
-    await signInLocal(page);
+    await openBoard(page);
     await page
       .getByRole('region', { name: /^Files on this branch/ })
       .getByRole('link', { name: 'Hello, placeholder' })
@@ -120,7 +119,7 @@ test.describe('working-tree mode', () => {
   });
 
   test('images on adjacent lines stay a gallery through an edit and a save', async ({ page }) => {
-    await signInLocal(page);
+    await openBoard(page);
     await page
       .getByRole('region', { name: /^Files on this branch/ })
       .getByRole('link', { name: 'Hello, placeholder' })
@@ -173,7 +172,7 @@ test.describe('working-tree mode', () => {
   test('a page is created on disk and renders on the site without a publish step', async ({
     page,
   }) => {
-    await signInLocal(page);
+    await openBoard(page);
     await page.getByRole('link', { name: 'New entry' }).click();
     await page.getByRole('radio', { name: /^page/i }).check();
     await page.getByLabel('Title').fill('Uses');
@@ -199,7 +198,7 @@ test.describe('working-tree mode', () => {
     page,
     request,
   }) => {
-    await signInLocal(page);
+    await openBoard(page);
     await page
       .getByRole('region', { name: /^Files on this branch/ })
       .getByRole('link', { name: 'Second placeholder' })
@@ -234,7 +233,7 @@ test.describe('working-tree mode', () => {
   test('an image is resized, written beside the markdown, and referenced from it', async ({
     page,
   }) => {
-    await signInLocal(page);
+    await openBoard(page);
     await page.getByRole('link', { name: 'New entry' }).click();
     await page.getByLabel('Title').fill('With Photo');
     await page.getByRole('button', { name: 'Create post' }).click();
@@ -258,7 +257,7 @@ test.describe('working-tree mode', () => {
   });
 
   test('deleting an entry removes its directory from the working tree', async ({ page }) => {
-    await signInLocal(page);
+    await openBoard(page);
     await page.getByRole('link', { name: 'New entry' }).click();
     await page.getByLabel('Title').fill('Temporary');
     await page.getByRole('button', { name: 'Create post' }).click();
@@ -280,7 +279,7 @@ test.describe('working-tree mode', () => {
     page,
     browserName,
   }) => {
-    await signInLocal(page);
+    await openBoard(page);
     await page.goto('/');
     await page.getByRole('button', { name: 'Edit card' }).click();
     const form = page.getByRole('form', { name: 'Edit card' });
@@ -333,7 +332,7 @@ test.describe('working-tree mode', () => {
   test('the landing card edits in place and saves profile.yaml to the working tree', async ({
     page,
   }) => {
-    await signInLocal(page);
+    await openBoard(page);
     // Whatever the tags are, a new one lands last, and one step left puts it before the last.
     const tagsOnDisk = () =>
       (parse(onDisk('profile.yaml')).tags as Array<string | { label: string }>).map((t) =>
@@ -366,7 +365,7 @@ test.describe('working-tree mode', () => {
   });
 
   test('leaving the card with unsaved edits asks first', async ({ page }) => {
-    await signInLocal(page);
+    await openBoard(page);
     // In-app steps, so Back stays inside the app: the brand goes to Posts, and from Posts to the card.
     await page.getByRole('link', { name: 'Caleb Roseland' }).click();
     await expect(page).toHaveURL(/\/posts$/);
@@ -402,7 +401,7 @@ test.describe('working-tree mode', () => {
   test("the Pages filter shows only the site's pages and opens one in the editor", async ({
     page,
   }) => {
-    await signInLocal(page);
+    await openBoard(page);
     await page
       .getByRole('navigation', { name: 'Show' })
       .getByRole('link', { name: /^Pages/ })

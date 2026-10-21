@@ -27,7 +27,7 @@ describe('UserMenu theme editor loading', () => {
         })}
       />,
     );
-    fireEvent.click(await screen.findByRole('button', { name: /^Account:/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /^Theme:/ }));
     const menu = await screen.findByRole('menu');
     await waitFor(() => expect(loads.count).toBe(1));
     fireEvent.click(within(menu).getByRole('menuitem', { name: /New custom theme/ }));

@@ -50,7 +50,7 @@ vi.mock('virtual:content/profile', () => ({
 vi.mock('virtual:content/index', () => ({ default: [], loaders: {} }));
 
 import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router';
-import { session } from '../editor/auth/store.ts';
+import { editMode } from '../editor/editMode.ts';
 import { type FakeWorkingTree, installFakeWorkingTree } from '../editor/fakeWorkingTree.ts';
 import { routeTree } from '../routeTree.gen.ts';
 import { detailsExpanded } from './detailsState.ts';
@@ -316,10 +316,10 @@ describe('Landing', () => {
 
     beforeEach(() => {
       disk = installFakeWorkingTree();
-      session.signIn({ status: 'authenticated', backend: 'local', token: 'local' });
+      editMode.set(true);
     });
     afterEach(() => {
-      session.signOut();
+      editMode.set(false);
       vi.unstubAllGlobals();
     });
 
@@ -482,9 +482,9 @@ describe('Landing', () => {
       );
     });
 
-    it('signing out mid-edit puts the card back, read-only', async () => {
+    it('turning edit mode off mid-edit puts the card back, read-only', async () => {
       await openEditor();
-      act(() => session.signOut());
+      act(() => editMode.set(false));
       await waitFor(() =>
         expect(screen.queryByRole('form', { name: 'Edit card' })).not.toBeInTheDocument(),
       );
@@ -507,9 +507,9 @@ describe('Landing', () => {
     });
   });
 
-  it('lets a signed-in editor change the card and save it as profile.yaml in the working tree', async () => {
+  it('lets an editor change the card and save it as profile.yaml in the working tree', async () => {
     const disk = installFakeWorkingTree();
-    session.signIn({ status: 'authenticated', backend: 'local', token: 'local' });
+    editMode.set(true);
     try {
       await renderLanding();
       fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
@@ -550,7 +550,7 @@ describe('Landing', () => {
       );
       await waitFor(() => expect(screen.getByRole('button', { name: 'Edit card' })).toHaveFocus());
     } finally {
-      session.signOut();
+      editMode.set(false);
       vi.unstubAllGlobals();
     }
   });

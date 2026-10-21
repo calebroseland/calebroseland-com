@@ -13,8 +13,7 @@ export const trackReturnPage = (router: AnyRouter): (() => void) => {
   last = undefined;
   return router.subscribe('onResolved', ({ toLocation }) => {
     const ids = router.state.matches.map((m) => m.routeId as string);
-    // Signing in is a detour, not a place to come back to.
-    if (!ids.some((id) => id === '/_card' || id.startsWith('/login'))) {
+    if (!ids.includes('/_card')) {
       last = toLocation.href;
     }
   });

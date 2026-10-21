@@ -24,7 +24,7 @@ const usePaletteDialog = (open: boolean) => {
 export const CommandPalette = () => {
   usePaletteHotkey();
   const open = usePaletteOpen();
-  useBuiltinCommands(open);
+  useBuiltinCommands();
   const Dialog = usePaletteDialog(open);
   return Dialog ? <Dialog open={open} /> : null;
 };
