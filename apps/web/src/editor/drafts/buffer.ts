@@ -24,14 +24,14 @@ type EntryDraftMeta = Entry extends infer T
   : never;
 
 export type Buffer = {
-  ref: string;
+  /** The entry's directory, which also keys its unsaved copy on this device. */
   dir: string;
-  /** Head sha the buffer was loaded from; saveBundle sends it as the optimistic lock. */
+  /** Tree hash the buffer was loaded from; a save sends it so a change on disk is refused. */
   baseHeadSha: string;
   markdown: string;
   meta: EntryDraftMeta;
   assets: BufferAsset[];
-  /** Assets that exist on the branch already (not re-uploaded on save). */
+  /** Assets already on disk (not written again on save). */
   existingAssets: string[];
   dirty: boolean;
   restoredFromLocal: boolean;
@@ -40,7 +40,7 @@ export type Buffer = {
   updatedAt: string;
 };
 
-const key = (ref: string) => `crc:buffer:${ref}`;
+const key = (dir: string) => `crc:buffer:${dir}`;
 
 /** Local storage when there is a browser that allows it; the buffer works without it. */
 export const browserStorage = (): BufferStorage | undefined => {
@@ -53,9 +53,9 @@ export const browserStorage = (): BufferStorage | undefined => {
 
 export type BufferStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
-export const readLocalBuffer = (ref: string, storage: BufferStorage | undefined): Buffer | null => {
+export const readLocalBuffer = (dir: string, storage: BufferStorage | undefined): Buffer | null => {
   try {
-    const raw = storage?.getItem(key(ref));
+    const raw = storage?.getItem(key(dir));
     if (!raw) {
       return null;
     }
@@ -82,7 +82,7 @@ export const writeLocalBuffer = (b: Buffer, storage: BufferStorage | undefined):
       // text with it, which is the part that cannot be recovered from anywhere else.
       const { assets, ...rest } = b;
       storage?.setItem(
-        key(b.ref),
+        key(b.dir),
         JSON.stringify({
           ...rest,
           assets: [],
@@ -91,7 +91,7 @@ export const writeLocalBuffer = (b: Buffer, storage: BufferStorage | undefined):
         }),
       );
     } else {
-      storage?.removeItem(key(b.ref));
+      storage?.removeItem(key(b.dir));
     }
   } catch {
     // storage full or blocked: the in-memory buffer still works

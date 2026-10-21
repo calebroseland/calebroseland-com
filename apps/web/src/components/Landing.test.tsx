@@ -51,6 +51,7 @@ vi.mock('virtual:content/index', () => ({ default: [], loaders: {} }));
 
 import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router';
 import { session } from '../editor/auth/store.ts';
+import { type FakeWorkingTree, installFakeWorkingTree } from '../editor/fakeWorkingTree.ts';
 import { routeTree } from '../routeTree.gen.ts';
 import { detailsExpanded } from './detailsState.ts';
 import { trackReturnPage } from './returnPage.ts';
@@ -310,18 +311,16 @@ describe('Landing', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
       return screen.findByRole('form', { name: 'Edit card' }, { timeout: 5000 });
     };
-    const savedYaml = (): string | undefined => {
-      const fake = JSON.parse(localStorage.getItem('crc:fake-github') ?? '{}');
-      return fake.branches?.['drafts/profile']?.files?.['content/profile.yaml']?.content;
-    };
+    let disk: FakeWorkingTree;
+    const savedYaml = (): string | undefined => disk.read('content/profile.yaml');
 
     beforeEach(() => {
-      localStorage.clear();
-      session.signIn({ status: 'authenticated', backend: 'fake', token: 'fake' });
+      disk = installFakeWorkingTree();
+      session.signIn({ status: 'authenticated', backend: 'local', token: 'local' });
     });
     afterEach(() => {
       session.signOut();
-      localStorage.clear();
+      vi.unstubAllGlobals();
     });
 
     it('turns the card itself editable, with every link of every group, and nothing to save yet', async () => {
@@ -468,7 +467,7 @@ describe('Landing', () => {
         },
       );
 
-      // The fake backend outlives each test: put Two back as the other tests expect it.
+      // A second edit starts from what the first saved.
       fireEvent.click(await screen.findByRole('button', { name: 'Edit card' }, { timeout: 5000 }));
       const again = await screen.findByRole('form', { name: 'Edit card' }, { timeout: 5000 });
       fireEvent.click(within(again).getByRole('button', { name: 'Settings for Two' }));
@@ -508,9 +507,9 @@ describe('Landing', () => {
     });
   });
 
-  it('lets a signed-in editor change the card and save it as profile.yaml on drafts/profile', async () => {
-    localStorage.clear();
-    session.signIn({ status: 'authenticated', backend: 'fake', token: 'fake' });
+  it('lets a signed-in editor change the card and save it as profile.yaml in the working tree', async () => {
+    const disk = installFakeWorkingTree();
+    session.signIn({ status: 'authenticated', backend: 'local', token: 'local' });
     try {
       await renderLanding();
       fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
@@ -544,8 +543,7 @@ describe('Landing', () => {
         () => expect(screen.queryByRole('form', { name: 'Edit card' })).not.toBeInTheDocument(),
         { timeout: 5000 },
       );
-      const fake = JSON.parse(localStorage.getItem('crc:fake-github') ?? '{}');
-      const yaml: string = fake.branches['drafts/profile'].files['content/profile.yaml'].content;
+      const yaml = disk.read('content/profile.yaml') ?? '';
       expect(yaml).toContain('tagline: A better tagline');
       expect(yaml).toMatch(
         /tags: \[ \{ label: Two, icon: simple-icons:react, show: icon, link: false }, \{ label: Three, link: false }, Four, .*Nine ]/,
@@ -553,7 +551,7 @@ describe('Landing', () => {
       await waitFor(() => expect(screen.getByRole('button', { name: 'Edit card' })).toHaveFocus());
     } finally {
       session.signOut();
-      localStorage.clear();
+      vi.unstubAllGlobals();
     }
   });
 });

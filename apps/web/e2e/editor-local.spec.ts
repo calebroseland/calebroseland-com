@@ -83,8 +83,8 @@ test.describe.configure({ mode: 'serial' });
 test.describe('working-tree mode', () => {
   test('lists the files on this branch and names the branch it is editing', async ({ page }) => {
     await signInLocal(page);
-    // The board says who is signed in and in which mode; here that is the checked-out branch.
-    await expect(page.getByText(/Signed in as .+ · working tree/)).toBeVisible();
+    // The board names the checked-out branch it is editing.
+    await expect(page.getByText(/Editing .+ · working tree/)).toBeVisible();
     const files = page.getByRole('region', { name: /^Files on this branch/ });
     await expect(files.getByRole('link', { name: 'Hello, placeholder' })).toBeVisible();
     await expect(files.getByRole('link', { name: 'About' })).toBeVisible();

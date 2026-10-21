@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { siteFonts } from '../content/theme.ts';
 import { useSession, useSignInMethods, useSignOut } from '../editor/auth/hooks.ts';
 import { canSignIn } from '../editor/auth/methods.ts';
-import { capabilitiesOf } from '../editor/data/backend.ts';
 import { useAccountLinks } from '../editor/navigation.ts';
 import { useDialogState } from '../hooks/useDialogState.ts';
 import { useDisclosure } from '../hooks/useDisclosure.ts';
@@ -90,7 +89,7 @@ export const UserMenu = () => {
             className={styles.button}
             aria-label={
               signedIn
-                ? `Account: signed in with ${capabilitiesOf(current.backend).label}. Theme: ${label}.`
+                ? `Account: editing the working tree. Theme: ${label}.`
                 : `Account: signed out. Theme: ${label}.`
             }
           >
@@ -152,7 +151,7 @@ export const UserMenu = () => {
               {signedIn ? (
                 <Menu.Group>
                   <Menu.GroupLabel className={styles.groupLabel}>
-                    Signed in · {capabilitiesOf(current.backend).label}
+                    Signed in · working tree
                   </Menu.GroupLabel>
                   <Menu.Item className={styles.item} onClick={links.board}>
                     <Icon name="lucide:file-pen" size="sm" />

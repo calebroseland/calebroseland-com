@@ -519,7 +519,7 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
     void withViewTransition(
       'edit',
       () => {
-        if (result?.workingTree) {
+        if (result) {
           setSaved(result.profile);
         }
         setReturnToEdit(true);

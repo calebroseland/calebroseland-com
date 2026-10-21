@@ -1,7 +1,7 @@
-import type { Bundle } from '@crc/github-client';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useEffect, useState } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
+import type { Tree } from '../workingTree.ts';
 import {
   type Buffer,
   type BufferController,
@@ -11,14 +11,14 @@ import {
   writeLocalBuffer,
 } from './buffer.ts';
 import { preview } from './images.ts';
-import { bufferFromBundle } from './load.ts';
+import { bufferFromTree } from './load.ts';
 
-/** The working copy of one draft: built once per branch from the bundle, or from unsaved work kept on
-    this device, and mirrored back to the device as it changes. */
-export const useDraftBuffer = (bundle: Bundle, slug: string) => {
+/** The working copy of one entry: built once from the tree, or from unsaved work kept on this device,
+    and mirrored back to the device as it changes. */
+export const useDraftBuffer = (tree: Tree, slug: string) => {
   const [controller] = useState(() => {
-    const initial = bufferFromBundle(bundle, slug);
-    const local = readLocalBuffer(initial.ref, browserStorage());
+    const initial = bufferFromTree(tree, slug);
+    const local = readLocalBuffer(initial.dir, browserStorage());
     // Unsaved work always wins on load, even when the source moved underneath it: it keeps its own
     // base, so saving is refused with the conflict dialog rather than the edit being thrown away here.
     return createBufferStore(
@@ -29,13 +29,13 @@ export const useDraftBuffer = (bundle: Bundle, slug: string) => {
   useLocalAutosave(buffer);
   useFlushOnUnmount(controller);
   useFlushBeforeLeaving(controller, buffer.dirty);
-  return { buffer, controller, preview: usePreview(bundle, controller) };
+  return { buffer, controller, preview: usePreview(tree, controller) };
 };
 
 /** Resolves an image in the document to something the browser can show. Reads the store, not React
     state, because an image is inserted in the same tick its file is added. */
-const usePreview = (bundle: Bundle, controller: BufferController) => {
-  const files = useLatest(bundle.files);
+const usePreview = (tree: Tree, controller: BufferController) => {
+  const files = useLatest(tree.files);
   return useCallback(
     (src: string) => preview(src, controller.store.state, files.current),
     [controller, files],

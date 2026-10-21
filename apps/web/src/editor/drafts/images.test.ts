@@ -16,13 +16,11 @@ const files = [
   {
     path: 'posts/2026/09-18-hello/index.md',
     content: '# Hi',
-    sha: 'a',
     encoding: 'utf-8' as const,
   },
   {
     path: 'posts/2026/09-18-hello/hero.png',
     content: hero,
-    sha: 'b',
     encoding: 'base64' as const,
   },
 ];
@@ -31,7 +29,6 @@ const broken = [
   {
     path: 'posts/2026/09-18-hello/broken.png',
     content: 'eA==',
-    sha: 'c',
     encoding: 'base64' as const,
   },
 ];
@@ -44,7 +41,7 @@ describe('preview', () => {
     });
   });
 
-  it('shows an image on the branch from the loaded bundle, with or without ./', () => {
+  it('shows an image on the branch from the loaded tree, with or without ./', () => {
     expect(preview('hero.png', buffer, files).src).toBe(`data:image/png;base64,${hero}`);
     expect(preview('./hero.png', buffer, files).src).toBe(`data:image/png;base64,${hero}`);
   });

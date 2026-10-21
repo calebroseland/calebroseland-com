@@ -26,7 +26,7 @@ const NewEntry = () => {
     }
     const outcome = await create.run(form.entry);
     if (outcome.ok) {
-      await openInEditor(outcome.value.draft.slug);
+      await openInEditor(outcome.value.slug);
     }
   };
 

@@ -2,19 +2,12 @@ import { Stack } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { ConfirmDialog } from '../editor/Dialogs.tsx';
-import {
-  useBeginEditing,
-  useBoard,
-  useDiscardEntry,
-  useViewerLogin,
-} from '../editor/data/hooks.ts';
+import { useBoard, useBranch, useDeleteEntry } from '../editor/data/hooks.ts';
 import type { EntryKind } from '../editor/drafts/paths.ts';
 import { RowMenu, RowMenuItem } from '../editor/drafts/RowMenu.tsx';
-import { useCapabilities } from '../editor/EditorProvider.tsx';
 import { EditorShell } from '../editor/EditorShell.tsx';
 import styles from '../editor/editor.module.css';
 import type { EditorEntry } from '../editor/entries.ts';
-import { useOpenInEditor } from '../editor/navigation.ts';
 import { notify } from '../editor/Toast.tsx';
 import { useDialogState } from '../hooks/useDialogState.ts';
 
@@ -33,42 +26,24 @@ const useKindFilter = (): EntryKind | undefined => {
   return Route.useSearch().kind;
 };
 
-type Discarding = { ref: string; slug: string; dir: string };
-
 const Board = () => {
   const kind = useKindFilter();
   const board = useBoard(kind);
-  const login = useViewerLogin();
-  const caps = useCapabilities();
-  const local = !caps.branches;
-  const discarding = useDialogState<Discarding>();
-  const discard = useDiscardEntry();
-  const edit = useBeginEditing();
-  const openInEditor = useOpenInEditor();
+  const branch = useBranch();
+  const deleting = useDialogState<EditorEntry>();
+  const remove = useDeleteEntry();
 
-  // Without branches there is nothing to throw away but the entry's files.
-  const runDiscard = async (row: Discarding) => {
-    const outcome = await discard.run(row);
+  const runDelete = async (entry: EditorEntry) => {
+    const outcome = await remove.run(entry.dir);
     if (outcome.ok) {
-      notify(local ? 'Deleted from your working tree' : 'Discarded the draft branch', {
-        kind: 'success',
-      });
+      notify('Deleted from your working tree', { kind: 'success' });
     } else {
-      notify("Couldn't discard that.", { kind: 'error' });
-    }
-  };
-
-  const startEditing = async (slug: string) => {
-    const outcome = await edit.run(slug);
-    if (outcome.ok) {
-      await openInEditor(slug);
-    } else {
-      notify("Couldn't start editing that entry.", { kind: 'error' });
+      notify("Couldn't delete that.", { kind: 'error' });
     }
   };
 
   const ready = board.status === 'ready' ? board : null;
-  const target = discarding.subject;
+  const target = deleting.subject;
 
   return (
     <EditorShell
@@ -78,9 +53,7 @@ const Board = () => {
         </Link>
       }
     >
-      <p className={styles.muted}>
-        Signed in as {login ?? '…'} · {caps.label}
-      </p>
+      <p className={styles.muted}>Editing {branch ?? '…'} · working tree</p>
       {/* Posts and pages share one board; the filter lives in the URL so a view can be linked to. */}
       <nav className={`${styles.tabs} ${styles.filters}`} aria-label="Show">
         {FILTERS.map((f) => (
@@ -100,69 +73,32 @@ const Board = () => {
         {board.status === 'loading' && <p className={styles.muted}>Loading…</p>}
         {board.status === 'error' && (
           <p role="alert" className={styles.alert}>
-            Couldn't load entries from GitHub.{' '}
+            Couldn't read your working tree.{' '}
             <button type="button" className={styles.toastAction} onClick={board.retry}>
               Retry
             </button>
           </p>
         )}
-        {ready && ready.inProgress.length + ready.live.length === 0 && (
+        {ready && ready.entries.length === 0 && (
           <p className={styles.muted}>{kind ? EMPTY[kind] : 'Nothing here yet.'}</p>
         )}
-
-        {ready && ready.inProgress.length > 0 && (
-          <Group title={`In progress (${ready.inProgress.length})`}>
-            {ready.inProgress.map((row) => (
-              <Row
-                key={row.ref}
-                entry={row}
-                action="Open"
-                onDiscard={() => discarding.open({ ref: row.ref, slug: row.slug, dir: row.dir })}
-              />
-            ))}
-          </Group>
-        )}
-
-        {ready && ready.live.length > 0 && (
-          <Group
-            title={
-              local
-                ? `Files on this branch (${ready.live.length})`
-                : `Published (${ready.live.length})`
-            }
-          >
-            {ready.live.map((row) => (
-              <Row
-                key={`${row.kind}:${row.slug}`}
-                entry={row}
-                action="Edit"
-                {...(local
-                  ? {
-                      onDiscard: () =>
-                        discarding.open({ ref: row.ref, slug: row.slug, dir: row.dir }),
-                    }
-                  : {
-                      busy: edit.pending && edit.variables === row.slug,
-                      onAction: () => void startEditing(row.slug),
-                    })}
-              />
+        {ready && ready.entries.length > 0 && (
+          <Group title={`Files on this branch (${ready.entries.length})`}>
+            {ready.entries.map((row) => (
+              <Row key={row.dir} entry={row} onDelete={() => deleting.open(row)} />
             ))}
           </Group>
         )}
       </div>
 
       <ConfirmDialog
-        open={discarding.isOpen}
-        onOpenChange={discarding.onOpenChange}
-        title={local ? `Delete ‘${target?.slug}’?` : `Discard ‘${target?.slug}’?`}
-        description={
-          local
-            ? `This deletes ${target?.dir} from your working tree. It is an ordinary file deletion you can undo with git.`
-            : `This deletes the branch ${target?.ref} and closes its pull request. Local unsaved changes are kept.`
-        }
+        open={deleting.isOpen}
+        onOpenChange={deleting.onOpenChange}
+        title={`Delete ‘${target?.slug}’?`}
+        description={`This deletes ${target?.dir} from your working tree. It is an ordinary file deletion you can undo with git.`}
         actions={
           <>
-            <button type="button" className={styles.secondary} onClick={discarding.close}>
+            <button type="button" className={styles.secondary} onClick={deleting.close}>
               Cancel
             </button>
             <button
@@ -170,12 +106,12 @@ const Board = () => {
               className={`${styles.primary} ${styles.danger}`}
               onClick={() => {
                 if (target) {
-                  void runDiscard(target);
+                  void runDelete(target);
                 }
-                discarding.close();
+                deleting.close();
               }}
             >
-              {local ? 'Delete' : 'Discard'}
+              Delete
             </button>
           </>
         }
@@ -195,63 +131,26 @@ const Group = ({ title, children }: { title: string; children: React.ReactNode }
   );
 };
 
-const describe = (entry: EditorEntry): string => {
-  switch (entry.status) {
-    case 'pull-request':
-      return `Pull request #${entry.pr?.number}`;
-    case 'draft':
-      return entry.ref;
-    case 'working-tree':
-      return entry.dir;
-    default:
-      return entry.draft ? `${entry.dir} · marked draft` : entry.dir;
-  }
-};
-
-const Row = ({
-  entry,
-  action,
-  busy,
-  onAction,
-  onDiscard,
-}: {
-  entry: EditorEntry;
-  action: string;
-  busy?: boolean;
-  onAction?: () => void;
-  onDiscard?: () => void;
-}) => {
+const Row = ({ entry, onDelete }: { entry: EditorEntry; onDelete: () => void }) => {
   return (
     <li className={styles.row}>
       <div className={styles.rowMain}>
         <Link to="/editor/$slug" params={{ slug: entry.slug }} className={styles.rowTitle}>
           {entry.title}
         </Link>
-        <span className={styles.rowMeta}>{describe(entry)}</span>
+        <span className={styles.rowMeta}>
+          {entry.draft ? `${entry.dir} · marked draft` : entry.dir}
+        </span>
       </div>
-      {entry.kind && <span className={styles.kindBadge}>{entry.kind}</span>}
-      {onAction ? (
-        <button
-          type="button"
-          className={styles.secondary}
-          onClick={onAction}
-          disabled={busy}
-          aria-busy={busy}
-        >
-          {busy ? 'Starting…' : action}
-        </button>
-      ) : (
-        <Link to="/editor/$slug" params={{ slug: entry.slug }} className={styles.secondary}>
-          {action}
-        </Link>
-      )}
-      {onDiscard && (
-        <RowMenu label={`Actions for ${entry.slug}`}>
-          <RowMenuItem onClick={onDiscard} danger>
-            {entry.status === 'working-tree' ? 'Delete entry' : 'Discard draft'}
-          </RowMenuItem>
-        </RowMenu>
-      )}
+      <span className={styles.kindBadge}>{entry.kind}</span>
+      <Link to="/editor/$slug" params={{ slug: entry.slug }} className={styles.secondary}>
+        Edit
+      </Link>
+      <RowMenu label={`Actions for ${entry.slug}`}>
+        <RowMenuItem onClick={onDelete} danger>
+          Delete entry
+        </RowMenuItem>
+      </RowMenu>
     </li>
   );
 };

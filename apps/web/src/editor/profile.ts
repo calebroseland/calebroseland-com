@@ -1,42 +1,28 @@
 import { type Profile, profile as profileSchema } from '@crc/content-schema';
-import type { GitHubClient } from '@crc/github-client';
 import { Document, isMap, isScalar, isSeq, parseDocument, visit } from 'yaml';
-import { capabilitiesOf } from './data/backend.ts';
+import { readTree, writeFiles } from './workingTree.ts';
 
 /* One path for reading and writing content/profile.yaml, used by the landing card's in-place editor.
-   On GitHub (and the fake) edits accumulate on a drafts/profile branch that is
-   published like any draft; in working-tree mode they are the file on disk. */
+   A save is the file on disk. */
 
-export const PROFILE_REF = 'drafts/profile';
 const PROFILE_PATH = 'content/profile.yaml';
 
 export type ProfileSource = {
   profile: Profile;
   /** The file as read, so a save can keep its comments and layout. */
   yaml: string;
-  /** Where a save will go: the draft branch, or the working tree. */
-  ref: string;
   headSha: string;
-  /** False until the first save creates the branch (GitHub and the fake only). */
-  branchExists: boolean;
 };
 
-/** Reads the profile from the draft branch if one exists, otherwise from what is published. When the
-    target branch has no profile yet, `fallback` (the profile this build was made from) stands in until
-    the first save. */
-export const loadProfile = async (gh: GitHubClient, fallback: Profile): Promise<ProfileSource> => {
-  const { branches } = capabilitiesOf(gh.kind);
-  const draft = branches
-    ? ((await gh.listDrafts()).find((d) => d.ref === PROFILE_REF) ?? null)
-    : null;
-  const bundle = await gh.readBundle(draft?.ref ?? gh.defaultBranch, 'content');
-  const file = bundle.files.find((f) => f.path === PROFILE_PATH);
+/** Reads the profile from disk. With no profile there yet, `fallback` (the profile this build was made
+    from) stands in until the first save. */
+export const loadProfile = async (fallback: Profile): Promise<ProfileSource> => {
+  const tree = await readTree();
+  const file = tree.files.find((f) => f.path === PROFILE_PATH);
   return {
     profile: file ? profileSchema.parse(parseDocument(file.content).toJS()) : fallback,
     yaml: file?.content ?? '',
-    ref: branches ? PROFILE_REF : bundle.ref,
-    headSha: !branches || draft ? bundle.headSha : '',
-    branchExists: !branches || draft !== null,
+    headSha: tree.headSha,
   };
 };
 
@@ -80,28 +66,15 @@ export const serializeProfile = (sourceYaml: string, next: Profile): string => {
   return doc.toString({ lineWidth: 0 });
 };
 
-/** Validates and writes the profile; throws StaleRefError when the target moved since it was read
-    (in working-tree mode, when any content file changed on disk). */
-export const saveProfile = async (
-  gh: GitHubClient,
-  source: ProfileSource,
-  next: Profile,
-  message: string,
-): Promise<ProfileSource> => {
+/** Validates and writes the profile; throws ChangedOnDiskError when any content file changed on disk
+    since it was read. */
+export const saveProfile = async (source: ProfileSource, next: Profile): Promise<ProfileSource> => {
   const valid = profileSchema.parse(next);
-  let { ref, headSha } = source;
-  if (!source.branchExists) {
-    const draft = await gh.createDraft('profile');
-    ref = draft.ref;
-    headSha = draft.headSha;
-  }
   const yaml = serializeProfile(source.yaml, valid);
-  const saved = await gh.saveBundle({
-    ref,
+  const saved = await writeFiles({
     dir: 'content',
     files: [{ path: 'profile.yaml', content: yaml }],
-    message,
-    expectedHeadSha: headSha,
+    expectedHeadSha: source.headSha,
   });
-  return { profile: valid, yaml, ref, headSha: saved.headSha, branchExists: true };
+  return { profile: valid, yaml, headSha: saved.headSha };
 };

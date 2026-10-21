@@ -1,7 +1,7 @@
-import type { Bundle } from '@crc/github-client';
 import { type ImageSize, imageSize } from '@crc/markdown';
 import type { ImagePreview } from '../document/extensions.ts';
 import { ImageTooLargeError, resizeImage, UnsupportedImageError } from '../document/resize.ts';
+import type { TreeFile } from '../workingTree.ts';
 import type { Buffer, BufferAsset, BufferController } from './buffer.ts';
 
 export type AddedImage =
@@ -43,11 +43,9 @@ const MIME: Record<string, string> = {
   svg: 'image/svg+xml',
 };
 
-type BundleFile = Bundle['files'][number];
+const sizes = new WeakMap<TreeFile, ImageSize | null>();
 
-const sizes = new WeakMap<BundleFile, ImageSize | null>();
-
-const fileSize = (file: BundleFile): ImageSize | null => {
+const fileSize = (file: TreeFile): ImageSize | null => {
   let size = sizes.get(file);
   if (size === undefined) {
     try {
@@ -65,8 +63,8 @@ const fileSize = (file: BundleFile): ImageSize | null => {
 };
 
 /** Where the editor can show an image the markdown names relative to its entry: a pending image's
-    object URL, else the file as loaded with the bundle. Anything else is shown as written. */
-export const preview = (src: string, buffer: Buffer, files: Bundle['files']): ImagePreview => {
+    object URL, else the file as loaded with the tree. Anything else is shown as written. */
+export const preview = (src: string, buffer: Buffer, files: TreeFile[]): ImagePreview => {
   if (/^([a-z][a-z\d+.-]*:|\/)/i.test(src)) {
     return { src };
   }
