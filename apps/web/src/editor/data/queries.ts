@@ -1,6 +1,13 @@
 import { queryOptions } from '@tanstack/react-query';
 import { readBranch, readTree } from '../workingTree.ts';
-import { editorKeys } from './keys.ts';
+
+/* Typed query-key factory for everything the editor caches. Every key sits under ["editor"]. */
+export const editorKeys = {
+  all: ['editor'] as const,
+  branch: () => [...editorKeys.all, 'branch'] as const,
+  /** Everything under content/ in the working tree. */
+  tree: () => [...editorKeys.all, 'tree'] as const,
+};
 
 /* Every read the editor makes, as query options. Hooks and loaders take these; nothing else builds a
    query key. */
