@@ -76,8 +76,6 @@ export default defineConfig({
       '@atlaskit/pragmatic-drag-and-drop/element/adapter',
       '@atlaskit/pragmatic-drag-and-drop/combine',
       '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge',
-      '@octokit/core',
-      '@octokit/plugin-rest-endpoint-methods',
       'yaml',
       'zod',
       'zod/mini',
