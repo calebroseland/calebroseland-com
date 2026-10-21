@@ -8,13 +8,11 @@ import {
 } from '@crc/interaction';
 import { Icon } from '@crc/ui';
 import { type FormEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from 'react';
-import { session } from '../../editor/auth/store.ts';
 import { ConfirmDialog } from '../../editor/Dialogs.tsx';
 import { useSaveProfile } from '../../editor/data/hooks.ts';
-import { EditorProvider, useCapabilities } from '../../editor/EditorProvider.tsx';
+import { EditorProvider } from '../../editor/EditorProvider.tsx';
 import editor from '../../editor/editor.module.css';
-import { clientFor } from '../../editor/github/client.ts';
-import { loadProfile, PROFILE_REF, type ProfileSource } from '../../editor/profile.ts';
+import { loadProfile, type ProfileSource } from '../../editor/profile.ts';
 import { notify } from '../../editor/Toast.tsx';
 import card from '../Landing.module.css';
 import { Tip } from '../Tip.tsx';
@@ -38,15 +36,15 @@ const LINKS = 'links';
 const GROUPS = 'groups';
 const linkListId = (group: EditGroup) => `links-${group.key}`;
 
-/** What a save produced; the card shows it when it is already the site's source (the working tree). */
-export type EditResult = { profile: Profile; workingTree: boolean } | null;
+/** What a save produced, for the card to show at once: the file on disk is the site's source. */
+export type EditResult = { profile: Profile } | null;
 
 /** The card's two faces while editing, for the landing to place where its own faces go. */
 export type EditFaces = { front: ReactNode; back: ReactNode };
 
-/* The landing card, editable where it stands for a signed-in editor: the same card, its text turned
-   into fields, its links and groups draggable. It loads the profile through the editor's backend (the
-   drafts/profile branch, or the working tree), edits a copy, and saves it back as content/profile.yaml.
+/* The landing card, editable where it stands in edit mode: the same card, its text turned into fields,
+   its links and groups draggable. It loads content/profile.yaml from the working tree, edits a copy,
+   and saves it back.
    Loaded only when an editor opens it, so readers never download it. */
 
 /** Whether the card has been turned in this session, so focus follows only a turn the editor made. */
@@ -63,7 +61,7 @@ const useTurnOver = (onFlip: () => void) => {
 
 /** Loads what the editor needs before it is shown, so the card can turn editable in one step. */
 export const prepareEdit = (published: Profile): Promise<ProfileSource> => {
-  return loadProfile(clientFor(session.store.state), published);
+  return loadProfile(published);
 };
 
 /** One edit session across both faces of the card; brings its own editor context, since the landing
@@ -140,7 +138,6 @@ type EditSession = ReturnType<typeof useEditSession>;
 
 /** The draft, its moves, additions and removals (each announced), and saving it. */
 const useEditSession = (source: ProfileSource, onDone: (result: EditResult) => void) => {
-  const working = !useCapabilities().branches;
   const { state, dirty, next, errors, update } = useProfileDraft(source.profile);
   const announcer = useAnnouncer();
   const focusByKey = useFocusByKey();
@@ -150,15 +147,8 @@ const useEditSession = (source: ProfileSource, onDone: (result: EditResult) => v
   const submit = async () => {
     const outcome = await save.run(next);
     if (outcome.ok) {
-      notify(
-        working
-          ? 'Saved content/profile.yaml.'
-          : `Saved to ${PROFILE_REF}. Publish it from the editor to update the site.`,
-        { kind: 'success' },
-      );
-      onDone({ profile: outcome.value.profile, workingTree: working });
-    } else if (outcome.reason === 'expired') {
-      notify('Your sign-in expired. Sign in again to save.', { kind: 'error' });
+      notify('Saved content/profile.yaml.', { kind: 'success' });
+      onDone({ profile: outcome.value.profile });
     } else if (outcome.reason === 'conflict') {
       notify('The profile changed since you opened it. Close the editor and open it again.', {
         kind: 'error',
@@ -257,7 +247,6 @@ const useEditSession = (source: ProfileSource, onDone: (result: EditResult) => v
     state,
     errors,
     update,
-    working,
     announcement: announcer.message,
     canSave: dirty && errors.size === 0 && !save.pending,
     saving: save.pending,
@@ -602,7 +591,7 @@ const SaveBar = ({ s }: { s: EditSession }) => {
   return (
     <div className={`${styles.bar} ${card.vt}`} style={vtName('card-more')}>
       <p className={styles.where}>
-        {s.working ? 'Saves to content/profile.yaml on this branch.' : `Saves to ${PROFILE_REF}.`}
+        Saves to content/profile.yaml on this branch.
         {problems > 0 && (
           <span className={styles.problems}>
             {' '}

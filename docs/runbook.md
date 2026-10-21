@@ -25,9 +25,9 @@ Preconditions: the rollback below has been rehearsed on staging and timed; stagi
    - `curl -s https://calebroseland.com/api/health` returns the sha that was just merged.
    - `dig +short calebroseland.com TXT` still returns the Mailgun SPF record.
    - `BASE_URL=https://calebroseland.com mise run smoke` passes.
-   - Only if `FEATURE_GITHUB_EDITING` is on for production: sign in at `/login` and load `/editor`. With it off, the account menu has no sign-in item and `/login` says editing is not available.
+   - `/editor` shows the not-found page, and the site menu offers no editing.
 5. Soak for one week. Leave the Netlify site locked and intact for the whole soak.
-6. Decommission only after three consecutive green backup deploys: delete the Netlify site, delete `develop` and `feature/ci-build`, and remove any unused OAuth callback.
+6. Decommission only after three consecutive green backup deploys: delete the Netlify site, delete `develop` and `feature/ci-build`, and delete the GitHub OAuth app if one was created.
 
 ## Rollback
 
@@ -59,11 +59,11 @@ For one stuck device: open the site, reload once. If it still shows the old site
 
 ## Secrets
 
-Set per Worker and never committed. Name the Worker: after a build, wrangler reads the generated deploy config and ignores `--env`, so `--env staging` would set the production secret.
+The Worker has none. If `GITHUB_CLIENT_SECRET` was ever set for the removed GitHub sign-in, delete it per Worker (name the Worker: after a build, wrangler reads the generated deploy config and ignores `--env`):
 
 ```bash
-npx wrangler secret put GITHUB_CLIENT_SECRET --name calebroseland-com            # production
-npx wrangler secret put GITHUB_CLIENT_SECRET --name calebroseland-com-staging    # staging
+npx wrangler secret delete GITHUB_CLIENT_SECRET --name calebroseland-com            # production
+npx wrangler secret delete GITHUB_CLIENT_SECRET --name calebroseland-com-staging    # staging
 ```
 
-Locally they live in `apps/web/.dev.vars`, which is git-ignored. `apps/web/.dev.vars.example` documents the names. No `VITE_`-prefixed variable may ever hold a credential, because those are inlined into the client bundle.
+Local Worker vars live in `apps/web/.dev.vars`, which is git-ignored; `apps/web/.dev.vars.example` documents them. No `VITE_`-prefixed variable may ever hold a credential, because those are inlined into the client bundle.

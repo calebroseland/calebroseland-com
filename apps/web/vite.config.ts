@@ -29,7 +29,6 @@ export default defineConfig({
   define: {
     __BUILD_SHA__: JSON.stringify(process.env.GITHUB_SHA ?? 'dev'),
     __API_ORIGIN__: JSON.stringify(process.env.VITE_API_ORIGIN ?? ''),
-    __CONTENT_BRANCH__: JSON.stringify(process.env.CONTENT_BRANCH ?? 'master'),
   },
   plugins: [
     content({ root: repoRoot, siteOrigin: process.env.SITE_ORIGIN ?? 'https://calebroseland.com' }),
@@ -77,8 +76,6 @@ export default defineConfig({
       '@atlaskit/pragmatic-drag-and-drop/element/adapter',
       '@atlaskit/pragmatic-drag-and-drop/combine',
       '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge',
-      '@octokit/core',
-      '@octokit/plugin-rest-endpoint-methods',
       'yaml',
       'zod',
       'zod/mini',

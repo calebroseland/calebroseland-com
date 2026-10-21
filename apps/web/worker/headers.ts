@@ -8,7 +8,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net",
   "img-src 'self' data:",
   "font-src 'self' https://use.typekit.net",
-  "connect-src 'self' https://api.github.com",
+  "connect-src 'self'",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

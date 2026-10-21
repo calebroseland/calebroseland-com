@@ -20,7 +20,7 @@ import {
   useState,
 } from 'react';
 import { hasContact } from '../content/profile.ts';
-import { useSignedIn } from '../editor/auth/hooks.ts';
+import { useEditMode } from '../editor/editMode.ts';
 import type { ProfileSource } from '../editor/profile.ts';
 import { notify } from '../editor/Toast.tsx';
 import { useLinkHover } from '../hooks/useLinkHover.ts';
@@ -71,7 +71,7 @@ const faceMotion = (reduce: boolean) => {
   };
 };
 
-// The card editor and the profile it edits load only for someone signed in, and readers never.
+// The card editor and the profile it edits load only in edit mode, and readers never.
 const cardEditorChunk = preloadable(() => import('./cardEditor/CardEditor.tsx'));
 /** Moves focus to the element once it mounts, when the mount was caused by the user turning the card. */
 const useFocusOnMount = <T extends HTMLElement>(when: boolean): RefObject<T | null> => {
@@ -442,12 +442,12 @@ const useFlipCard = (side: 'front' | 'back') => {
 };
 
 /** The card's edit session, the face it shows (its own: /contact would redirect a card with no contact
-    yet), and whether it is loading. Signing out (the palette can, mid-edit) ends it: its backend is gone. */
-const useEditSession = (signedIn: boolean) => {
+    yet), and whether it is loading. Turning edit mode off (the palette can, mid-edit) ends it. */
+const useEditSession = (editMode: boolean) => {
   const [editing, setEditing] = useState<OpenEditor | null>(null);
   const [editSide, setEditSide] = useState<'front' | 'back'>('front');
   const [opening, setOpening] = useState(false);
-  if (editing && !signedIn) {
+  if (editing && !editMode) {
     setEditing(null);
   }
   return { editing, setEditing, editSide, setEditSide, opening, setOpening };
@@ -484,9 +484,9 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
   const side = useCardSide();
   const flip = useFlipCard(side);
   const { expanded, toggle: toggleDetails } = useDetailsExpanded();
-  const signedIn = useSignedIn();
+  const editMode = useEditMode();
   const { editing, setEditing, editSide, setEditSide, opening, setOpening } =
-    useEditSession(signedIn);
+    useEditSession(editMode);
   const { turned, returnToEdit, setReturnToEdit } = useFaceFocus(side);
   const contact = profile.contact;
 
@@ -519,7 +519,7 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
     void withViewTransition(
       'edit',
       () => {
-        if (result?.workingTree) {
+        if (result) {
           setSaved(result.profile);
         }
         setReturnToEdit(true);
@@ -596,7 +596,7 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
                 expanded={expanded}
                 onToggle={() => withViewTransition('expand', toggleDetails, reduce)}
                 onFlip={hasContact(profile) ? flip : null}
-                onEdit={signedIn ? () => void openEditor() : null}
+                onEdit={editMode ? () => void openEditor() : null}
                 opening={opening}
                 focusOnMount={faceFocus(returnToEdit, turned)}
               />

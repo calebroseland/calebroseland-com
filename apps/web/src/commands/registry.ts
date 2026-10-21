@@ -8,8 +8,6 @@ type CommandContext = {
   /** Closes the palette and goes to an in-app address (path, search and hash). */
   go: (href: string) => Promise<void>;
   close: () => void;
-  /** Where the visitor is now, for coming back after signing in. */
-  href: string;
 };
 
 export type Command = {

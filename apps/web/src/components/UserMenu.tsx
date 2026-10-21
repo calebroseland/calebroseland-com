@@ -2,10 +2,8 @@ import { Menu } from '@base-ui/react/menu';
 import { Icon } from '@crc/ui';
 import { useEffect } from 'react';
 import { siteFonts } from '../content/theme.ts';
-import { useSession, useSignInMethods, useSignOut } from '../editor/auth/hooks.ts';
-import { canSignIn } from '../editor/auth/methods.ts';
-import { capabilitiesOf } from '../editor/data/backend.ts';
-import { useAccountLinks } from '../editor/navigation.ts';
+import { editMode, useEditMode } from '../editor/editMode.ts';
+import { useEditorLinks } from '../editor/navigation.ts';
 import { useDialogState } from '../hooks/useDialogState.ts';
 import { useDisclosure } from '../hooks/useDisclosure.ts';
 import { usePopupMotion } from '../hooks/usePopupMotion.ts';
@@ -47,22 +45,17 @@ const builtIns = [
   { value: 'dark', label: 'Dark', icon: 'lucide:moon' },
 ] as const;
 
-/* The account menu (Base UI Menu): the theme, and what the visitor can do as themselves — signing in
-   or out, and, once signed in, the editing screens. Custom themes sit under the built-ins with their
-   accent as a swatch, and the theme editor opens from here too. */
+/* The site menu (Base UI Menu): the theme, and under the dev server, edit mode and the editing
+   screens. Custom themes sit under the built-ins with their accent as a swatch, and the theme editor
+   opens from here too. */
 export const UserMenu = () => {
   const { preference, resolved, customThemes } = useThemeState();
-  const current = useSession();
+  const editOn = useEditMode();
   const editing = useDialogState<{ theme: CustomTheme; isNew: boolean }>();
-  const links = useAccountLinks();
-  const signOut = useSignOut();
+  const links = useEditorLinks();
   const menu = useDisclosure();
   const motion = usePopupMotion('dropdown');
   const ThemeEditor = useThemeEditor(menu.open, editing.isOpen, editing.close);
-  const signedIn = current.status === 'authenticated';
-  // Asked only once the menu opens, so readers who never open it never call the Worker for it.
-  const methods = useSignInMethods(menu.open && !signedIn);
-  const offerSignIn = methods !== null && canSignIn(methods);
 
   const active = customThemes.find((t) => customPreference(t.id) === preference);
   const builtIn = builtIns.find((b) => b.value === preference);
@@ -85,16 +78,12 @@ export const UserMenu = () => {
           menu.setOpen(open);
         }}
       >
-        <Tip label="Account and theme" side="bottom">
+        <Tip label="Theme" side="bottom">
           <Menu.Trigger
             className={styles.button}
-            aria-label={
-              signedIn
-                ? `Account: signed in with ${capabilitiesOf(current.backend).label}. Theme: ${label}.`
-                : `Account: signed out. Theme: ${label}.`
-            }
+            aria-label={`Theme: ${label}.${editOn ? ' Edit mode on.' : ''}`}
           >
-            <Icon name={signedIn ? 'lucide:circle-user' : 'lucide:user'} size="md" />
+            <Icon name={editOn ? 'lucide:circle-user' : 'lucide:user'} size="md" />
           </Menu.Trigger>
         </Tip>
         <Menu.Portal>
@@ -148,32 +137,34 @@ export const UserMenu = () => {
                 <Icon name="lucide:plus" size="sm" />
                 <span className={styles.itemLabel}>New custom theme…</span>
               </Menu.Item>
-              {(signedIn || offerSignIn) && <Menu.Separator className={styles.separator} />}
-              {signedIn ? (
+              {editMode.available && (
                 <Menu.Group>
-                  <Menu.GroupLabel className={styles.groupLabel}>
-                    Signed in · {capabilitiesOf(current.backend).label}
-                  </Menu.GroupLabel>
-                  <Menu.Item className={styles.item} onClick={links.board}>
-                    <Icon name="lucide:file-pen" size="sm" />
-                    <span className={styles.itemLabel}>Editor</span>
-                  </Menu.Item>
-                  <Menu.Item className={styles.item} onClick={links.newEntry}>
-                    <Icon name="lucide:file-plus" size="sm" />
-                    <span className={styles.itemLabel}>New entry</span>
-                  </Menu.Item>
-                  <Menu.Item className={styles.item} onClick={signOut}>
-                    <Icon name="lucide:log-out" size="sm" />
-                    <span className={styles.itemLabel}>Sign out</span>
-                  </Menu.Item>
+                  <Menu.Separator className={styles.separator} />
+                  <Menu.GroupLabel className={styles.groupLabel}>Working tree</Menu.GroupLabel>
+                  <Menu.CheckboxItem
+                    className={styles.item}
+                    checked={editOn}
+                    onCheckedChange={editMode.set}
+                  >
+                    <Icon name="lucide:pencil" size="sm" />
+                    <span className={styles.itemLabel}>Edit mode</span>
+                    <Menu.CheckboxItemIndicator className={styles.indicator}>
+                      <Icon name="lucide:check" size="sm" />
+                    </Menu.CheckboxItemIndicator>
+                  </Menu.CheckboxItem>
+                  {editOn && (
+                    <>
+                      <Menu.Item className={styles.item} onClick={links.board}>
+                        <Icon name="lucide:file-pen" size="sm" />
+                        <span className={styles.itemLabel}>Editor</span>
+                      </Menu.Item>
+                      <Menu.Item className={styles.item} onClick={links.newEntry}>
+                        <Icon name="lucide:file-plus" size="sm" />
+                        <span className={styles.itemLabel}>New entry</span>
+                      </Menu.Item>
+                    </>
+                  )}
                 </Menu.Group>
-              ) : (
-                offerSignIn && (
-                  <Menu.Item className={styles.item} onClick={links.signIn}>
-                    <Icon name="lucide:log-in" size="sm" />
-                    <span className={styles.itemLabel}>Sign in</span>
-                  </Menu.Item>
-                )
               )}
             </Menu.Popup>
           </Menu.Positioner>

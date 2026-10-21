@@ -19,7 +19,6 @@ const asset = (name: string): BufferAsset => ({
 });
 
 const base: Buffer = {
-  ref: 'drafts/x',
   dir: 'content/posts/2026/09-18-x',
   baseHeadSha: 'abc',
   markdown: '# x',
@@ -73,6 +72,18 @@ describe('buffer store', () => {
     expect(b.store.state.dirty).toBe(false);
   });
 
+  it("keeps each entry's unsaved copy apart, though every one is on the same working tree", () => {
+    const storage = mem();
+    const a = createBufferStore(base);
+    const b = createBufferStore({ ...base, dir: 'content/pages/about', markdown: '# about' });
+    a.setMarkdown('# a, edited');
+    b.setMarkdown('# about, edited');
+    writeLocalBuffer(a.store.state, storage);
+    writeLocalBuffer(b.store.state, storage);
+    expect(readLocalBuffer(base.dir, storage)?.markdown).toBe('# a, edited');
+    expect(readLocalBuffer('content/pages/about', storage)?.markdown).toBe('# about, edited');
+  });
+
   it('persists only while dirty and restores with the restored flag', () => {
     const storage = mem();
     const b = createBufferStore(base);
@@ -80,13 +91,13 @@ describe('buffer store', () => {
     expect(storage.m.size).toBe(0);
     b.setMarkdown('# edited');
     writeLocalBuffer(b.store.state, storage);
-    expect(readLocalBuffer('drafts/x', storage)).toMatchObject({
+    expect(readLocalBuffer(base.dir, storage)).toMatchObject({
       markdown: '# edited',
       restoredFromLocal: true,
     });
     b.markSaved('def');
     writeLocalBuffer(b.store.state, storage);
-    expect(readLocalBuffer('drafts/x', storage)).toBeNull();
+    expect(readLocalBuffer(base.dir, storage)).toBeNull();
   });
 
   it('keeps only the text locally, and says so when a restored copy had images', () => {
@@ -97,8 +108,8 @@ describe('buffer store', () => {
     writeLocalBuffer(b.store.state, storage);
 
     // A Blob cannot go into local storage, and serialising it would cost the text its place there.
-    expect(storage.m.get('crc:buffer:drafts/x')).not.toContain('blob');
-    const restored = readLocalBuffer('drafts/x', storage);
+    expect(storage.m.get(`crc:buffer:${base.dir}`)).not.toContain('blob');
+    const restored = readLocalBuffer(base.dir, storage);
     expect(restored).toMatchObject({
       markdown: '# with an image',
       assets: [],

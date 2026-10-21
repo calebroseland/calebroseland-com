@@ -7,7 +7,6 @@ const root = fileURLToPath(new URL('.', import.meta.url));
 export default defineConfig({
   // Makes virtual:content/* resolvable in unit and dom tests, from fixed fixture content, never the live content/.
   plugins: [content({ root, includeDrafts: true, contentDir: `${root}apps/web/fixtures/content` })],
-  define: { __CONTENT_BRANCH__: JSON.stringify('master') },
   test: {
     projects: [
       {

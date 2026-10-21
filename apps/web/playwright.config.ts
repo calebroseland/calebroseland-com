@@ -30,9 +30,6 @@ export default defineConfig({
     env: {
       // Backends that write files do so here, never in the repository's content/.
       CRC_CONTENT_DIR: scratchContentDir,
-      // The suite covers the experimental GitHub editing too, so the Worker gets its flag from here.
-      CLOUDFLARE_INCLUDE_PROCESS_ENV: 'true',
-      FEATURE_GITHUB_EDITING: 'on',
       // System fonts only, present from the first paint (vite.config.ts).
       CRC_FONTS: 'system',
     },
