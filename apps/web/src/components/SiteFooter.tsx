@@ -1,11 +1,10 @@
 import type { Profile, ProfileLink } from '@crc/content-schema';
 import { Icon, Tip, useReduceMotion } from '@crc/ui';
 import { Link } from '@tanstack/react-router';
-import type { MouseEvent, ReactElement } from 'react';
+import { type MouseEvent, type ReactElement, useId } from 'react';
 import { pages } from '../content/entries.ts';
 import { hasContact } from '../content/profile.ts';
 import { useLinkHover } from '../hooks/useLinkHover.ts';
-import { useSectionHeading } from '../hooks/useSectionHeading.ts';
 import { isPlainClick, useBackToCard } from './backToCard.ts';
 import { oncePerPress, useDetailsExpanded } from './detailsState.ts';
 import styles from './SiteFooter.module.css';
@@ -132,6 +131,12 @@ const Named = ({
   ) : (
     children
   );
+};
+
+/** Names a region by its heading: spread `region` on the section and `heading` on its title. */
+const useSectionHeading = () => {
+  const id = useId();
+  return { region: { 'aria-labelledby': id }, heading: { id } };
 };
 
 const FooterGroup = ({

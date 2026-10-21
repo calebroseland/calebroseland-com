@@ -3,13 +3,13 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import type { MouseEvent, ReactNode } from 'react';
 import { siteProfile } from '../content/profile.ts';
 import { useLinkHover } from '../hooks/useLinkHover.ts';
-import { useStickyTop } from '../hooks/useStickyTop.ts';
 import { isPlainClick, useBackToCard } from './backToCard.ts';
 import styles from './Page.module.css';
 import { ENTRY_PAGE } from './returnPage.ts';
 import { SearchButton } from './SearchButton.tsx';
 import { SiteFooter } from './SiteFooter.tsx';
 import { UserMenu } from './UserMenu.tsx';
+import { useStickyTop } from './useStickyTop.ts';
 
 const useAtHome = (): boolean => {
   return useRouterState({
