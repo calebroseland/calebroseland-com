@@ -1,5 +1,5 @@
 import { Menu } from '@base-ui/react/menu';
-import { Icon, usePopupMotion } from '@crc/ui';
+import { Icon, iconButton, usePopupMotion } from '@crc/ui';
 import type { ReactNode } from 'react';
 import styles from '../editor.module.css';
 
@@ -8,7 +8,7 @@ export const RowMenu = ({ label, children }: { label: string; children: ReactNod
   const motion = usePopupMotion('dropdown');
   return (
     <Menu.Root onOpenChange={motion.onOpenChange}>
-      <Menu.Trigger className={styles.handle} aria-label={label}>
+      <Menu.Trigger className={iconButton({ size: 'sm' })} aria-label={label}>
         <Icon name="lucide:ellipsis-vertical" size="sm" />
       </Menu.Trigger>
       <Menu.Portal>

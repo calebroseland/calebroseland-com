@@ -6,12 +6,11 @@ import {
   useItemRegistration,
   useListTarget,
 } from '@crc/interaction';
-import { Icon, notify, Tip } from '@crc/ui';
+import { Button, Icon, IconButton, notify } from '@crc/ui';
 import { type FormEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from 'react';
 import { ConfirmDialog } from '../../editor/Dialogs.tsx';
 import { useSaveProfile } from '../../editor/data/hooks.ts';
 import { EditorProvider } from '../../editor/EditorProvider.tsx';
-import editor from '../../editor/editor.module.css';
 import { loadProfile, type ProfileSource } from '../../editor/profile.ts';
 import card from '../Landing.module.css';
 import { vtName } from '../viewTransition.ts';
@@ -115,16 +114,10 @@ const Session = ({
         description="You have edits you haven't saved. Leaving this page throws them away."
         actions={
           <>
-            <button type="button" className={editor.secondary} onClick={() => leaving.reset?.()}>
-              Keep editing
-            </button>
-            <button
-              type="button"
-              className={`${editor.primary} ${editor.danger}`}
-              onClick={() => leaving.proceed?.()}
-            >
+            <Button onClick={() => leaving.reset?.()}>Keep editing</Button>
+            <Button variant="primary" tone="danger" onClick={() => leaving.proceed?.()}>
               Discard
-            </button>
+            </Button>
           </>
         }
       />
@@ -296,19 +289,16 @@ const EditFront = ({
     <form aria-label="Edit card" className={styles.editFace} onSubmit={s.onSubmit}>
       <div className={card.corners}>
         <span />
-        <Tip label="Contact details" side="bottom">
-          <button
-            ref={flipRef}
-            type="button"
-            className={`${card.cornerButton} ${card.vt}`}
-            style={vtName('card-flip')}
-            aria-label="Contact details"
-            onClick={onFlip}
-          >
-            <Icon name="lucide:id-card" size="lg" />
-            <Icon name="lucide:chevron-right" size="sm" />
-          </button>
-        </Tip>
+        <IconButton
+          ref={flipRef}
+          label="Contact details"
+          className={card.vt}
+          style={vtName('card-flip')}
+          onClick={onFlip}
+        >
+          <Icon name="lucide:id-card" size="lg" />
+          <Icon name="lucide:chevron-right" size="sm" />
+        </IconButton>
       </div>
 
       <div className={`${card.name} ${card.vt}`} style={vtName('site-name')}>
@@ -563,17 +553,9 @@ const EditBack = ({
             ))}
           </ul>
         </div>
-        <Tip label="Back to links" side="bottom">
-          <button
-            ref={closeRef}
-            type="button"
-            className={card.cornerButton}
-            aria-label="Back to links"
-            onClick={onFlip}
-          >
-            <Icon name="lucide:x" size="lg" />
-          </button>
-        </Tip>
+        <IconButton ref={closeRef} label="Back to links" onClick={onFlip}>
+          <Icon name="lucide:x" size="lg" />
+        </IconButton>
       </div>
       <p className="visually-hidden" aria-live="polite">
         {s.announcement}
@@ -598,12 +580,12 @@ const SaveBar = ({ s }: { s: EditSession }) => {
         )}
       </p>
       <div className={styles.actions}>
-        <button type="button" className={styles.secondary} onClick={s.cancel}>
+        <Button size="sm" onClick={s.cancel}>
           Cancel
-        </button>
-        <button type="submit" className={styles.primary} disabled={!s.canSave} aria-busy={s.saving}>
+        </Button>
+        <Button type="submit" variant="primary" size="sm" disabled={!s.canSave} pending={s.saving}>
           {s.saving ? 'Saving…' : 'Save card'}
-        </button>
+        </Button>
       </div>
     </div>
   );

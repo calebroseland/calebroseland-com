@@ -1,5 +1,5 @@
 import { Menu } from '@base-ui/react/menu';
-import { Icon, Tip, usePopupMotion } from '@crc/ui';
+import { Icon, iconButton, Tip, usePopupMotion } from '@crc/ui';
 import { useEffect } from 'react';
 import { siteFonts } from '../content/theme.ts';
 import { editMode, useEditMode } from '../editor/editMode.ts';
@@ -78,7 +78,7 @@ export const UserMenu = () => {
       >
         <Tip label="Theme" side="bottom">
           <Menu.Trigger
-            className={styles.button}
+            className={iconButton()}
             aria-label={`Theme: ${label}.${editOn ? ' Edit mode on.' : ''}`}
           >
             <Icon name={editOn ? 'lucide:circle-user' : 'lucide:user'} size="md" />

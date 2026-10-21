@@ -6,7 +6,7 @@ import {
   resolveTag,
   tagLabel,
 } from '@crc/content-schema';
-import { Icon, notify, Tip, useReduceMotion } from '@crc/ui';
+import { Icon, IconButton, notify, Tip, useReduceMotion } from '@crc/ui';
 import { Link, useMatch, useNavigate } from '@tanstack/react-router';
 import { AnimatePresence, m, type Transition } from 'motion/react';
 import {
@@ -204,38 +204,33 @@ const Front = ({
             <UserMenu />
           </span>
           {onEdit && (
-            <Tip label="Edit card" side="bottom">
-              <button
-                ref={editRef}
-                type="button"
-                className={`${styles.cornerButton} ${styles.vt}`}
-                style={vtName('card-edit')}
-                aria-label="Edit card"
-                aria-busy={opening || undefined}
-                disabled={opening}
-                onClick={onEdit}
-                onPointerEnter={cardEditorChunk.prefetch}
-                onFocus={cardEditorChunk.prefetch}
-              >
-                <Icon name="lucide:pencil" size="md" />
-              </button>
-            </Tip>
+            <IconButton
+              ref={editRef}
+              label="Edit card"
+              className={styles.vt}
+              style={vtName('card-edit')}
+              aria-busy={opening || undefined}
+              disabled={opening}
+              onClick={onEdit}
+              onPointerEnter={cardEditorChunk.prefetch}
+              onFocus={cardEditorChunk.prefetch}
+            >
+              <Icon name="lucide:pencil" size="md" />
+            </IconButton>
           )}
         </div>
         {onFlip && (
-          <Tip label="Contact card" side="bottom">
-            <button
-              ref={flipRef}
-              type="button"
-              className={`${styles.cornerButton} ${styles.vt}`}
-              style={vtName('card-flip')}
-              aria-label="Contact information"
-              onClick={onFlip}
-            >
-              <Icon name="lucide:id-card" size="lg" />
-              <Icon name="lucide:chevron-right" size="sm" />
-            </button>
-          </Tip>
+          <IconButton
+            ref={flipRef}
+            label="Contact information"
+            tip="Contact card"
+            className={styles.vt}
+            style={vtName('card-flip')}
+            onClick={onFlip}
+          >
+            <Icon name="lucide:id-card" size="lg" />
+            <Icon name="lucide:chevron-right" size="sm" />
+          </IconButton>
         )}
       </div>
 
@@ -405,17 +400,9 @@ const Back = ({
           )}
         </ul>
       </div>
-      <Tip label="Back to links" side="bottom">
-        <button
-          ref={closeRef}
-          type="button"
-          className={styles.cornerButton}
-          aria-label="Back to links"
-          onClick={onFlip}
-        >
-          <Icon name="lucide:x" size="lg" />
-        </button>
-      </Tip>
+      <IconButton ref={closeRef} label="Back to links" onClick={onFlip}>
+        <Icon name="lucide:x" size="lg" />
+      </IconButton>
     </div>
   );
 };

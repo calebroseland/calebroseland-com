@@ -1,7 +1,7 @@
 import { Field } from '@base-ui/react/field';
 import { Popover } from '@base-ui/react/popover';
 import { Switch } from '@base-ui/react/switch';
-import { Icon, usePopupMotion } from '@crc/ui';
+import { Button, Icon, usePopupMotion } from '@crc/ui';
 import styles from './CardEditor.module.css';
 import type { EditGroup } from './model.ts';
 
@@ -42,16 +42,16 @@ export const GroupPopover = ({
               </Switch.Root>
             </Field.Root>
             <div className={styles.popupActions}>
-              <button type="button" className={styles.secondary} onClick={() => onMove(-1)}>
+              <Button size="sm" onClick={() => onMove(-1)}>
                 Move earlier
-              </button>
-              <button type="button" className={styles.secondary} onClick={() => onMove(1)}>
+              </Button>
+              <Button size="sm" onClick={() => onMove(1)}>
                 Move later
-              </button>
+              </Button>
               {canRemove && (
-                <button type="button" className={styles.danger} onClick={onRemove}>
+                <Button variant="ghost" tone="danger" size="sm" onClick={onRemove}>
                   Remove group
-                </button>
+                </Button>
               )}
             </div>
           </Popover.Popup>

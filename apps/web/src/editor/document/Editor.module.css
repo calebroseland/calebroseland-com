@@ -22,26 +22,6 @@
     border-start-end-radius: var(--radius-lg);
   }
 
-  .tool {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
-    color: var(--color-text-muted);
-    border-radius: var(--radius-sm);
-
-    &:hover {
-      color: var(--color-text);
-      background: var(--color-surface-hover);
-    }
-
-    &[aria-pressed="true"] {
-      color: var(--color-accent-text);
-      background: var(--color-accent-subtle);
-    }
-  }
-
   .content {
     min-block-size: 20rem;
     padding: var(--space-6);

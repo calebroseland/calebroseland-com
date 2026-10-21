@@ -1,4 +1,4 @@
-import { Stack } from '@crc/ui';
+import { Button, Stack } from '@crc/ui';
 import type { Buffer, BufferController } from '../drafts/buffer.ts';
 import styles from '../editor.module.css';
 
@@ -37,13 +37,14 @@ export const AssetsPanel = ({
               aria-invalid={!a.alt.trim()}
             />
           </div>
-          <button
-            type="button"
-            className={styles.secondary}
+          <Button
+            variant="ghost"
+            tone="danger"
+            size="sm"
             onClick={() => controller.removeAsset(a.name)}
           >
             Remove
-          </button>
+          </Button>
         </div>
       ))}
       {buffer.existingAssets.length > 0 && (

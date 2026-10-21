@@ -1,4 +1,4 @@
-import { notify } from '@crc/ui';
+import { Button, button, notify } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { ConfirmDialog } from '../editor/Dialogs.tsx';
@@ -56,9 +56,9 @@ const DraftRoute = () => {
         <EditorShell title={slug}>
           <p role="alert" className={styles.alert}>
             Couldn't read this entry from your working tree.{' '}
-            <button type="button" className={styles.toastAction} onClick={entry.retry}>
+            <Button variant="inline" onClick={entry.retry}>
               Retry
-            </button>
+            </Button>
           </p>
         </EditorShell>
       );
@@ -166,19 +166,18 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
           <span className={styles.status} data-dirty={buffer.dirty}>
             {saveStatus(save.pending, buffer.dirty)}
           </span>
-          <button
-            type="button"
-            className={styles.primary}
+          <Button
+            variant="primary"
             onClick={onSave}
-            disabled={!buffer.dirty || save.pending}
-            aria-busy={save.pending}
+            disabled={!buffer.dirty}
+            pending={save.pending}
           >
             {save.pending ? 'Saving…' : 'Save'}
-          </button>
+          </Button>
           {/* Unsaved work stays on this device and is restored when the entry is opened again. */}
           <a
             href={close.href}
-            className={styles.secondary}
+            className={button()}
             onClick={(e) => {
               // A modified click opens a new tab as any link does.
               if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
@@ -200,9 +199,9 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
         <p role="status" className={styles.banner}>
           Restored unsaved changes from this device.
           {buffer.imagesDropped ? ' Images added but not saved were not kept.' : ''}
-          <button type="button" className={styles.toastAction} onClick={reloadFromSource}>
+          <Button variant="inline" onClick={reloadFromSource}>
             Discard local changes
-          </button>
+          </Button>
         </p>
       )}
       <p className={styles.muted}>
@@ -252,22 +251,18 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
         description="Reload to see what is on disk now (your unsaved edits are discarded), or overwrite the file with what you have here."
         actions={
           <>
-            <button type="button" className={styles.secondary} onClick={conflict.close}>
-              Cancel
-            </button>
-            <button type="button" className={styles.secondary} onClick={reloadFromSource}>
-              Reload from disk
-            </button>
-            <button
-              type="button"
-              className={`${styles.primary} ${styles.danger}`}
+            <Button onClick={conflict.close}>Cancel</Button>
+            <Button onClick={reloadFromSource}>Reload from disk</Button>
+            <Button
+              variant="primary"
+              tone="danger"
               onClick={() => {
                 conflict.close();
                 void runSave('overwrite');
               }}
             >
               Overwrite
-            </button>
+            </Button>
           </>
         }
       />

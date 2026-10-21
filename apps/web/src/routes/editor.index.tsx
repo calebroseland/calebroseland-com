@@ -1,4 +1,4 @@
-import { notify, Stack } from '@crc/ui';
+import { Button, button, notify, Stack } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { ConfirmDialog } from '../editor/Dialogs.tsx';
@@ -47,7 +47,11 @@ const Board = () => {
   return (
     <EditorShell
       actions={
-        <Link to="/editor/new" search={kind ? { kind } : {}} className={styles.primary}>
+        <Link
+          to="/editor/new"
+          search={kind ? { kind } : {}}
+          className={button({ variant: 'primary' })}
+        >
           {kind ? NEW_LABEL[kind] : 'New entry'}
         </Link>
       }
@@ -73,9 +77,9 @@ const Board = () => {
         {board.status === 'error' && (
           <p role="alert" className={styles.alert}>
             Couldn't read your working tree.{' '}
-            <button type="button" className={styles.toastAction} onClick={board.retry}>
+            <Button variant="inline" onClick={board.retry}>
               Retry
-            </button>
+            </Button>
           </p>
         )}
         {ready && ready.entries.length === 0 && (
@@ -97,12 +101,10 @@ const Board = () => {
         description={`This deletes ${target?.dir} from your working tree. It is an ordinary file deletion you can undo with git.`}
         actions={
           <>
-            <button type="button" className={styles.secondary} onClick={deleting.close}>
-              Cancel
-            </button>
-            <button
-              type="button"
-              className={`${styles.primary} ${styles.danger}`}
+            <Button onClick={deleting.close}>Cancel</Button>
+            <Button
+              variant="primary"
+              tone="danger"
               onClick={() => {
                 if (target) {
                   void runDelete(target);
@@ -111,7 +113,7 @@ const Board = () => {
               }}
             >
               Delete
-            </button>
+            </Button>
           </>
         }
       />
@@ -142,7 +144,7 @@ const Row = ({ entry, onDelete }: { entry: EditorEntry; onDelete: () => void }) 
         </span>
       </div>
       <span className={styles.kindBadge}>{entry.kind}</span>
-      <Link to="/editor/$slug" params={{ slug: entry.slug }} className={styles.secondary}>
+      <Link to="/editor/$slug" params={{ slug: entry.slug }} className={button()}>
         Edit
       </Link>
       <RowMenu label={`Actions for ${entry.slug}`}>

@@ -7,7 +7,7 @@ import { RadioGroup } from '@base-ui/react/radio-group';
 import { Select } from '@base-ui/react/select';
 import { Slider } from '@base-ui/react/slider';
 import { Switch } from '@base-ui/react/switch';
-import { Icon, Tip, usePopupMotion } from '@crc/ui';
+import { Button, button, Icon, iconButton, Tip, usePopupMotion } from '@crc/ui';
 import { type CSSProperties, type ReactNode, useEffect, useId, useState } from 'react';
 import { HexColorInput, HexColorPicker } from 'react-colorful';
 import { siteFonts } from '../content/theme.ts';
@@ -354,7 +354,7 @@ export const ThemeEditor = ({
                 Changes preview on the page as you make them.
               </Dialog.Description>
             </div>
-            <Dialog.Close className={styles.iconButton} aria-label="Cancel and close">
+            <Dialog.Close className={iconButton({ shape: 'round' })} aria-label="Cancel and close">
               <Icon name="lucide:x" size="md" />
             </Dialog.Close>
           </header>
@@ -513,9 +513,10 @@ export const ThemeEditor = ({
 
           <footer className={styles.footer}>
             {!isNew && (
-              <button
-                type="button"
-                className={styles.danger}
+              <Button
+                variant="ghost"
+                tone="danger"
+                size="sm"
                 onClick={() => {
                   if (!confirmDelete) {
                     return setConfirmDelete(true);
@@ -526,13 +527,13 @@ export const ThemeEditor = ({
               >
                 <Icon name="lucide:trash-2" size="sm" />
                 {confirmDelete ? 'Delete for good' : 'Delete'}
-              </button>
+              </Button>
             )}
             <span className={styles.spacer} />
-            <Dialog.Close className={styles.secondary}>Cancel</Dialog.Close>
-            <button type="button" className={styles.primary} onClick={save}>
+            <Dialog.Close className={button({ size: 'sm' })}>Cancel</Dialog.Close>
+            <Button variant="primary" size="sm" onClick={save}>
               Save theme
-            </button>
+            </Button>
           </footer>
         </Dialog.Popup>
       </Dialog.Portal>

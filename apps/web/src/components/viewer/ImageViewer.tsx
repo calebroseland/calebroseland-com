@@ -1,6 +1,6 @@
 import { Dialog } from '@base-ui/react/dialog';
 import { ScrollArea } from '@base-ui/react/scroll-area';
-import { Icon, Tip } from '@crc/ui';
+import { Icon, IconButton, iconButton, Tip } from '@crc/ui';
 import { m } from 'motion/react';
 import { SLIDE_GAP } from './stage.ts';
 import { useViewerStage, type ViewerProps } from './useViewerStage.ts';
@@ -81,23 +81,17 @@ export const ImageViewer = (props: ViewerProps) => {
               {many ? `${index + 1} / ${count}` : ''}
             </span>
             <div className={styles.tools}>
-              <Tip label="Zoom out" side="bottom">
-                <button type="button" className={styles.button} onClick={v.zoomOut}>
-                  <Icon name="lucide:minus" size="sm" />
-                  <span className="visually-hidden">Zoom out</span>
-                </button>
-              </Tip>
+              <IconButton label="Zoom out" variant="scrim" shape="round" onClick={v.zoomOut}>
+                <Icon name="lucide:minus" size="sm" />
+              </IconButton>
               <span className={styles.zoom} aria-hidden="true">
                 {Math.round(v.zoom * 100)}%
               </span>
-              <Tip label="Zoom in" side="bottom">
-                <button type="button" className={styles.button} onClick={v.zoomIn}>
-                  <Icon name="lucide:plus" size="sm" />
-                  <span className="visually-hidden">Zoom in</span>
-                </button>
-              </Tip>
+              <IconButton label="Zoom in" variant="scrim" shape="round" onClick={v.zoomIn}>
+                <Icon name="lucide:plus" size="sm" />
+              </IconButton>
               <Tip label="Close" side="bottom">
-                <Dialog.Close className={styles.button}>
+                <Dialog.Close className={iconButton({ variant: 'scrim', shape: 'round' })}>
                   <Icon name="lucide:x" size="sm" />
                   <span className="visually-hidden">Close</span>
                 </Dialog.Close>
@@ -107,28 +101,28 @@ export const ImageViewer = (props: ViewerProps) => {
 
           {many && (
             <>
-              <Tip label="Previous image" side="right">
-                <button
-                  type="button"
-                  className={`${styles.button} ${styles.side} ${styles.previous}`}
-                  onClick={v.previous}
-                  aria-disabled={index === 0}
-                >
-                  <Icon name="lucide:chevron-left" />
-                  <span className="visually-hidden">Previous image</span>
-                </button>
-              </Tip>
-              <Tip label="Next image" side="left">
-                <button
-                  type="button"
-                  className={`${styles.button} ${styles.side} ${styles.next}`}
-                  onClick={v.next}
-                  aria-disabled={index === count - 1}
-                >
-                  <Icon name="lucide:chevron-right" />
-                  <span className="visually-hidden">Next image</span>
-                </button>
-              </Tip>
+              <IconButton
+                label="Previous image"
+                tipSide="right"
+                variant="scrim"
+                shape="round"
+                className={`${styles.side} ${styles.previous}`}
+                onClick={v.previous}
+                aria-disabled={index === 0}
+              >
+                <Icon name="lucide:chevron-left" />
+              </IconButton>
+              <IconButton
+                label="Next image"
+                tipSide="left"
+                variant="scrim"
+                shape="round"
+                className={`${styles.side} ${styles.next}`}
+                onClick={v.next}
+                aria-disabled={index === count - 1}
+              >
+                <Icon name="lucide:chevron-right" />
+              </IconButton>
             </>
           )}
 

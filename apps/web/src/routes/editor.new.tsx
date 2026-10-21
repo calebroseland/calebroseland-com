@@ -1,4 +1,4 @@
-import { Stack } from '@crc/ui';
+import { Button, Stack } from '@crc/ui';
 import { createFileRoute } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { useCreateEntry } from '../editor/data/hooks.ts';
@@ -111,13 +111,9 @@ const NewEntry = () => {
             </p>
           )}
           <div>
-            <button
-              type="submit"
-              className={styles.primary}
-              disabled={!form.entry || create.pending}
-            >
+            <Button type="submit" variant="primary" disabled={!form.entry} pending={create.pending}>
               {create.pending ? 'Creating…' : `Create ${kind}`}
-            </button>
+            </Button>
           </div>
         </Stack>
       </form>

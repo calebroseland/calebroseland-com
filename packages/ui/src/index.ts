@@ -1,3 +1,9 @@
+export { Button, type ButtonStyle, button } from './components/Button/Button.tsx';
+export {
+  IconButton,
+  type IconButtonStyle,
+  iconButton,
+} from './components/IconButton/IconButton.tsx';
 export { Tip, TipProvider } from './components/Tip/Tip.tsx';
 export { notify, Toasts } from './components/Toast/Toast.tsx';
 export type { IconSize } from './Icon.tsx';
