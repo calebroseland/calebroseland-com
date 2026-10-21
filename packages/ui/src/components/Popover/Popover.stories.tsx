@@ -10,7 +10,14 @@ import { Popover } from './Popover.tsx';
 const Demo = () => {
   const [inline, setInline] = useState(false);
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', minBlockSize: '18rem' }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        minBlockSize: '18rem',
+      }}
+    >
       <Popover
         title="Writing"
         trigger={
@@ -40,9 +47,10 @@ export const Closed: Story = {};
 
 export const Open: Story = {
   play: async ({ canvasElement }) => {
-    await userEvent.click(
-      within(canvasElement).getByRole('button', { name: 'Options for Writing' }),
-    );
+    const trigger = within(canvasElement).getByRole('button', { name: 'Options for Writing' });
+    // A trigger keeps its own size; a flex parent must not stretch it.
+    await expect(trigger.getBoundingClientRect().height).toBeLessThan(64);
+    await userEvent.click(trigger);
     const panel = await within(document.body).findByRole('dialog', { name: 'Writing' });
     await waitFor(() => expect(panel.getAnimations({ subtree: true })).toHaveLength(0));
   },

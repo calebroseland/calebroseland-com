@@ -18,7 +18,14 @@ const Demo = () => {
   const [theme, setTheme] = useState('auto');
   const [edit, setEdit] = useState(true);
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', minBlockSize: '28rem' }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        minBlockSize: '28rem',
+      }}
+    >
       <Menu
         tip="Theme"
         trigger={
@@ -77,7 +84,10 @@ export const Closed: Story = {};
 /** Open, with a radio group, an action, a setting, a disabled row and a destructive one. */
 export const Open: Story = {
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Theme: Auto.' }));
+    const trigger = within(canvasElement).getByRole('button', { name: 'Theme: Auto.' });
+    // A trigger keeps its own size; a flex parent must not stretch it.
+    await expect(trigger.getBoundingClientRect().height).toBeLessThan(64);
+    await userEvent.click(trigger);
     const menu = await within(document.body).findByRole('menu');
     // Rows cascade in; axe needs the settled colours, not a blend.
     await waitFor(() => expect(menu.getAnimations({ subtree: true })).toHaveLength(0));

@@ -9,7 +9,14 @@ const meta = {
   decorators: [
     (Story) => (
       <TipProvider>
-        <div style={{ padding: 'var(--space-12)', display: 'flex', justifyContent: 'center' }}>
+        <div
+          style={{
+            padding: 'var(--space-12)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+          }}
+        >
           <Story />
         </div>
       </TipProvider>

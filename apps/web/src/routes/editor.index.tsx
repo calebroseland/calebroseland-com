@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   button,
   ConfirmDialog,
@@ -8,6 +9,8 @@ import {
   MenuItem,
   notify,
   Stack,
+  tab,
+  tabList,
 } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
@@ -66,14 +69,14 @@ const Board = () => {
     >
       <p className={styles.muted}>Editing {branch ?? '…'} · working tree</p>
       {/* Posts and pages share one board; the filter lives in the URL so a view can be linked to. */}
-      <nav className={`${styles.tabs} ${styles.filters}`} aria-label="Show">
+      <nav className={`${tabList()} ${styles.filters}`} aria-label="Show">
         {FILTERS.map((f) => (
           <Link
             key={f.label}
             to="/editor"
             search={f.kind ? { kind: f.kind } : {}}
             activeOptions={{ exact: true, includeSearch: true }}
-            className={styles.tab}
+            className={tab()}
           >
             {f.label}
             {ready && <span className={styles.tabCount}> {ready.counts[f.kind ?? 'all']}</span>}
@@ -83,12 +86,12 @@ const Board = () => {
       <div className={styles.board} aria-busy={board.status === 'loading'}>
         {board.status === 'loading' && <p className={styles.muted}>Loading…</p>}
         {board.status === 'error' && (
-          <p role="alert" className={styles.alert}>
+          <Alert>
             Couldn't read your working tree.{' '}
             <Button variant="inline" onClick={board.retry}>
               Retry
             </Button>
-          </p>
+          </Alert>
         )}
         {ready && ready.entries.length === 0 && (
           <p className={styles.muted}>{kind ? EMPTY[kind] : 'Nothing here yet.'}</p>

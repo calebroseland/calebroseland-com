@@ -1,3 +1,4 @@
+export { Alert } from './components/Alert/Alert.tsx';
 export { Button, type ButtonStyle, button } from './components/Button/Button.tsx';
 export { ConfirmDialog } from './components/ConfirmDialog/ConfirmDialog.tsx';
 export { input, TextField } from './components/Field/Field.tsx';
@@ -19,6 +20,7 @@ export { Popover } from './components/Popover/Popover.tsx';
 export { RadioGroup } from './components/RadioGroup/RadioGroup.tsx';
 export { Select, type SelectOption } from './components/Select/Select.tsx';
 export { Switch } from './components/Switch/Switch.tsx';
+export { Tabs, tab, tabList } from './components/Tabs/Tabs.tsx';
 export { Tip, TipProvider } from './components/Tip/Tip.tsx';
 export { notify, Toasts } from './components/Toast/Toast.tsx';
 export type { IconSize } from './Icon.tsx';

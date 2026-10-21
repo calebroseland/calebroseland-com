@@ -1,4 +1,4 @@
-import { Button, button, ConfirmDialog, notify } from '@crc/ui';
+import { Alert, Button, button, ConfirmDialog, notify, Tabs } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { useEntry, useReloadEntry, useSaveEntry } from '../editor/data/hooks.ts';
@@ -53,20 +53,18 @@ const DraftRoute = () => {
     case 'error':
       return (
         <EditorShell title={slug}>
-          <p role="alert" className={styles.alert}>
+          <Alert>
             Couldn't read this entry from your working tree.{' '}
             <Button variant="inline" onClick={entry.retry}>
               Retry
             </Button>
-          </p>
+          </Alert>
         </EditorShell>
       );
     case 'missing':
       return (
         <EditorShell title={slug}>
-          <p role="alert" className={styles.alert}>
-            No entry with the slug “{slug}” exists in your working tree.
-          </p>
+          <Alert>No entry with the slug “{slug}” exists in your working tree.</Alert>
           <p className={styles.muted}>
             <Link to="/editor">← Editor</Link>
           </p>
@@ -195,13 +193,13 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
       }
     >
       {buffer.restoredFromLocal && (
-        <p role="status" className={styles.banner}>
+        <Alert tone="info">
           Restored unsaved changes from this device.
           {buffer.imagesDropped ? ' Images added but not saved were not kept.' : ''}
           <Button variant="inline" onClick={reloadFromSource}>
             Discard local changes
           </Button>
-        </p>
+        </Alert>
       )}
       <p className={styles.muted}>
         <Link to="/editor">← Editor</Link>
@@ -216,31 +214,25 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
           apiRef={api}
         />
         <aside aria-label="Post details and images">
-          <div className={styles.tabs} role="tablist" aria-label="Panel">
-            {(['meta', 'media'] as const).map((p) => (
-              <button
-                key={p}
-                type="button"
-                role="tab"
-                id={`tab-${p}`}
-                aria-selected={panel === p}
-                aria-controls={`panel-${p}`}
-                className={styles.tab}
-                onClick={() => show(p)}
-              >
-                {p === 'meta'
-                  ? 'Details'
-                  : `Images${buffer.assets.length > 0 ? ` (${buffer.assets.length})` : ''}`}
-              </button>
-            ))}
-          </div>
-          <div id={`panel-${panel}`} role="tabpanel" aria-labelledby={`tab-${panel}`}>
-            {panel === 'meta' ? (
-              <MetaPanel buffer={buffer} controller={controller} />
-            ) : (
-              <AssetsPanel buffer={buffer} controller={controller} onAltChange={onAltChange} />
-            )}
-          </div>
+          <Tabs
+            label="Panel"
+            value={panel}
+            onValueChange={show}
+            tabs={[
+              {
+                value: 'meta',
+                label: 'Details',
+                panel: <MetaPanel buffer={buffer} controller={controller} />,
+              },
+              {
+                value: 'media',
+                label: `Images${buffer.assets.length > 0 ? ` (${buffer.assets.length})` : ''}`,
+                panel: (
+                  <AssetsPanel buffer={buffer} controller={controller} onAltChange={onAltChange} />
+                ),
+              },
+            ]}
+          />
         </aside>
       </div>
       <ConfirmDialog

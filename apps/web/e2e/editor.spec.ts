@@ -168,6 +168,21 @@ test.describe('editor', () => {
       .toBeGreaterThanOrEqual((bar?.y ?? 0) + (bar?.height ?? 0));
   });
 
+  test('the side panel tabs follow the APG pattern: arrow keys move and select', async ({
+    page,
+  }) => {
+    await page.goto('/editor/about');
+    const details = page.getByRole('tab', { name: 'Details' });
+    await details.focus();
+    await page.keyboard.press('ArrowRight');
+    const images = page.getByRole('tab', { name: /^Images/ });
+    await expect(images).toBeFocused();
+    await expect(images).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tabpanel')).toHaveAccessibleName(/^Images/);
+    await page.keyboard.press('ArrowLeft');
+    await expect(details).toHaveAttribute('aria-selected', 'true');
+  });
+
   test('editor routes are accessible', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     for (const path of ['/editor', '/editor?kind=page', '/editor/new', '/editor/about']) {

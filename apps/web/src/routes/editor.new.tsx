@@ -1,4 +1,4 @@
-import { Button, RadioGroup, Stack, TextField } from '@crc/ui';
+import { Alert, Button, RadioGroup, Stack, TextField } from '@crc/ui';
 import { createFileRoute } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { useCreateEntry } from '../editor/data/hooks.ts';
@@ -60,12 +60,12 @@ const NewEntry = () => {
             <TextField label="Date" type="date" value={date} onValueChange={form.setDate} />
           )}
           {create.failure && (
-            <p role="alert" className={styles.alert}>
+            <Alert>
               Couldn't create it:{' '}
               {create.failure.error instanceof Error
                 ? create.failure.error.message
                 : 'unknown error'}
-            </p>
+            </Alert>
           )}
           <div>
             <Button type="submit" variant="primary" disabled={!form.entry} pending={create.pending}>
