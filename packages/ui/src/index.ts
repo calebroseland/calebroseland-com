@@ -4,6 +4,15 @@ export {
   type IconButtonStyle,
   iconButton,
 } from './components/IconButton/IconButton.tsx';
+export {
+  Menu,
+  MenuCheckboxItem,
+  MenuGroup,
+  MenuItem,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSeparator,
+} from './components/Menu/Menu.tsx';
 export { Tip, TipProvider } from './components/Tip/Tip.tsx';
 export { notify, Toasts } from './components/Toast/Toast.tsx';
 export type { IconSize } from './Icon.tsx';

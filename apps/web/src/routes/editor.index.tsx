@@ -1,10 +1,9 @@
-import { Button, button, notify, Stack } from '@crc/ui';
+import { Button, button, Icon, iconButton, Menu, MenuItem, notify, Stack } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { ConfirmDialog } from '../editor/Dialogs.tsx';
 import { useBoard, useBranch, useDeleteEntry } from '../editor/data/hooks.ts';
 import type { EntryKind } from '../editor/drafts/paths.ts';
-import { RowMenu, RowMenuItem } from '../editor/drafts/RowMenu.tsx';
 import { EditorShell } from '../editor/EditorShell.tsx';
 import styles from '../editor/editor.module.css';
 import type { EditorEntry } from '../editor/entries.ts';
@@ -147,11 +146,21 @@ const Row = ({ entry, onDelete }: { entry: EditorEntry; onDelete: () => void }) 
       <Link to="/editor/$slug" params={{ slug: entry.slug }} className={button()}>
         Edit
       </Link>
-      <RowMenu label={`Actions for ${entry.slug}`}>
-        <RowMenuItem onClick={onDelete} danger>
+      <Menu
+        trigger={
+          <button
+            type="button"
+            className={iconButton({ size: 'sm' })}
+            aria-label={`Actions for ${entry.slug}`}
+          >
+            <Icon name="lucide:ellipsis-vertical" size="sm" />
+          </button>
+        }
+      >
+        <MenuItem tone="danger" onClick={onDelete}>
           Delete entry
-        </RowMenuItem>
-      </RowMenu>
+        </MenuItem>
+      </Menu>
     </li>
   );
 };
