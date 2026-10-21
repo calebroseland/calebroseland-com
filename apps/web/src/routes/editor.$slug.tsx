@@ -21,11 +21,14 @@ const useSlug = (): string => {
   return Route.useParams().slug;
 };
 
-/** The side panel on show, kept in the URL. */
+/** The side panel on show, kept in the URL. Switching it stays where the reader is on the page. */
 const usePanel = () => {
   const { panel = 'meta' } = Route.useSearch();
   const navigate = Route.useNavigate();
-  return { panel, show: (next: Panel) => navigate({ search: (s) => ({ ...s, panel: next }) }) };
+  return {
+    panel,
+    show: (next: Panel) => navigate({ search: (s) => ({ ...s, panel: next }), resetScroll: false }),
+  };
 };
 
 /** Where Close goes: back to the page the edit was opened from, or to the editor's list. */
