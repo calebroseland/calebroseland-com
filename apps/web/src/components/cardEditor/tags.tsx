@@ -1,14 +1,8 @@
-import { Field } from '@base-ui/react/field';
-import { Fieldset } from '@base-ui/react/fieldset';
-import { Popover } from '@base-ui/react/popover';
-import { Radio } from '@base-ui/react/radio';
-import { RadioGroup } from '@base-ui/react/radio-group';
-import { Switch } from '@base-ui/react/switch';
 import { DropIndicator, useItemRegistration, useListReorder } from '@crc/interaction';
-import { Icon, Tip, usePopupMotion } from '@crc/ui';
+import { Icon, Popover, RadioGroup, Switch, TextField, Tip } from '@crc/ui';
 import { type RefObject, useId, useState } from 'react';
 import styles from './CardEditor.module.css';
-import { Handle, IconSelect, TextField } from './fields.tsx';
+import { Handle, IconSelect } from './fields.tsx';
 import { type EditTag, MAX_TAGS, newTag, tagProblem } from './model.ts';
 
 /** The tag being typed, why it cannot be added yet, and the id tying its label and message to it. */
@@ -184,72 +178,50 @@ const TagSettings = ({
   error: string | undefined;
   onChange: (tag: EditTag) => void;
 }) => {
-  const motion = usePopupMotion('dropdown');
   return (
-    <Popover.Root onOpenChange={motion.onOpenChange}>
-      <Popover.Trigger className={styles.remove} aria-label={`Settings for ${name}`}>
-        <Icon name="lucide:pencil" size="xs" />
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Positioner className={styles.floating} side="bottom" align="start" sideOffset={6}>
-          <Popover.Popup ref={motion.ref} className={styles.popup}>
-            <Popover.Title className={styles.legend}>Focus area</Popover.Title>
-            <TextField
-              label="Label"
-              visibleLabel
-              value={tag.label}
-              error={error}
-              onChange={(label) => onChange({ ...tag, label })}
-            />
-            <div className={styles.iconRow}>
-              <span className={styles.label}>Icon</span>
-              <IconSelect
-                value={tag.icon}
-                allowNone
-                label={`Icon for ${name}`}
-                onChange={(icon) =>
-                  onChange({
-                    ...tag,
-                    icon,
-                    show: showWithIcon(icon, tag.show),
-                  })
-                }
-              />
-            </div>
-            <Fieldset.Root
-              className={styles.showGroup}
-              disabled={tag.icon === null}
-              render={
-                <RadioGroup
-                  value={tag.icon === null ? 'label' : tag.show}
-                  onValueChange={(show) => onChange({ ...tag, show: show as EditTag['show'] })}
-                />
-              }
-            >
-              <Fieldset.Legend className={styles.label}>Show</Fieldset.Legend>
-              {SHOW_OPTIONS.map((o) => (
-                // biome-ignore lint/a11y/noLabelWithoutControl: Radio.Root renders the radio inside this label
-                <label key={o.value} className={styles.segment}>
-                  <Radio.Root value={o.value} className={styles.radio}>
-                    <Radio.Indicator className={styles.radioDot} />
-                  </Radio.Root>
-                  {o.label}
-                </label>
-              ))}
-            </Fieldset.Root>
-            <Field.Root className={styles.switchRow}>
-              <Field.Label className={styles.label}>Links to its posts</Field.Label>
-              <Switch.Root
-                className={styles.switch}
-                checked={tag.link}
-                onCheckedChange={(link) => onChange({ ...tag, link })}
-              >
-                <Switch.Thumb className={styles.switchThumb} />
-              </Switch.Root>
-            </Field.Root>
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
+    <Popover
+      title="Focus area"
+      align="start"
+      trigger={
+        <button type="button" className={styles.remove} aria-label={`Settings for ${name}`}>
+          <Icon name="lucide:pencil" size="xs" />
+        </button>
+      }
+    >
+      <TextField
+        label="Label"
+        size="sm"
+        value={tag.label}
+        error={error}
+        onValueChange={(label) => onChange({ ...tag, label })}
+      />
+      <div className={styles.iconRow}>
+        <span className={styles.label}>Icon</span>
+        <IconSelect
+          value={tag.icon}
+          allowNone
+          label={`Icon for ${name}`}
+          onChange={(icon) =>
+            onChange({
+              ...tag,
+              icon,
+              show: showWithIcon(icon, tag.show),
+            })
+          }
+        />
+      </div>
+      <RadioGroup
+        legend="Show"
+        value={tag.icon === null ? 'label' : tag.show}
+        options={SHOW_OPTIONS}
+        disabled={tag.icon === null}
+        onValueChange={(show) => onChange({ ...tag, show })}
+      />
+      <Switch
+        label="Links to its posts"
+        checked={tag.link}
+        onCheckedChange={(link) => onChange({ ...tag, link })}
+      />
+    </Popover>
   );
 };

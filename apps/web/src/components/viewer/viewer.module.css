@@ -221,7 +221,7 @@
   }
 
   /* Hidden controls take no taps but stay in the tab order, and come back on focus. */
-  .viewer[data-controls="hidden"] :is(.top, .bottom, .side, .button) {
+  .viewer[data-controls="hidden"] :is(.top, .bottom, .side) {
     pointer-events: none;
     opacity: 0 !important;
   }

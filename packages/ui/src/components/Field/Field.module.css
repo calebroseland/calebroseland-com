@@ -1,0 +1,52 @@
+@layer components {
+  .field {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+
+  .label {
+    font-weight: var(--font-weight-medium);
+  }
+
+  .description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+
+  .error {
+    font-size: var(--font-size-sm);
+    color: var(--color-danger);
+  }
+
+  .input {
+    inline-size: 100%;
+    padding: var(--space-1) var(--space-3);
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: 1px;
+    }
+
+    &[aria-invalid="true"] {
+      border-color: var(--color-danger);
+    }
+  }
+
+  .md {
+    min-block-size: 2.75rem;
+  }
+
+  .sm {
+    min-block-size: 2.5rem;
+  }
+}

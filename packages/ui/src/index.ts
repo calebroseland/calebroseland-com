@@ -1,5 +1,6 @@
 export { Button, type ButtonStyle, button } from './components/Button/Button.tsx';
 export { ConfirmDialog } from './components/ConfirmDialog/ConfirmDialog.tsx';
+export { input, TextField } from './components/Field/Field.tsx';
 export {
   IconButton,
   type IconButtonStyle,
@@ -14,6 +15,10 @@ export {
   MenuRadioItem,
   MenuSeparator,
 } from './components/Menu/Menu.tsx';
+export { Popover } from './components/Popover/Popover.tsx';
+export { RadioGroup } from './components/RadioGroup/RadioGroup.tsx';
+export { Select, type SelectOption } from './components/Select/Select.tsx';
+export { Switch } from './components/Switch/Switch.tsx';
 export { Tip, TipProvider } from './components/Tip/Tip.tsx';
 export { notify, Toasts } from './components/Toast/Toast.tsx';
 export type { IconSize } from './Icon.tsx';

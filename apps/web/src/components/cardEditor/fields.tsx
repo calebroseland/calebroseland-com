@@ -1,5 +1,4 @@
-import { Select } from '@base-ui/react/select';
-import { Icon, usePopupMotion } from '@crc/ui';
+import { Icon, Select } from '@crc/ui';
 import { type KeyboardEvent, type ReactNode, type RefObject, useId } from 'react';
 import styles from './CardEditor.module.css';
 import { ICON_CHOICES } from './model.ts';
@@ -7,50 +6,6 @@ import { ICON_CHOICES } from './model.ts';
 /** Ties a field's label to its control. */
 const useLabelId = () => {
   return useId();
-};
-
-/** A labelled field in a popover or on the contact side. */
-export const TextField = ({
-  label,
-  value,
-  error,
-  onChange,
-  className,
-  type = 'text',
-  visibleLabel = false,
-}: {
-  label: string;
-  value: string;
-  error: string | undefined;
-  onChange: (v: string) => void;
-  className?: string | undefined;
-  type?: 'text' | 'url';
-  visibleLabel?: boolean;
-}) => {
-  const id = useLabelId();
-  return (
-    <div className={styles.field}>
-      <label htmlFor={id} className={visibleLabel ? styles.label : 'visually-hidden'}>
-        {label}
-      </label>
-      <input
-        id={id}
-        type="text"
-        inputMode={type === 'url' ? 'url' : undefined}
-        className={[styles.input, className].filter(Boolean).join(' ')}
-        value={value}
-        placeholder={label}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      {error && (
-        <span id={`${id}-error`} className={styles.error}>
-          {error}
-        </span>
-      )}
-    </div>
-  );
 };
 
 /* Text on the card, editable where it stands: it keeps the type of whatever holds it, and shows a
@@ -176,42 +131,24 @@ export const IconSelect = ({
     ...(known || value === null ? [] : [{ value, label: value }]),
     ...ICON_CHOICES,
   ];
-  const motion = usePopupMotion('dropdown');
   return (
-    <Select.Root
-      onOpenChange={motion.onOpenChange}
+    <Select
       value={value ?? NO_ICON}
-      items={choices}
-      onValueChange={(v) => v && onChange(v === NO_ICON ? null : (v as string))}
-    >
-      <Select.Trigger className={className} aria-label={label}>
-        <Select.Value>
-          {(v: string) =>
-            v === NO_ICON ? <span className={styles.noIcon}>—</span> : <Icon name={v} size={size} />
-          }
-        </Select.Value>
-      </Select.Trigger>
-      <Select.Portal>
-        <Select.Positioner className={styles.floating} sideOffset={4} alignItemWithTrigger={false}>
-          <Select.Popup ref={motion.ref} className={styles.iconPopup}>
-            <Select.List>
-              {choices.map((c) => (
-                <Select.Item key={c.value} value={c.value} className={styles.iconItem}>
-                  {c.value === NO_ICON ? (
-                    <span className={styles.noIcon}>—</span>
-                  ) : (
-                    <Icon name={c.value} size="sm" />
-                  )}
-                  <Select.ItemText>{c.label}</Select.ItemText>
-                  <Select.ItemIndicator className={styles.iconCheck}>
-                    <Icon name="lucide:check" size="sm" />
-                  </Select.ItemIndicator>
-                </Select.Item>
-              ))}
-            </Select.List>
-          </Select.Popup>
-        </Select.Positioner>
-      </Select.Portal>
-    </Select.Root>
+      hiddenLabel={label}
+      triggerClassName={className}
+      options={choices.map((c) => ({
+        ...c,
+        leading:
+          c.value === NO_ICON ? (
+            <span className={styles.noIcon}>—</span>
+          ) : (
+            <Icon name={c.value} size="sm" />
+          ),
+      }))}
+      renderValue={(v) =>
+        v === NO_ICON ? <span className={styles.noIcon}>—</span> : <Icon name={v} size={size} />
+      }
+      onValueChange={(v) => onChange(v === NO_ICON ? null : v)}
+    />
   );
 };

@@ -1,13 +1,20 @@
 import { Dialog } from '@base-ui/react/dialog';
-import { Field } from '@base-ui/react/field';
 import { Fieldset } from '@base-ui/react/fieldset';
 import { Popover } from '@base-ui/react/popover';
-import { Radio } from '@base-ui/react/radio';
-import { RadioGroup } from '@base-ui/react/radio-group';
-import { Select } from '@base-ui/react/select';
 import { Slider } from '@base-ui/react/slider';
-import { Switch } from '@base-ui/react/switch';
-import { Button, button, Icon, iconButton, Tip, usePopupMotion } from '@crc/ui';
+import {
+  Button,
+  button,
+  Icon,
+  iconButton,
+  input,
+  RadioGroup,
+  Select,
+  Switch,
+  TextField,
+  Tip,
+  usePopupMotion,
+} from '@crc/ui';
 import { type CSSProperties, type ReactNode, useEffect, useId, useState } from 'react';
 import { HexColorInput, HexColorPicker } from 'react-colorful';
 import { siteFonts } from '../content/theme.ts';
@@ -98,6 +105,11 @@ const SliderField = ({
   );
 };
 
+const BASES = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+] as const;
+
 /** Ties a field's visible label to the control it names. */
 const useLabelId = () => {
   return useId();
@@ -137,65 +149,13 @@ const ColorField = ({
         </Popover.Portal>
       </Popover.Root>
       <HexColorInput
-        className={styles.hexInput}
+        className={`${input({ size: 'sm' })} ${styles.hexInput}`}
         color={value}
         onChange={(hex) => onChange(sixDigit(hex))}
         prefixed
         aria-labelledby={labelId}
       />
     </div>
-  );
-};
-
-const SelectField = <V extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: V;
-  options: ReadonlyArray<{ value: V; label: string; font: string }>;
-  onChange: (v: V) => void;
-}) => {
-  const motion = usePopupMotion('dropdown');
-  return (
-    <Field.Root className={styles.field}>
-      <Select.Root
-        onOpenChange={motion.onOpenChange}
-        value={value}
-        items={options.map((o) => ({ value: o.value, label: o.label }))}
-        onValueChange={(v) => v && onChange(v as V)}
-      >
-        <Select.Label className={styles.label}>{label}</Select.Label>
-        <Select.Trigger className={styles.selectTrigger}>
-          <Select.Value />
-          <Select.Icon className={styles.selectIcon}>
-            <Icon name="lucide:chevron-down" size="sm" />
-          </Select.Icon>
-        </Select.Trigger>
-        <Select.Portal>
-          <Select.Positioner
-            className={styles.floating}
-            sideOffset={4}
-            alignItemWithTrigger={false}
-          >
-            <Select.Popup ref={motion.ref} className={styles.selectPopup}>
-              <Select.List>
-                {options.map((o) => (
-                  <Select.Item key={o.value} value={o.value} className={styles.selectItem}>
-                    <Select.ItemText style={{ fontFamily: o.font }}>{o.label}</Select.ItemText>
-                    <Select.ItemIndicator className={styles.selectCheck}>
-                      <Icon name="lucide:check" size="sm" />
-                    </Select.ItemIndicator>
-                  </Select.Item>
-                ))}
-              </Select.List>
-            </Select.Popup>
-          </Select.Positioner>
-        </Select.Portal>
-      </Select.Root>
-    </Field.Root>
   );
 };
 
@@ -360,36 +320,20 @@ export const ThemeEditor = ({
           </header>
 
           <div className={styles.body}>
-            <Field.Root className={styles.field}>
-              <Field.Label className={styles.label}>Name</Field.Label>
-              <Field.Control
-                className={styles.input}
-                value={theme.name}
-                maxLength={40}
-                onValueChange={(v) => set('name', v)}
-              />
-            </Field.Root>
+            <TextField
+              label="Name"
+              size="sm"
+              value={theme.name}
+              maxLength={40}
+              onValueChange={(v) => set('name', v)}
+            />
 
-            <Fieldset.Root
-              render={
-                <RadioGroup
-                  value={theme.base}
-                  onValueChange={(v) => set('base', v as CustomTheme['base'])}
-                />
-              }
-              className={styles.segmented}
-            >
-              <Fieldset.Legend className={styles.label}>Built on</Fieldset.Legend>
-              {(['light', 'dark'] as const).map((base) => (
-                // biome-ignore lint/a11y/noLabelWithoutControl: Radio.Root renders the radio inside this label
-                <label key={base} className={styles.segment}>
-                  <Radio.Root value={base} className={styles.radio}>
-                    <Radio.Indicator className={styles.radioDot} />
-                  </Radio.Root>
-                  {base === 'light' ? 'Light' : 'Dark'}
-                </label>
-              ))}
-            </Fieldset.Root>
+            <RadioGroup
+              legend="Built on"
+              value={theme.base}
+              options={BASES}
+              onValueChange={(v) => set('base', v)}
+            />
 
             <Section title="Color">
               <ColorField label="Accent" value={theme.accent} onChange={(v) => set('accent', v)} />
@@ -417,16 +361,11 @@ export const ThemeEditor = ({
                 format={(v) => pct(v / RANGES.neutralTint.max)}
                 onChange={(v) => set('neutralTint', v)}
               />
-              <Field.Root className={styles.switchRow}>
-                <Field.Label className={styles.label}>Landing backdrop matches accent</Field.Label>
-                <Switch.Root
-                  className={styles.switch}
-                  checked={theme.backdrop === null}
-                  onCheckedChange={(match) => set('backdrop', match ? null : theme.accent)}
-                >
-                  <Switch.Thumb className={styles.switchThumb} />
-                </Switch.Root>
-              </Field.Root>
+              <Switch
+                label="Landing backdrop matches accent"
+                checked={theme.backdrop === null}
+                onCheckedChange={(match) => set('backdrop', match ? null : theme.accent)}
+              />
               {theme.backdrop !== null && (
                 <ColorField
                   label="Backdrop"
@@ -437,23 +376,23 @@ export const ThemeEditor = ({
             </Section>
 
             <Section title="Type">
-              <SelectField
+              <Select
                 label="Text font"
                 value={theme.fontText}
-                options={textFonts}
-                onChange={(v) => set('fontText', v)}
+                options={textFonts.map((o) => ({ ...o, style: { fontFamily: o.font } }))}
+                onValueChange={(v) => set('fontText', v)}
               />
-              <SelectField
+              <Select
                 label="Reading font"
                 value={theme.fontReading}
-                options={readingFonts}
-                onChange={(v) => set('fontReading', v)}
+                options={readingFonts.map((o) => ({ ...o, style: { fontFamily: o.font } }))}
+                onValueChange={(v) => set('fontReading', v)}
               />
-              <SelectField
+              <Select
                 label="Name font"
                 value={theme.fontName}
-                options={nameFonts}
-                onChange={(v) => set('fontName', v)}
+                options={nameFonts.map((o) => ({ ...o, style: { fontFamily: o.font } }))}
+                onValueChange={(v) => set('fontName', v)}
               />
               <SliderField
                 label="Text size"
