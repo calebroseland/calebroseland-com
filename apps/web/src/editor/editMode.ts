@@ -1,6 +1,7 @@
 import { notFound } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { Store } from '@tanstack/store';
+import { browserStorage } from '../storage.ts';
 
 /* Editing writes the files in content/ through the dev server, so it exists only there. Edit mode is
    off in each new tab, so the dev site looks as a reader sees it until it is switched on, and it
@@ -45,17 +46,9 @@ export const createEditMode = (env: { available: boolean; storage: EditModeStora
   };
 };
 
-const safeSessionStorage = (): EditModeStorage => {
-  try {
-    return window.sessionStorage;
-  } catch {
-    return undefined;
-  }
-};
-
 export const editMode: EditMode = createEditMode({
   available: import.meta.env.DEV,
-  storage: typeof window === 'undefined' ? undefined : safeSessionStorage(),
+  storage: browserStorage('session'),
 });
 
 /** Whether edit mode is on, as React sees it. */

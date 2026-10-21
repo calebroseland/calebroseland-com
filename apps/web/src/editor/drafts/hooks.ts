@@ -1,11 +1,11 @@
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useEffect, useState } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
+import { browserStorage } from '../../storage.ts';
 import type { Tree } from '../workingTree.ts';
 import {
   type Buffer,
   type BufferController,
-  browserStorage,
   createBufferStore,
   readLocalBuffer,
   writeLocalBuffer,
@@ -18,7 +18,7 @@ import { bufferFromTree } from './load.ts';
 export const useDraftBuffer = (tree: Tree, slug: string) => {
   const [controller] = useState(() => {
     const initial = bufferFromTree(tree, slug);
-    const local = readLocalBuffer(initial.dir, browserStorage());
+    const local = readLocalBuffer(initial.dir, browserStorage('local'));
     // Unsaved work always wins on load, even when the source moved underneath it: it keeps its own
     // base, so saving is refused with the conflict dialog rather than the edit being thrown away here.
     return createBufferStore(
@@ -45,7 +45,7 @@ const usePreview = (tree: Tree, controller: BufferController) => {
 /** Keeps the working copy on this device, debounced; never commits. */
 const useLocalAutosave = (buffer: Buffer) => {
   useEffect(() => {
-    const t = setTimeout(() => writeLocalBuffer(buffer, browserStorage()), 500);
+    const t = setTimeout(() => writeLocalBuffer(buffer, browserStorage('local')), 500);
     return () => clearTimeout(t);
   }, [buffer]);
 };
@@ -53,7 +53,10 @@ const useLocalAutosave = (buffer: Buffer) => {
 /** Writes the working copy down when the editor closes, so an edit inside the autosave debounce is
     not lost to an in-app navigation. */
 const useFlushOnUnmount = (controller: BufferController) => {
-  useEffect(() => () => writeLocalBuffer(controller.store.state, browserStorage()), [controller]);
+  useEffect(
+    () => () => writeLocalBuffer(controller.store.state, browserStorage('local')),
+    [controller],
+  );
 };
 
 /** Asks before leaving with unsaved changes, and writes them down first: a reload inside the autosave
@@ -64,7 +67,7 @@ const useFlushBeforeLeaving = (controller: BufferController, dirty: boolean) => 
       return;
     }
     const guard = (e: BeforeUnloadEvent) => {
-      writeLocalBuffer(controller.store.state, browserStorage());
+      writeLocalBuffer(controller.store.state, browserStorage('local'));
       e.preventDefault();
     };
     window.addEventListener('beforeunload', guard);

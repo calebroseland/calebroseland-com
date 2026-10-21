@@ -1,6 +1,7 @@
 import type { Profile } from '@crc/content-schema';
 import { mutationOptions } from '@tanstack/react-query';
-import { type BufferController, browserStorage, writeLocalBuffer } from '../drafts/buffer.ts';
+import { browserStorage } from '../../storage.ts';
+import { type BufferController, writeLocalBuffer } from '../drafts/buffer.ts';
 import { bufferFromTree } from '../drafts/load.ts';
 import { type ProfileSource, saveProfile } from '../profile.ts';
 import { readTree } from '../workingTree.ts';
@@ -21,7 +22,7 @@ export const createEntryMutation = () =>
 
 export const deleteEntryMutation = () =>
   mutationOptions({
-    mutationFn: (dir: string) => deleteEntry(dir, browserStorage()),
+    mutationFn: (dir: string) => deleteEntry(dir, browserStorage('local')),
     meta: { invalidates: written },
   });
 
@@ -42,7 +43,7 @@ export const reloadEntryMutation = (controller: BufferController, slug: string) 
   mutationOptions({
     mutationFn: async () => {
       // A clean buffer removes its local copy.
-      writeLocalBuffer({ ...controller.store.state, dirty: false }, browserStorage());
+      writeLocalBuffer({ ...controller.store.state, dirty: false }, browserStorage('local'));
       controller.replace(bufferFromTree(await readTree(), slug));
     },
     meta: { invalidates: written },

@@ -1,4 +1,5 @@
 import { Store } from '@tanstack/store';
+import { browserStorage } from '../storage.ts';
 import { type CustomTheme, customTheme, needsAdobeFonts, themeVars } from './custom.ts';
 
 const builtInThemes = ['auto', 'light', 'dark'] as const;
@@ -205,10 +206,10 @@ const browserEnv = (): ThemeEnv => {
     return {};
   }
   const env: ThemeEnv = { root: document.documentElement };
-  try {
-    env.storage = window.localStorage;
-  } catch {
-    // access can throw under strict privacy settings; theme then lives for the session only
+  // Without storage (strict privacy settings) the theme lives for the session only.
+  const storage = browserStorage('local');
+  if (storage) {
+    env.storage = storage;
   }
   // Written by the content plugin into index.html; theme-init.js has linked the kit already if needed.
   const kit = document.querySelector<HTMLMetaElement>('meta[name="adobe-fonts"]');
