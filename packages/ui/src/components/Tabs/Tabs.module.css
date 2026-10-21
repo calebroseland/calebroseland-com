@@ -13,7 +13,7 @@
     border-block-end: var(--border-width-thick) solid transparent;
 
     /* A tab that is selected, or a link styled as one that is the current page. */
-    &[data-selected],
+    &[aria-selected="true"],
     &[aria-current="page"] {
       color: var(--color-text);
       border-color: var(--color-accent);

@@ -32,9 +32,12 @@ export const Keyboard: Story = {
     const canvas = within(canvasElement);
     canvas.getByRole('tab', { name: 'Details' }).focus();
     await userEvent.keyboard('{ArrowRight}');
-    await expect(canvas.getByRole('tab', { name: 'Images (2)' })).toHaveAttribute(
-      'aria-selected',
-      'true',
+    const images = canvas.getByRole('tab', { name: 'Images (2)' });
+    await expect(images).toHaveAttribute('aria-selected', 'true');
+    // The selected tab is marked by its underline, which the other tab does not have.
+    const underline = (el: Element) => getComputedStyle(el).borderBlockEndColor;
+    await expect(underline(images)).not.toBe(
+      underline(canvas.getByRole('tab', { name: 'Details' })),
     );
     // The panel it leaves fades out before it unmounts.
     await waitFor(() =>

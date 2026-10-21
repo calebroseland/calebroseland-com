@@ -14,8 +14,8 @@ const useRequestedKind = (): EntryKind => {
 };
 
 const KINDS = [
-  { value: 'post', label: 'Post — dated, listed under Posts' },
-  { value: 'page', label: 'Page — standalone, at its own address' },
+  { value: 'post', label: 'Post' },
+  { value: 'page', label: 'Page' },
 ] as const;
 
 const NewEntry = () => {
@@ -48,6 +48,9 @@ const NewEntry = () => {
       >
         <Stack gap="4">
           <RadioGroup legend="Kind" value={kind} options={KINDS} onValueChange={form.setKind} />
+          <p className={styles.muted}>
+            A post is dated and listed under Posts; a page stands alone at its own address.
+          </p>
           <TextField label="Title" value={title} onValueChange={form.setTitle} required />
           <TextField
             label="Slug"

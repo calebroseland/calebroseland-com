@@ -14,13 +14,13 @@ export type SelectOption<V extends string> = {
   style?: CSSProperties;
 };
 
-type SelectProps<V extends string> = {
+/** A visible label above the trigger, or a hidden one naming a trigger that shows its value only. */
+type Naming = { label: string; hiddenLabel?: never } | { hiddenLabel: string; label?: never };
+
+type SelectProps<V extends string> = Naming & {
   value: V;
   options: ReadonlyArray<SelectOption<V>>;
   onValueChange: (value: V) => void;
-  /** A visible label above the trigger, or `hiddenLabel` to name a trigger that shows its value only. */
-  label?: string;
-  hiddenLabel?: string;
   /** How the trigger shows the value; the option's label by default. */
   renderValue?: (value: V) => ReactNode;
   /** A trigger with its own look (an icon on the card) instead of the bordered field. */
