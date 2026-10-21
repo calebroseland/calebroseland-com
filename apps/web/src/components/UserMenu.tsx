@@ -1,12 +1,11 @@
 import { Menu } from '@base-ui/react/menu';
-import { Icon } from '@crc/ui';
+import { Icon, Tip, usePopupMotion } from '@crc/ui';
 import { useEffect } from 'react';
 import { siteFonts } from '../content/theme.ts';
 import { editMode, useEditMode } from '../editor/editMode.ts';
 import { useEditorLinks } from '../editor/navigation.ts';
 import { useDialogState } from '../hooks/useDialogState.ts';
 import { useDisclosure } from '../hooks/useDisclosure.ts';
-import { usePopupMotion } from '../hooks/usePopupMotion.ts';
 import { notifyLoadFailed } from '../lazy/failed.ts';
 import { useLoaded } from '../lazy/hooks.ts';
 import { preloadable } from '../lazy/preloadable.ts';
@@ -18,7 +17,6 @@ import {
   type ThemePreference,
   themeController,
 } from '../theme/store.ts';
-import { Tip } from './Tip.tsx';
 import styles from './UserMenu.module.css';
 
 // The editor and its colour picker load apart from the site shell: as the menu that offers them opens.

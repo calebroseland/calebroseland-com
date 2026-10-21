@@ -1,7 +1,6 @@
 import { Menu } from '@base-ui/react/menu';
-import { Icon } from '@crc/ui';
+import { Icon, usePopupMotion } from '@crc/ui';
 import type { ReactNode } from 'react';
-import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
 import styles from '../editor.module.css';
 
 /* APG menu button via Base UI. Items are passed in so the board and the profile list share the pattern. */

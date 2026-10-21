@@ -1,8 +1,7 @@
 import { Dialog } from '@base-ui/react/dialog';
 import { ScrollArea } from '@base-ui/react/scroll-area';
-import { Icon } from '@crc/ui';
+import { Icon, Tip } from '@crc/ui';
 import { m } from 'motion/react';
-import { Tip } from '../Tip.tsx';
 import { SLIDE_GAP } from './stage.ts';
 import { useViewerStage, type ViewerProps } from './useViewerStage.ts';
 import styles from './viewer.module.css';

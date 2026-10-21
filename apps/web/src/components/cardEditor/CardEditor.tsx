@@ -6,16 +6,14 @@ import {
   useItemRegistration,
   useListTarget,
 } from '@crc/interaction';
-import { Icon } from '@crc/ui';
+import { Icon, notify, Tip } from '@crc/ui';
 import { type FormEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from 'react';
 import { ConfirmDialog } from '../../editor/Dialogs.tsx';
 import { useSaveProfile } from '../../editor/data/hooks.ts';
 import { EditorProvider } from '../../editor/EditorProvider.tsx';
 import editor from '../../editor/editor.module.css';
 import { loadProfile, type ProfileSource } from '../../editor/profile.ts';
-import { notify } from '../../editor/Toast.tsx';
 import card from '../Landing.module.css';
-import { Tip } from '../Tip.tsx';
 import { vtName } from '../viewTransition.ts';
 import styles from './CardEditor.module.css';
 import { Handle, IconSelect, InlineText } from './fields.tsx';

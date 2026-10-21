@@ -1,7 +1,6 @@
 import { Select } from '@base-ui/react/select';
-import { Icon } from '@crc/ui';
+import { Icon, usePopupMotion } from '@crc/ui';
 import { type KeyboardEvent, type ReactNode, type RefObject, useId } from 'react';
-import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
 import styles from './CardEditor.module.css';
 import { ICON_CHOICES } from './model.ts';
 

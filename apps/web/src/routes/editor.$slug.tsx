@@ -1,3 +1,4 @@
+import { notify } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { ConfirmDialog } from '../editor/Dialogs.tsx';
@@ -11,7 +12,6 @@ import { addImage } from '../editor/drafts/images.ts';
 import { EditorShell } from '../editor/EditorShell.tsx';
 import styles from '../editor/editor.module.css';
 import { isAppHref } from '../editor/navigation.ts';
-import { notify } from '../editor/Toast.tsx';
 import type { ChangedOnDiskError, Tree } from '../editor/workingTree.ts';
 import { useDialogState } from '../hooks/useDialogState.ts';
 import { useTrackLoading } from '../loading/hooks.ts';

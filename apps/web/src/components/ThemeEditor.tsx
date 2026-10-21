@@ -7,11 +7,10 @@ import { RadioGroup } from '@base-ui/react/radio-group';
 import { Select } from '@base-ui/react/select';
 import { Slider } from '@base-ui/react/slider';
 import { Switch } from '@base-ui/react/switch';
-import { Icon } from '@crc/ui';
+import { Icon, Tip, usePopupMotion } from '@crc/ui';
 import { type CSSProperties, type ReactNode, useEffect, useId, useState } from 'react';
 import { HexColorInput, HexColorPicker } from 'react-colorful';
 import { siteFonts } from '../content/theme.ts';
-import { usePopupMotion } from '../hooks/usePopupMotion.ts';
 import { contrastRatio, parseColor } from '../theme/contrast.ts';
 import {
   type CustomTheme,
@@ -25,7 +24,6 @@ import {
 } from '../theme/custom.ts';
 import { themeController } from '../theme/store.ts';
 import styles from './ThemeEditor.module.css';
-import { Tip } from './Tip.tsx';
 
 type Range = { min: number; max: number; step: number };
 

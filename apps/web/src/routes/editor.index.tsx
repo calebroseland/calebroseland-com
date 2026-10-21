@@ -1,4 +1,4 @@
-import { Stack } from '@crc/ui';
+import { notify, Stack } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { ConfirmDialog } from '../editor/Dialogs.tsx';
@@ -8,7 +8,6 @@ import { RowMenu, RowMenuItem } from '../editor/drafts/RowMenu.tsx';
 import { EditorShell } from '../editor/EditorShell.tsx';
 import styles from '../editor/editor.module.css';
 import type { EditorEntry } from '../editor/entries.ts';
-import { notify } from '../editor/Toast.tsx';
 import { useDialogState } from '../hooks/useDialogState.ts';
 
 const EMPTY = { page: 'No pages yet.', post: 'No posts yet.' } as const;

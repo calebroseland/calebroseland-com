@@ -1,10 +1,10 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { enterPopup, leavePopup, resetPopup } from '../components/motion/presets.ts';
+import { enterPopup, leavePopup, resetPopup } from './popup.ts';
 import { usePopupMotion } from './usePopupMotion.ts';
 import { useReduceMotion } from './useReduceMotion.ts';
 
-vi.mock('../components/motion/presets.ts', () => ({
+vi.mock('./popup.ts', () => ({
   canAnimate: true,
   enterPopup: vi.fn(() => [{ cancel: vi.fn() }]),
   leavePopup: vi.fn(() => [{ cancel: vi.fn() }]),

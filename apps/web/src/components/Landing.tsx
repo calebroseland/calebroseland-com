@@ -6,7 +6,7 @@ import {
   resolveTag,
   tagLabel,
 } from '@crc/content-schema';
-import { Icon } from '@crc/ui';
+import { Icon, notify, Tip, useReduceMotion } from '@crc/ui';
 import { Link, useMatch, useNavigate } from '@tanstack/react-router';
 import { AnimatePresence, m, type Transition } from 'motion/react';
 import {
@@ -22,9 +22,7 @@ import {
 import { hasContact } from '../content/profile.ts';
 import { useEditMode } from '../editor/editMode.ts';
 import type { ProfileSource } from '../editor/profile.ts';
-import { notify } from '../editor/Toast.tsx';
 import { useLinkHover } from '../hooks/useLinkHover.ts';
-import { useReduceMotion } from '../hooks/useReduceMotion.ts';
 import { preloadable } from '../lazy/preloadable.ts';
 import { loading } from '../loading/tracker.ts';
 import { backdrop, isBackdropClick } from './backdrop.ts';
@@ -34,7 +32,6 @@ import { oncePerPress, useDetailsExpanded } from './detailsState.ts';
 import { FocusChip } from './FocusChip.tsx';
 import styles from './Landing.module.css';
 import { returnPage } from './returnPage.ts';
-import { Tip } from './Tip.tsx';
 import { UserMenu } from './UserMenu.tsx';
 import { footerHeadingName, footerLinkName, vtName, withViewTransition } from './viewTransition.ts';
 

@@ -1,12 +1,11 @@
 import { Autocomplete } from '@base-ui/react/autocomplete';
 import { Dialog } from '@base-ui/react/dialog';
 import { ScrollArea } from '@base-ui/react/scroll-area';
-import { Icon } from '@crc/ui';
+import { Icon, usePopupMotion } from '@crc/ui';
 import type { KeyboardEvent } from 'react';
 import { type CommandGroup, usePaletteView, useRunCommand } from '../commands/hooks.ts';
 import { palette } from '../commands/palette.ts';
 import { type Command, searchText } from '../commands/registry.ts';
-import { usePopupMotion } from '../hooks/usePopupMotion.ts';
 import styles from './CommandPaletteDialog.module.css';
 
 /* Base UI's command palette pattern: a Dialog around an inline Autocomplete. A command either runs,

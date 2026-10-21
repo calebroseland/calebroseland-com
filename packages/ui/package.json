@@ -11,11 +11,15 @@
     "./fonts.css": "./src/fonts.css"
   },
   "dependencies": {
+    "@base-ui/react": "^1.8.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/ibm-plex-serif": "^5.3.0",
     "@iconify-icons/lucide": "2.0.12",
     "@iconify-icons/simple-icons": "2.0.4",
-    "@iconify/react": "^6.0.2"
+    "@iconify/react": "^6.0.2",
+    "@tanstack/react-store": "^0.11.1",
+    "@tanstack/store": "^0.11.1",
+    "motion": "^13.4.0"
   },
   "peerDependencies": {
     "react": "^19.0.0"

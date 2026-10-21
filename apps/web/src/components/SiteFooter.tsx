@@ -1,16 +1,14 @@
 import type { Profile, ProfileLink } from '@crc/content-schema';
-import { Icon } from '@crc/ui';
+import { Icon, Tip, useReduceMotion } from '@crc/ui';
 import { Link } from '@tanstack/react-router';
 import type { MouseEvent, ReactElement } from 'react';
 import { pages } from '../content/entries.ts';
 import { hasContact } from '../content/profile.ts';
 import { useLinkHover } from '../hooks/useLinkHover.ts';
-import { useReduceMotion } from '../hooks/useReduceMotion.ts';
 import { useSectionHeading } from '../hooks/useSectionHeading.ts';
 import { isPlainClick, useBackToCard } from './backToCard.ts';
 import { oncePerPress, useDetailsExpanded } from './detailsState.ts';
 import styles from './SiteFooter.module.css';
-import { Tip } from './Tip.tsx';
 import { footerHeadingName, footerLinkName, withViewTransition } from './viewTransition.ts';
 
 const LINKS_ID = 'site-footer-links';

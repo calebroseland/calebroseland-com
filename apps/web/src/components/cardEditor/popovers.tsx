@@ -1,8 +1,7 @@
 import { Field } from '@base-ui/react/field';
 import { Popover } from '@base-ui/react/popover';
 import { Switch } from '@base-ui/react/switch';
-import { Icon } from '@crc/ui';
-import { usePopupMotion } from '../../hooks/usePopupMotion.ts';
+import { Icon, usePopupMotion } from '@crc/ui';
 import styles from './CardEditor.module.css';
 import type { EditGroup } from './model.ts';
 
