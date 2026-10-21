@@ -29,6 +29,18 @@ describe('HEAD on an /api route', () => {
   });
 });
 
+describe('the removed sign-in routes', () => {
+  it('are gone', async () => {
+    for (const [method, path] of [
+      ['GET', '/api/auth/config'],
+      ['POST', '/api/auth/callback'],
+    ] as const) {
+      const res = await SELF.fetch(`https://example.com${path}`, { method });
+      expect(res.status).toBe(404);
+    }
+  });
+});
+
 describe('unknown /api route', () => {
   it('returns an RFC 9457 problem', async () => {
     const res = await SELF.fetch('https://example.com/api/nope');

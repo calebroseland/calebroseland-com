@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { WorkerEnv } from './env.ts';
 import { problem } from './problem.ts';
 
 /* Client error sink. Deliberately small: a bounded, validated payload logged as structured JSON to
@@ -17,7 +16,7 @@ const clientError = z.object({
 
 export const logClientError = async (
   request: Request,
-  env: WorkerEnv,
+  env: Env,
   requestId: string,
 ): Promise<Response> => {
   const size = Number(request.headers.get('content-length') ?? 0);
