@@ -23,6 +23,7 @@ const defined = (css: string): Set<string> => {
   const own = css
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/url\([^)]*\)/g, '')
+    .replace(/"[^"]*"|'[^']*'/g, '')
     .replace(/:global\((?:[^()]|\([^()]*\))*\)/g, '');
   return new Set([...own.matchAll(/\.([a-zA-Z_][\w-]*)/g)].map((m) => m[1] ?? ''));
 };
@@ -33,7 +34,9 @@ const used = (module: string): Set<string> | null => {
   const out = new Set<string>();
   const name = basename(module).replaceAll('.', '\\.');
   for (const code of sources) {
-    for (const [, alias] of code.matchAll(new RegExp(`import (\\w+) from '[^']*${name}'`, 'g'))) {
+    for (const [, alias] of code.matchAll(
+      new RegExp(`import (\\w+) from '(?:[^']*/)?${name}'`, 'g'),
+    )) {
       if (new RegExp(`\\b${alias}\\[`).test(code)) {
         return null;
       }
@@ -46,6 +49,16 @@ const used = (module: string): Set<string> | null => {
 };
 
 describe('CSS modules', () => {
+  // Their classes are picked by variant; a reader checks them, so the list stays short and named.
+  it('reads by computed key only in the components that pick a class by variant', () => {
+    expect(modules.filter((m) => used(m) === null)).toEqual([
+      'packages/ui/src/components/Alert/Alert.module.css',
+      'packages/ui/src/components/Button/Button.module.css',
+      'packages/ui/src/components/Field/Field.module.css',
+      'packages/ui/src/components/IconButton/IconButton.module.css',
+    ]);
+  });
+
   it.each(modules)('%s defines no class nothing uses', (module) => {
     const uses = used(module);
     const orphans = [...defined(readFileSync(join(root, module), 'utf8'))].filter(
