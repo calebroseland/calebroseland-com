@@ -1,10 +1,9 @@
-import { Icon } from '@crc/ui';
+import { Icon, Tip } from '@crc/ui';
 import { createFileRoute } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { EntryHeader, TagList } from '../components/Article.tsx';
 import { Page } from '../components/Page.tsx';
 import { PostList } from '../components/PostList.tsx';
-import { Tip } from '../components/Tip.tsx';
 import { allTags, posts } from '../content/entries.ts';
 import { siteProfile } from '../content/profile.ts';
 import styles from './posts.module.css';

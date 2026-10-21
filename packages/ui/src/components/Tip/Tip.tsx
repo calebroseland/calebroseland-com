@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { usePopupMotion } from '../hooks/usePopupMotion.ts';
+import { usePopupMotion } from '../../motion/usePopupMotion.ts';
 import styles from './Tip.module.css';
 
 /* One delay group for the whole site: a tooltip opens quickly, and once one is showing, moving to the

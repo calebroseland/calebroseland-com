@@ -68,32 +68,6 @@
     display: inline-flex;
   }
 
-  .cornerButton {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-inline-size: 2.75rem;
-    min-block-size: 2.75rem;
-    padding-inline: var(--space-2);
-    color: var(--color-text-muted);
-    text-decoration: none;
-    border-radius: var(--radius-md);
-    transition:
-      background-color var(--duration-fast) var(--ease-out),
-      color var(--duration-fast) var(--ease-out);
-
-    &:hover {
-      color: var(--color-text);
-      background: var(--color-surface-hover);
-    }
-
-    /* Pressed reads as the accent, not just a darker grey, so a tap is unmistakable. */
-    &:active {
-      color: var(--color-accent-text);
-      background: var(--color-accent-subtle);
-    }
-  }
-
   .name {
     margin-block-start: var(--space-12);
     font-family: var(--font-brand);

@@ -1,0 +1,26 @@
+@layer components {
+  .positioner {
+    z-index: var(--z-popover);
+    outline: none;
+  }
+
+  .popup {
+    display: grid;
+    gap: var(--space-3);
+    inline-size: 17rem;
+    padding: var(--space-3);
+    color: var(--color-text);
+    outline: none;
+    background: var(--color-surface-raised);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    /* Motion grows it out of its trigger (motion/popup.ts). */
+    transform-origin: var(--transform-origin);
+  }
+
+  .title {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+}

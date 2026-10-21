@@ -1,6 +1,6 @@
+import { useReduceMotion } from '@crc/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
-import { useReduceMotion } from '../../hooks/useReduceMotion.ts';
 import { useStripFollow } from './useStripFollow.ts';
 
 /** `key` is the slide's place: a gallery's slides never move, and two may show the same file. */

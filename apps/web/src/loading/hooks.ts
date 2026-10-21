@@ -1,10 +1,9 @@
-import { durations, eases } from '@crc/ui';
+import { durations, eases, useReduceMotion } from '@crc/ui';
 import { useRouterState } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { animate } from 'motion/mini';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { canAnimate } from '../components/motion/presets.ts';
-import { useReduceMotion } from '../hooks/useReduceMotion.ts';
 import { loading } from './tracker.ts';
 
 export type BarPhase = 'hidden' | 'waiting' | 'running' | 'finishing';

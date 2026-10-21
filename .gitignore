@@ -21,3 +21,4 @@ routeTree.gen.ts.tmp
 dist-pages/
 *.tsbuildinfo
 .tmp/
+packages/ui/storybook-static/

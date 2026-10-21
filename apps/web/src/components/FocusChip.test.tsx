@@ -1,8 +1,8 @@
 import type { ResolvedTag } from '@crc/content-schema';
+import { TipProvider } from '@crc/ui';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { FocusChip } from './FocusChip.tsx';
-import { TipProvider } from './Tip.tsx';
 
 const chip = (show: ResolvedTag['show']) => {
   const { container } = render(

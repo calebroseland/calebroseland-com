@@ -1,7 +1,8 @@
-import { Icon, type IconName } from '@crc/ui';
 import { useStore } from '@tanstack/react-store';
 import { Store } from '@tanstack/store';
-import styles from './editor.module.css';
+import { Icon } from '../../Icon.tsx';
+import type { IconName } from '../../icons.ts';
+import styles from './Toast.module.css';
 
 /* One polite status region and one alert region, mounted once in the shell. Info and success fade on
    their own; a warning (something to fix) or an error (something failed) interrupts, and stays until
@@ -55,15 +56,15 @@ export const Toasts = () => {
   const items = useToasts();
   // One stack for both regions, so news and problems never land on top of each other.
   return (
-    <div className={styles.toastStack}>
-      <div role="status" aria-live="polite" className={styles.toasts}>
+    <div className={styles.stack}>
+      <div role="status" aria-live="polite" className={styles.region}>
         {items
           .filter((t) => !urgent(t.kind))
           .map((t) => (
             <ToastItem key={t.id} toast={t} />
           ))}
       </div>
-      <div role="alert" className={styles.toasts}>
+      <div role="alert" className={styles.region}>
         {items
           .filter((t) => urgent(t.kind))
           .map((t) => (
@@ -77,17 +78,17 @@ export const Toasts = () => {
 const ToastItem = ({ toast, dismissible = false }: { toast: Toast; dismissible?: boolean }) => {
   return (
     <div className={styles.toast} data-kind={toast.kind}>
-      <Icon name={ICONS[toast.kind]} size="sm" className={styles.toastIcon} />
+      <Icon name={ICONS[toast.kind]} size="sm" className={styles.icon} />
       <span>{toast.message}</span>
       {toast.action && (
-        <button type="button" className={styles.toastAction} onClick={toast.action.onClick}>
+        <button type="button" className={styles.action} onClick={toast.action.onClick}>
           {toast.action.label}
         </button>
       )}
       {dismissible && (
         <button
           type="button"
-          className={styles.toastAction}
+          className={styles.action}
           onClick={() => dismiss(toast.id)}
           aria-label="Dismiss"
         >

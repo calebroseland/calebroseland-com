@@ -1,0 +1,77 @@
+@layer components {
+  .iconButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: var(--space-2);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+
+    &:disabled,
+    &[aria-disabled="true"] {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  .md {
+    min-inline-size: 2.75rem;
+    min-block-size: 2.75rem;
+  }
+
+  /* Dense rows: a toolbar, a list row's menu. */
+  .sm {
+    min-inline-size: 2.25rem;
+    min-block-size: 2.25rem;
+    padding-inline: var(--space-1);
+  }
+
+  .square {
+    border-radius: var(--radius-md);
+  }
+
+  .sm.square {
+    border-radius: var(--radius-sm);
+  }
+
+  .round {
+    border-radius: var(--radius-full);
+  }
+
+  .ghost {
+    &:hover:not(:disabled),
+    &[data-popup-open] {
+      color: var(--color-text);
+      background: var(--color-surface-hover);
+    }
+
+    /* Pressed, or on (a toggle), reads as the accent. */
+    &:active:not(:disabled),
+    &[aria-pressed="true"] {
+      color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
+    }
+  }
+
+  /* Over an image's scrim: the scrim's own text colour, its own focus ring. */
+  .scrim {
+    color: inherit;
+    pointer-events: auto;
+
+    &:hover {
+      background: oklch(from var(--color-viewer-on-scrim) l c h / 0.12);
+    }
+
+    &:focus-visible {
+      outline-color: var(--color-viewer-on-scrim);
+    }
+
+    &[aria-disabled="true"] {
+      pointer-events: none;
+      opacity: 0.35;
+    }
+  }
+}

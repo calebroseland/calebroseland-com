@@ -168,6 +168,38 @@ test.describe('editor', () => {
       .toBeGreaterThanOrEqual((bar?.y ?? 0) + (bar?.height ?? 0));
   });
 
+  test('the side panel tabs follow the APG pattern: arrow keys move and select', async ({
+    page,
+  }) => {
+    await page.goto('/editor/about');
+    const details = page.getByRole('tab', { name: 'Details' });
+    await details.focus();
+    await page.keyboard.press('ArrowRight');
+    const images = page.getByRole('tab', { name: /^Images/ });
+    await expect(images).toBeFocused();
+    await expect(images).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tabpanel')).toHaveAccessibleName(/^Images/);
+    await page.keyboard.press('ArrowLeft');
+    await expect(details).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('switching the side panel keeps the page where it was', async ({ page }) => {
+    await page.goto('/editor/about');
+    await expect(page.getByRole('tab', { name: 'Details' })).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 400));
+    const before = await page.evaluate(() => window.scrollY);
+    test.skip(before === 0, 'the page is too short to scroll on this screen');
+    await page.getByRole('tab', { name: /^Images/ }).click();
+    await expect(page).toHaveURL(/panel=media/);
+    // Where it was, or as near as the shorter panel lets it be; never back at the top.
+    const { y, max } = await page.evaluate(() => ({
+      y: window.scrollY,
+      max: document.documentElement.scrollHeight - window.innerHeight,
+    }));
+    expect(y).toBe(Math.min(before, max));
+    expect(y).toBeGreaterThan(0);
+  });
+
   test('editor routes are accessible', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     for (const path of ['/editor', '/editor?kind=page', '/editor/new', '/editor/about']) {

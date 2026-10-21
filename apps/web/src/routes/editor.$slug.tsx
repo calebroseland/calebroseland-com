@@ -1,6 +1,6 @@
+import { Alert, Button, button, ConfirmDialog, notify, Tabs } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
-import { ConfirmDialog } from '../editor/Dialogs.tsx';
 import { useEntry, useReloadEntry, useSaveEntry } from '../editor/data/hooks.ts';
 import { AssetsPanel } from '../editor/document/AssetsPanel.tsx';
 import { Editor, useEditorApi } from '../editor/document/Editor.tsx';
@@ -11,7 +11,6 @@ import { addImage } from '../editor/drafts/images.ts';
 import { EditorShell } from '../editor/EditorShell.tsx';
 import styles from '../editor/editor.module.css';
 import { isAppHref } from '../editor/navigation.ts';
-import { notify } from '../editor/Toast.tsx';
 import type { ChangedOnDiskError, Tree } from '../editor/workingTree.ts';
 import { useDialogState } from '../hooks/useDialogState.ts';
 import { useTrackLoading } from '../loading/hooks.ts';
@@ -22,11 +21,14 @@ const useSlug = (): string => {
   return Route.useParams().slug;
 };
 
-/** The side panel on show, kept in the URL. */
+/** The side panel on show, kept in the URL. Switching it stays where the reader is on the page. */
 const usePanel = () => {
   const { panel = 'meta' } = Route.useSearch();
   const navigate = Route.useNavigate();
-  return { panel, show: (next: Panel) => navigate({ search: (s) => ({ ...s, panel: next }) }) };
+  return {
+    panel,
+    show: (next: Panel) => navigate({ search: (s) => ({ ...s, panel: next }), resetScroll: false }),
+  };
 };
 
 /** Where Close goes: back to the page the edit was opened from, or to the editor's list. */
@@ -54,20 +56,18 @@ const DraftRoute = () => {
     case 'error':
       return (
         <EditorShell title={slug}>
-          <p role="alert" className={styles.alert}>
+          <Alert>
             Couldn't read this entry from your working tree.{' '}
-            <button type="button" className={styles.toastAction} onClick={entry.retry}>
+            <Button variant="inline" onClick={entry.retry}>
               Retry
-            </button>
-          </p>
+            </Button>
+          </Alert>
         </EditorShell>
       );
     case 'missing':
       return (
         <EditorShell title={slug}>
-          <p role="alert" className={styles.alert}>
-            No entry with the slug “{slug}” exists in your working tree.
-          </p>
+          <Alert>No entry with the slug “{slug}” exists in your working tree.</Alert>
           <p className={styles.muted}>
             <Link to="/editor">← Editor</Link>
           </p>
@@ -166,19 +166,18 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
           <span className={styles.status} data-dirty={buffer.dirty}>
             {saveStatus(save.pending, buffer.dirty)}
           </span>
-          <button
-            type="button"
-            className={styles.primary}
+          <Button
+            variant="primary"
             onClick={onSave}
-            disabled={!buffer.dirty || save.pending}
-            aria-busy={save.pending}
+            disabled={!buffer.dirty}
+            pending={save.pending}
           >
             {save.pending ? 'Saving…' : 'Save'}
-          </button>
+          </Button>
           {/* Unsaved work stays on this device and is restored when the entry is opened again. */}
           <a
             href={close.href}
-            className={styles.secondary}
+            className={button()}
             onClick={(e) => {
               // A modified click opens a new tab as any link does.
               if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
@@ -197,13 +196,13 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
       }
     >
       {buffer.restoredFromLocal && (
-        <p role="status" className={styles.banner}>
+        <Alert tone="info">
           Restored unsaved changes from this device.
           {buffer.imagesDropped ? ' Images added but not saved were not kept.' : ''}
-          <button type="button" className={styles.toastAction} onClick={reloadFromSource}>
+          <Button variant="inline" onClick={reloadFromSource}>
             Discard local changes
-          </button>
-        </p>
+          </Button>
+        </Alert>
       )}
       <p className={styles.muted}>
         <Link to="/editor">← Editor</Link>
@@ -218,31 +217,25 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
           apiRef={api}
         />
         <aside aria-label="Post details and images">
-          <div className={styles.tabs} role="tablist" aria-label="Panel">
-            {(['meta', 'media'] as const).map((p) => (
-              <button
-                key={p}
-                type="button"
-                role="tab"
-                id={`tab-${p}`}
-                aria-selected={panel === p}
-                aria-controls={`panel-${p}`}
-                className={styles.tab}
-                onClick={() => show(p)}
-              >
-                {p === 'meta'
-                  ? 'Details'
-                  : `Images${buffer.assets.length > 0 ? ` (${buffer.assets.length})` : ''}`}
-              </button>
-            ))}
-          </div>
-          <div id={`panel-${panel}`} role="tabpanel" aria-labelledby={`tab-${panel}`}>
-            {panel === 'meta' ? (
-              <MetaPanel buffer={buffer} controller={controller} />
-            ) : (
-              <AssetsPanel buffer={buffer} controller={controller} onAltChange={onAltChange} />
-            )}
-          </div>
+          <Tabs
+            label="Panel"
+            value={panel}
+            onValueChange={show}
+            tabs={[
+              {
+                value: 'meta',
+                label: 'Details',
+                panel: <MetaPanel buffer={buffer} controller={controller} />,
+              },
+              {
+                value: 'media',
+                label: `Images${buffer.assets.length > 0 ? ` (${buffer.assets.length})` : ''}`,
+                panel: (
+                  <AssetsPanel buffer={buffer} controller={controller} onAltChange={onAltChange} />
+                ),
+              },
+            ]}
+          />
         </aside>
       </div>
       <ConfirmDialog
@@ -250,26 +243,15 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
         onOpenChange={conflict.onOpenChange}
         title="This file changed on disk since you opened it."
         description="Reload to see what is on disk now (your unsaved edits are discarded), or overwrite the file with what you have here."
-        actions={
-          <>
-            <button type="button" className={styles.secondary} onClick={conflict.close}>
-              Cancel
-            </button>
-            <button type="button" className={styles.secondary} onClick={reloadFromSource}>
-              Reload from disk
-            </button>
-            <button
-              type="button"
-              className={`${styles.primary} ${styles.danger}`}
-              onClick={() => {
-                conflict.close();
-                void runSave('overwrite');
-              }}
-            >
-              Overwrite
-            </button>
-          </>
-        }
+        alternative={{ label: 'Reload from disk', onClick: reloadFromSource }}
+        confirm={{
+          label: 'Overwrite',
+          tone: 'danger',
+          onClick: () => {
+            conflict.close();
+            void runSave('overwrite');
+          },
+        }}
       />
     </EditorShell>
   );

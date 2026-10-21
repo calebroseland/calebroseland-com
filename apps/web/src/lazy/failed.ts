@@ -1,4 +1,4 @@
-import { notify } from '../editor/Toast.tsx';
+import { notify } from '@crc/ui';
 
 /** Says a lazily loaded surface couldn't open. A browser keeps a failed module fetch failed for the
     page's life (Chromium does), so the way back is a reload, offered right there. */

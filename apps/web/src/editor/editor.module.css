@@ -93,91 +93,10 @@
     font-size: var(--font-size-2xl);
   }
 
-  .primary,
-  .secondary {
-    display: inline-flex;
-    gap: var(--space-2);
-    align-items: center;
-    justify-content: center;
-    min-block-size: 2.75rem;
-    padding: var(--space-2) var(--space-4);
-    font-weight: var(--font-weight-medium);
-    text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: background-color var(--duration-fast) var(--ease-out);
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-  }
-
-  .primary {
-    color: var(--color-text-on-accent);
-    background: var(--color-accent);
-
-    &:hover:not(:disabled) {
-      background: var(--color-accent-hover);
-    }
-  }
-
-  .secondary {
-    color: var(--color-text);
-    background: var(--color-surface);
-    border: var(--border-width) solid var(--color-border-strong);
-
-    &:hover:not(:disabled) {
-      background: var(--color-surface-hover);
-    }
-  }
-
-  .danger {
-    color: var(--color-text-inverted);
-    background: var(--color-danger);
-
-    &:hover:not(:disabled) {
-      background: var(--color-danger-hover);
-    }
-  }
-
   .muted {
     max-inline-size: var(--measure-narrow);
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
-  }
-
-  .alert {
-    padding: var(--space-3) var(--space-4);
-    color: var(--color-danger);
-    background: var(--color-danger-subtle);
-    border: var(--border-width) solid color-mix(in oklch, var(--color-danger) 30%, transparent);
-    border-radius: var(--radius-md);
-  }
-
-  .details {
-    inline-size: 100%;
-    max-inline-size: 24rem;
-    text-align: start;
-
-    & > summary {
-      padding-block: var(--space-2);
-      color: var(--color-text-muted);
-      cursor: pointer;
-    }
-
-    & > :not(summary) {
-      margin-block-start: var(--space-4);
-    }
-  }
-
-  .input {
-    inline-size: 100%;
-    min-block-size: 2.75rem;
-    padding: var(--space-2) var(--space-3);
-    color: var(--color-text);
-    background: var(--color-surface);
-    border: var(--border-width) solid var(--color-border-strong);
-    border-radius: var(--radius-md);
   }
 }
 
@@ -238,23 +157,6 @@
     color: var(--color-text-muted);
   }
 
-  .handle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
-    color: var(--color-text-subtle);
-    touch-action: none;
-    cursor: grab;
-    border-radius: var(--radius-sm);
-
-    &:hover {
-      color: var(--color-text);
-      background: var(--color-surface-hover);
-    }
-  }
-
   /* Editor page */
   .editorBar {
     display: flex;
@@ -288,31 +190,6 @@
     border-radius: var(--radius-lg);
   }
 
-  .tabs {
-    display: flex;
-    gap: var(--space-1);
-    border-block-end: var(--border-width) solid var(--color-border);
-  }
-
-  .tab {
-    min-block-size: 2.75rem;
-    padding: var(--space-2) var(--space-3);
-    color: var(--color-text-muted);
-
-    text-decoration: none;
-    border-block-end: var(--border-width-thick) solid transparent;
-
-    &[aria-selected="true"],
-    &[aria-current="page"] {
-      color: var(--color-text);
-      border-color: var(--color-accent);
-    }
-
-    &:hover {
-      color: var(--color-text);
-    }
-  }
-
   .filters {
     margin-block: var(--space-4) var(--space-6);
   }
@@ -327,7 +204,6 @@
     gap: var(--space-1);
 
     & > label {
-      font-size: var(--font-size-sm);
       font-weight: var(--font-weight-medium);
     }
   }
@@ -356,195 +232,10 @@
     border-radius: var(--radius-sm);
   }
 
-  .banner {
-    display: flex;
-    gap: var(--space-3);
-    align-items: center;
-    padding: var(--space-3) var(--space-4);
-    color: var(--color-accent-text);
-    background: var(--color-accent-subtle);
-    border: var(--border-width) solid var(--color-accent-border);
-    border-radius: var(--radius-md);
-  }
-
   /* Dialog */
-  .backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-overlay);
-    background: var(--color-overlay);
-    transition: opacity var(--duration-fast) var(--ease-out);
-
-    &[data-starting-style],
-    &[data-ending-style] {
-      opacity: 0;
-    }
-  }
-
-  .dialog {
-    position: fixed;
-    inset-block-start: 50%;
-    inset-inline-start: 50%;
-    z-index: var(--z-modal);
-    display: grid;
-    gap: var(--space-4);
-    inline-size: min(28rem, calc(100vw - 2 * var(--space-4)));
-    padding: var(--space-6);
-    background: var(--color-surface-raised);
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    translate: -50% -50%;
-    transition:
-      opacity var(--duration-fast) var(--ease-out),
-      scale var(--duration-fast) var(--ease-out);
-
-    &[data-starting-style],
-    &[data-ending-style] {
-      opacity: 0;
-      scale: 0.96;
-    }
-  }
-
-  .dialogTitle {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  .dialogBody {
-    color: var(--color-text-muted);
-  }
-
-  .dialogActions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    justify-content: flex-end;
-  }
-
-  /* Toasts */
-  /* The regions are always mounted; only their toasts should take pointer events. */
-  .toastStack {
-    position: fixed;
-    inset-block-end: var(--space-4);
-    inset-inline-end: var(--space-4);
-    z-index: var(--z-toast);
-    display: grid;
-    gap: var(--space-2);
-    max-inline-size: min(24rem, calc(100vw - 2 * var(--space-4)));
-    pointer-events: none;
-  }
-
-  .toasts {
-    display: grid;
-    gap: var(--space-2);
-  }
-
-  .toast {
-    display: flex;
-    gap: var(--space-3);
-    align-items: center;
-    padding: var(--space-3) var(--space-4);
-    font-size: var(--font-size-sm);
-    pointer-events: auto;
-    background: var(--color-surface-raised);
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-  }
-
-  /* Each kind: a tinted surface, a coloured edge on the leading side, and its icon in that colour. The
-     text keeps the body colour, which holds its contrast on every tint. */
-  .toast[data-kind] {
-    --toast-accent: var(--color-accent);
-    border-inline-start: var(--border-width-thick) solid var(--toast-accent);
-  }
-
-  .toast[data-kind="info"] {
-    background: var(--color-surface-raised);
-  }
-
-  .toast[data-kind="success"] {
-    --toast-accent: var(--color-success);
-    background: var(--color-success-subtle);
-  }
-
-  .toast[data-kind="warning"] {
-    --toast-accent: var(--color-warning);
-    background: var(--color-warning-subtle);
-  }
-
-  .toast[data-kind="error"] {
-    --toast-accent: var(--color-danger);
-    background: var(--color-danger-subtle);
-  }
-
-  .toastIcon {
-    flex: none;
-    color: var(--toast-accent);
-  }
-
-  .toastAction {
-    min-block-size: 2rem;
-    padding-inline: var(--space-1);
-    font-weight: var(--font-weight-medium);
-    text-decoration: underline;
-  }
-
-  .menu {
-    z-index: var(--z-popover);
-    display: grid;
-    gap: var(--space-px);
-    min-inline-size: 12rem;
-    padding: var(--space-1);
-    outline: none;
-    background: var(--color-surface-raised);
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    /* Motion grows it out of its trigger (motion/presets.ts). */
-    transform-origin: var(--transform-origin);
-  }
-
-  .menuItem {
-    display: flex;
-    gap: var(--space-2);
-    align-items: center;
-    min-block-size: 2.5rem;
-    padding: var(--space-2) var(--space-3);
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-
-    /* Raised popup: hover would match its own surface in dark, so rows step up once more. */
-    &[data-highlighted] {
-      background: var(--color-surface-active);
-    }
-
-    &[data-disabled] {
-      color: var(--color-text-subtle);
-    }
-  }
-
-  .menuDanger {
-    color: var(--color-danger);
-  }
 }
 
 @layer components {
-  .fieldset {
-    display: grid;
-    gap: var(--space-1);
-    padding: var(--space-3) var(--space-4);
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-md);
-
-    & > legend {
-      padding-inline: var(--space-2);
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
-    }
-  }
-
   .kindBadge {
     padding: var(--space-px) var(--space-2);
     font-size: var(--font-size-xs);

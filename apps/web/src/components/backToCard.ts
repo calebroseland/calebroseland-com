@@ -1,6 +1,6 @@
+import { useReduceMotion } from '@crc/ui';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import type { MouseEvent } from 'react';
-import { useReduceMotion } from '../hooks/useReduceMotion.ts';
 import { withViewTransition } from './viewTransition.ts';
 
 /** The landing card's two sides. */

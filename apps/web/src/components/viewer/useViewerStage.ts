@@ -1,4 +1,5 @@
 import { recognize, type Size } from '@crc/interaction/gestures';
+import { useReduceMotion } from '@crc/ui';
 import { cancelFrame, frame } from 'motion';
 import { useMotionValue, useTransform } from 'motion/react';
 import {
@@ -11,7 +12,6 @@ import {
   useState,
 } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
-import { useReduceMotion } from '../../hooks/useReduceMotion.ts';
 import { useStripFollow } from '../gallery/useStripFollow.ts';
 import { revealNow } from '../motion/reveal.ts';
 import type { ViewerItem, ViewerSet } from './sets.ts';

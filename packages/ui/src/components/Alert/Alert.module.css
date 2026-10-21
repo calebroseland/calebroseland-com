@@ -1,0 +1,23 @@
+@layer components {
+  .alert {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-width) solid;
+    border-radius: var(--radius-md);
+  }
+
+  .danger {
+    color: var(--color-danger);
+    background: var(--color-danger-subtle);
+    border-color: color-mix(in oklch, var(--color-danger) 30%, transparent);
+  }
+
+  .info {
+    color: var(--color-accent-text);
+    background: var(--color-accent-subtle);
+    border-color: var(--color-accent-border);
+  }
+}

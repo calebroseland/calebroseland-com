@@ -1,11 +1,5 @@
 import { useCallback, useLayoutEffect, useRef } from 'react';
-import {
-  canAnimate,
-  enterPopup,
-  leavePopup,
-  type PopupKind,
-  resetPopup,
-} from '../components/motion/presets.ts';
+import { canAnimate, enterPopup, leavePopup, type PopupKind, resetPopup } from './popup.ts';
 import { useReduceMotion } from './useReduceMotion.ts';
 
 type Running = ReturnType<typeof enterPopup>;
