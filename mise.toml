@@ -39,6 +39,18 @@ run = "vitest run"
 [tasks."test:watch"]
 run = "vitest"
 
+[tasks.storybook]
+description = "Component workshop for @crc/ui at http://localhost:6006"
+run = "storybook dev -c packages/ui/.storybook -p 6006 --no-open"
+
+[tasks."storybook:build"]
+description = "Static build of the component workshop"
+run = "storybook build -c packages/ui/.storybook -o packages/ui/storybook-static --quiet"
+
+[tasks."test:stories"]
+description = "Every story rendered in Chromium and checked with axe"
+run = "vitest run --config packages/ui/vitest.stories.config.ts"
+
 [tasks."test:e2e"]
 run = "npm run test:e2e -w apps/web"
 

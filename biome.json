@@ -140,7 +140,12 @@
   },
   "overrides": [
     {
-      "includes": ["apps/web/src/**/*.tsx", "packages/*/src/**/*.tsx", "!**/*.test.tsx"],
+      "includes": [
+        "apps/web/src/**/*.tsx",
+        "packages/*/src/**/*.tsx",
+        "!**/*.test.tsx",
+        "!**/*.stories.tsx"
+      ],
       "plugins": ["./tools/biome/no-direct-hooks.grit"]
     },
     {
@@ -152,7 +157,13 @@
       "plugins": ["./tools/biome/no-react-lazy.grit"]
     },
     {
-      "includes": ["**/*.config.ts", "**/*.d.ts", "apps/web/worker/index.ts"],
+      "includes": [
+        "**/*.config.ts",
+        "**/*.d.ts",
+        "apps/web/worker/index.ts",
+        "**/*.stories.tsx",
+        "**/.storybook/*.{ts,tsx}"
+      ],
       "linter": {
         "rules": {
           "style": {

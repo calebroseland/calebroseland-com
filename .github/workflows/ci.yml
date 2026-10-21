@@ -64,3 +64,18 @@ jobs:
           name: playwright-report
           path: apps/web/playwright-report
           retention-days: 7
+
+  stories:
+    name: stories
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { fetch-depth: 1 }
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with: { cache: true }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: mise run storybook:build
+      - run: mise run test:stories
