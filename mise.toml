@@ -20,6 +20,11 @@ run = "npm run dev -w apps/web --"
 description = "Production build of the web app"
 run = "npm run build -w apps/web"
 
+[tasks.preview]
+description = "Preview production build of the web app"
+run = "npm run preview -w apps/web --"
+depends = ["build"]
+
 [tasks."build:pages"]
 description = "Build the GitHub Pages backup variant"
 run = "npm run build:pages -w apps/web"

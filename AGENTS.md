@@ -10,7 +10,7 @@ Personal site + an editor for its content. React 19 SPA on a Cloudflare Worker; 
 | `mise run dev` | SPA + Worker in workerd with HMR at http://localhost:5173 |
 | `mise run check` | Biome lint/format, `tsc -b`, Vitest (unit, dom, worker). Pre-commit hook and CI gate |
 | `mise run test:e2e` | Playwright (Chromium, WebKit, mobile) against the dev server |
-| `mise run build` / `build:pages` | Production build / GitHub Pages backup variant |
+| `mise run build` / `build:pages` / `preview` | Production build / GitHub Pages backup variant / serve the production build locally |
 | `mise run size` · `mise run knip` | Bundle budgets · dead code and deps |
 | `mise run storybook` · `mise run test:stories` | Component workshop · every story under axe in Chromium (CI) |
 | `mise run smoke` | Post-deploy checks; needs `BASE_URL` |
