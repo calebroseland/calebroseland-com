@@ -179,6 +179,13 @@ test.describe('working-tree mode', () => {
     await page.getByRole('button', { name: 'Create page' }).click();
     await expect(page).toHaveURL(/\/editor\/uses$/);
 
+    // A page has no dated directory and no tag index, so neither field is offered.
+    const details = page.getByRole('form', { name: 'Page details' });
+    await expect(details).toBeVisible();
+    await expect(details.getByLabel('Date')).toHaveCount(0);
+    await expect(details.getByLabel('Tags')).toHaveCount(0);
+    await expect(details.getByRole('textbox', { name: 'Slug' })).toHaveValue('uses');
+
     await page.getByRole('textbox', { name: 'Post body' }).click();
     await page.keyboard.type('The tools behind this site.');
     await page.getByRole('checkbox', { name: /Draft/ }).uncheck();
