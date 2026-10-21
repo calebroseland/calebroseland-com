@@ -1,6 +1,6 @@
 import { MutationObserver } from '@tanstack/react-query';
 import { describe, expect, it } from 'vitest';
-import { editorKeys } from './keys.ts';
+import { editorKeys } from './queries.ts';
 import { editorQueryClient } from './queryClient.ts';
 
 describe('editorQueryClient', () => {

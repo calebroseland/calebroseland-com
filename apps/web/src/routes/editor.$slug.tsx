@@ -1,6 +1,7 @@
 import { Alert, Button, button, ConfirmDialog, notify, Tabs } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
+import { isPlainClick } from '../dom.ts';
 import { useEntry, useReloadEntry, useSaveEntry } from '../editor/data/hooks.ts';
 import { AssetsPanel } from '../editor/document/AssetsPanel.tsx';
 import { Editor, useEditorApi } from '../editor/document/Editor.tsx';
@@ -180,7 +181,7 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
             className={button()}
             onClick={(e) => {
               // A modified click opens a new tab as any link does.
-              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+              if (!isPlainClick(e)) {
                 return;
               }
               e.preventDefault();

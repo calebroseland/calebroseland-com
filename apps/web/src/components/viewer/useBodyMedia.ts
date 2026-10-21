@@ -1,10 +1,11 @@
 import { useRouterState } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
-import { preloadable } from '../lazy/preloadable.ts';
+import { isPlainClick } from '../../dom.ts';
+import { preloadable } from '../../lazy/preloadable.ts';
 
 /* The viewer and the gallery controls load together: at once for a body with a gallery, else on
    first use or ahead of it when a pointer or focus reaches an image. */
-const mediaChunk = preloadable(() => import('../components/viewer/BodyMedia.tsx'));
+const mediaChunk = preloadable(() => import('./BodyMedia.tsx'));
 
 type MediaModule = Awaited<ReturnType<typeof mediaChunk.load>>;
 
@@ -50,15 +51,7 @@ export const useBodyMedia = (entryId: string) => {
     }
     const open = (e: MouseEvent) => {
       const link = zoomLink(e);
-      if (
-        !link
-        || e.defaultPrevented
-        || e.button !== 0
-        || e.metaKey
-        || e.ctrlKey
-        || e.shiftKey
-        || e.altKey
-      ) {
+      if (!link || e.defaultPrevented || !isPlainClick(e)) {
         return;
       }
       e.preventDefault();

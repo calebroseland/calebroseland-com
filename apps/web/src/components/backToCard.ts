@@ -1,6 +1,5 @@
 import { useReduceMotion } from '@crc/ui';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
-import type { MouseEvent } from 'react';
 import { withViewTransition } from './viewTransition.ts';
 
 /** The landing card's two sides. */
@@ -33,7 +32,3 @@ export const useSiteGo = () => {
     );
   };
 };
-
-/** A plain click; a modified one (new tab, new window) is left to the browser. */
-export const isPlainClick = (e: MouseEvent): boolean =>
-  e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;

@@ -42,15 +42,6 @@ export type Buffer = {
 
 const key = (dir: string) => `crc:buffer:${dir}`;
 
-/** Local storage when there is a browser that allows it; the buffer works without it. */
-export const browserStorage = (): BufferStorage | undefined => {
-  try {
-    return typeof window === 'undefined' ? undefined : window.localStorage;
-  } catch {
-    return undefined;
-  }
-};
-
 export type BufferStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 export const readLocalBuffer = (dir: string, storage: BufferStorage | undefined): Buffer | null => {

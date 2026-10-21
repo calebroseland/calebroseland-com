@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { browserStorage } from '../../storage.ts';
 import type { BufferController } from '../drafts/buffer.ts';
-import { browserStorage, writeLocalBuffer } from '../drafts/buffer.ts';
+import { writeLocalBuffer } from '../drafts/buffer.ts';
 import { type EntryKind, findEntryDir } from '../drafts/paths.ts';
 import { type EditorEntry, entriesFromTree } from '../entries.ts';
 import type { ProfileSource } from '../profile.ts';
@@ -83,7 +84,7 @@ export const useSaveEntry = (controller: BufferController) => {
     ...saveEntryMutation(controller),
     onSuccess: ({ headSha }) => {
       controller.markSaved(headSha);
-      writeLocalBuffer(controller.store.state, browserStorage());
+      writeLocalBuffer(controller.store.state, browserStorage('local'));
     },
   });
 };
