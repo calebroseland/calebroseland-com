@@ -12,6 +12,7 @@ Personal site + an editor for its content. React 19 SPA on a Cloudflare Worker; 
 | `mise run test:e2e` | Playwright (Chromium, WebKit, mobile) against the dev server |
 | `mise run build` / `build:pages` | Production build / GitHub Pages backup variant |
 | `mise run size` · `mise run knip` | Bundle budgets · dead code and deps |
+| `mise run storybook` · `mise run test:stories` | Component workshop · every story under axe in Chromium (CI) |
 | `mise run smoke` | Post-deploy checks; needs `BASE_URL` |
 
 Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise task exists.
@@ -19,7 +20,7 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 ## Layout
 
 - `apps/web` — the one deployable. `src/routes` (TanStack file routes; `routeTree.gen.ts` is generated), `src/components`, `src/theme`, `worker/` (Cloudflare Worker: `/api/*` only, everything else is static assets), `vite/` (build plugins), `e2e/`.
-- `packages/ui` — design system: tokens (`src/tokens`), base CSS, layout primitives (Stack, Cluster, Grid, Center), `Icon`, icon registry (`icons.ts`: the only import of icon data, Lucide and Simple Icons through Iconify, named `lucide:…` / `simple-icons:…` in code and content), motion tokens.
+- `packages/ui` — design system: tokens (`src/tokens`), base CSS, layout primitives (Stack, Cluster, Grid, Center), `Icon`, icon registry (`icons.ts`: the only import of icon data, Lucide and Simple Icons through Iconify, named `lucide:…` / `simple-icons:…` in code and content), motion tokens and popup motion, and the canonical controls in `src/components` (Button, IconButton, Menu, ConfirmDialog, Popover, TextField, Switch, RadioGroup, Select, Tabs, Alert, Tip, Toast), each with stories. `mise run storybook` is the workshop; `mise run test:stories` renders every story in Chromium under axe.
 - `packages/content-schema` — Zod schemas for everything in `content/`.
 - `content/` — data the site renders.
 
@@ -27,6 +28,7 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 
 - TypeScript strict + `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`. Relative imports carry `.ts`/`.tsx`.
 - Style (Biome enforces it; `mise run format` fixes most): single quotes in TS, double in JSX; semicolons; 100 columns; operators lead wrapped lines; braces on every block; no nested ternaries; arrow constants for named functions (`const thing = () => {…}`); `type` over `interface` except module augmentation; named exports only (config files, `.d.ts` declarations and the Worker entry excepted); `T[]` for plain element types and `Array<…>` otherwise; exported functions state their return type, except components, hooks, and query/mutation option factories; CSS properties ordered outside-in. Custom rules live in `tools/biome/*.grit`, each with fixtures under `tools/biome/fixtures/` checked by `tools/biome/rules.test.ts`.
+- Interactive controls come from `@crc/ui`: feature CSS lays out, never styles a button, menu, dialog, popover, field or toggle. A link or Base UI part that should look like a control takes the recipe (`button()`, `iconButton()`, `input()`, `tab()`). A new control, or a second copy of one, goes into `@crc/ui` with stories.
 - CSS Modules, every module wrapped in `@layer components`; semantic tokens only (`var(--color-text-muted)`), never primitives; logical properties; one level of nesting.
 - State: URL (Router) → server (Query) → form (Form) → client (Store). Challenge any new `useState`/store field against that order.
 - Motion: `m` inside `LazyMotion strict`; reduced motion is honoured twice (CSS tokens + `MotionConfig`).
