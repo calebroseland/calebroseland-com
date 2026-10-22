@@ -39,6 +39,7 @@ Never run `npm run`, `npx vitest`, or `tsc` directly in docs or CI when a mise t
 - Edit mode (`src/editor/editMode.ts`) switches editing on per tab, from the site menu or the palette; opening `/editor` turns it on too. It is off at first, so the dev site renders as a reader sees it. A built site has no editing: no menu item, and `/editor` is not found.
 - Editor data lives in `src/editor/data`: query keys, query options, and mutation options that declare what they make stale. One lazily created query client serves every editing surface and refreshes those queries after a write. Unit tests stand in for the dev server with `src/editor/fakeWorkingTree.ts`.
 - Tests never read the live `content/`: unit tests and the E2E suite use the fixed fixture in `apps/web/fixtures/content` (E2E on a fresh copy, through `CRC_CONTENT_DIR`). Change the fixture when a test needs different content.
+- Dependencies are pinned to exact versions (`.npmrc` `save-exact=true`); only `peerDependencies` keep ranges. Dependabot moves the pins.
 - Secrets: `apps/web/.dev.vars` (git-ignored) locally, `wrangler secret put` remotely. No `VITE_` variable may hold a credential.
 
 ## Operations
