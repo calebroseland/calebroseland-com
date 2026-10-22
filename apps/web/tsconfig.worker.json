@@ -4,7 +4,7 @@
     "outDir": "dist/tsc-worker",
     "rootDir": "worker",
     "lib": ["ES2023"],
-    "types": ["./worker-configuration.d.ts", "@cloudflare/vitest-pool-workers/types"],
+    "types": ["./worker-configuration.d.ts", "@cloudflare/vitest-plugin/types"],
     "jsx": "preserve"
   },
   "include": ["worker", "worker-configuration.d.ts"],
