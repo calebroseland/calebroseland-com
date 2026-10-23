@@ -29,14 +29,13 @@ export const Gallery = Node.create({
   renderMarkdown: (node: JSONContent, h) => h.renderChildren(node.content ?? [], '\n'),
 });
 
-const parseParagraph = Paragraph.config.parseMarkdown;
-
 export const GalleryParagraph = Paragraph.extend({
-  parseMarkdown: (token, helpers) => {
+  parseMarkdown(token, helpers) {
     const images = galleryImages(token);
     if (images) {
       return helpers.createNode('gallery', undefined, helpers.parseChildren(images));
     }
-    return parseParagraph?.(token, helpers) ?? [];
+    // Anything else parses as the paragraph it extends.
+    return this.parent?.(token, helpers) ?? [];
   },
 });
