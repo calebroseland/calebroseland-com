@@ -33,6 +33,15 @@ test.describe('@smoke', () => {
     expect(await res.text()).toContain('registration.unregister()');
   });
 
+  test('an old URL redirects permanently to its new home', async ({ request, baseURL }) => {
+    test.skip(!!process.env.SMOKE_STATIC, 'GitHub Pages does not read _redirects');
+    const res = await request.get(new URL('card?from=smoke', baseURL).toString(), {
+      maxRedirects: 0,
+    });
+    expect(res.status()).toBe(301);
+    expect(res.headers().location).toMatch(/^(https?:\/\/[^/]+)?\/\?from=smoke$/);
+  });
+
   test('theme toggle works', async ({ page }) => {
     await page.goto('./');
     await page.getByRole('button', { name: /Theme:/ }).click();
