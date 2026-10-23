@@ -140,7 +140,11 @@ const Row = ({ entry, onDelete }: { entry: EditorEntry; onDelete: () => void }) 
   return (
     <li className={styles.row}>
       <div className={styles.rowMain}>
-        <Link to="/editor/$slug" params={{ slug: entry.slug }} className={styles.rowTitle}>
+        <Link
+          to={entry.kind === 'post' ? '/posts/$slug' : '/$slug'}
+          params={{ slug: entry.slug }}
+          className={styles.rowTitle}
+        >
           {entry.title}
         </Link>
         <span className={styles.rowMeta}>

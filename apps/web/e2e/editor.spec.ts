@@ -12,6 +12,14 @@ const openBoard = async (page: Page) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Editor' })).toBeVisible();
 };
 
+/** A row's Edit link opens the entry in the editor; its title opens the page a reader sees. */
+const editFromBoard = (page: Page, title: string) =>
+  page
+    .getByRole('listitem')
+    .filter({ has: page.getByRole('link', { name: title, exact: true }) })
+    .getByRole('link', { name: 'Edit' })
+    .click();
+
 /** Starts the tab in edit mode, as if it had been turned on before. */
 const startInEditMode = (page: Page) =>
   page.addInitScript(() => sessionStorage.setItem('crc:edit-mode', 'on'));
@@ -111,14 +119,14 @@ test.describe('unsaved work', () => {
 
   test('Close goes back to the list and keeps the edit for next time', async ({ page }) => {
     await openBoard(page);
-    await page.getByRole('link', { name: 'Hello, placeholder' }).click();
+    await editFromBoard(page, 'Hello, placeholder');
     await body(page).click();
     await page.keyboard.type('Half a thought');
     // Straight away, inside the autosave debounce: closing writes the edit down itself.
     await page.getByRole('link', { name: 'Close' }).click();
     await expect(page).toHaveURL(/\/editor\/?$/);
     await expect(page.getByRole('status').filter({ hasText: 'kept on this device' })).toBeVisible();
-    await page.getByRole('link', { name: 'Hello, placeholder' }).click();
+    await editFromBoard(page, 'Hello, placeholder');
     await expect(body(page)).toContainText('Half a thought');
   });
 
@@ -138,7 +146,7 @@ test.describe('unsaved work', () => {
 
     // In the app, the same way: back to the list, then the other entry.
     await page.getByRole('link', { name: '← Editor' }).click();
-    await page.getByRole('link', { name: 'Second placeholder' }).click();
+    await editFromBoard(page, 'Second placeholder');
     await expect(page.getByRole('heading', { level: 1, name: 'Second placeholder' })).toBeVisible();
     await expect(body(page)).not.toContainText('Only in hello');
   });
