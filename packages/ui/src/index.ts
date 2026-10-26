@@ -19,6 +19,7 @@ export {
 export { Popover } from './components/Popover/Popover.tsx';
 export { RadioGroup } from './components/RadioGroup/RadioGroup.tsx';
 export { Select, type SelectOption } from './components/Select/Select.tsx';
+export { Slider } from './components/Slider/Slider.tsx';
 export { Switch } from './components/Switch/Switch.tsx';
 export { Tabs, tab, tabList } from './components/Tabs/Tabs.tsx';
 export { Tip, TipProvider } from './components/Tip/Tip.tsx';
