@@ -27,7 +27,8 @@
   if (custom && (custom.base === 'light' || custom.base === 'dark') && custom.vars) {
     root.dataset.theme = custom.base;
     for (var name in custom.vars) {
-      if (name.indexOf('--') === 0) {
+      // Themes saved with a content width still carry --measure; reading width owns the column now.
+      if (name.indexOf('--') === 0 && name.indexOf('--measure') !== 0) {
         root.style.setProperty(name, String(custom.vars[name]));
       }
     }

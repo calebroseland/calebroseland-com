@@ -22,7 +22,6 @@ export const RANGES = {
   leading: { min: 1.4, max: 1.8, step: 0.05 },
   spaceScale: { min: 0.8, max: 1.3, step: 0.05 },
   radiusScale: { min: 0, max: 2, step: 0.1 },
-  measure: { min: 60, max: 80, step: 2 },
   shadowScale: { min: 0, max: 2, step: 0.1 },
 } as const;
 type RangeKey = keyof typeof RANGES;
@@ -54,7 +53,6 @@ export const customTheme = z.object({
   leading: ranged('leading'),
   spaceScale: ranged('spaceScale'),
   radiusScale: ranged('radiusScale'),
-  measure: ranged('measure'),
   shadowScale: ranged('shadowScale'),
 });
 export type CustomTheme = z.infer<typeof customTheme>;
@@ -81,7 +79,6 @@ export const defaultTheme = (
     leading: 1.5,
     spaceScale: 1,
     radiusScale: 1,
-    measure: 68,
     shadowScale: 1,
   };
 };
@@ -206,9 +203,6 @@ export const themeVars = (t: CustomTheme): Record<string, string> => {
   for (const [name, px] of Object.entries(RADII)) {
     vars[`--radius-${name}`] = `${round(px * t.radiusScale, 1)}px`;
   }
-  vars['--measure-narrow'] = `${t.measure - 16}ch`;
-  vars['--measure'] = `${t.measure}ch`;
-  vars['--measure-wide'] = `${t.measure + 12}ch`;
   Object.assign(vars, shadows(t.base, t.shadowScale));
   return vars;
 };

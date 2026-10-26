@@ -374,14 +374,6 @@ export const ThemeEditor = ({
                 onChange={(v) => set('radiusScale', v)}
               />
               <Slider
-                label="Content width"
-                value={theme.measure}
-                {...RANGES.measure}
-                initial={defaults.measure}
-                format={(v) => `${v} characters`}
-                onChange={(v) => set('measure', v)}
-              />
-              <Slider
                 label="Shadow depth"
                 value={theme.shadowScale}
                 {...RANGES.shadowScale}
