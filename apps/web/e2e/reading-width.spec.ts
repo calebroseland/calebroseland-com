@@ -78,9 +78,12 @@ test.describe('reading width', () => {
     await expect(page.getByRole('menu')).toBeHidden();
     expect(await columnWidth(page)).toBeCloseTo(list, 0);
 
+    // Leaving a page mid-load cancels its lazy chunks, which the fixture reports; let each settle.
+    await page.waitForLoadState('networkidle');
     await page.goto('/posts/hello-placeholder');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     const post = await columnWidth(page);
+    await page.waitForLoadState('networkidle');
     await page.goto('/editor/hello-placeholder');
     await expect(page.getByRole('textbox', { name: 'Post body' })).toBeVisible();
     expect(await columnWidth(page)).toBeCloseTo(post, 0);
