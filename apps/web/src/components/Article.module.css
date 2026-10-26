@@ -2,7 +2,7 @@
   .header {
     display: grid;
     gap: var(--space-3);
-    max-inline-size: var(--measure);
+    max-inline-size: var(--reading-width, var(--measure));
     margin-block-end: var(--space-10);
   }
 
@@ -72,7 +72,7 @@
   .skeleton {
     display: grid;
     gap: var(--space-4);
-    max-inline-size: var(--measure);
+    max-inline-size: var(--reading-width, var(--measure));
 
     & > span {
       display: block;

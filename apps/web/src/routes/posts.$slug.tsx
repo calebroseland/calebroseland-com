@@ -13,7 +13,7 @@ const usePost = () => {
 const PostRoute = () => {
   const entry = usePost();
   return (
-    <Page>
+    <Page reading>
       <article>
         <EntryHeader meta={entry.meta} />
         <ArticleBody entry={entry} />

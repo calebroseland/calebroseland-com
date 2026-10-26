@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { allTags, formatDate, pages, posts } from '../content/entries.ts';
 import { hasContact, siteProfile } from '../content/profile.ts';
 import { editMode } from '../editor/editMode.ts';
+import { type ReadingWidth, readingWidth } from '../theme/readingWidth.ts';
 import { customPreference, type ThemePreference, themeController } from '../theme/store.ts';
 import { type Command, registerCommands } from './registry.ts';
 
@@ -10,6 +11,12 @@ const THEMES: ReadonlyArray<{ value: ThemePreference; title: string; icon: IconN
   { value: 'auto', title: 'Auto', icon: 'lucide:sun-moon' },
   { value: 'light', title: 'Light', icon: 'lucide:sun' },
   { value: 'dark', title: 'Dark', icon: 'lucide:moon' },
+];
+
+const WIDTHS: ReadonlyArray<{ value: ReadingWidth; title: string; icon: IconName }> = [
+  { value: 'narrow', title: 'Narrow', icon: 'lucide:fold-horizontal' },
+  { value: 'standard', title: 'Standard', icon: 'lucide:text-align-center' },
+  { value: 'wide', title: 'Wide', icon: 'lucide:unfold-horizontal' },
 ];
 
 const siteCommands = (): Command[] => {
@@ -83,6 +90,27 @@ const preferenceCommands = (): Command[] => {
           }),
         ),
       ],
+    },
+    {
+      id: 'pref.width',
+      title: 'Reading width',
+      group: 'Preferences',
+      icon: 'lucide:text-align-center',
+      keywords: ['wide', 'narrow', 'width', 'column', 'measure'],
+      page: () =>
+        WIDTHS.map(
+          (w): Command => ({
+            id: `width.${w.value}`,
+            title: w.title,
+            group: 'Reading width',
+            icon: w.icon,
+            ...optional('hint', w.value === readingWidth.store.state ? 'Current' : undefined),
+            run: (ctx) => {
+              readingWidth.set(w.value);
+              ctx.close();
+            },
+          }),
+        ),
     },
   ];
 };

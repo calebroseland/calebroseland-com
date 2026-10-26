@@ -8,13 +8,16 @@ export const EditorShell = ({
   children,
   title = 'Editor',
   actions,
+  reading = false,
 }: {
   children: ReactNode;
   title?: string;
   actions?: ReactNode;
+  /** The entry editor: the column takes the reader's chosen width, as the post will. */
+  reading?: boolean;
 }) => {
   return (
-    <Page>
+    <Page reading={reading}>
       <div className={styles.pageHead}>
         <h1 className={styles.title}>{title}</h1>
         {actions && <div className={styles.barGroup}>{actions}</div>}
