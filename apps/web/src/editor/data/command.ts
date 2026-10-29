@@ -1,24 +1,19 @@
-import { AuthError, StaleRefError } from '@crc/github-client';
 import { type UseMutationOptions, useMutation } from '@tanstack/react-query';
+import { ChangedOnDiskError } from '../workingTree.ts';
 
 /* What a write hands back to the screen that asked for it. Screens decide what to say and where to go;
    the data hooks only say what happened. */
 
 export type Failure =
-  /** Someone else moved the branch (or the file on disk) since it was loaded. */
-  | { ok: false; reason: 'conflict'; error: StaleRefError }
-  /** GitHub rejected the token; the session has already ended. */
-  | { ok: false; reason: 'expired'; error: AuthError }
+  /** A file under content/ changed on disk since it was loaded. */
+  | { ok: false; reason: 'conflict'; error: ChangedOnDiskError }
   | { ok: false; reason: 'failed'; error: unknown };
 
 type Outcome<T> = { ok: true; value: T } | Failure;
 
 export const toFailure = (error: unknown): Failure => {
-  if (error instanceof StaleRefError) {
+  if (error instanceof ChangedOnDiskError) {
     return { ok: false, reason: 'conflict', error };
-  }
-  if (error instanceof AuthError) {
-    return { ok: false, reason: 'expired', error };
   }
   return { ok: false, reason: 'failed', error };
 };

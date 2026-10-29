@@ -6,18 +6,12 @@ import {
   useItemRegistration,
   useListTarget,
 } from '@crc/interaction';
-import { Icon } from '@crc/ui';
+import { Button, ConfirmDialog, Icon, IconButton, notify } from '@crc/ui';
 import { type FormEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from 'react';
-import { session } from '../../editor/auth/store.ts';
-import { ConfirmDialog } from '../../editor/Dialogs.tsx';
 import { useSaveProfile } from '../../editor/data/hooks.ts';
-import { EditorProvider, useCapabilities } from '../../editor/EditorProvider.tsx';
-import editor from '../../editor/editor.module.css';
-import { clientFor } from '../../editor/github/client.ts';
-import { loadProfile, PROFILE_REF, type ProfileSource } from '../../editor/profile.ts';
-import { notify } from '../../editor/Toast.tsx';
+import { EditorProvider } from '../../editor/EditorProvider.tsx';
+import { loadProfile, type ProfileSource } from '../../editor/profile.ts';
 import card from '../Landing.module.css';
-import { Tip } from '../Tip.tsx';
 import { vtName } from '../viewTransition.ts';
 import styles from './CardEditor.module.css';
 import { Handle, IconSelect, InlineText } from './fields.tsx';
@@ -38,15 +32,15 @@ const LINKS = 'links';
 const GROUPS = 'groups';
 const linkListId = (group: EditGroup) => `links-${group.key}`;
 
-/** What a save produced; the card shows it when it is already the site's source (the working tree). */
-export type EditResult = { profile: Profile; workingTree: boolean } | null;
+/** What a save produced, for the card to show at once: the file on disk is the site's source. */
+export type EditResult = { profile: Profile } | null;
 
 /** The card's two faces while editing, for the landing to place where its own faces go. */
 export type EditFaces = { front: ReactNode; back: ReactNode };
 
-/* The landing card, editable where it stands for a signed-in editor: the same card, its text turned
-   into fields, its links and groups draggable. It loads the profile through the editor's backend (the
-   drafts/profile branch, or the working tree), edits a copy, and saves it back as content/profile.yaml.
+/* The landing card, editable where it stands in edit mode: the same card, its text turned into fields,
+   its links and groups draggable. It loads content/profile.yaml from the working tree, edits a copy,
+   and saves it back.
    Loaded only when an editor opens it, so readers never download it. */
 
 /** Whether the card has been turned in this session, so focus follows only a turn the editor made. */
@@ -63,7 +57,7 @@ const useTurnOver = (onFlip: () => void) => {
 
 /** Loads what the editor needs before it is shown, so the card can turn editable in one step. */
 export const prepareEdit = (published: Profile): Promise<ProfileSource> => {
-  return loadProfile(clientFor(session.store.state), published);
+  return loadProfile(published);
 };
 
 /** One edit session across both faces of the card; brings its own editor context, since the landing
@@ -117,20 +111,8 @@ const Session = ({
         }}
         title="Discard your changes to the card?"
         description="You have edits you haven't saved. Leaving this page throws them away."
-        actions={
-          <>
-            <button type="button" className={editor.secondary} onClick={() => leaving.reset?.()}>
-              Keep editing
-            </button>
-            <button
-              type="button"
-              className={`${editor.primary} ${editor.danger}`}
-              onClick={() => leaving.proceed?.()}
-            >
-              Discard
-            </button>
-          </>
-        }
+        cancelLabel="Keep editing"
+        confirm={{ label: 'Discard', tone: 'danger', onClick: () => leaving.proceed?.() }}
       />
     </>
   );
@@ -140,7 +122,6 @@ type EditSession = ReturnType<typeof useEditSession>;
 
 /** The draft, its moves, additions and removals (each announced), and saving it. */
 const useEditSession = (source: ProfileSource, onDone: (result: EditResult) => void) => {
-  const working = !useCapabilities().branches;
   const { state, dirty, next, errors, update } = useProfileDraft(source.profile);
   const announcer = useAnnouncer();
   const focusByKey = useFocusByKey();
@@ -150,15 +131,8 @@ const useEditSession = (source: ProfileSource, onDone: (result: EditResult) => v
   const submit = async () => {
     const outcome = await save.run(next);
     if (outcome.ok) {
-      notify(
-        working
-          ? 'Saved content/profile.yaml.'
-          : `Saved to ${PROFILE_REF}. Publish it from the editor to update the site.`,
-        { kind: 'success' },
-      );
-      onDone({ profile: outcome.value.profile, workingTree: working });
-    } else if (outcome.reason === 'expired') {
-      notify('Your sign-in expired. Sign in again to save.', { kind: 'error' });
+      notify('Saved content/profile.yaml.', { kind: 'success' });
+      onDone({ profile: outcome.value.profile });
     } else if (outcome.reason === 'conflict') {
       notify('The profile changed since you opened it. Close the editor and open it again.', {
         kind: 'error',
@@ -257,7 +231,6 @@ const useEditSession = (source: ProfileSource, onDone: (result: EditResult) => v
     state,
     errors,
     update,
-    working,
     announcement: announcer.message,
     canSave: dirty && errors.size === 0 && !save.pending,
     saving: save.pending,
@@ -309,19 +282,16 @@ const EditFront = ({
     <form aria-label="Edit card" className={styles.editFace} onSubmit={s.onSubmit}>
       <div className={card.corners}>
         <span />
-        <Tip label="Contact details" side="bottom">
-          <button
-            ref={flipRef}
-            type="button"
-            className={`${card.cornerButton} ${card.vt}`}
-            style={vtName('card-flip')}
-            aria-label="Contact details"
-            onClick={onFlip}
-          >
-            <Icon name="lucide:id-card" size="lg" />
-            <Icon name="lucide:chevron-right" size="sm" />
-          </button>
-        </Tip>
+        <IconButton
+          ref={flipRef}
+          label="Contact details"
+          className={card.vt}
+          style={vtName('card-flip')}
+          onClick={onFlip}
+        >
+          <Icon name="lucide:id-card" size="lg" />
+          <Icon name="lucide:chevron-right" size="sm" />
+        </IconButton>
       </div>
 
       <div className={`${card.name} ${card.vt}`} style={vtName('site-name')}>
@@ -576,17 +546,9 @@ const EditBack = ({
             ))}
           </ul>
         </div>
-        <Tip label="Back to links" side="bottom">
-          <button
-            ref={closeRef}
-            type="button"
-            className={card.cornerButton}
-            aria-label="Back to links"
-            onClick={onFlip}
-          >
-            <Icon name="lucide:x" size="lg" />
-          </button>
-        </Tip>
+        <IconButton ref={closeRef} label="Back to links" onClick={onFlip}>
+          <Icon name="lucide:x" size="lg" />
+        </IconButton>
       </div>
       <p className="visually-hidden" aria-live="polite">
         {s.announcement}
@@ -602,7 +564,7 @@ const SaveBar = ({ s }: { s: EditSession }) => {
   return (
     <div className={`${styles.bar} ${card.vt}`} style={vtName('card-more')}>
       <p className={styles.where}>
-        {s.working ? 'Saves to content/profile.yaml on this branch.' : `Saves to ${PROFILE_REF}.`}
+        Saves to content/profile.yaml on this branch.
         {problems > 0 && (
           <span className={styles.problems}>
             {' '}
@@ -611,12 +573,12 @@ const SaveBar = ({ s }: { s: EditSession }) => {
         )}
       </p>
       <div className={styles.actions}>
-        <button type="button" className={styles.secondary} onClick={s.cancel}>
+        <Button size="sm" onClick={s.cancel}>
           Cancel
-        </button>
-        <button type="submit" className={styles.primary} disabled={!s.canSave} aria-busy={s.saving}>
+        </Button>
+        <Button type="submit" variant="primary" size="sm" disabled={!s.canSave} pending={s.saving}>
           {s.saving ? 'Saving…' : 'Save card'}
-        </button>
+        </Button>
       </div>
     </div>
   );

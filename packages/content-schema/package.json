@@ -8,7 +8,7 @@
     "./fonts": "./src/fonts.ts"
   },
   "dependencies": {
-    "yaml": "^2.9.1",
-    "zod": "^4.6.5"
+    "yaml": "2.9.1",
+    "zod": "4.6.7"
   }
 }

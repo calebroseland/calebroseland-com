@@ -1,14 +1,8 @@
 name: ci
 
-# Pull requests run it here; pushes to next and master run it from staging.yml and deploy.yml, which
-# deploy only once it passes.
+# Reusable: pr.yml runs it for pull requests, deploy.yml for pushes to master, deploying only once it passes.
 on:
-  pull_request:
   workflow_call:
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -21,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: { fetch-depth: 1 }
-      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with: { cache: true }
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -29,19 +23,58 @@ jobs:
           key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
       - run: mise run check
-      - run: mise run build
-      - run: mise run size
       - run: mise run knip
       - run: npm audit --omit=dev --audit-level=moderate
       - name: No credentials in client-visible config
         run: |
           ! grep -RInE "(VITE_[A-Z_]*(SECRET|TOKEN|KEY)|CLIENT_SECRET\s*[:=]\s*['\"][^'\"]+)" apps/web/src apps/web/vite.config.ts apps/web/wrangler.jsonc apps/web/.dev.vars.example
 
-  e2e:
-    name: e2e
+  build:
+    name: build
     needs: check
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { fetch-depth: 1 }
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with: { cache: true }
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+      - run: mise run build
+        env: { GITHUB_SHA: "${{ github.sha }}" }
+      - run: mise run size
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: worker-build
+          path: |
+            apps/web/dist
+            apps/web/.wrangler/deploy/config.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+      - run: mise run build:pages
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          VITE_API_ORIGIN: https://calebroseland.com
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pages-build
+          path: apps/web/dist-pages
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  e2e-setup:
+    name: e2e-setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+      playwright: ${{ steps.version.outputs.playwright }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: { fetch-depth: 2 }
@@ -49,18 +82,59 @@ jobs:
         id: filter
         run: |
           if git diff --name-only HEAD^ HEAD 2>/dev/null | grep -qvE '^(content/|.*\.md$)'; then echo run=true >> "$GITHUB_OUTPUT"; else echo run=false >> "$GITHUB_OUTPUT"; fi
-      - if: steps.filter.outputs.run == 'true'
-        uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+      - name: Playwright version
+        id: version
+        run: |
+          echo "playwright=$(jq -er '.packages["node_modules/@playwright/test"].version' package-lock.json)" >> "$GITHUB_OUTPUT"
+
+  e2e-project:
+    name: e2e-${{ matrix.project }}
+    needs: [check, e2e-setup]
+    if: needs.e2e-setup.outputs.run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.e2e-setup.outputs.playwright }}-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, webkit, mobile, working-tree]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { fetch-depth: 1 }
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with: { cache: true }
-      - if: steps.filter.outputs.run == 'true'
-        run: npm ci
-      - if: steps.filter.outputs.run == 'true'
-        run: npx playwright install --with-deps chromium webkit
-      - if: steps.filter.outputs.run == 'true'
-        run: mise run test:e2e
+      - run: npm ci
+      # Each project has its own dev server here, so working-tree needn't wait for the others.
+      - run: mise run test:e2e -- --project=${{ matrix.project }} --no-deps
       - if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}
           path: apps/web/playwright-report
           retention-days: 7
+
+  e2e:
+    name: e2e
+    needs: [check, e2e-setup, e2e-project]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+
+  stories:
+    name: stories
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { fetch-depth: 1 }
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with: { cache: true }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: mise run storybook:build
+      - run: mise run test:stories

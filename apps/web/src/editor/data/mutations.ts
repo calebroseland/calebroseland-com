@@ -1,108 +1,56 @@
 import type { Profile } from '@crc/content-schema';
-import type { GitHubClient } from '@crc/github-client';
 import { mutationOptions } from '@tanstack/react-query';
-import { type BufferController, browserStorage, writeLocalBuffer } from '../drafts/buffer.ts';
-import { bufferFromBundle } from '../drafts/load.ts';
+import { browserStorage } from '../../storage.ts';
+import { type BufferController, writeLocalBuffer } from '../drafts/buffer.ts';
+import { bufferFromTree } from '../drafts/load.ts';
 import { type ProfileSource, saveProfile } from '../profile.ts';
-import {
-  mergeAndCleanUp,
-  openPr,
-  type PullRequestInput,
-  waitForDeploy,
-} from '../publish/publish.ts';
-import { capabilitiesOf } from './backend.ts';
-import { editorKeys } from './keys.ts';
-import { beginEditing, createEntryDraft, discardEntry, type NewEntry, saveDraft } from './ops.ts';
+import { readTree } from '../workingTree.ts';
+import { createEntry, deleteEntry, type NewEntry, saveEntry } from './ops.ts';
+import { editorKeys } from './queries.ts';
 
 /* Every write the editor makes, as mutation options that declare what they make stale. The query
    client refreshes those before a caller's own onSuccess runs, so a caller can navigate straight to
    fresh data. Callers add only what the screen does next. */
 
-const listed = [editorKeys.drafts(), editorKeys.published()] as const;
+const written = [editorKeys.tree()] as const;
 
-export const createEntryMutation = (gh: GitHubClient) =>
+export const createEntryMutation = () =>
   mutationOptions({
-    mutationFn: (input: NewEntry) => createEntryDraft(gh, input),
-    meta: { invalidates: listed },
+    mutationFn: (input: NewEntry) => createEntry(input),
+    meta: { invalidates: written },
   });
 
-export const beginEditingMutation = (gh: GitHubClient) =>
+export const deleteEntryMutation = () =>
   mutationOptions({
-    mutationFn: (slug: string) => beginEditing(gh, slug),
-    meta: { invalidates: listed },
+    mutationFn: (dir: string) => deleteEntry(dir, browserStorage('local')),
+    meta: { invalidates: written },
   });
 
-export const discardEntryMutation = (gh: GitHubClient) =>
+/** Saves the buffer; "overwrite" first takes the tree's current head, replacing what is on disk. */
+export const saveEntryMutation = (controller: BufferController) =>
   mutationOptions({
-    mutationFn: (row: { ref: string; dir: string }) => discardEntry(gh, row),
-    meta: { invalidates: listed },
-  });
-
-/** Saves the buffer; "overwrite" first takes the branch's current head, replacing what is there. */
-export const saveDraftMutation = (gh: GitHubClient, controller: BufferController) => {
-  const { ref } = controller.store.state;
-  return mutationOptions({
     mutationFn: async (mode: 'save' | 'overwrite') => {
       if (mode === 'overwrite') {
-        const b = controller.store.state;
-        controller.rebase((await gh.readBundle(b.ref, b.dir)).headSha);
+        controller.rebase((await readTree()).headSha);
       }
-      return saveDraft(gh, controller.store.state);
+      return saveEntry(controller.store.state);
     },
-    meta: { invalidates: [...listed, editorKeys.tree(ref)] },
+    meta: { invalidates: written },
   });
-};
 
-export const openPullRequestMutation = (gh: GitHubClient, ref: string) =>
+/** Throws away the local copy and loads what is on disk as the new base. */
+export const reloadEntryMutation = (controller: BufferController, slug: string) =>
   mutationOptions({
-    mutationFn: (input: Omit<PullRequestInput, 'ref'>) => openPr(gh, { ...input, ref }),
-    meta: { invalidates: [editorKeys.drafts(), editorKeys.pull(ref)] },
-  });
-
-/** Throws away the local copy and loads the branch's current version as the new base. */
-export const reloadDraftMutation = (
-  gh: GitHubClient,
-  controller: BufferController,
-  slug: string,
-) => {
-  const { ref } = controller.store.state;
-  return mutationOptions({
     mutationFn: async () => {
-      const b = controller.store.state;
       // A clean buffer removes its local copy.
-      writeLocalBuffer({ ...b, dirty: false }, browserStorage());
-      controller.replace(bufferFromBundle(await gh.readBundle(b.ref, b.dir), slug));
+      writeLocalBuffer({ ...controller.store.state, dirty: false }, browserStorage('local'));
+      controller.replace(bufferFromTree(await readTree(), slug));
     },
-    meta: { invalidates: [editorKeys.tree(ref)] },
-  });
-};
-
-/** Merges, then waits for the deploy where there is one. A merge changes what is published, so
-    everything the editor has read is stale. */
-export const mergeMutation = (
-  gh: GitHubClient,
-  ref: string,
-  onDeploying: () => void = () => undefined,
-) =>
-  mutationOptions({
-    mutationFn: async (number: number) => {
-      const merged = await mergeAndCleanUp(gh, { ref, number });
-      if (!capabilitiesOf(gh.kind).deploys) {
-        return { deployed: true };
-      }
-      onDeploying();
-      const deployed = await waitForDeploy({
-        healthUrl: `${window.location.origin}/api/health`,
-        sha: merged.sha,
-      });
-      return { deployed };
-    },
-    meta: { invalidates: [editorKeys.all] },
+    meta: { invalidates: written },
   });
 
-export const saveProfileMutation = (gh: GitHubClient, source: ProfileSource) =>
+export const saveProfileMutation = (source: ProfileSource) =>
   mutationOptions({
-    mutationFn: (next: Profile) =>
-      saveProfile(gh, source, next, 'profile: edit from the landing card'),
-    meta: { invalidates: listed },
+    mutationFn: (next: Profile) => saveProfile(source, next),
+    meta: { invalidates: written },
   });

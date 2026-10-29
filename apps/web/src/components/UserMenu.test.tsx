@@ -17,7 +17,7 @@ const renderMenu = () => {
       router={createRouter({ routeTree, history: createMemoryHistory({ initialEntries: ['/'] }) })}
     />,
   );
-  return screen.findByRole('button', { name: /^Account:/ });
+  return screen.findByRole('button', { name: /^Theme:/ });
 };
 
 const root = document.documentElement;
@@ -32,7 +32,7 @@ beforeEach(() => {
 });
 
 const openMenu = async () => {
-  fireEvent.click(screen.getByRole('button', { name: /^Account:/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Theme:/ }));
   return screen.findByRole('menu');
 };
 
@@ -134,19 +134,15 @@ describe('UserMenu', () => {
   });
 });
 
-describe('UserMenu sign-in', () => {
+describe('UserMenu editing', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
-    vi.unstubAllGlobals();
+    sessionStorage.clear();
   });
 
-  /* The ways to sign in are asked of the Worker once per page load, so each case loads fresh. */
-  const renderFresh = async (github: boolean) => {
+  /* Whether the site can edit is fixed when the module loads, so each case loads it fresh. */
+  const renderFresh = async () => {
     vi.resetModules();
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => Response.json({ github, oauth: false, clientId: null })),
-    );
     const router = await import('@tanstack/react-router');
     const { UserMenu: Fresh } = await import('./UserMenu.tsx');
     render(
@@ -157,23 +153,28 @@ describe('UserMenu sign-in', () => {
         })}
       />,
     );
-    fireEvent.click(await screen.findByRole('button', { name: /^Account:/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /^Theme:/ }));
     return screen.findByRole('menu');
   };
 
-  it('offers sign-in when the environment has a way to sign in', async () => {
+  it('offers edit mode under the dev server, and the editing screens once it is on', async () => {
     vi.stubEnv('DEV', true);
-    const menu = await renderFresh(false);
-    expect(await within(menu).findByRole('menuitem', { name: 'Sign in' })).toBeInTheDocument();
+    const menu = await renderFresh();
+    const toggle = within(menu).getByRole('menuitemcheckbox', { name: 'Edit mode' });
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    expect(within(menu).queryByRole('menuitem', { name: 'Editor' })).not.toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(await within(menu).findByRole('menuitem', { name: 'Editor' })).toBeInTheDocument();
+    expect(within(menu).getByRole('menuitem', { name: 'New entry' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Edit mode on/ })).toBeInTheDocument();
   });
 
-  it('leaves sign-in out when there is no way to sign in', async () => {
+  it('offers no editing in a built site', async () => {
     vi.stubEnv('DEV', false);
-    const menu = await renderFresh(false);
-    await waitFor(() => expect(vi.mocked(fetch)).toHaveBeenCalled());
-    // Let the answer land before checking that nothing appeared.
-    await new Promise((r) => setTimeout(r, 0));
-    expect(within(menu).queryByRole('menuitem', { name: 'Sign in' })).not.toBeInTheDocument();
+    const menu = await renderFresh();
+    expect(
+      within(menu).queryByRole('menuitemcheckbox', { name: 'Edit mode' }),
+    ).not.toBeInTheDocument();
     expect(within(menu).getByRole('menuitem', { name: /New custom theme/ })).toBeInTheDocument();
   });
 });

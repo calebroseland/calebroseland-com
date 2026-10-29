@@ -1,4 +1,4 @@
-import { Stack } from '@crc/ui';
+import { Alert, Button, RadioGroup, Stack, TextField } from '@crc/ui';
 import { createFileRoute } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { useCreateEntry } from '../editor/data/hooks.ts';
@@ -13,6 +13,11 @@ const useRequestedKind = (): EntryKind => {
   return Route.useSearch().kind ?? 'post';
 };
 
+const KINDS = [
+  { value: 'post', label: 'Post' },
+  { value: 'page', label: 'Page' },
+] as const;
+
 const NewEntry = () => {
   const form = useNewEntryForm(useRequestedKind());
   const { kind, title, slugOk, date } = form;
@@ -26,7 +31,7 @@ const NewEntry = () => {
     }
     const outcome = await create.run(form.entry);
     if (outcome.ok) {
-      await openInEditor(outcome.value.draft.slug);
+      await openInEditor(outcome.value.slug);
     }
   };
 
@@ -42,82 +47,33 @@ const NewEntry = () => {
         aria-busy={create.pending}
       >
         <Stack gap="4">
-          <fieldset className={styles.fieldset}>
-            <legend>Kind</legend>
-            {(['post', 'page'] as const).map((k) => (
-              <label key={k} className={styles.check}>
-                <input
-                  type="radio"
-                  name="kind"
-                  value={k}
-                  checked={kind === k}
-                  onChange={() => form.setKind(k)}
-                />
-                <span>
-                  {k === 'post'
-                    ? 'Post — dated, listed under Posts'
-                    : 'Page — standalone, at its own address'}
-                </span>
-              </label>
-            ))}
-          </fieldset>
-          <div className={styles.field}>
-            <label htmlFor="new-title">Title</label>
-            <input
-              id="new-title"
-              className={styles.input}
-              value={title}
-              onChange={(e) => form.setTitle(e.target.value)}
-              required
-            />
-          </div>
-          <div className={styles.field}>
-            <label htmlFor="new-slug">Slug</label>
-            <input
-              id="new-slug"
-              className={styles.input}
-              value={effectiveSlug}
-              onChange={(e) => form.setSlug(e.target.value)}
-              aria-invalid={effectiveSlug.length > 0 && !slugOk}
-              aria-describedby="new-slug-hint"
-            />
-            <small
-              id="new-slug-hint"
-              className={effectiveSlug && !slugOk ? styles.fieldError : styles.muted}
-            >
-              {effectiveSlug && !slugOk
-                ? 'Lowercase words separated by single hyphens.'
-                : 'Fixed after the first save.'}
-            </small>
-          </div>
+          <RadioGroup legend="Kind" value={kind} options={KINDS} onValueChange={form.setKind} />
+          <p className={styles.muted}>
+            A post is dated and listed under Posts; a page stands alone at its own address.
+          </p>
+          <TextField label="Title" value={title} onValueChange={form.setTitle} required />
+          <TextField
+            label="Slug"
+            value={effectiveSlug}
+            onValueChange={form.setSlug}
+            error={effectiveSlug && !slugOk ? 'Lowercase words separated by single hyphens.' : null}
+            description="Fixed after the first save."
+          />
           {kind === 'post' && (
-            <div className={styles.field}>
-              <label htmlFor="new-date">Date</label>
-              <input
-                id="new-date"
-                type="date"
-                className={styles.input}
-                value={date}
-                onChange={(e) => form.setDate(e.target.value)}
-              />
-            </div>
+            <TextField label="Date" type="date" value={date} onValueChange={form.setDate} />
           )}
           {create.failure && (
-            <p role="alert" className={styles.alert}>
+            <Alert>
               Couldn't create it:{' '}
               {create.failure.error instanceof Error
                 ? create.failure.error.message
                 : 'unknown error'}
-            </p>
+            </Alert>
           )}
           <div>
-            <button
-              type="submit"
-              className={styles.primary}
-              disabled={!form.entry || create.pending}
-            >
+            <Button type="submit" variant="primary" disabled={!form.entry} pending={create.pending}>
               {create.pending ? 'Creating…' : `Create ${kind}`}
-            </button>
+            </Button>
           </div>
         </Stack>
       </form>

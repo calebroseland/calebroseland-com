@@ -47,30 +47,6 @@
 
   /* A back button: chevron first, mirroring the card's own flip button (card, then chevron right). The
      bar's inline padding is pulled back so the chevron sits at the page edge. */
-  .cardLink {
-    display: inline-flex;
-    align-items: center;
-    block-size: 2.75rem;
-    padding-inline: var(--space-1) var(--space-2);
-    margin-inline-start: calc(-1 * var(--space-2));
-    color: var(--color-text-muted);
-    border-radius: var(--radius-md);
-    transition:
-      background-color var(--duration-fast) var(--ease-out),
-      color var(--duration-fast) var(--ease-out);
-
-    &:hover {
-      color: var(--color-text);
-      background: var(--color-surface-hover);
-    }
-
-    /* Pressed reads as the accent, not just a darker grey, so a tap is unmistakable. */
-    &:active {
-      color: var(--color-accent-text);
-      background: var(--color-accent-subtle);
-    }
-  }
-
   .home {
     font-family: var(--font-brand);
     font-size: clamp(var(--font-size-lg), 0.75rem + 3vw, var(--font-size-2xl));
@@ -165,6 +141,10 @@
 
   .main {
     padding-block: var(--space-8) var(--space-16);
+  }
+
+  .reading {
+    max-inline-size: var(--reading-width, var(--max));
   }
 
   /* The title stands apart from what follows, and everything is centred on the page's axis. */

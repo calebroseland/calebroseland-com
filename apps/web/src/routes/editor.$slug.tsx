@@ -1,21 +1,18 @@
-import type { Bundle, StaleRefError } from '@crc/github-client';
-import { Stack } from '@crc/ui';
+import { Alert, Button, button, ConfirmDialog, notify, Tabs } from '@crc/ui';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
-import { ConfirmDialog } from '../editor/Dialogs.tsx';
-import { useBeginEditing, useEntry, useReloadDraft, useSaveDraft } from '../editor/data/hooks.ts';
+import { isPlainClick } from '../dom.ts';
+import { useEntry, useReloadEntry, useSaveEntry } from '../editor/data/hooks.ts';
 import { AssetsPanel } from '../editor/document/AssetsPanel.tsx';
 import { Editor, useEditorApi } from '../editor/document/Editor.tsx';
 import { MetaPanel } from '../editor/document/MetaPanel.tsx';
 import { missingAlt } from '../editor/drafts/buffer.ts';
 import { useDraftBuffer } from '../editor/drafts/hooks.ts';
 import { addImage } from '../editor/drafts/images.ts';
-import { useCapabilities, useGitHub } from '../editor/EditorProvider.tsx';
 import { EditorShell } from '../editor/EditorShell.tsx';
 import styles from '../editor/editor.module.css';
 import { isAppHref } from '../editor/navigation.ts';
-import { PublishDialog } from '../editor/publish/PublishDialog.tsx';
-import { notify } from '../editor/Toast.tsx';
+import type { ChangedOnDiskError, Tree } from '../editor/workingTree.ts';
 import { useDialogState } from '../hooks/useDialogState.ts';
 import { useTrackLoading } from '../loading/hooks.ts';
 
@@ -25,11 +22,14 @@ const useSlug = (): string => {
   return Route.useParams().slug;
 };
 
-/** The side panel on show, kept in the URL. */
+/** The side panel on show, kept in the URL. Switching it stays where the reader is on the page. */
 const usePanel = () => {
   const { panel = 'meta' } = Route.useSearch();
   const navigate = Route.useNavigate();
-  return { panel, show: (next: Panel) => navigate({ search: (s) => ({ ...s, panel: next }) }) };
+  return {
+    panel,
+    show: (next: Panel) => navigate({ search: (s) => ({ ...s, panel: next }), resetScroll: false }),
+  };
 };
 
 /** Where Close goes: back to the page the edit was opened from, or to the editor's list. */
@@ -43,7 +43,7 @@ const useClose = () => {
 const DraftRoute = () => {
   const slug = useSlug();
   const entry = useEntry(slug);
-  // The drafts list and the content tree arrive before the editor can show; the bar covers the wait.
+  // The content tree arrives before the editor can show; the bar covers the wait.
   useTrackLoading(entry.status === 'loading');
   switch (entry.status) {
     case 'loading':
@@ -57,64 +57,28 @@ const DraftRoute = () => {
     case 'error':
       return (
         <EditorShell title={slug}>
-          <p role="alert" className={styles.alert}>
-            Couldn't load this entry from GitHub.{' '}
-            <button type="button" className={styles.toastAction} onClick={entry.retry}>
+          <Alert>
+            Couldn't read this entry from your working tree.{' '}
+            <Button variant="inline" onClick={entry.retry}>
               Retry
-            </button>
-          </p>
+            </Button>
+          </Alert>
         </EditorShell>
       );
     case 'missing':
       return (
         <EditorShell title={slug}>
-          <p role="alert" className={styles.alert}>
-            No entry with the slug “{slug}” exists on {entry.ref}.
-          </p>
+          <Alert>No entry with the slug “{slug}” exists in your working tree.</Alert>
           <p className={styles.muted}>
             <Link to="/editor">← Editor</Link>
           </p>
         </EditorShell>
       );
-    case 'published':
-      return <StartEditing slug={slug} />;
-    case 'draft':
-      // Keyed by ref only: a save advances the head, and remounting on that would rebuild the editor
-      // from the pre-save cache and blank the body. Wholesale replacements are handled inside.
-      return <DraftEditor key={entry.ref} slug={slug} bundle={entry.bundle} />;
+    case 'ready':
+      // Keyed by directory, never the head: a save advances the head, and remounting on that would
+      // rebuild the editor from the pre-save cache and blank the body. Reloads are handled inside.
+      return <DraftEditor key={entry.dir} slug={slug} tree={entry.tree} />;
   }
-};
-
-const StartEditing = ({ slug }: { slug: string }) => {
-  const gh = useGitHub();
-  const begin = useBeginEditing();
-  const start = async () => {
-    const outcome = await begin.run(slug);
-    if (!outcome.ok) {
-      notify("Couldn't start editing this entry.", { kind: 'error' });
-    }
-  };
-  return (
-    <EditorShell title={slug}>
-      <Stack gap="4">
-        <p className={styles.muted}>
-          This entry is published on <code>{gh.defaultBranch}</code>. Editing it starts a draft
-          branch from there and reuses the existing bundle, so nothing is duplicated.
-        </p>
-        <div>
-          <button
-            type="button"
-            className={styles.primary}
-            onClick={start}
-            disabled={begin.pending}
-            aria-busy={begin.pending}
-          >
-            {begin.pending ? 'Starting…' : 'Edit this entry'}
-          </button>
-        </div>
-      </Stack>
-    </EditorShell>
-  );
 };
 
 const saveStatus = (saving: boolean, dirty: boolean): string => {
@@ -124,44 +88,26 @@ const saveStatus = (saving: boolean, dirty: boolean): string => {
   return dirty ? 'Unsaved changes' : 'Saved';
 };
 
-const DraftEditor = ({ slug, bundle }: { slug: string; bundle: Bundle }) => {
-  const { branches, publishes } = useCapabilities();
+const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
   const { panel, show } = usePanel();
   const close = useClose();
-  const { buffer, controller, preview } = useDraftBuffer(bundle, slug);
-  const save = useSaveDraft(controller);
-  const reload = useReloadDraft(controller, slug);
-  const conflict = useDialogState<StaleRefError>();
+  const { buffer, controller, preview } = useDraftBuffer(tree, slug);
+  const save = useSaveEntry(controller);
+  const reload = useReloadEntry(controller, slug);
+  const conflict = useDialogState<ChangedOnDiskError>();
   const api = useEditorApi();
 
   const runSave = async (mode: 'save' | 'overwrite') => {
     const outcome = await save.run(mode);
     if (outcome.ok) {
-      if (branches) {
-        const { commitUrl } = outcome.value;
-        notify(`Committed to ${buffer.ref}`, {
-          kind: 'success',
-          action: {
-            label: 'View commit',
-            onClick: () => window.open(commitUrl, '_blank', 'noopener'),
-          },
-        });
-      } else {
-        notify(`Saved ${buffer.dir} to your working tree`, { kind: 'success' });
-      }
+      notify(`Saved ${buffer.dir} to your working tree`, { kind: 'success' });
     } else if (outcome.reason === 'conflict') {
       conflict.open(outcome.error);
-    } else if (outcome.reason === 'expired') {
-      notify('Your sign-in expired. Sign in again; your changes are kept on this device.', {
-        kind: 'error',
-      });
     } else {
-      notify(
-        branches
-          ? "Couldn't save to GitHub. Your changes are still here."
-          : "Couldn't write to your working tree. Your changes are still here.",
-        { kind: 'error', action: { label: 'Retry', onClick: () => void runSave('save') } },
-      );
+      notify("Couldn't write to your working tree. Your changes are still here.", {
+        kind: 'error',
+        action: { label: 'Retry', onClick: () => void runSave('save') },
+      });
     }
   };
 
@@ -215,30 +161,28 @@ const DraftEditor = ({ slug, bundle }: { slug: string; bundle: Bundle }) => {
 
   return (
     <EditorShell
+      reading
       title={buffer.meta.title || slug}
       actions={
         <div className={styles.editorBar}>
           <span className={styles.status} data-dirty={buffer.dirty}>
             {saveStatus(save.pending, buffer.dirty)}
           </span>
-          <button
-            type="button"
-            className={styles.primary}
+          <Button
+            variant="primary"
             onClick={onSave}
-            disabled={!buffer.dirty || save.pending}
-            aria-busy={save.pending}
+            disabled={!buffer.dirty}
+            pending={save.pending}
           >
             {save.pending ? 'Saving…' : 'Save'}
-          </button>
-          {/* Nothing to publish in working-tree mode: the file is already on your branch. */}
-          {publishes && <PublishDialog buffer={buffer} disabled={save.pending} />}
+          </Button>
           {/* Unsaved work stays on this device and is restored when the entry is opened again. */}
           <a
             href={close.href}
-            className={styles.secondary}
+            className={button()}
             onClick={(e) => {
               // A modified click opens a new tab as any link does.
-              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+              if (!isPlainClick(e)) {
                 return;
               }
               e.preventDefault();
@@ -254,13 +198,13 @@ const DraftEditor = ({ slug, bundle }: { slug: string; bundle: Bundle }) => {
       }
     >
       {buffer.restoredFromLocal && (
-        <p role="status" className={styles.banner}>
+        <Alert tone="info">
           Restored unsaved changes from this device.
           {buffer.imagesDropped ? ' Images added but not saved were not kept.' : ''}
-          <button type="button" className={styles.toastAction} onClick={reloadFromSource}>
+          <Button variant="inline" onClick={reloadFromSource}>
             Discard local changes
-          </button>
-        </p>
+          </Button>
+        </Alert>
       )}
       <p className={styles.muted}>
         <Link to="/editor">← Editor</Link>
@@ -275,66 +219,41 @@ const DraftEditor = ({ slug, bundle }: { slug: string; bundle: Bundle }) => {
           apiRef={api}
         />
         <aside aria-label="Post details and images">
-          <div className={styles.tabs} role="tablist" aria-label="Panel">
-            {(['meta', 'media'] as const).map((p) => (
-              <button
-                key={p}
-                type="button"
-                role="tab"
-                id={`tab-${p}`}
-                aria-selected={panel === p}
-                aria-controls={`panel-${p}`}
-                className={styles.tab}
-                onClick={() => show(p)}
-              >
-                {p === 'meta'
-                  ? 'Details'
-                  : `Images${buffer.assets.length > 0 ? ` (${buffer.assets.length})` : ''}`}
-              </button>
-            ))}
-          </div>
-          <div id={`panel-${panel}`} role="tabpanel" aria-labelledby={`tab-${panel}`}>
-            {panel === 'meta' ? (
-              <MetaPanel buffer={buffer} controller={controller} />
-            ) : (
-              <AssetsPanel buffer={buffer} controller={controller} onAltChange={onAltChange} />
-            )}
-          </div>
+          <Tabs
+            label="Panel"
+            value={panel}
+            onValueChange={show}
+            tabs={[
+              {
+                value: 'meta',
+                label: 'Details',
+                panel: <MetaPanel buffer={buffer} controller={controller} />,
+              },
+              {
+                value: 'media',
+                label: `Images${buffer.assets.length > 0 ? ` (${buffer.assets.length})` : ''}`,
+                panel: (
+                  <AssetsPanel buffer={buffer} controller={controller} onAltChange={onAltChange} />
+                ),
+              },
+            ]}
+          />
         </aside>
       </div>
       <ConfirmDialog
         open={conflict.isOpen}
         onOpenChange={conflict.onOpenChange}
-        title={
-          branches
-            ? 'This post changed on GitHub since you opened it.'
-            : 'This file changed on disk since you opened it.'
-        }
-        description={
-          branches
-            ? 'Reload to see the newer version (your local edits are discarded), or overwrite it with what you have here.'
-            : 'Reload to see what is on disk now (your unsaved edits are discarded), or overwrite the file with what you have here.'
-        }
-        actions={
-          <>
-            <button type="button" className={styles.secondary} onClick={conflict.close}>
-              Cancel
-            </button>
-            <button type="button" className={styles.secondary} onClick={reloadFromSource}>
-              {branches ? 'Reload from GitHub' : 'Reload from disk'}
-            </button>
-            <button
-              type="button"
-              className={`${styles.primary} ${styles.danger}`}
-              onClick={() => {
-                conflict.close();
-                void runSave('overwrite');
-              }}
-            >
-              Overwrite
-            </button>
-          </>
-        }
+        title="This file changed on disk since you opened it."
+        description="Reload to see what is on disk now (your unsaved edits are discarded), or overwrite the file with what you have here."
+        alternative={{ label: 'Reload from disk', onClick: reloadFromSource }}
+        confirm={{
+          label: 'Overwrite',
+          tone: 'danger',
+          onClick: () => {
+            conflict.close();
+            void runSave('overwrite');
+          },
+        }}
       />
     </EditorShell>
   );

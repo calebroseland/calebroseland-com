@@ -1,7 +1,6 @@
 import { useStore } from '@tanstack/react-store';
 import { useEffect, useState } from 'react';
 import { useSiteGo } from '../components/backToCard.ts';
-import { useCurrentHref } from '../hooks/useCurrentHref.ts';
 import { palette } from './palette.ts';
 import { allCommands, type Command, commandSources, visibleFor } from './registry.ts';
 
@@ -55,13 +54,11 @@ export const usePaletteView = (open: boolean) => {
   };
 };
 
-/** Runs a command with what it needs: navigation that closes the palette, and where the visitor is. */
+/** Runs a command with what it needs: navigation that closes the palette. */
 export const useRunCommand = () => {
   const go = useSiteGo();
-  const href = useCurrentHref();
   return (c: Command) =>
     c.run?.({
-      href,
       close: palette.close,
       go: async (to) => {
         palette.close();

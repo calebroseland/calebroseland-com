@@ -122,29 +122,6 @@
     text-align: center;
   }
 
-  .button {
-    display: inline-grid;
-    place-items: center;
-    inline-size: 2.75rem;
-    block-size: 2.75rem;
-    color: inherit;
-    pointer-events: auto;
-    border-radius: var(--radius-full);
-
-    &:hover {
-      background: oklch(from var(--color-viewer-on-scrim) l c h / 0.12);
-    }
-
-    &:focus-visible {
-      outline-color: var(--color-viewer-on-scrim);
-    }
-
-    &[aria-disabled="true"] {
-      pointer-events: none;
-      opacity: 0.35;
-    }
-  }
-
   .side {
     position: absolute;
     inset-block-start: 50%;
@@ -244,7 +221,7 @@
   }
 
   /* Hidden controls take no taps but stay in the tab order, and come back on focus. */
-  .viewer[data-controls="hidden"] :is(.top, .bottom, .side, .button) {
+  .viewer[data-controls="hidden"] :is(.top, .bottom, .side) {
     pointer-events: none;
     opacity: 0 !important;
   }

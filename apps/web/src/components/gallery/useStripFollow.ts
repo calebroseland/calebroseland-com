@@ -1,5 +1,5 @@
+import { useReduceMotion } from '@crc/ui';
 import { useEffect, useState } from 'react';
-import { useReduceMotion } from '../../hooks/useReduceMotion.ts';
 
 // Room left beside a thumbnail scrolled into view, so its outline shows.
 const PAD = 8;

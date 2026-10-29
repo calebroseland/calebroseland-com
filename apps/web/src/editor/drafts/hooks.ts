@@ -1,24 +1,24 @@
-import type { Bundle } from '@crc/github-client';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useEffect, useState } from 'react';
 import { useLatest } from '../../hooks/useLatest.ts';
+import { browserStorage } from '../../storage.ts';
+import type { Tree } from '../workingTree.ts';
 import {
   type Buffer,
   type BufferController,
-  browserStorage,
   createBufferStore,
   readLocalBuffer,
   writeLocalBuffer,
 } from './buffer.ts';
 import { preview } from './images.ts';
-import { bufferFromBundle } from './load.ts';
+import { bufferFromTree } from './load.ts';
 
-/** The working copy of one draft: built once per branch from the bundle, or from unsaved work kept on
-    this device, and mirrored back to the device as it changes. */
-export const useDraftBuffer = (bundle: Bundle, slug: string) => {
+/** The working copy of one entry: built once from the tree, or from unsaved work kept on this device,
+    and mirrored back to the device as it changes. */
+export const useDraftBuffer = (tree: Tree, slug: string) => {
   const [controller] = useState(() => {
-    const initial = bufferFromBundle(bundle, slug);
-    const local = readLocalBuffer(initial.ref, browserStorage());
+    const initial = bufferFromTree(tree, slug);
+    const local = readLocalBuffer(initial.dir, browserStorage('local'));
     // Unsaved work always wins on load, even when the source moved underneath it: it keeps its own
     // base, so saving is refused with the conflict dialog rather than the edit being thrown away here.
     return createBufferStore(
@@ -29,13 +29,13 @@ export const useDraftBuffer = (bundle: Bundle, slug: string) => {
   useLocalAutosave(buffer);
   useFlushOnUnmount(controller);
   useFlushBeforeLeaving(controller, buffer.dirty);
-  return { buffer, controller, preview: usePreview(bundle, controller) };
+  return { buffer, controller, preview: usePreview(tree, controller) };
 };
 
 /** Resolves an image in the document to something the browser can show. Reads the store, not React
     state, because an image is inserted in the same tick its file is added. */
-const usePreview = (bundle: Bundle, controller: BufferController) => {
-  const files = useLatest(bundle.files);
+const usePreview = (tree: Tree, controller: BufferController) => {
+  const files = useLatest(tree.files);
   return useCallback(
     (src: string) => preview(src, controller.store.state, files.current),
     [controller, files],
@@ -45,7 +45,7 @@ const usePreview = (bundle: Bundle, controller: BufferController) => {
 /** Keeps the working copy on this device, debounced; never commits. */
 const useLocalAutosave = (buffer: Buffer) => {
   useEffect(() => {
-    const t = setTimeout(() => writeLocalBuffer(buffer, browserStorage()), 500);
+    const t = setTimeout(() => writeLocalBuffer(buffer, browserStorage('local')), 500);
     return () => clearTimeout(t);
   }, [buffer]);
 };
@@ -53,7 +53,10 @@ const useLocalAutosave = (buffer: Buffer) => {
 /** Writes the working copy down when the editor closes, so an edit inside the autosave debounce is
     not lost to an in-app navigation. */
 const useFlushOnUnmount = (controller: BufferController) => {
-  useEffect(() => () => writeLocalBuffer(controller.store.state, browserStorage()), [controller]);
+  useEffect(
+    () => () => writeLocalBuffer(controller.store.state, browserStorage('local')),
+    [controller],
+  );
 };
 
 /** Asks before leaving with unsaved changes, and writes them down first: a reload inside the autosave
@@ -64,7 +67,7 @@ const useFlushBeforeLeaving = (controller: BufferController, dirty: boolean) => 
       return;
     }
     const guard = (e: BeforeUnloadEvent) => {
-      writeLocalBuffer(controller.store.state, browserStorage());
+      writeLocalBuffer(controller.store.state, browserStorage('local'));
       e.preventDefault();
     };
     window.addEventListener('beforeunload', guard);

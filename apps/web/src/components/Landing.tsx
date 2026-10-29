@@ -6,7 +6,7 @@ import {
   resolveTag,
   tagLabel,
 } from '@crc/content-schema';
-import { Icon } from '@crc/ui';
+import { Icon, IconButton, notify, Tip, useReduceMotion } from '@crc/ui';
 import { Link, useMatch, useNavigate } from '@tanstack/react-router';
 import { AnimatePresence, m, type Transition } from 'motion/react';
 import {
@@ -20,11 +20,9 @@ import {
   useState,
 } from 'react';
 import { hasContact } from '../content/profile.ts';
-import { useSignedIn } from '../editor/auth/hooks.ts';
+import { useEditMode } from '../editor/editMode.ts';
 import type { ProfileSource } from '../editor/profile.ts';
-import { notify } from '../editor/Toast.tsx';
 import { useLinkHover } from '../hooks/useLinkHover.ts';
-import { useReduceMotion } from '../hooks/useReduceMotion.ts';
 import { preloadable } from '../lazy/preloadable.ts';
 import { loading } from '../loading/tracker.ts';
 import { backdrop, isBackdropClick } from './backdrop.ts';
@@ -34,7 +32,6 @@ import { oncePerPress, useDetailsExpanded } from './detailsState.ts';
 import { FocusChip } from './FocusChip.tsx';
 import styles from './Landing.module.css';
 import { returnPage } from './returnPage.ts';
-import { Tip } from './Tip.tsx';
 import { UserMenu } from './UserMenu.tsx';
 import { footerHeadingName, footerLinkName, vtName, withViewTransition } from './viewTransition.ts';
 
@@ -71,7 +68,7 @@ const faceMotion = (reduce: boolean) => {
   };
 };
 
-// The card editor and the profile it edits load only for someone signed in, and readers never.
+// The card editor and the profile it edits load only in edit mode, and readers never.
 const cardEditorChunk = preloadable(() => import('./cardEditor/CardEditor.tsx'));
 /** Moves focus to the element once it mounts, when the mount was caused by the user turning the card. */
 const useFocusOnMount = <T extends HTMLElement>(when: boolean): RefObject<T | null> => {
@@ -207,38 +204,33 @@ const Front = ({
             <UserMenu />
           </span>
           {onEdit && (
-            <Tip label="Edit card" side="bottom">
-              <button
-                ref={editRef}
-                type="button"
-                className={`${styles.cornerButton} ${styles.vt}`}
-                style={vtName('card-edit')}
-                aria-label="Edit card"
-                aria-busy={opening || undefined}
-                disabled={opening}
-                onClick={onEdit}
-                onPointerEnter={cardEditorChunk.prefetch}
-                onFocus={cardEditorChunk.prefetch}
-              >
-                <Icon name="lucide:pencil" size="md" />
-              </button>
-            </Tip>
+            <IconButton
+              ref={editRef}
+              label="Edit card"
+              className={styles.vt}
+              style={vtName('card-edit')}
+              aria-busy={opening || undefined}
+              disabled={opening}
+              onClick={onEdit}
+              onPointerEnter={cardEditorChunk.prefetch}
+              onFocus={cardEditorChunk.prefetch}
+            >
+              <Icon name="lucide:pencil" size="md" />
+            </IconButton>
           )}
         </div>
         {onFlip && (
-          <Tip label="Contact card" side="bottom">
-            <button
-              ref={flipRef}
-              type="button"
-              className={`${styles.cornerButton} ${styles.vt}`}
-              style={vtName('card-flip')}
-              aria-label="Contact information"
-              onClick={onFlip}
-            >
-              <Icon name="lucide:id-card" size="lg" />
-              <Icon name="lucide:chevron-right" size="sm" />
-            </button>
-          </Tip>
+          <IconButton
+            ref={flipRef}
+            label="Contact information"
+            tip="Contact card"
+            className={styles.vt}
+            style={vtName('card-flip')}
+            onClick={onFlip}
+          >
+            <Icon name="lucide:id-card" size="lg" />
+            <Icon name="lucide:chevron-right" size="sm" />
+          </IconButton>
         )}
       </div>
 
@@ -408,17 +400,9 @@ const Back = ({
           )}
         </ul>
       </div>
-      <Tip label="Back to links" side="bottom">
-        <button
-          ref={closeRef}
-          type="button"
-          className={styles.cornerButton}
-          aria-label="Back to links"
-          onClick={onFlip}
-        >
-          <Icon name="lucide:x" size="lg" />
-        </button>
-      </Tip>
+      <IconButton ref={closeRef} label="Back to links" onClick={onFlip}>
+        <Icon name="lucide:x" size="lg" />
+      </IconButton>
     </div>
   );
 };
@@ -442,12 +426,12 @@ const useFlipCard = (side: 'front' | 'back') => {
 };
 
 /** The card's edit session, the face it shows (its own: /contact would redirect a card with no contact
-    yet), and whether it is loading. Signing out (the palette can, mid-edit) ends it: its backend is gone. */
-const useEditSession = (signedIn: boolean) => {
+    yet), and whether it is loading. Turning edit mode off (the palette can, mid-edit) ends it. */
+const useEditSession = (editMode: boolean) => {
   const [editing, setEditing] = useState<OpenEditor | null>(null);
   const [editSide, setEditSide] = useState<'front' | 'back'>('front');
   const [opening, setOpening] = useState(false);
-  if (editing && !signedIn) {
+  if (editing && !editMode) {
     setEditing(null);
   }
   return { editing, setEditing, editSide, setEditSide, opening, setOpening };
@@ -484,9 +468,9 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
   const side = useCardSide();
   const flip = useFlipCard(side);
   const { expanded, toggle: toggleDetails } = useDetailsExpanded();
-  const signedIn = useSignedIn();
+  const editMode = useEditMode();
   const { editing, setEditing, editSide, setEditSide, opening, setOpening } =
-    useEditSession(signedIn);
+    useEditSession(editMode);
   const { turned, returnToEdit, setReturnToEdit } = useFaceFocus(side);
   const contact = profile.contact;
 
@@ -519,7 +503,7 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
     void withViewTransition(
       'edit',
       () => {
-        if (result?.workingTree) {
+        if (result) {
           setSaved(result.profile);
         }
         setReturnToEdit(true);
@@ -596,7 +580,7 @@ export const Landing = ({ profile: published }: { profile: Profile }) => {
                 expanded={expanded}
                 onToggle={() => withViewTransition('expand', toggleDetails, reduce)}
                 onFlip={hasContact(profile) ? flip : null}
-                onEdit={signedIn ? () => void openEditor() : null}
+                onEdit={editMode ? () => void openEditor() : null}
                 opening={opening}
                 focusOnMount={faceFocus(returnToEdit, turned)}
               />

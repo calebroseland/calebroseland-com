@@ -1,0 +1,95 @@
+@layer components {
+  .button {
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    padding-inline: var(--space-4);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+
+    &:disabled,
+    &[aria-disabled="true"] {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  .md {
+    min-block-size: 2.75rem;
+  }
+
+  .sm {
+    gap: var(--space-1);
+    min-block-size: 2.5rem;
+  }
+
+  .primary {
+    color: var(--color-text-on-accent);
+    background: var(--color-accent);
+
+    &:hover:not(:disabled) {
+      background: var(--color-accent-hover);
+    }
+
+    &:active:not(:disabled) {
+      background: var(--color-accent-active);
+    }
+  }
+
+  .secondary {
+    color: var(--color-text);
+    border: var(--border-width) solid var(--color-border-strong);
+  }
+
+  .ghost {
+    color: var(--color-text);
+  }
+
+  .secondary,
+  .ghost {
+    &:hover:not(:disabled) {
+      background: var(--color-surface-hover);
+    }
+
+    /* Pressed reads as the accent, not just a darker grey, so a tap is unmistakable. */
+    &:active:not(:disabled) {
+      color: var(--color-accent-text);
+      background: var(--color-accent-subtle);
+    }
+  }
+
+  /* A text action inside a sentence, a toast or an alert: underlined, no box of its own. */
+  .inline {
+    min-block-size: 2rem;
+    padding-inline: var(--space-1);
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  /* Confirming something destructive: the solid fill, in the danger colour. */
+  .primary.danger {
+    color: var(--color-text-inverted);
+    background: var(--color-danger);
+
+    &:hover:not(:disabled) {
+      background: var(--color-danger-hover);
+    }
+  }
+
+  /* A destructive action beside others: the text in the danger colour. */
+  .secondary.danger,
+  .ghost.danger,
+  .inline.danger {
+    color: var(--color-danger);
+
+    &:hover:not(:disabled) {
+      background: var(--color-danger-subtle);
+    }
+  }
+}

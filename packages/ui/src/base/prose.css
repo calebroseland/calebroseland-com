@@ -1,7 +1,8 @@
 /* Rendered-markdown styles. The one file worth writing carefully: it is where posts are read. */
 @layer base {
   .prose {
-    max-inline-size: var(--measure);
+    /* The reader's chosen width (apps/web theme/readingWidth.ts) when there is one. */
+    max-inline-size: var(--reading-width, var(--measure));
     font-family: var(--font-prose);
     font-size: var(--font-size-md);
     line-height: var(--leading-relaxed);

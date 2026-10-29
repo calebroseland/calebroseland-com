@@ -1,4 +1,4 @@
-import { Stack } from '@crc/ui';
+import { Button, input, Stack } from '@crc/ui';
 import type { Buffer, BufferController } from '../drafts/buffer.ts';
 import styles from '../editor.module.css';
 
@@ -30,20 +30,21 @@ export const AssetsPanel = ({
             <label htmlFor={`alt-${a.name}`}>Alt text for {a.name}</label>
             <input
               id={`alt-${a.name}`}
-              className={styles.input}
+              className={input({ size: 'sm' })}
               value={a.alt}
               onChange={(e) => onAltChange(a.name, e.target.value)}
               required
               aria-invalid={!a.alt.trim()}
             />
           </div>
-          <button
-            type="button"
-            className={styles.secondary}
+          <Button
+            variant="ghost"
+            tone="danger"
+            size="sm"
             onClick={() => controller.removeAsset(a.name)}
           >
             Remove
-          </button>
+          </Button>
         </div>
       ))}
       {buffer.existingAssets.length > 0 && (

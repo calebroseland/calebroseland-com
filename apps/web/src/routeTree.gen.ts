@@ -18,8 +18,6 @@ import { Route as CardContactRouteImport } from './routes/_card.contact'
 import { Route as EditorIndexRouteImport } from './routes/editor.index'
 import { Route as EditorSlugRouteImport } from './routes/editor.$slug'
 import { Route as EditorNewRouteImport } from './routes/editor.new'
-import { Route as LoginIndexRouteImport } from './routes/login.index'
-import { Route as LoginCallbackRouteImport } from './routes/login.callback'
 import { Route as PostsIndexRouteImport } from './routes/posts.index'
 import { Route as PostsSlugRouteImport } from './routes/posts.$slug'
 
@@ -67,16 +65,6 @@ const EditorNewRoute = EditorNewRouteImport.update({
   path: '/new',
   getParentRoute: () => EditorRoute,
 } as any)
-const LoginIndexRoute = LoginIndexRouteImport.update({
-  id: '/login/',
-  path: '/login/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginCallbackRoute = LoginCallbackRouteImport.update({
-  id: '/login/callback',
-  path: '/login/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PostsIndexRoute = PostsIndexRouteImport.update({
   id: '/posts/',
   path: '/posts/',
@@ -96,10 +84,8 @@ export interface FileRoutesByFullPath {
   '/contact': typeof CardContactRoute
   '/editor/$slug': typeof EditorSlugRoute
   '/editor/new': typeof EditorNewRoute
-  '/login/callback': typeof LoginCallbackRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/editor/': typeof EditorIndexRoute
-  '/login/': typeof LoginIndexRoute
   '/posts/': typeof PostsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -108,11 +94,9 @@ export interface FileRoutesByTo {
   '/contact': typeof CardContactRoute
   '/editor/$slug': typeof EditorSlugRoute
   '/editor/new': typeof EditorNewRoute
-  '/login/callback': typeof LoginCallbackRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/': typeof CardIndexRoute
   '/editor': typeof EditorIndexRoute
-  '/login': typeof LoginIndexRoute
   '/posts': typeof PostsIndexRoute
 }
 export interface FileRoutesById {
@@ -124,11 +108,9 @@ export interface FileRoutesById {
   '/_card/contact': typeof CardContactRoute
   '/editor/$slug': typeof EditorSlugRoute
   '/editor/new': typeof EditorNewRoute
-  '/login/callback': typeof LoginCallbackRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/_card/': typeof CardIndexRoute
   '/editor/': typeof EditorIndexRoute
-  '/login/': typeof LoginIndexRoute
   '/posts/': typeof PostsIndexRoute
 }
 export interface FileRouteTypes {
@@ -141,10 +123,8 @@ export interface FileRouteTypes {
     | '/contact'
     | '/editor/$slug'
     | '/editor/new'
-    | '/login/callback'
     | '/posts/$slug'
     | '/editor/'
-    | '/login/'
     | '/posts/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -153,11 +133,9 @@ export interface FileRouteTypes {
     | '/contact'
     | '/editor/$slug'
     | '/editor/new'
-    | '/login/callback'
     | '/posts/$slug'
     | '/'
     | '/editor'
-    | '/login'
     | '/posts'
   id:
     | '__root__'
@@ -168,11 +146,9 @@ export interface FileRouteTypes {
     | '/_card/contact'
     | '/editor/$slug'
     | '/editor/new'
-    | '/login/callback'
     | '/posts/$slug'
     | '/_card/'
     | '/editor/'
-    | '/login/'
     | '/posts/'
   fileRoutesById: FileRoutesById
 }
@@ -181,9 +157,7 @@ export interface RootRouteChildren {
   CardRoute: typeof CardRouteWithChildren
   EditorRoute: typeof EditorRouteWithChildren
   HomeRoute: typeof HomeRoute
-  LoginCallbackRoute: typeof LoginCallbackRoute
   PostsSlugRoute: typeof PostsSlugRoute
-  LoginIndexRoute: typeof LoginIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
 }
 
@@ -252,20 +226,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditorNewRouteImport
       parentRoute: typeof EditorRoute
     }
-    '/login/': {
-      id: '/login/'
-      path: '/login'
-      fullPath: '/login/'
-      preLoaderRoute: typeof LoginIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login/callback': {
-      id: '/login/callback'
-      path: '/login/callback'
-      fullPath: '/login/callback'
-      preLoaderRoute: typeof LoginCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/posts/': {
       id: '/posts/'
       path: '/posts'
@@ -315,9 +275,7 @@ const rootRouteChildren: RootRouteChildren = {
   CardRoute: CardRouteWithChildren,
   EditorRoute: EditorRouteWithChildren,
   HomeRoute: HomeRoute,
-  LoginCallbackRoute: LoginCallbackRoute,
   PostsSlugRoute: PostsSlugRoute,
-  LoginIndexRoute: LoginIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -22,33 +22,17 @@
     border-start-end-radius: var(--radius-lg);
   }
 
-  .tool {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
-    color: var(--color-text-muted);
-    border-radius: var(--radius-sm);
-
-    &:hover {
-      color: var(--color-text);
-      background: var(--color-surface-hover);
-    }
-
-    &[aria-pressed="true"] {
-      color: var(--color-accent-text);
-      background: var(--color-accent-subtle);
-    }
-  }
-
+  /* The text fills the frame: the column, and so the frame, already takes the reader's width, and a
+     prose cap measured in another font would leave a gap at the frame's right edge. */
   .content {
+    max-inline-size: none;
     min-block-size: 20rem;
     padding: var(--space-6);
     font-size: var(--font-size-base);
     outline: none;
 
-    & p.is-editor-empty:first-child::before {
+    /* TipTap's own classes: global, or CSS Modules would rename them and nothing would match. */
+    & :global(p.is-editor-empty:first-child)::before {
       float: inline-start;
       block-size: 0;
       color: var(--color-text-subtle);
@@ -65,7 +49,7 @@
       overflow-x: auto;
     }
 
-    & img.ProseMirror-selectednode {
+    & :global(img.ProseMirror-selectednode) {
       outline: var(--focus-ring-width) solid var(--color-focus-ring);
     }
   }

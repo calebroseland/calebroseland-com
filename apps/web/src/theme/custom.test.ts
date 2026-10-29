@@ -12,9 +12,9 @@ const primitive = (name: string) =>
 describe('themeVars', () => {
   const vars = themeVars(defaultTheme('light', 't', 'Mine'));
 
-  it("at defaults, reproduces today's type, spacing, radius and measure primitives", () => {
+  it("at defaults, reproduces today's type, spacing and radius primitives", () => {
     for (const name of Object.keys(vars).filter((n) =>
-      /^--(font-size|space|radius|measure|leading-normal|font-sans|font-brand)/.test(n),
+      /^--(font-size|space|radius|leading-normal|font-sans|font-brand)/.test(n),
     )) {
       expect([name, vars[name]]).toEqual([name, primitive(name)]);
     }
@@ -79,6 +79,11 @@ describe('customTheme schema', () => {
     expect(parsed.textScale).toBe(RANGES.textScale.max);
     expect(parsed.neutralTint).toBe(RANGES.neutralTint.min);
     expect(parsed.neutralHue).toBe(10);
+  });
+
+  it('reads a theme saved with a content width, and leaves width to the reader', () => {
+    const parsed = customTheme.parse({ ...valid, measure: 76 });
+    expect(Object.keys(themeVars(parsed)).filter((n) => n.startsWith('--measure'))).toEqual([]);
   });
 
   it('reads a theme saved before the reading font in serif', () => {

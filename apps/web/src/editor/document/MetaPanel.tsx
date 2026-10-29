@@ -1,5 +1,5 @@
 import { entry } from '@crc/content-schema';
-import { Stack } from '@crc/ui';
+import { input, Stack } from '@crc/ui';
 import { useForm } from '@tanstack/react-form';
 import type { Buffer, BufferController } from '../drafts/buffer.ts';
 import styles from '../editor.module.css';
@@ -56,7 +56,7 @@ export const MetaPanel = ({
             <Field label="Title" error={f.state.meta.errors[0]} id="meta-title">
               <input
                 id="meta-title"
-                className={styles.input}
+                className={input()}
                 value={f.state.value}
                 onChange={(e) => f.handleChange(e.target.value)}
                 onBlur={f.handleBlur}
@@ -68,7 +68,7 @@ export const MetaPanel = ({
         <Field label="Slug" id="meta-slug" hint="Slugs are fixed after the first save.">
           <input
             id="meta-slug"
-            className={styles.input}
+            className={input()}
             value={buffer.meta.slug}
             readOnly
             aria-readonly="true"
@@ -88,7 +88,7 @@ export const MetaPanel = ({
                   <input
                     id="meta-date"
                     type="date"
-                    className={styles.input}
+                    className={input()}
                     value={f.state.value}
                     onChange={(e) => f.handleChange(e.target.value)}
                     onBlur={f.handleBlur}
@@ -101,7 +101,7 @@ export const MetaPanel = ({
                 <Field label="Tags" id="meta-tags" hint="Comma separated.">
                   <input
                     id="meta-tags"
-                    className={styles.input}
+                    className={input()}
                     value={f.state.value}
                     onChange={(e) => f.handleChange(e.target.value)}
                     onBlur={f.handleBlur}
@@ -116,7 +116,7 @@ export const MetaPanel = ({
             <Field label="Summary" id="meta-summary">
               <textarea
                 id="meta-summary"
-                className={styles.input}
+                className={input()}
                 rows={3}
                 value={f.state.value}
                 onChange={(e) => f.handleChange(e.target.value)}

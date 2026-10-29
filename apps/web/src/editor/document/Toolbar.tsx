@@ -1,4 +1,4 @@
-import { Icon } from '@crc/ui';
+import { Icon, IconButton } from '@crc/ui';
 import type { Editor } from '@tiptap/react';
 import { useEditorState } from '@tiptap/react';
 import { type KeyboardEvent, useRef } from 'react';
@@ -167,27 +167,27 @@ export const Toolbar = ({
   return (
     <div className={styles.toolbar} role="toolbar" aria-label="Formatting" onKeyDown={onKeyDown}>
       {commands.map((c, i) => (
-        <button
+        <IconButton
           key={c.id}
-          type="button"
-          className={styles.tool}
-          aria-label={c.shortcut ? `${c.label} (${c.shortcut})` : c.label}
+          label={c.shortcut ? `${c.label} (${c.shortcut})` : c.label}
+          tip={false}
+          size="sm"
           aria-pressed={c.active ? active[c.id] : undefined}
           tabIndex={i === 0 ? 0 : -1}
           onClick={() => c.run(editor)}
         >
           <Icon name={c.icon} size="sm" />
-        </button>
+        </IconButton>
       ))}
-      <button
-        type="button"
-        className={styles.tool}
-        aria-label="Insert image"
+      <IconButton
+        label="Insert image"
+        tip={false}
+        size="sm"
         tabIndex={-1}
         onClick={() => fileInput.current?.click()}
       >
         <Icon name="lucide:image-plus" size="sm" />
-      </button>
+      </IconButton>
       <input
         ref={fileInput}
         type="file"

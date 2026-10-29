@@ -15,7 +15,7 @@ const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 const systemFonts = process.env.CRC_FONTS === 'system';
 
 /* Two build targets from one config:
-   - default: SPA + Worker via the Cloudflare plugin (production, staging, local dev)
+   - default: SPA + Worker via the Cloudflare plugin (production, previews, local dev)
    - pages:   SPA only, for the GitHub Pages backup at calebroseland.dev. No Worker. */
 export default defineConfig({
   base,
@@ -29,7 +29,6 @@ export default defineConfig({
   define: {
     __BUILD_SHA__: JSON.stringify(process.env.GITHUB_SHA ?? 'dev'),
     __API_ORIGIN__: JSON.stringify(process.env.VITE_API_ORIGIN ?? ''),
-    __CONTENT_BRANCH__: JSON.stringify(process.env.CONTENT_BRANCH ?? 'master'),
   },
   plugins: [
     content({ root: repoRoot, siteOrigin: process.env.SITE_ORIGIN ?? 'https://calebroseland.com' }),
@@ -77,8 +76,6 @@ export default defineConfig({
       '@atlaskit/pragmatic-drag-and-drop/element/adapter',
       '@atlaskit/pragmatic-drag-and-drop/combine',
       '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge',
-      '@octokit/core',
-      '@octokit/plugin-rest-endpoint-methods',
       'yaml',
       'zod',
       'zod/mini',

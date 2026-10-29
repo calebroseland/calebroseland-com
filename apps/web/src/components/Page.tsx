@@ -2,14 +2,15 @@ import { Center } from '@crc/ui';
 import { Link, useRouterState } from '@tanstack/react-router';
 import type { MouseEvent, ReactNode } from 'react';
 import { siteProfile } from '../content/profile.ts';
+import { isPlainClick } from '../dom.ts';
 import { useLinkHover } from '../hooks/useLinkHover.ts';
-import { useStickyTop } from '../hooks/useStickyTop.ts';
-import { isPlainClick, useBackToCard } from './backToCard.ts';
+import { useBackToCard } from './backToCard.ts';
 import styles from './Page.module.css';
 import { ENTRY_PAGE } from './returnPage.ts';
 import { SearchButton } from './SearchButton.tsx';
 import { SiteFooter } from './SiteFooter.tsx';
 import { UserMenu } from './UserMenu.tsx';
+import { useStickyTop } from './useStickyTop.ts';
 
 const useAtHome = (): boolean => {
   return useRouterState({
@@ -23,9 +24,12 @@ const useAtHome = (): boolean => {
 export const Page = ({
   children,
   width = 'measure-wide',
+  reading = false,
 }: {
   children: ReactNode;
   width?: 'measure' | 'measure-wide';
+  /** Posts, pages and the entry editor: the column takes the reader's chosen width (theme/readingWidth.ts). */
+  reading?: boolean;
 }) => {
   const atHome = useAtHome();
   const barRef = useStickyTop<HTMLElement>();
@@ -68,7 +72,12 @@ export const Page = ({
           <UserMenu />
         </nav>
       </header>
-      <Center as="main" id="main" max={width} className={styles.main}>
+      <Center
+        as="main"
+        id="main"
+        max={width}
+        className={reading ? `${styles.main} ${styles.reading}` : styles.main}
+      >
         {children}
       </Center>
       <SiteFooter profile={siteProfile} />

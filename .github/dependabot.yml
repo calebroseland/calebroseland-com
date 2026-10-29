@@ -3,6 +3,8 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly, day: monday }
+    # Dependencies are pinned exactly; updates move the pin.
+    versioning-strategy: increase
     groups:
       minor-and-patch:
         update-types: [minor, patch]

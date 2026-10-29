@@ -1,8 +1,7 @@
 import type { ResolvedTag } from '@crc/content-schema';
-import { Icon, isIconName } from '@crc/ui';
+import { Icon, isIconName, Tip } from '@crc/ui';
 import { Link } from '@tanstack/react-router';
 import styles from './FocusChip.module.css';
-import { Tip } from './Tip.tsx';
 
 const chipIcon = (name: string) => (isIconName(name) ? name : 'lucide:code');
 

@@ -1,10 +1,9 @@
 import type { IconName } from '@crc/ui/icons';
 import { useEffect } from 'react';
-import { ENTRY_PAGE } from '../components/returnPage.ts';
 import { allTags, formatDate, pages, posts } from '../content/entries.ts';
 import { hasContact, siteProfile } from '../content/profile.ts';
-import { canSignIn, signInMethods } from '../editor/auth/methods.ts';
-import { session } from '../editor/auth/store.ts';
+import { editMode } from '../editor/editMode.ts';
+import { type ReadingWidth, readingWidth } from '../theme/readingWidth.ts';
 import { customPreference, type ThemePreference, themeController } from '../theme/store.ts';
 import { type Command, registerCommands } from './registry.ts';
 
@@ -12,6 +11,11 @@ const THEMES: ReadonlyArray<{ value: ThemePreference; title: string; icon: IconN
   { value: 'auto', title: 'Auto', icon: 'lucide:sun-moon' },
   { value: 'light', title: 'Light', icon: 'lucide:sun' },
   { value: 'dark', title: 'Dark', icon: 'lucide:moon' },
+];
+
+const WIDTHS: ReadonlyArray<{ value: ReadingWidth; title: string; icon: IconName }> = [
+  { value: 'standard', title: 'Standard', icon: 'lucide:text-align-center' },
+  { value: 'wide', title: 'Wide', icon: 'lucide:unfold-horizontal' },
 ];
 
 const siteCommands = (): Command[] => {
@@ -86,54 +90,65 @@ const preferenceCommands = (): Command[] => {
         ),
       ],
     },
+    {
+      id: 'pref.width',
+      title: 'Reading width',
+      group: 'Preferences',
+      icon: 'lucide:text-align-center',
+      keywords: ['wide', 'width', 'column', 'measure'],
+      page: () =>
+        WIDTHS.map(
+          (w): Command => ({
+            id: `width.${w.value}`,
+            title: w.title,
+            group: 'Reading width',
+            icon: w.icon,
+            ...optional('hint', w.value === readingWidth.store.state ? 'Current' : undefined),
+            run: (ctx) => {
+              readingWidth.set(w.value);
+              ctx.close();
+            },
+          }),
+        ),
+    },
   ];
 };
 
-const accountCommands = (offerSignIn: boolean): Command[] => {
-  const signedIn = session.store.state.status === 'authenticated';
-  if (!signedIn) {
-    return offerSignIn
-      ? [
-          {
-            id: 'account.sign-in',
-            title: 'Sign in',
-            group: 'Account',
-            icon: 'lucide:log-in',
-            run: (ctx) => ctx.go(`/login?returnTo=${encodeURIComponent(ctx.href)}`),
-          },
-        ]
-      : [];
+const editCommands = (): Command[] => {
+  if (!editMode.available) {
+    return [];
   }
+  const on = editMode.store.state;
   return [
     {
-      id: 'account.editor',
-      title: 'Editor',
-      group: 'Account',
-      icon: 'lucide:file-pen',
-      run: (ctx) => ctx.go('/editor'),
-    },
-    {
-      id: 'account.new',
-      title: 'New entry',
-      group: 'Account',
-      icon: 'lucide:file-plus',
-      run: (ctx) => ctx.go('/editor/new'),
-    },
-    {
-      id: 'account.sign-out',
-      title: 'Sign out',
-      group: 'Account',
-      icon: 'lucide:log-out',
-      // Leave the editing routes first, so their guard never redirects a page mid-render.
-      run: async (ctx) => {
-        if (ctx.href.startsWith('/editor')) {
-          await ctx.go(ENTRY_PAGE);
-        } else {
-          ctx.close();
-        }
-        session.signOut();
+      id: 'edit.mode',
+      title: on ? 'Turn edit mode off' : 'Turn edit mode on',
+      group: 'Editing',
+      icon: 'lucide:pencil',
+      keywords: ['edit', 'working tree', 'write'],
+      run: (ctx) => {
+        editMode.set(!on);
+        ctx.close();
       },
     },
+    ...(on
+      ? [
+          {
+            id: 'edit.board',
+            title: 'Editor',
+            group: 'Editing',
+            icon: 'lucide:file-pen',
+            run: (ctx) => ctx.go('/editor'),
+          } satisfies Command,
+          {
+            id: 'edit.new',
+            title: 'New entry',
+            group: 'Editing',
+            icon: 'lucide:file-plus',
+            run: (ctx) => ctx.go('/editor/new'),
+          } satisfies Command,
+        ]
+      : []),
   ];
 };
 
@@ -141,18 +156,8 @@ const optional = <K extends string, V>(key: K, value: V | undefined) =>
   (value === undefined ? {} : { [key]: value }) as Partial<Record<K, V>>;
 
 /** Registers the site's own commands while the palette host is mounted. */
-export const useBuiltinCommands = (open: boolean) => {
+export const useBuiltinCommands = () => {
   useEffect(() => registerCommands('site', siteCommands), []);
   useEffect(() => registerCommands('preferences', preferenceCommands), []);
-  useEffect(() => {
-    let offerSignIn = false;
-    const off = registerCommands('account', () => accountCommands(offerSignIn));
-    // Asked only when the palette opens, so readers who never open it never call the Worker.
-    if (open) {
-      void signInMethods().then((m) => {
-        offerSignIn = canSignIn(m);
-      });
-    }
-    return off;
-  }, [open]);
+  useEffect(() => registerCommands('editing', editCommands), []);
 };

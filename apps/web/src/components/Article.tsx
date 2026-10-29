@@ -1,13 +1,17 @@
 import { Icon } from '@crc/ui';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import type { EntryMeta, LoadedEntry } from '../content/entries.ts';
 import { formatDate } from '../content/entries.ts';
-import { useSignedIn } from '../editor/auth/hooks.ts';
-import { useBodyMedia } from '../hooks/useBodyMedia.ts';
-import { useCurrentHref } from '../hooks/useCurrentHref.ts';
-import { useScrollReveal } from '../hooks/useScrollReveal.ts';
+import { useEditMode } from '../editor/editMode.ts';
 import styles from './Article.module.css';
+import { useScrollReveal } from './motion/useScrollReveal.ts';
+import { useBodyMedia } from './viewer/useBodyMedia.ts';
+
+/** Path, search and hash of this page, so Close in the editor comes back to it. */
+const useCurrentHref = (): string => {
+  return useRouterState({ select: (s) => s.location.href });
+};
 
 /** An entry's title and meta; `action` takes the Edit link's place on a page that is not an entry. */
 export const EntryHeader = ({
@@ -35,11 +39,11 @@ export const EntryHeader = ({
   );
 };
 
-/** Signed in, an editor can open this entry in the editor from the page itself. */
+/** In edit mode, this entry opens in the editor from the page itself. */
 const EditEntry = ({ slug, title }: { slug: string; title: string }) => {
-  const signedIn = useSignedIn();
+  const editing = useEditMode();
   const here = useCurrentHref();
-  if (!signedIn) {
+  if (!editing) {
     return null;
   }
   return (

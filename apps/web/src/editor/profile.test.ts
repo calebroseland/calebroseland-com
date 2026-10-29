@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { type Profile, profile as profileSchema } from '@crc/content-schema';
-import { createFakeClient, StaleRefError } from '@crc/github-client';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { parse } from 'yaml';
-import { loadProfile, PROFILE_REF, saveProfile, serializeProfile } from './profile.ts';
+import { installFakeWorkingTree } from './fakeWorkingTree.ts';
+import { loadProfile, saveProfile, serializeProfile } from './profile.ts';
+import { ChangedOnDiskError } from './workingTree.ts';
 
 const sourceYaml = readFileSync(
   new URL('../../fixtures/content/profile.yaml', import.meta.url),
@@ -48,32 +49,43 @@ groups:
 });
 
 describe('loadProfile and saveProfile', () => {
-  it('starts from the fallback, creates drafts/profile on first save, then reads the draft back', async () => {
-    const gh = createFakeClient();
-    const first = await loadProfile(gh, published);
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('starts from the fallback, writes profile.yaml on first save, then reads it back', async () => {
+    const disk = installFakeWorkingTree();
+    const first = await loadProfile(published);
     expect(first.profile).toEqual(published);
-    expect(first.branchExists).toBe(false);
 
-    const saved = await saveProfile(gh, first, { ...published, name: 'Someone' }, 'profile: edit');
-    expect(saved.ref).toBe(PROFILE_REF);
-    expect((await gh.listDrafts()).map((d) => d.ref)).toContain(PROFILE_REF);
+    const saved = await saveProfile(first, { ...published, name: 'Someone' });
+    expect(disk.read('content/profile.yaml')).toContain('name: Someone');
 
-    const again = await loadProfile(gh, published);
+    const again = await loadProfile(published);
     expect(again.profile.name).toBe('Someone');
     expect(again.headSha).toBe(saved.headSha);
   });
 
-  it('refuses to overwrite a draft that moved since it was read', async () => {
-    const gh = createFakeClient();
-    const a = await saveProfile(gh, await loadProfile(gh, published), published, 'one');
-    const stale = { ...a, headSha: 'not-the-head' };
-    await expect(saveProfile(gh, stale, published, 'two')).rejects.toBeInstanceOf(StaleRefError);
+  it('keeps the file as written apart from what changed', async () => {
+    const disk = installFakeWorkingTree({ 'content/profile.yaml': sourceYaml });
+    await saveProfile(await loadProfile(published), { ...published, tagline: 'Engineer' });
+    expect(disk.read('content/profile.yaml')).toBe(
+      serializeProfile(sourceYaml, { ...published, tagline: 'Engineer' }),
+    );
+  });
+
+  it('refuses to overwrite a file that changed on disk since it was read', async () => {
+    const disk = installFakeWorkingTree({ 'content/profile.yaml': sourceYaml });
+    const source = await loadProfile(published);
+    disk.touch('content/posts/2026/10-21-elsewhere/index.md', '# edited in a code editor');
+    await expect(saveProfile(source, published)).rejects.toBeInstanceOf(ChangedOnDiskError);
+    expect(disk.read('content/profile.yaml')).toBe(sourceYaml);
   });
 
   it('rejects an invalid profile before writing anything', async () => {
-    const gh = createFakeClient();
-    const source = await loadProfile(gh, published);
-    await expect(saveProfile(gh, source, { ...published, name: '' }, 'bad')).rejects.toThrow();
-    expect(await gh.listDrafts()).toEqual([]);
+    const disk = installFakeWorkingTree();
+    const source = await loadProfile(published);
+    await expect(saveProfile(source, { ...published, name: '' })).rejects.toThrow();
+    expect(disk.read('content/profile.yaml')).toBeUndefined();
   });
 });

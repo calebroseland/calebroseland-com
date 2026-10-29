@@ -1,8 +1,7 @@
 import { ScrollArea } from '@base-ui/react/scroll-area';
-import { Icon } from '@crc/ui';
+import { Icon, Tip } from '@crc/ui';
 import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import { Tip } from '../Tip.tsx';
 import styles from './GalleryControls.module.css';
 import { useGalleries } from './useGalleries.ts';
 import { useGallery } from './useGallery.ts';
