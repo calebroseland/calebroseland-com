@@ -114,18 +114,6 @@ export const UserMenu = () => {
           ))}
         </MenuRadioGroup>
         <MenuSeparator />
-        <MenuRadioGroup<ReadingWidth>
-          label="Reading width"
-          value={width}
-          onValueChange={readingWidth.set}
-        >
-          {WIDTHS.map((w) => (
-            <MenuRadioItem key={w.value} value={w.value} icon={w.icon}>
-              {w.label}
-            </MenuRadioItem>
-          ))}
-        </MenuRadioGroup>
-        <MenuSeparator />
         {active && (
           <MenuItem
             icon="lucide:pencil"
@@ -137,6 +125,18 @@ export const UserMenu = () => {
         <MenuItem icon="lucide:plus" onClick={startNew}>
           New custom theme…
         </MenuItem>
+        <MenuSeparator />
+        <MenuRadioGroup<ReadingWidth>
+          label="Reading width"
+          value={width}
+          onValueChange={readingWidth.set}
+        >
+          {WIDTHS.map((w) => (
+            <MenuRadioItem key={w.value} value={w.value} icon={w.icon}>
+              {w.label}
+            </MenuRadioItem>
+          ))}
+        </MenuRadioGroup>
         {editMode.available && (
           <>
             <MenuSeparator />
