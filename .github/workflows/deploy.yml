@@ -17,6 +17,10 @@ jobs:
   ci:
     name: ci
     uses: ./.github/workflows/ci.yml
+    # ci.yml's preview job declares this; it never runs on push.
+    permissions:
+      contents: read
+      deployments: write
 
   worker:
     needs: ci
