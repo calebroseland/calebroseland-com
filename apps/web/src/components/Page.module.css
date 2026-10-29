@@ -143,6 +143,10 @@
     padding-block: var(--space-8) var(--space-16);
   }
 
+  .reading {
+    max-inline-size: var(--reading-width, var(--max));
+  }
+
   /* The title stands apart from what follows, and everything is centred on the page's axis. */
   .centered {
     display: grid;

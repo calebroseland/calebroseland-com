@@ -1,7 +1,6 @@
 import { Dialog } from '@base-ui/react/dialog';
 import { Fieldset } from '@base-ui/react/fieldset';
 import { Popover } from '@base-ui/react/popover';
-import { Slider } from '@base-ui/react/slider';
 import {
   Button,
   button,
@@ -10,12 +9,12 @@ import {
   input,
   RadioGroup,
   Select,
+  Slider,
   Switch,
   TextField,
-  Tip,
   usePopupMotion,
 } from '@crc/ui';
-import { type CSSProperties, type ReactNode, useEffect, useId, useState } from 'react';
+import { type ReactNode, useEffect, useId, useState } from 'react';
 import { HexColorInput, HexColorPicker } from 'react-colorful';
 import { siteFonts } from '../content/theme.ts';
 import { contrastRatio, parseColor } from '../theme/contrast.ts';
@@ -32,13 +31,7 @@ import {
 import { themeController } from '../theme/store.ts';
 import styles from './ThemeEditor.module.css';
 
-type Range = { min: number; max: number; step: number };
-
 const pct = (v: number) => `${Number((v * 100).toFixed(1))}%`;
-/** Rounds to the step's own decimals, so 0.025 steps land on 1.025, not 1.0249999. */
-const fixed = (v: number, step: number) =>
-  Number(v.toFixed((String(step).split('.')[1] ?? '').length));
-
 /** react-colorful's input can emit #abc; the theme stores #aabbcc. */
 const sixDigit = (hex: string) =>
   /^#[0-9a-f]{3}$/i.test(hex)
@@ -51,57 +44,6 @@ const Section = ({ title, children }: { title: string; children: ReactNode }) =>
       <Fieldset.Legend className={styles.sectionTitle}>{title}</Fieldset.Legend>
       {children}
     </Fieldset.Root>
-  );
-};
-
-const SliderField = ({
-  label,
-  value,
-  range,
-  initial,
-  format,
-  onChange,
-  trackStyle,
-}: {
-  label: string;
-  value: number;
-  range: Range;
-  initial: number;
-  format: (v: number) => string;
-  onChange: (v: number) => void;
-  trackStyle?: CSSProperties;
-}) => {
-  return (
-    <Slider.Root
-      className={styles.slider}
-      value={value}
-      min={range.min}
-      max={range.max}
-      step={range.step}
-      onValueChange={(v) => onChange(fixed(v as number, range.step))}
-    >
-      <div className={styles.fieldHead}>
-        <Slider.Label className={styles.label}>{label}</Slider.Label>
-        <span className={styles.value}>{format(value)}</span>
-        <Tip label={`Reset to ${format(initial)}`}>
-          <button
-            type="button"
-            className={styles.reset}
-            aria-label={`Reset ${label.toLowerCase()} to ${format(initial)}`}
-            disabled={value === initial}
-            onClick={() => onChange(initial)}
-          >
-            <Icon name="lucide:rotate-ccw" size="sm" />
-          </button>
-        </Tip>
-      </div>
-      <Slider.Control className={styles.sliderControl}>
-        <Slider.Track className={styles.sliderTrack} style={trackStyle}>
-          {!trackStyle && <Slider.Indicator className={styles.sliderIndicator} />}
-          <Slider.Thumb className={styles.sliderThumb} getAriaValueText={(_f, v) => format(v)} />
-        </Slider.Track>
-      </Slider.Control>
-    </Slider.Root>
   );
 };
 
@@ -341,10 +283,12 @@ export const ThemeEditor = ({
                 Sets the accent's hue and vividness. Each shade keeps the lightness that holds its
                 contrast.
               </p>
-              <SliderField
+              <Slider
                 label="Neutral hue"
                 value={theme.neutralHue}
-                range={{ min: 0, max: 359, step: 1 }}
+                min={0}
+                max={359}
+                step={1}
                 initial={defaults.neutralHue}
                 format={(v) => `${v}°`}
                 onChange={(v) => set('neutralHue', v)}
@@ -353,10 +297,10 @@ export const ThemeEditor = ({
                     'linear-gradient(to right in oklch longer hue, oklch(0.7 0.12 0), oklch(0.7 0.12 0))',
                 }}
               />
-              <SliderField
+              <Slider
                 label="Neutral tint"
                 value={theme.neutralTint}
-                range={RANGES.neutralTint}
+                {...RANGES.neutralTint}
                 initial={defaults.neutralTint}
                 format={(v) => pct(v / RANGES.neutralTint.max)}
                 onChange={(v) => set('neutralTint', v)}
@@ -394,18 +338,18 @@ export const ThemeEditor = ({
                 options={nameFonts.map((o) => ({ ...o, style: { fontFamily: o.font } }))}
                 onValueChange={(v) => set('fontName', v)}
               />
-              <SliderField
+              <Slider
                 label="Text size"
                 value={theme.textScale}
-                range={RANGES.textScale}
+                {...RANGES.textScale}
                 initial={defaults.textScale}
                 format={pct}
                 onChange={(v) => set('textScale', v)}
               />
-              <SliderField
+              <Slider
                 label="Line height"
                 value={theme.leading}
-                range={RANGES.leading}
+                {...RANGES.leading}
                 initial={defaults.leading}
                 format={(v) => v.toFixed(2)}
                 onChange={(v) => set('leading', v)}
@@ -413,34 +357,26 @@ export const ThemeEditor = ({
             </Section>
 
             <Section title="Layout">
-              <SliderField
+              <Slider
                 label="Spacing"
                 value={theme.spaceScale}
-                range={RANGES.spaceScale}
+                {...RANGES.spaceScale}
                 initial={defaults.spaceScale}
                 format={pct}
                 onChange={(v) => set('spaceScale', v)}
               />
-              <SliderField
+              <Slider
                 label="Corner radius"
                 value={theme.radiusScale}
-                range={RANGES.radiusScale}
+                {...RANGES.radiusScale}
                 initial={defaults.radiusScale}
                 format={pct}
                 onChange={(v) => set('radiusScale', v)}
               />
-              <SliderField
-                label="Content width"
-                value={theme.measure}
-                range={RANGES.measure}
-                initial={defaults.measure}
-                format={(v) => `${v} characters`}
-                onChange={(v) => set('measure', v)}
-              />
-              <SliderField
+              <Slider
                 label="Shadow depth"
                 value={theme.shadowScale}
-                range={RANGES.shadowScale}
+                {...RANGES.shadowScale}
                 initial={defaults.shadowScale}
                 format={pct}
                 onChange={(v) => set('shadowScale', v)}

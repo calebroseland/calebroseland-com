@@ -22,7 +22,10 @@
     border-start-end-radius: var(--radius-lg);
   }
 
+  /* The text fills the frame: the column, and so the frame, already takes the reader's width, and a
+     prose cap measured in another font would leave a gap at the frame's right edge. */
   .content {
+    max-inline-size: none;
     min-block-size: 20rem;
     padding: var(--space-6);
     font-size: var(--font-size-base);

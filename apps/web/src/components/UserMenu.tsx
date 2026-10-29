@@ -17,7 +17,8 @@ import { notifyLoadFailed } from '../lazy/failed.ts';
 import { useLoaded } from '../lazy/hooks.ts';
 import { preloadable } from '../lazy/preloadable.ts';
 import { type CustomTheme, defaultTheme } from '../theme/custom.ts';
-import { useThemeState } from '../theme/hooks.ts';
+import { useReadingWidth, useThemeState } from '../theme/hooks.ts';
+import { type ReadingWidth, readingWidth } from '../theme/readingWidth.ts';
 import {
   customPreference,
   newThemeId,
@@ -45,11 +46,17 @@ const builtIns = [
   { value: 'dark', label: 'Dark', icon: 'lucide:moon' },
 ] as const;
 
+const WIDTHS = [
+  { value: 'standard', label: 'Standard', icon: 'lucide:text-align-center' },
+  { value: 'wide', label: 'Wide', icon: 'lucide:unfold-horizontal' },
+] as const;
+
 /* The site menu (Base UI Menu): the theme, and under the dev server, edit mode and the editing
    screens. Custom themes sit under the built-ins with their accent as a swatch, and the theme editor
    opens from here too. */
 export const UserMenu = () => {
   const { preference, resolved, customThemes } = useThemeState();
+  const width = useReadingWidth();
   const editOn = useEditMode();
   const editing = useDialogState<{ theme: CustomTheme; isNew: boolean }>();
   const links = useEditorLinks();
@@ -118,6 +125,18 @@ export const UserMenu = () => {
         <MenuItem icon="lucide:plus" onClick={startNew}>
           New custom theme…
         </MenuItem>
+        <MenuSeparator />
+        <MenuRadioGroup<ReadingWidth>
+          label="Reading width"
+          value={width}
+          onValueChange={readingWidth.set}
+        >
+          {WIDTHS.map((w) => (
+            <MenuRadioItem key={w.value} value={w.value} icon={w.icon}>
+              {w.label}
+            </MenuRadioItem>
+          ))}
+        </MenuRadioGroup>
         {editMode.available && (
           <>
             <MenuSeparator />

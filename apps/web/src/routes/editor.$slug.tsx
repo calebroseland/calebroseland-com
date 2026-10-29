@@ -161,6 +161,7 @@ const DraftEditor = ({ slug, tree }: { slug: string; tree: Tree }) => {
 
   return (
     <EditorShell
+      reading
       title={buffer.meta.title || slug}
       actions={
         <div className={styles.editorBar}>

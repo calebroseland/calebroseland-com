@@ -24,9 +24,12 @@ const useAtHome = (): boolean => {
 export const Page = ({
   children,
   width = 'measure-wide',
+  reading = false,
 }: {
   children: ReactNode;
   width?: 'measure' | 'measure-wide';
+  /** Posts, pages and the entry editor: the column takes the reader's chosen width (theme/readingWidth.ts). */
+  reading?: boolean;
 }) => {
   const atHome = useAtHome();
   const barRef = useStickyTop<HTMLElement>();
@@ -69,7 +72,12 @@ export const Page = ({
           <UserMenu />
         </nav>
       </header>
-      <Center as="main" id="main" max={width} className={styles.main}>
+      <Center
+        as="main"
+        id="main"
+        max={width}
+        className={reading ? `${styles.main} ${styles.reading}` : styles.main}
+      >
         {children}
       </Center>
       <SiteFooter profile={siteProfile} />

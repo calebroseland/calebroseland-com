@@ -27,7 +27,8 @@
   if (custom && (custom.base === 'light' || custom.base === 'dark') && custom.vars) {
     root.dataset.theme = custom.base;
     for (var name in custom.vars) {
-      if (name.indexOf('--') === 0) {
+      // Themes saved with a content width still carry --measure; reading width owns the column now.
+      if (name.indexOf('--') === 0 && name.indexOf('--measure') !== 0) {
         root.style.setProperty(name, String(custom.vars[name]));
       }
     }
@@ -41,4 +42,16 @@
     t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
   root.dataset.theme = t;
+})();
+
+// The reader's column width (theme/readingWidth.ts), set before paint so the column never jumps.
+(() => {
+  var widths = { wide: '120ch' };
+  var w;
+  try {
+    w = widths[localStorage.getItem('reading-width')];
+  } catch (_) {}
+  if (w) {
+    document.documentElement.style.setProperty('--reading-width', w);
+  }
 })();

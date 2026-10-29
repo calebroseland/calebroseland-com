@@ -13,7 +13,7 @@ const usePage = () => {
 const PageRoute = () => {
   const entry = usePage();
   return (
-    <Page width="measure">
+    <Page width="measure" reading>
       <article>
         <EntryHeader meta={entry.meta} showMeta={false} />
         <ArticleBody entry={entry} />
