@@ -11,12 +11,19 @@
 
 ## Test plan
 
-<!-- Optional. What ran and its result; mark anything not run and say why. Delete this section if unused. -->
+<!-- Optional. In one or two sentences: what needs testing and how it was covered. Then the checklist, with results; mark anything not run and say why. For a complex change, move the checklist and its results into the details block below. Delete this section if unused. -->
 
 - [ ] `mise run check`
 - [ ] `mise run build`
 - [ ] `mise run test:e2e` (if `apps/**` or `packages/**` changed)
 - [ ] Manual: keyboard path and VoiceOver pass for any new interactive flow
+
+<details>
+<summary>Details</summary>
+
+<!-- Optional, for complex changes: per-area cases, repeated runs, browsers and devices covered. Delete this block if unused. -->
+
+</details>
 
 ## Links
 
