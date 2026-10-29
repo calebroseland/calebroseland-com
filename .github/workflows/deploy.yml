@@ -24,8 +24,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
-      contents: read
-      issues: write
+      contents: write
+      pull-requests: write
     environment:
       name: production
       url: https://calebroseland.com
@@ -60,12 +60,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          body="Smoke failed for ${GITHUB_SHA}; production was rolled back to the previous version. Run: ${RUN_URL}"
-          issue=$(gh issue list --label deploy-rollback --state open --limit 1 --json number --jq '.[0].number // empty')
-          if [ -n "$issue" ]; then
-            gh issue comment "$issue" --body "$body"
+          body="Smoke failed for ${GITHUB_SHA::7} after deploy; production was rolled back to the previous version. Run: ${RUN_URL}"
+          pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq 'map(select(.merged_at)) | .[0].number // empty')
+          if [ -n "$pr" ]; then
+            gh pr comment "$pr" --body "$body"
           else
-            gh issue create --label deploy-rollback --title "Production deploy rolled back" --body "$body"
+            gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments" -f body="$body" > /dev/null
           fi
 
   pages:

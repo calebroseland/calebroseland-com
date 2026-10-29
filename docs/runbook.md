@@ -21,7 +21,7 @@ Add the `preview` label to a pull request. Once `check` and `build` pass, CI dep
 
 1. Confirm what is live: `curl -s https://calebroseland.com/api/health`.
 2. Revert the offending commit on `master` by pull request and let the deploy workflow publish, so the repository and production never disagree.
-3. If the deploy's smoke check fails, the workflow already rolled production back to the previous version and opened or commented on the issue labelled `deploy-rollback`. Revert or fix on `master` before the next merge redeploys the bad commit.
+3. If the deploy's smoke check fails, the workflow already rolled production back to the previous version and commented on the merged PR that shipped the commit (or on the commit, if it had no PR). Revert or fix on `master` before the next merge redeploys the bad commit.
 
 ## Rollback
 
