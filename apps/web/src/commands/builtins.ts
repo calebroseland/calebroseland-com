@@ -14,7 +14,6 @@ const THEMES: ReadonlyArray<{ value: ThemePreference; title: string; icon: IconN
 ];
 
 const WIDTHS: ReadonlyArray<{ value: ReadingWidth; title: string; icon: IconName }> = [
-  { value: 'narrow', title: 'Narrow', icon: 'lucide:fold-horizontal' },
   { value: 'standard', title: 'Standard', icon: 'lucide:text-align-center' },
   { value: 'wide', title: 'Wide', icon: 'lucide:unfold-horizontal' },
 ];
@@ -96,7 +95,7 @@ const preferenceCommands = (): Command[] => {
       title: 'Reading width',
       group: 'Preferences',
       icon: 'lucide:text-align-center',
-      keywords: ['wide', 'narrow', 'width', 'column', 'measure'],
+      keywords: ['wide', 'width', 'column', 'measure'],
       page: () =>
         WIDTHS.map(
           (w): Command => ({

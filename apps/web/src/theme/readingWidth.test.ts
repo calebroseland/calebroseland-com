@@ -33,14 +33,11 @@ describe('reading width', () => {
     expect(env.props.has('--reading-width')).toBe(false);
   });
 
-  it.each([
-    ['narrow', '60ch'],
-    ['wide', '120ch'],
-  ] as const)('applies and keeps %s as %s', (choice, css) => {
+  it('applies and keeps wide as 120ch', () => {
     const env = fakeEnv();
-    createReadingWidthStore(env).set(choice);
-    expect(env.props.get('--reading-width')).toBe(css);
-    expect(env.data.get('reading-width')).toBe(choice);
+    createReadingWidthStore(env).set('wide');
+    expect(env.props.get('--reading-width')).toBe('120ch');
+    expect(env.data.get('reading-width')).toBe('wide');
   });
 
   it('goes back to the designed measure on standard, keeping nothing', () => {
@@ -58,7 +55,7 @@ describe('reading width', () => {
 
   it('works for the session when storage throws', () => {
     const env = fakeEnv(undefined, { throwing: true });
-    createReadingWidthStore(env).set('narrow');
-    expect(env.props.get('--reading-width')).toBe('60ch');
+    createReadingWidthStore(env).set('wide');
+    expect(env.props.get('--reading-width')).toBe('120ch');
   });
 });

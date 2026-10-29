@@ -23,7 +23,6 @@ export { default as 'lucide:file-json' } from '@iconify-icons/lucide/file-json';
 export { default as 'lucide:file-pen' } from '@iconify-icons/lucide/file-pen';
 export { default as 'lucide:file-plus' } from '@iconify-icons/lucide/file-plus';
 export { default as 'lucide:file-text' } from '@iconify-icons/lucide/file-text';
-export { default as 'lucide:fold-horizontal' } from '@iconify-icons/lucide/fold-horizontal';
 export { default as 'lucide:fold-vertical' } from '@iconify-icons/lucide/fold-vertical';
 export { default as 'lucide:git-branch' } from '@iconify-icons/lucide/git-branch';
 export { default as 'lucide:globe' } from '@iconify-icons/lucide/globe';

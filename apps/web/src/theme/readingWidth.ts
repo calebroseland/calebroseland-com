@@ -1,16 +1,15 @@
 import { Store } from '@tanstack/store';
 import { browserStorage } from '../storage.ts';
 
-/* How wide the reader wants the reading column: narrow, as designed, or wide. `--reading-width` on
+/* How wide the reader wants the reading column: as designed, or wide. `--reading-width` on
    <html> carries the choice to the column and its prose; theme-init.js sets it before first paint
    from the same key. Standard sets nothing, so posts and pages keep their designed measures. */
 
-const READING_WIDTHS = ['narrow', 'standard', 'wide'] as const;
+const READING_WIDTHS = ['standard', 'wide'] as const;
 export type ReadingWidth = (typeof READING_WIDTHS)[number];
 
-// theme-init.js repeats these two; change them together.
+// theme-init.js repeats this; change them together.
 const WIDTH: Record<ReadingWidth, string | null> = {
-  narrow: '60ch',
   standard: null,
   wide: '120ch',
 };

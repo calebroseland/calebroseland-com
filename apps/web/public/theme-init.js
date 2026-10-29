@@ -46,7 +46,7 @@
 
 // The reader's column width (theme/readingWidth.ts), set before paint so the column never jumps.
 (() => {
-  var widths = { narrow: '60ch', wide: '120ch' };
+  var widths = { wide: '120ch' };
   var w;
   try {
     w = widths[localStorage.getItem('reading-width')];

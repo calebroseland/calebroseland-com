@@ -47,7 +47,6 @@ const builtIns = [
 ] as const;
 
 const WIDTHS = [
-  { value: 'narrow', label: 'Narrow', icon: 'lucide:fold-horizontal' },
   { value: 'standard', label: 'Standard', icon: 'lucide:text-align-center' },
   { value: 'wide', label: 'Wide', icon: 'lucide:unfold-horizontal' },
 ] as const;

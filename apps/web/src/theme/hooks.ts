@@ -7,7 +7,7 @@ export const useThemeState = () => {
   return useStore(themeController.store, (s) => s);
 };
 
-/** The reader's chosen column width: narrow, standard or wide. */
+/** The reader's chosen column width: standard or wide. */
 export const useReadingWidth = () => {
   return useStore(readingWidth.store, (s) => s);
 };

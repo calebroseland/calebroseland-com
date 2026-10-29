@@ -1,13 +1,13 @@
 import { expect, test } from './fixtures.ts';
 
-/* Reading width: narrow, standard or wide, from the site menu or the palette; kept across reloads and
+/* Reading width: standard or wide, from the site menu or the palette; kept across reloads and
    shared with the entry editor. Standard is the page as designed. */
 
 type Page = import('@playwright/test').Page;
 
 const columnWidth = async (page: Page) => (await page.getByRole('main').boundingBox())?.width ?? 0;
 
-const choose = async (page: Page, width: 'Narrow' | 'Standard' | 'Wide') => {
+const choose = async (page: Page, width: 'Standard' | 'Wide') => {
   await page.getByRole('button', { name: /^Theme:/ }).click();
   await page.getByRole('menuitemradio', { name: width }).click();
 };
@@ -26,9 +26,7 @@ test.describe('reading width', () => {
   test.skip(({ isMobile }) => isMobile, 'a phone column is the screen at every width');
   test.use({ viewport: { width: 1600, height: 900 } });
 
-  test('wide and narrow change the column and its text; standard is the design', async ({
-    page,
-  }) => {
+  test('wide widens the column and its text; standard is the design', async ({ page }) => {
     await page.goto('/posts/hello-placeholder');
     const standard = await columnWidth(page);
 
@@ -37,9 +35,6 @@ test.describe('reading width', () => {
     await expect
       .poll(async () => (await page.locator('.prose').first().boundingBox())?.width ?? 0)
       .toBeGreaterThan(standard);
-
-    await choose(page, 'Narrow');
-    await expect.poll(() => columnWidth(page)).toBeLessThan(standard);
 
     await choose(page, 'Standard');
     await expect.poll(() => columnWidth(page)).toBeCloseTo(standard, 0);
@@ -67,8 +62,8 @@ test.describe('reading width', () => {
     await openPalette(page);
     await page.getByRole('combobox', { name: 'Search commands' }).fill('reading width');
     await page.getByRole('option', { name: /Reading width/ }).click();
-    await page.getByRole('option', { name: /Narrow/ }).click();
-    await expect.poll(() => columnWidth(page)).toBeLessThan(standard);
+    await page.getByRole('option', { name: /Wide/ }).click();
+    await expect.poll(() => columnWidth(page)).toBeGreaterThan(standard);
   });
 
   test('the entry editor takes the same width; the posts list does not', async ({ page }) => {
