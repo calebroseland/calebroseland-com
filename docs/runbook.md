@@ -44,4 +44,4 @@ For one stuck device: open the site, reload once. If it still shows the old site
 
 The Worker has none. Local Worker vars live in `apps/web/.dev.vars`, which is git-ignored; `apps/web/.dev.vars.example` documents them. No `VITE_`-prefixed variable may ever hold a credential, because those are inlined into the client bundle.
 
-`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are GitHub environment secrets, in `production` (deploys from `master` only) and `preview` (the preview and teardown jobs). There are no repository-level copies.
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets, read only by the jobs in the `production` (deploys from `master` only) and `preview` (the preview and teardown jobs) environments.
