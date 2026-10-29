@@ -1,4 +1,6 @@
 [tools]
+"aqua:koalaman/shellcheck" = "0.11.0"
+"aqua:rhysd/actionlint" = "1.7.12"
 node = "24"
 
 [env]
@@ -35,6 +37,10 @@ run = "tsc -b"
 [tasks.lint]
 run = "biome check ."
 
+[tasks."lint:actions"]
+description = "GitHub Actions workflows, with shellcheck on their run steps"
+run = "actionlint"
+
 [tasks.format]
 run = "biome check --write ."
 
@@ -70,5 +76,5 @@ run = "knip"
 run = ["size-limit", "node tools/first-load-size.ts"]
 
 [tasks.check]
-description = "The gate: lint, typecheck, unit tests"
-depends = ["lint", "typecheck", "test"]
+description = "The gate: lint, workflow lint, typecheck, unit tests"
+depends = ["lint", "lint:actions", "typecheck", "test"]
