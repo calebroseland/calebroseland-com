@@ -15,7 +15,7 @@ const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 const systemFonts = process.env.CRC_FONTS === 'system';
 
 /* Two build targets from one config:
-   - default: SPA + Worker via the Cloudflare plugin (production, staging, local dev)
+   - default: SPA + Worker via the Cloudflare plugin (production, previews, local dev)
    - pages:   SPA only, for the GitHub Pages backup at calebroseland.dev. No Worker. */
 export default defineConfig({
   base,
