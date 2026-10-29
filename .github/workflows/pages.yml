@@ -1,6 +1,6 @@
 name: pages
 
-# Reusable: builds the static variant and publishes it to GitHub Pages, served at calebroseland.dev.
+# Reusable: publishes CI's static build to GitHub Pages, served at calebroseland.dev.
 # Fully independent of Cloudflare; the site works here even if Workers or Cloudflare DNS are down.
 on:
   workflow_call:
@@ -15,21 +15,14 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
-        with: { cache: true }
-      - run: npm ci
-      - run: mise run build:pages
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-          VITE_API_ORIGIN: https://calebroseland.com
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: { name: pages-build, path: apps/web/dist-pages }
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with: { path: apps/web/dist-pages }
 
   deploy:
     needs: build
     runs-on: ubuntu-24.04
-    # Staging and production both publish the backup; one deploy at a time, none cancelled midway.
     concurrency: { group: github-pages, cancel-in-progress: false }
     timeout-minutes: 10
     environment:

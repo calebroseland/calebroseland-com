@@ -57,7 +57,7 @@ description = "Every story rendered in Chromium and checked with axe"
 run = "vitest run --config packages/ui/vitest.stories.config.ts"
 
 [tasks."test:e2e"]
-run = "npm run test:e2e -w apps/web"
+run = "npm run test:e2e -w apps/web --"
 
 [tasks.smoke]
 description = "Post-deploy smoke tests; BASE_URL required"

@@ -23,6 +23,9 @@ jobs:
     name: deploy production worker
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
     environment:
       name: production
       url: https://calebroseland.com
@@ -31,18 +34,39 @@ jobs:
       - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with: { cache: true }
       - run: npm ci
-      - run: mise run build
-        env: { GITHUB_SHA: "${{ github.sha }}" }
-      - run: npx wrangler deploy
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: { name: worker-build, path: apps/web }
+      - id: deploy
+        run: npx wrangler deploy
         working-directory: apps/web
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - run: npx playwright install --with-deps chromium
-      - run: mise run smoke
+      - id: smoke
+        run: mise run smoke
         env:
           BASE_URL: https://calebroseland.com
           EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_ENV: production
+      - if: failure() && steps.deploy.outcome == 'success' && steps.smoke.outcome == 'failure'
+        run: npx wrangler rollback --yes --message "smoke failed for ${GITHUB_SHA::7}"
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - if: failure() && steps.deploy.outcome == 'success' && steps.smoke.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          body="Smoke failed for ${GITHUB_SHA}; production was rolled back to the previous version. Run: ${RUN_URL}"
+          issue=$(gh issue list --label deploy --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$issue" ]; then
+            gh issue comment "$issue" --body "$body"
+          else
+            gh issue create --label deploy --title "Production deploy rolled back" --body "$body"
+          fi
 
   pages:
     needs: ci
