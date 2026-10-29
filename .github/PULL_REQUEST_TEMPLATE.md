@@ -5,16 +5,18 @@
 <details>
 <summary>Details</summary>
 
-<!-- Optional. What a reviewer may want but does not need first: notable choices, risks and rollout, deferrals and skips. Delete the notes you don't need. -->
+<!-- Optional. What a reviewer may want but does not need first: notable choices, risks and rollout, deferrals and skips. Delete this block if unused. -->
 
-**Test plan**
+</details>
+
+## Test plan
+
+<!-- Optional. What ran and its result; mark anything not run and say why. Delete this section if unused. -->
 
 - [ ] `mise run check`
 - [ ] `mise run build`
 - [ ] `mise run test:e2e` (if `apps/**` or `packages/**` changed)
 - [ ] Manual: keyboard path and VoiceOver pass for any new interactive flow
-
-</details>
 
 ## Links
 
