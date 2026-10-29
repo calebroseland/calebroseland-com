@@ -75,6 +75,16 @@ const openBoard = async (page: import('@playwright/test').Page) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Editor' })).toBeVisible();
 };
 
+/** A row's Edit link opens the entry in the editor; its title opens the page a reader sees. */
+const editFromBoard = async (page: import('@playwright/test').Page, title: string) => {
+  await page
+    .getByRole('region', { name: /^Files on this branch/ })
+    .getByRole('listitem')
+    .filter({ has: page.getByRole('link', { name: title, exact: true }) })
+    .getByRole('link', { name: 'Edit' })
+    .click();
+};
+
 /* Writing content makes the dev server broadcast a reload to every open page, so these run one at a
    time rather than racing each other through a reload. */
 test.describe.configure({ mode: 'serial' });
@@ -91,12 +101,22 @@ test.describe('working-tree mode', () => {
     await expect(page.getByRole('region', { name: /^In progress/ })).toHaveCount(0);
   });
 
+  test("a row's title opens the entry as a reader sees it", async ({ page }) => {
+    await openBoard(page);
+    const files = page.getByRole('region', { name: /^Files on this branch/ });
+    await files.getByRole('link', { name: 'Hello, placeholder', exact: true }).click();
+    await expect(page).toHaveURL(/\/posts\/hello-placeholder$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Hello, placeholder' })).toBeVisible();
+
+    await openBoard(page);
+    await files.getByRole('link', { name: 'About', exact: true }).click();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'About' })).toBeVisible();
+  });
+
   test('editing a post writes the markdown straight to the file', async ({ page }) => {
     await openBoard(page);
-    await page
-      .getByRole('region', { name: /^Files on this branch/ })
-      .getByRole('link', { name: 'Hello, placeholder' })
-      .click();
+    await editFromBoard(page, 'Hello, placeholder');
     await expect(page).toHaveURL(/\/editor\/hello-placeholder$/);
     await expect(page.getByRole('textbox', { name: 'Post body' })).toContainText('Lorem ipsum');
     await expectLoaded(page, 'A teal placeholder hero');
@@ -120,10 +140,7 @@ test.describe('working-tree mode', () => {
 
   test('images on adjacent lines stay a gallery through an edit and a save', async ({ page }) => {
     await openBoard(page);
-    await page
-      .getByRole('region', { name: /^Files on this branch/ })
-      .getByRole('link', { name: 'Hello, placeholder' })
-      .click();
+    await editFromBoard(page, 'Hello, placeholder');
     const body = page.getByRole('textbox', { name: 'Post body' });
     await expect(body.locator('[data-gallery] img')).toHaveCount(2);
     await expectLoaded(page, 'A teal placeholder, second in a gallery');
@@ -206,10 +223,7 @@ test.describe('working-tree mode', () => {
     request,
   }) => {
     await openBoard(page);
-    await page
-      .getByRole('region', { name: /^Files on this branch/ })
-      .getByRole('link', { name: 'Second placeholder' })
-      .click();
+    await editFromBoard(page, 'Second placeholder');
     await expect(page).toHaveURL(/\/editor\/second-placeholder$/);
     await page.getByRole('textbox', { name: 'Post body' }).click();
     await page.keyboard.type('Browser edit. ');
