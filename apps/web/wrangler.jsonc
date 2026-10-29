@@ -10,10 +10,19 @@
   },
   "observability": { "enabled": true },
   "routes": [{ "pattern": "calebroseland.com", "custom_domain": true }],
+  // Required for Previews to get a URL.
+  "preview_urls": true,
   "vars": {
     "ENVIRONMENT": "production",
     "SITE_ORIGIN": "https://calebroseland.com",
     "ALLOWED_ORIGINS": "https://calebroseland.com,https://calebroseland.dev"
+  },
+  "previews": {
+    "vars": {
+      "ENVIRONMENT": "preview",
+      "SITE_ORIGIN": "",
+      "ALLOWED_ORIGINS": ""
+    }
   },
   "env": {
     "staging": {
