@@ -11,17 +11,14 @@
 
 ## Test plan
 
-<!-- Optional. In one or two sentences: what needs testing and how it was covered. Then the checklist, with results; mark anything not run and say why. For a complex change, move the checklist and its results into the details block below. Delete this section if unused. -->
+<!-- Optional. CI already runs check, build, size, knip, audit, E2E and the stories; don't list them. In a sentence or two: what a reviewer should try by hand, and anything checked beyond CI. For a complex change, put the steps in the details block. Delete this section if unused. -->
 
-- [ ] `mise run check`
-- [ ] `mise run build`
-- [ ] `mise run test:e2e` (if `apps/**` or `packages/**` changed)
-- [ ] Manual: keyboard path and VoiceOver pass for any new interactive flow
+- [ ] Keyboard path and VoiceOver pass for any new interactive flow
 
 <details>
 <summary>Details</summary>
 
-<!-- Optional, for complex changes: per-area cases, repeated runs, browsers and devices covered. Delete this block if unused. -->
+<!-- Optional, for complex changes: manual steps per area, devices and browsers tried, runs beyond CI. Delete this block if unused. -->
 
 </details>
 
