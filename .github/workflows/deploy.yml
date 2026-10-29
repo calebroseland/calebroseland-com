@@ -61,11 +61,11 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           body="Smoke failed for ${GITHUB_SHA}; production was rolled back to the previous version. Run: ${RUN_URL}"
-          issue=$(gh issue list --label deploy --state open --limit 1 --json number --jq '.[0].number // empty')
+          issue=$(gh issue list --label deploy-rollback --state open --limit 1 --json number --jq '.[0].number // empty')
           if [ -n "$issue" ]; then
             gh issue comment "$issue" --body "$body"
           else
-            gh issue create --label deploy --title "Production deploy rolled back" --body "$body"
+            gh issue create --label deploy-rollback --title "Production deploy rolled back" --body "$body"
           fi
 
   pages:
