@@ -23,16 +23,5 @@
       "SITE_ORIGIN": "",
       "ALLOWED_ORIGINS": ""
     }
-  },
-  "env": {
-    "staging": {
-      "name": "calebroseland-com-staging",
-      "routes": [{ "pattern": "next.calebroseland.com", "custom_domain": true }],
-      "vars": {
-        "ENVIRONMENT": "staging",
-        "SITE_ORIGIN": "https://next.calebroseland.com",
-        "ALLOWED_ORIGINS": "https://next.calebroseland.com,https://calebroseland.dev"
-      }
-    }
   }
 }

@@ -1,49 +1,32 @@
 # Runbook
 
-Operational procedures for calebroseland.com. Mirrors the cutover and rollback sections of the migration spec; this copy is the one to follow during an incident.
+Operational procedures for calebroseland.com.
 
 ## Environments
 
 | Env | URL | Deployed by |
 |---|---|---|
 | local | `http://localhost:5173` | `mise run dev` |
-| staging | `https://next.calebroseland.com` | push to `next`, or `workflow_dispatch` |
+| preview | a `workers.dev` URL, shown as the PR's deployment | `preview` label on a pull request |
 | production | `https://calebroseland.com` | push to `master` |
 | backup | `https://calebroseland.dev` | every deploy, GitHub Pages (custom domain), static only |
 
 `GET /api/health` returns the deployed commit sha, the environment name, and the time. It is the fastest way to tell which build is live.
 
-## Cutover to Cloudflare
+## Previews
 
-Preconditions: the rollback below has been rehearsed on staging and timed; staging passes its checks; Netlify is locked to its current deploy; the Cloudflare zone has been active for at least 48 hours with every record verified against the list taken from Squarespace Domains.
-
-1. Set the apex record's TTL to 300 seconds at least an hour ahead, so a rollback propagates quickly.
-2. Merge `next` into `master` by pull request. The deploy workflow publishes the production Worker, still reachable only on its `workers.dev` hostname.
-3. Add the apex custom domain to the production environment in `apps/web/wrangler.jsonc` and deploy. Cloudflare replaces the apex `A` record with the Worker binding.
-4. Verify, in this order:
-   - `curl -sI https://calebroseland.com` shows Cloudflare headers and preserves HSTS.
-   - `curl -s https://calebroseland.com/api/health` returns the sha that was just merged.
-   - `dig +short calebroseland.com TXT` still returns the Mailgun SPF record.
-   - `BASE_URL=https://calebroseland.com mise run smoke` passes.
-   - `/editor` shows the not-found page, and the site menu offers no editing.
-5. Soak for one week. Leave the Netlify site locked and intact for the whole soak.
-6. Decommission only after three consecutive green backup deploys: delete the Netlify site, delete `develop` and `feature/ci-build`, and delete the GitHub OAuth app if one was created.
-
-## Rollback
-
-Valid until the Netlify site is deleted at step 6 above.
-
-1. Remove the apex custom domain from the production environment and deploy.
-2. Recreate `A calebroseland.com → 104.198.14.52` in Cloudflare, DNS only, grey cloud.
-3. Recovery is bound by the apex TTL, which is why step 1 of the cutover lowers it first.
-
-After Netlify is gone, the standing fallback is the GitHub Pages backup at `calebroseland.dev`, which shares no runtime with Cloudflare, and no DNS as long as the `.dev` zone is hosted elsewhere. It is always live and smoke-tested on every deploy. In a Workers outage, link people to `calebroseland.dev` (the old `github.io` address redirects there); pointing the apex at Pages is possible but takes about ten minutes for a certificate.
+Add the `preview` label to a pull request. Once `check` and `build` pass, CI deploys that build as a Worker Preview named `pr-<number>` on `workers.dev`, smoke-tests it, and reports it as the PR's `pr-<number>-preview` deployment (View deployment). Each later push redeploys it. Removing the label or closing the PR deletes the Preview. Previews are public, sent with `noindex`, and report `preview` from `/api/health`.
 
 ## A bad deploy
 
 1. Confirm what is live: `curl -s https://calebroseland.com/api/health`.
-2. Revert the offending commit on `master` by pull request and let the deploy workflow publish. Prefer a revert over a manual `wrangler rollback`, so the repository and production never disagree.
-3. If the site is down rather than wrong, follow the rollback above instead.
+2. Revert the offending commit on `master` by pull request and let the deploy workflow publish, so the repository and production never disagree.
+3. If the deploy's smoke check fails, the workflow already rolled production back to the previous version and commented on the merged PR that shipped the commit (or on the commit, if it had no PR). Revert or fix on `master` before the next merge redeploys the bad commit.
+
+## Rollback
+
+- In an emergency, when a revert can't wait for CI: `npx wrangler rollback --name calebroseland-com --message "<why>"` from `apps/web` returns production to the previous version. Revert on `master` afterwards.
+- In a Workers or Cloudflare outage: link people to the GitHub Pages backup at `calebroseland.dev` (the old `github.io` address redirects there). It shares no runtime with Cloudflare, and no DNS while the `.dev` zone is hosted elsewhere, and every deploy publishes and smoke-tests it. Pointing the apex at Pages is possible but takes about ten minutes for a certificate.
 
 ## The old site's service worker
 
@@ -59,11 +42,6 @@ For one stuck device: open the site, reload once. If it still shows the old site
 
 ## Secrets
 
-The Worker has none. If `GITHUB_CLIENT_SECRET` was ever set for the removed GitHub sign-in, delete it per Worker (name the Worker: after a build, wrangler reads the generated deploy config and ignores `--env`):
+The Worker has none. Local Worker vars live in `apps/web/.dev.vars`, which is git-ignored; `apps/web/.dev.vars.example` documents them. No `VITE_`-prefixed variable may ever hold a credential, because those are inlined into the client bundle.
 
-```bash
-npx wrangler secret delete GITHUB_CLIENT_SECRET --name calebroseland-com            # production
-npx wrangler secret delete GITHUB_CLIENT_SECRET --name calebroseland-com-staging    # staging
-```
-
-Local Worker vars live in `apps/web/.dev.vars`, which is git-ignored; `apps/web/.dev.vars.example` documents them. No `VITE_`-prefixed variable may ever hold a credential, because those are inlined into the client bundle.
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repository secrets, read only by the jobs in the `production` (deploys from `master` only) and `preview` (the preview and teardown jobs) environments.

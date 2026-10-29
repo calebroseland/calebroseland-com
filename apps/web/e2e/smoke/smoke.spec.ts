@@ -15,10 +15,13 @@ test.describe('@smoke', () => {
     test.skip(!!process.env.SMOKE_STATIC, 'no Worker behind this URL (GitHub Pages backup)');
     const res = await request.get(new URL('api/health', baseURL).toString());
     expect(res.ok()).toBe(true);
-    const body = (await res.json()) as { ok: boolean; sha: string };
+    const body = (await res.json()) as { ok: boolean; sha: string; env: string };
     expect(body.ok).toBe(true);
     if (process.env.EXPECTED_SHA) {
       expect(body.sha).toBe(process.env.EXPECTED_SHA);
+    }
+    if (process.env.EXPECTED_ENV) {
+      expect(body.env).toBe(process.env.EXPECTED_ENV);
     }
   });
 

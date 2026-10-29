@@ -1,9 +1,9 @@
 name: ci
 
-# Pull requests run it here; pushes to next and master run it from staging.yml and deploy.yml, which
-# deploy only once it passes.
+# Pull requests run it here; pushes to master run it from deploy.yml, which deploys only once it passes.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
   workflow_call:
 
 concurrency:
@@ -29,19 +29,58 @@ jobs:
           key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
       - run: mise run check
-      - run: mise run build
-      - run: mise run size
       - run: mise run knip
       - run: npm audit --omit=dev --audit-level=moderate
       - name: No credentials in client-visible config
         run: |
           ! grep -RInE "(VITE_[A-Z_]*(SECRET|TOKEN|KEY)|CLIENT_SECRET\s*[:=]\s*['\"][^'\"]+)" apps/web/src apps/web/vite.config.ts apps/web/wrangler.jsonc apps/web/.dev.vars.example
 
-  e2e:
-    name: e2e
+  build:
+    name: build
     needs: check
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { fetch-depth: 1 }
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with: { cache: true }
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+      - run: mise run build
+        env: { GITHUB_SHA: "${{ github.sha }}" }
+      - run: mise run size
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: worker-build
+          path: |
+            apps/web/dist
+            apps/web/.wrangler/deploy/config.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+      - run: mise run build:pages
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          VITE_API_ORIGIN: https://calebroseland.com
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pages-build
+          path: apps/web/dist-pages
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  e2e-setup:
+    name: e2e-setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+      playwright: ${{ steps.version.outputs.playwright }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: { fetch-depth: 2 }
@@ -49,21 +88,47 @@ jobs:
         id: filter
         run: |
           if git diff --name-only HEAD^ HEAD 2>/dev/null | grep -qvE '^(content/|.*\.md$)'; then echo run=true >> "$GITHUB_OUTPUT"; else echo run=false >> "$GITHUB_OUTPUT"; fi
-      - if: steps.filter.outputs.run == 'true'
-        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+      - name: Playwright version
+        id: version
+        run: |
+          echo "playwright=$(jq -er '.packages["node_modules/@playwright/test"].version' package-lock.json)" >> "$GITHUB_OUTPUT"
+
+  e2e-project:
+    name: e2e-${{ matrix.project }}
+    needs: [check, e2e-setup]
+    if: needs.e2e-setup.outputs.run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.e2e-setup.outputs.playwright }}-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, webkit, mobile, working-tree]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { fetch-depth: 1 }
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with: { cache: true }
-      - if: steps.filter.outputs.run == 'true'
-        run: npm ci
-      - if: steps.filter.outputs.run == 'true'
-        run: npx playwright install --with-deps chromium webkit
-      - if: steps.filter.outputs.run == 'true'
-        run: mise run test:e2e
+      - run: npm ci
+      # Each project has its own dev server here, so working-tree needn't wait for the others.
+      - run: mise run test:e2e -- --project=${{ matrix.project }} --no-deps
       - if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}
           path: apps/web/playwright-report
           retention-days: 7
+
+  e2e:
+    name: e2e
+    needs: [check, e2e-setup, e2e-project]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
 
   stories:
     name: stories
@@ -79,3 +144,90 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: mise run storybook:build
       - run: mise run test:stories
+
+  preview:
+    name: preview
+    needs: [check, build]
+    if: >-
+      github.event_name == 'pull_request'
+      && contains(github.event.pull_request.labels.*.name, 'preview')
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: preview
+      deployment: false
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    env:
+      PREVIEW_NAME: pr-${{ github.event.pull_request.number }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # The event's labels are from when the run started; teardown may have run since.
+      - id: wanted
+        env:
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          on=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" \
+            --jq '.state == "open" and any(.labels[]; .name == "preview")')
+          echo "on=$on" >> "$GITHUB_OUTPUT"
+          if [ "$on" != true ]; then
+            echo "Preview skipped: the PR is closed or no longer labelled preview." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.wanted.outputs.on == 'true'
+        with: { fetch-depth: 1 }
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        if: steps.wanted.outputs.on == 'true'
+        with: { cache: true }
+      - run: npm ci
+        if: steps.wanted.outputs.on == 'true'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: steps.wanted.outputs.on == 'true'
+        with: { name: worker-build, path: apps/web }
+      - id: deployment
+        if: steps.wanted.outputs.on == 'true'
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          id=$(jq -n --arg ref "$HEAD_SHA" --arg env "$PREVIEW_NAME-preview" '{
+              ref: $ref, environment: $env, description: "Worker Preview", auto_merge: false,
+              required_contexts: [], transient_environment: true, production_environment: false
+            }' | gh api "repos/$GITHUB_REPOSITORY/deployments" --input - --jq .id)
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+      - id: preview
+        if: steps.wanted.outputs.on == 'true'
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
+        run: |
+          npx wrangler preview --name "$PREVIEW_NAME"
+          url=$(jq -er 'select(.type == "preview") | .preview_urls[0]' "$WRANGLER_OUTPUT_FILE_PATH")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - run: npx playwright install --with-deps chromium
+        if: steps.wanted.outputs.on == 'true'
+      - run: mise run smoke
+        if: steps.wanted.outputs.on == 'true'
+        env:
+          BASE_URL: ${{ steps.preview.outputs.url }}
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_ENV: preview
+      - if: always() && steps.deployment.outputs.id
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          STATE: ${{ job.status == 'success' && 'success' || 'failure' }}
+          URL: ${{ steps.preview.outputs.url }}
+          LOG_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          jq -n --arg state "$STATE" --arg url "$URL" --arg log "$LOG_URL" \
+            '{state: $state, log_url: $log} + (if $url == "" then {} else {environment_url: $url} end)' \
+            | gh api "repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" --input - > /dev/null
+          if [ "$STATE" = success ]; then
+            echo "Preview deployed: $URL" >> "$GITHUB_STEP_SUMMARY"
+          fi
