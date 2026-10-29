@@ -1,6 +1,6 @@
 name: preview-teardown
 
-# Outside ci.yml so an unlabel never reruns CI.
+# Outside pr.yml so an unlabel never reruns CI.
 on:
   pull_request:
     types: [unlabeled, closed]

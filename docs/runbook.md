@@ -15,7 +15,7 @@ Operational procedures for calebroseland.com.
 
 ## Previews
 
-Add the `preview` label to a pull request. Once `check` and `build` pass, CI deploys that build as a Worker Preview named `pr-<number>` on `workers.dev`, smoke-tests it, and reports it as the PR's `pr-<number>-preview` deployment (View deployment). Each later push redeploys it. Removing the label or closing the PR deletes the Preview. Previews are public, sent with `noindex`, and report `preview` from `/api/health`.
+Add the `preview` label to a pull request. Once CI passes, `pr.yml` deploys the build CI made as a Worker Preview named `pr-<number>` on `workers.dev`, smoke-tests it, and reports it as the PR's `pr-<number>-preview` deployment (View deployment). Each later push redeploys it. Removing the label or closing the PR deletes the Preview. Previews are public, sent with `noindex`, and report `preview` from `/api/health`.
 
 ## A bad deploy
 
