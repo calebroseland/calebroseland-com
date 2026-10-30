@@ -1,5 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { ArticleBody, ArticleSkeleton, EntryHeader } from '../components/Article.tsx';
+import { useReturnToCard } from '../components/autoReturn.ts';
 import { CenteredMessage, Page } from '../components/Page.tsx';
 import { viewSearch } from '../components/viewer/search.ts';
 import { findBySlug, loadEntry } from '../content/entries.ts';
@@ -36,15 +37,18 @@ export const Route = createFileRoute('/posts/$slug')({
       <ArticleSkeleton />
     </Page>
   ),
-  notFoundComponent: () => (
-    <Page>
-      <CenteredMessage title="That post isn't here.">
-        <p>
-          <a href="/posts">All posts</a>
-        </p>
-      </CenteredMessage>
-    </Page>
-  ),
+  notFoundComponent: () => {
+    useReturnToCard();
+    return (
+      <Page>
+        <CenteredMessage title="That post isn't here.">
+          <p>
+            <a href="/posts">All posts</a>
+          </p>
+        </CenteredMessage>
+      </Page>
+    );
+  },
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [

@@ -7,6 +7,7 @@ import {
   useRouter,
 } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import { useAutoReturn, useReturnToCard } from '../components/autoReturn.ts';
 import { CommandPalette } from '../components/CommandPalette.tsx';
 import { LoadingBar } from '../components/LoadingBar.tsx';
 import { MotionProvider } from '../components/MotionProvider.tsx';
@@ -54,6 +55,7 @@ const useFocusHeadingOnNavigate = () => {
 };
 
 const NotFound = () => {
+  useReturnToCard();
   return (
     <Page>
       <CenteredMessage title="That page isn't here.">
@@ -67,6 +69,7 @@ const NotFound = () => {
 
 const RootError = ({ error }: ErrorComponentProps) => {
   console.error(error);
+  useAutoReturn(() => window.location.assign(import.meta.env.BASE_URL));
   return (
     <Page>
       <CenteredMessage title="Something went wrong.">
@@ -76,6 +79,8 @@ const RootError = ({ error }: ErrorComponentProps) => {
           </button>
         </p>
       </CenteredMessage>
+      {/* The root's error page replaces RootLayout, and with it the shell's toasts. */}
+      <Toasts />
     </Page>
   );
 };
