@@ -34,7 +34,7 @@ export const Countdown: Story = {
   play: async ({ canvasElement }) => {
     notify('Taking you back to the start.', {
       ttl: 60_000,
-      progress: true,
+      countdown: true,
       onExpire: () => undefined,
       action: { label: 'Stay', onClick: () => undefined },
     });
@@ -43,5 +43,20 @@ export const Countdown: Story = {
       'Taking you back to the start.',
     );
     await expect(canvas.getByRole('button', { name: 'Stay' })).toBeInTheDocument();
+  },
+};
+
+/** A task: the bar fills forward as it runs, or sweeps while its length is unknown, until `update` ends it. */
+export const Task: Story = {
+  play: async ({ canvasElement }) => {
+    notify('Uploading 3 images: 2 done.', { progress: 2 / 3 });
+    notify('Publishing.', { progress: 'busy' });
+    const canvas = within(canvasElement);
+    await expect(
+      await canvas.findByRole('progressbar', { name: 'Uploading 3 images: 2 done.' }),
+    ).toHaveAttribute('aria-valuenow', '67');
+    await expect(canvas.getByRole('progressbar', { name: 'Publishing.' })).not.toHaveAttribute(
+      'aria-valuenow',
+    );
   },
 };

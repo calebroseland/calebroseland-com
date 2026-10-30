@@ -24,7 +24,7 @@ export const useAutoReturn = (go: () => void) => {
       }
       toast = notify('Taking you back to the start.', {
         ttl: TTL_MS,
-        progress: true,
+        countdown: true,
         onExpire: () => arrive(),
         action: { label: 'Stay', onClick: stay },
       });
