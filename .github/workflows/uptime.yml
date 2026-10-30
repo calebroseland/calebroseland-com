@@ -1,15 +1,18 @@
 name: uptime
 
-# Vendor-free synthetic monitoring. Activated in Phase 6 by restoring the schedule; until then a
-# disabled schedule would still start (and skip) a run every half hour.
+# Vendor-free synthetic monitoring.
 on:
-  # schedule:
-  #   - cron: "*/30 * * * *"
+  schedule:
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
   issues: write
+
+# Overlapping runs could each see no open issue and both report.
+concurrency:
+  group: uptime
 
 jobs:
   probe:
@@ -26,7 +29,8 @@ jobs:
         with:
           script: |
             const title = "Uptime probe failed";
-            const { data: open } = await github.rest.issues.listForRepo({ ...context.repo, state: "open", labels: "uptime" });
+            // Matched by title: GitHub silently drops a label the token cannot set.
+            const open = await github.paginate(github.rest.issues.listForRepo, { ...context.repo, state: "open", per_page: 100 });
+            if (open.some((issue) => issue.title === title && !issue.pull_request)) return;
             const body = `Probe failed at ${new Date().toISOString()}. Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            if (open.length) await github.rest.issues.createComment({ ...context.repo, issue_number: open[0].number, body });
-            else await github.rest.issues.create({ ...context.repo, title, body, labels: ["uptime"] });
+            await github.rest.issues.create({ ...context.repo, title, body, labels: ["uptime"] });
