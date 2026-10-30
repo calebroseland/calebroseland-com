@@ -38,7 +38,7 @@ For one stuck device: open the site, reload once. If it still shows the old site
 
 - Worker errors: `npx wrangler tail` from `apps/web`, or the Workers Logs tab. All errors are structured JSON carrying a `requestId`.
 - Client errors: sampled at ten percent and posted to `/api/log`, which logs them with `"event":"client.error"`. No personal data is collected and no cookie is set.
-- The scheduled uptime probe opens or comments on a single GitHub issue labelled `uptime`.
+- The scheduled uptime probe opens one GitHub issue titled "Uptime probe failed" and stays silent while it is open. Close it once fixed; the next failure opens a new one.
 
 ## Secrets
 
