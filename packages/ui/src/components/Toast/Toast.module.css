@@ -17,10 +17,12 @@
   }
 
   .toast {
+    position: relative;
     display: flex;
     gap: var(--space-3);
     align-items: center;
     padding: var(--space-3) var(--space-4);
+    overflow: hidden;
     font-size: var(--font-size-sm);
     pointer-events: auto;
     background: var(--color-surface-raised);
@@ -65,5 +67,57 @@
     padding-inline: var(--space-1);
     font-weight: var(--font-weight-medium);
     text-decoration: underline;
+  }
+
+  .bar {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    block-size: var(--border-width-thick);
+    background: var(--toast-accent);
+  }
+
+  /* Time left: full at first, empty when the toast times out. */
+  .countdown {
+    inline-size: 100%;
+    animation: drain linear forwards;
+  }
+
+  .progress {
+    transition: inline-size var(--duration-normal) var(--ease-out);
+  }
+
+  /* No known length: a segment sweeps across until the task ends. */
+  .busy {
+    inline-size: 30%;
+    animation: sweep 1.2s var(--ease-in-out) infinite;
+  }
+
+  @keyframes drain {
+    to {
+      inline-size: 0;
+    }
+  }
+
+  @keyframes sweep {
+    from {
+      inset-inline-start: -30%;
+    }
+    to {
+      inset-inline-start: 100%;
+    }
+  }
+
+  /* The message says what is happening; without motion, a still bar marks the task as running. */
+  @media (prefers-reduced-motion: reduce) {
+    .countdown {
+      display: none;
+    }
+
+    .busy {
+      inline-size: 100%;
+      opacity: 0.4;
+      animation: none;
+    }
   }
 }
