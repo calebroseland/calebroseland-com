@@ -17,10 +17,12 @@
   }
 
   .toast {
+    position: relative;
     display: flex;
     gap: var(--space-3);
     align-items: center;
     padding: var(--space-3) var(--space-4);
+    overflow: hidden;
     font-size: var(--font-size-sm);
     pointer-events: auto;
     background: var(--color-surface-raised);
@@ -65,5 +67,28 @@
     padding-inline: var(--space-1);
     font-weight: var(--font-weight-medium);
     text-decoration: underline;
+  }
+
+  .progress {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: var(--border-width-thick);
+    background: var(--toast-accent);
+    animation: drain linear forwards;
+  }
+
+  @keyframes drain {
+    to {
+      inline-size: 0;
+    }
+  }
+
+  /* The message already says what will happen; a moving bar isn't needed to know it. */
+  @media (prefers-reduced-motion: reduce) {
+    .progress {
+      display: none;
+    }
   }
 }

@@ -28,3 +28,20 @@ export const Kinds: Story = {
     await expect(canvas.getByRole('status')).toHaveTextContent('Saved to your working tree.');
   },
 };
+
+/** A countdown: the bar drains over the toast's life, then onExpire runs unless the action is taken. */
+export const Countdown: Story = {
+  play: async ({ canvasElement }) => {
+    notify('Taking you back to the start.', {
+      ttl: 60_000,
+      progress: true,
+      onExpire: () => undefined,
+      action: { label: 'Stay', onClick: () => undefined },
+    });
+    const canvas = within(canvasElement);
+    await expect(await canvas.findByRole('status')).toHaveTextContent(
+      'Taking you back to the start.',
+    );
+    await expect(canvas.getByRole('button', { name: 'Stay' })).toBeInTheDocument();
+  },
+};

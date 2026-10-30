@@ -23,7 +23,7 @@ export { Slider } from './components/Slider/Slider.tsx';
 export { Switch } from './components/Switch/Switch.tsx';
 export { Tabs, tab, tabList } from './components/Tabs/Tabs.tsx';
 export { Tip, TipProvider } from './components/Tip/Tip.tsx';
-export { notify, Toasts } from './components/Toast/Toast.tsx';
+export { dismiss, notify, Toasts } from './components/Toast/Toast.tsx';
 export type { IconSize } from './Icon.tsx';
 export { Icon } from './Icon.tsx';
 export { type IconName, icons, isIconName } from './icons.ts';

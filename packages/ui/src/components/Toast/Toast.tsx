@@ -14,6 +14,8 @@ type Toast = {
   kind: Kind;
   message: string;
   action?: { label: string; onClick: () => void };
+  /** Shown as a bar draining over this many ms. */
+  progress?: number;
 };
 
 const ICONS: Record<Kind, IconName> = {
@@ -26,25 +28,50 @@ const ICONS: Record<Kind, IconName> = {
 const urgent = (kind: Kind) => kind === 'warning' || kind === 'error';
 
 const toasts = new Store<Toast[]>([]);
+const timers = new Map<number, ReturnType<typeof setTimeout>>();
 let nextId = 1;
 
 export const notify = (
   message: string,
-  opts: { kind?: Kind; action?: Toast['action']; ttl?: number } = {},
+  opts: {
+    kind?: Kind;
+    action?: Toast['action'];
+    ttl?: number;
+    /** Runs when the toast times out, not when it is dismissed or its action is taken. */
+    onExpire?: () => void;
+    /** Show the time left as a draining bar. */
+    progress?: boolean;
+  } = {},
 ): number => {
   const id = nextId++;
   const kind = opts.kind ?? 'info';
+  const ttl = opts.ttl ?? 4000;
   toasts.setState((t) => [
     // One urgent toast at a time: a newer problem replaces the last.
     ...t.filter((x) => !urgent(x.kind) || !urgent(kind)),
-    { id, kind, message, ...(opts.action ? { action: opts.action } : {}) },
+    {
+      id,
+      kind,
+      message,
+      ...(opts.action ? { action: opts.action } : {}),
+      ...(opts.progress && !urgent(kind) ? { progress: ttl } : {}),
+    },
   ]);
   if (!urgent(kind)) {
-    setTimeout(() => dismiss(id), opts.ttl ?? 4000);
+    timers.set(
+      id,
+      setTimeout(() => {
+        dismiss(id);
+        opts.onExpire?.();
+      }, ttl),
+    );
   }
   return id;
 };
-const dismiss = (id: number) => {
+
+export const dismiss = (id: number): void => {
+  clearTimeout(timers.get(id));
+  timers.delete(id);
   toasts.setState((t) => t.filter((x) => x.id !== id));
 };
 
@@ -81,7 +108,14 @@ const ToastItem = ({ toast, dismissible = false }: { toast: Toast; dismissible?:
       <Icon name={ICONS[toast.kind]} size="sm" className={styles.icon} />
       <span>{toast.message}</span>
       {toast.action && (
-        <button type="button" className={styles.action} onClick={toast.action.onClick}>
+        <button
+          type="button"
+          className={styles.action}
+          onClick={() => {
+            dismiss(toast.id);
+            toast.action?.onClick();
+          }}
+        >
           {toast.action.label}
         </button>
       )}
@@ -94,6 +128,13 @@ const ToastItem = ({ toast, dismissible = false }: { toast: Toast; dismissible?:
         >
           <Icon name="lucide:x" size="sm" />
         </button>
+      )}
+      {toast.progress !== undefined && (
+        <span
+          className={styles.progress}
+          style={{ animationDuration: `${toast.progress}ms` }}
+          aria-hidden="true"
+        />
       )}
     </div>
   );
