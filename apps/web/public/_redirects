@@ -1,0 +1,7 @@
+# Old URLs kept working. Cloudflare's static assets apply these before any asset or the Worker, with the
+# query string kept; a trailing slash is a different source. The dev server ignores this file.
+# Format: source destination status (https://developers.cloudflare.com/workers/static-assets/redirects/)
+
+# The old site showed the card at /card; it is the landing page now.
+/card / 301
+/card/ / 301

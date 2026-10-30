@@ -72,6 +72,11 @@ run = "npm run smoke -w apps/web"
 [tasks.knip]
 run = "knip"
 
+[tasks."lint:redirects"]
+description = "Built _redirects through Cloudflare's parser; any rule it would skip fails. Needs a build"
+dir = "apps/web"
+run = "node vite/check-redirects.ts"
+
 [tasks.size]
 run = ["size-limit", "node tools/first-load-size.ts"]
 

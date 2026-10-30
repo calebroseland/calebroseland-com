@@ -47,6 +47,7 @@ jobs:
       - run: mise run build
         env: { GITHUB_SHA: "${{ github.sha }}" }
       - run: mise run size
+      - run: mise run lint:redirects
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: worker-build
