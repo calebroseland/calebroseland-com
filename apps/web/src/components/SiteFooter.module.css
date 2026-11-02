@@ -201,7 +201,7 @@
   /* Named only while entering or leaving, like the card side. A shown heading pairs its words; a hidden
      one pairs itself, whose snapshot is clipped away, so the card's heading shrinks into it as a label does. */
   :root:is([data-vt="enter"], [data-vt="leave"])
-  :is([data-expanded] .headingText, .footer:not([data-expanded]) .groupTitle) {
+    :is([data-expanded] .headingText, .footer:not([data-expanded]) .groupTitle) {
     view-transition-name: var(--vt-footer-heading);
     view-transition-class: footer-link footer-label footer-heading;
   }

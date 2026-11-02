@@ -1,4 +1,4 @@
-import { act, render, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { loading } from '../loading/tracker.ts';
 import { useLoaded } from './hooks.ts';
@@ -9,12 +9,10 @@ describe('useLoaded', () => {
     const p = preloadable(async () => ({ value: 'ready' }));
     await p.load();
     const seen: Array<string | null> = [];
-    const Probe = () => {
+    renderHook(() => {
       const m = useLoaded(p, true);
       seen.push(m?.value ?? null);
-      return null;
-    };
-    render(<Probe />);
+    });
     expect(seen[0]).toBe('ready');
   });
 
