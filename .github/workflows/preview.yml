@@ -1,0 +1,101 @@
+name: preview
+
+# Apart from CI, so a label reruns nothing and a Preview never waits on checks or E2E.
+on:
+  pull_request:
+    types: [labeled, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    name: preview
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'preview')
+      && (github.event.action != 'labeled' || github.event.label.name == 'preview')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: preview
+      deployment: false
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    env:
+      PREVIEW_NAME: pr-${{ github.event.pull_request.number }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # The event's labels are from when the run started; teardown may have run since.
+      - id: wanted
+        env:
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          on=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" \
+            --jq '.state == "open" and any(.labels[]; .name == "preview")')
+          echo "on=$on" >> "$GITHUB_OUTPUT"
+          if [ "$on" != true ]; then
+            echo "Preview skipped: the PR is closed or no longer labelled preview." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.wanted.outputs.on == 'true'
+        with: { fetch-depth: 1 }
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        if: steps.wanted.outputs.on == 'true'
+        with: { cache: true }
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.wanted.outputs.on == 'true'
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+        if: steps.wanted.outputs.on == 'true'
+      - run: mise run build
+        if: steps.wanted.outputs.on == 'true'
+        env: { GITHUB_SHA: "${{ github.sha }}" }
+      - id: deployment
+        if: steps.wanted.outputs.on == 'true'
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          id=$(jq -n --arg ref "$HEAD_SHA" --arg env "$PREVIEW_NAME-preview" '{
+              ref: $ref, environment: $env, description: "Worker Preview", auto_merge: false,
+              required_contexts: [], transient_environment: true, production_environment: false
+            }' | gh api "repos/$GITHUB_REPOSITORY/deployments" --input - --jq .id)
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+      - id: preview
+        if: steps.wanted.outputs.on == 'true'
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
+        run: |
+          npx wrangler preview --name "$PREVIEW_NAME"
+          url=$(jq -er 'select(.type == "preview") | .preview_urls[0]' "$WRANGLER_OUTPUT_FILE_PATH")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - run: npx playwright install --with-deps chromium
+        if: steps.wanted.outputs.on == 'true'
+      - run: mise run smoke
+        if: steps.wanted.outputs.on == 'true'
+        env:
+          BASE_URL: ${{ steps.preview.outputs.url }}
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_ENV: preview
+      - if: always() && steps.deployment.outputs.id
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          STATE: ${{ job.status == 'success' && 'success' || 'failure' }}
+          URL: ${{ steps.preview.outputs.url }}
+          LOG_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          jq -n --arg state "$STATE" --arg url "$URL" --arg log "$LOG_URL" \
+            '{state: $state, log_url: $log} + (if $url == "" then {} else {environment_url: $url} end)' \
+            | gh api "repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" --input - > /dev/null
+          if [ "$STATE" = success ]; then
+            echo "Preview deployed: $URL" >> "$GITHUB_STEP_SUMMARY"
+          fi
