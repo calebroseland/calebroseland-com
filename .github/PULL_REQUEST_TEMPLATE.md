@@ -1,24 +1,24 @@
 ## Summary
 
-<!-- What changed and why, in at most 2–3 short paragraphs. Lead with the outcome for the reader, not the list of files. -->
+<!-- Required: what changed and why. At most 2 sentences in one paragraph, under 300 characters. Lead with the outcome for the reader, not the list of files. -->
 
 <details>
 <summary>Details</summary>
 
-<!-- Optional. What a reviewer may want but does not need first: notable choices, risks and rollout, deferrals and skips. Delete this block if unused. -->
+<!-- Optional. The detailed what and how: notable choices, risks and rollout, deferrals and skips. Delete this block if unused. -->
 
 </details>
 
-## Test plan
+## Testing plan
 
-<!-- Optional. CI already runs check, build, size, knip, audit, E2E and the stories; don't list them. In a sentence or two: what a reviewer should try by hand, and anything checked beyond CI. For a complex change, put the steps in the details block. Delete this section if unused. -->
-
-- [ ] Keyboard path and VoiceOver pass for any new interactive flow
+<!-- Required: what is checked beyond CI and why that check fits. At most 2 sentences in one paragraph, under 300 characters. CI already runs check, build, size, knip, audit, E2E and the stories; don't list them. -->
 
 <details>
-<summary>Details</summary>
+<summary>Full test plan</summary>
 
-<!-- Optional, for complex changes: manual steps per area, devices and browsers tried, runs beyond CI. Delete this block if unused. -->
+<!-- Optional. Precise instructions: manual steps per area, devices and browsers tried, expected and actual results, runs beyond CI. Delete this block if unused, keeping the check below whenever a new interactive flow is added. -->
+
+- [ ] Keyboard path and VoiceOver pass for any new interactive flow
 
 </details>
 
