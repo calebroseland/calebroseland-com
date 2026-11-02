@@ -297,6 +297,7 @@ export const useViewerStage = (props: ViewerProps) => {
   const onKeyDown = (e: KeyboardEvent) => {
     wake();
     const zoomed = stage.zoomed();
+    // biome-ignore-start lint/correctness/noComponentHookFactories: key names, not components
     const keys: Record<string, () => void> = {
       ArrowLeft: () => (zoomed ? stage.nudge(-1, 0) : step('previous')),
       ArrowRight: () => (zoomed ? stage.nudge(1, 0) : step('next')),
@@ -309,6 +310,7 @@ export const useViewerStage = (props: ViewerProps) => {
       Home: () => props.onIndexChange(0),
       End: () => props.onIndexChange(count - 1),
     };
+    // biome-ignore-end lint/correctness/noComponentHookFactories: key names, not components
     const run = e.ctrlKey || e.metaKey || e.altKey ? undefined : keys[e.key];
     if (run) {
       e.preventDefault();
