@@ -58,7 +58,8 @@
   }
 
   ::selection {
-    background: var(--color-accent-subtle);
+    color: var(--color-text-on-accent);
+    background: color-mix(in oklch, var(--color-accent) 75%, transparent);
   }
 
   .visually-hidden {

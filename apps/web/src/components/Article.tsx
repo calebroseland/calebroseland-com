@@ -6,6 +6,7 @@ import { formatDate } from '../content/entries.ts';
 import { useEditMode } from '../editor/editMode.ts';
 import styles from './Article.module.css';
 import { useScrollReveal } from './motion/useScrollReveal.ts';
+import { useBodyLinks } from './useBodyLinks.ts';
 import { useBodyMedia } from './viewer/useBodyMedia.ts';
 
 /** Path, search and hash of this page, so Close in the editor comes back to it. */
@@ -96,6 +97,7 @@ export const ArticleBody = ({ entry }: { entry: LoadedEntry }) => {
   const id = entry.meta.id ?? entry.meta.slug;
   const images = useBodyMedia(id);
   useScrollReveal(images.body, id);
+  useBodyLinks(images.body);
   const Media = images.media?.Media;
   return (
     <>

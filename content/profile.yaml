@@ -1,6 +1,6 @@
 name: Caleb Roseland
 tagline: Software Engineer
-tags: [ { label: React, icon: simple-icons:react, link: false }, { label: TS, icon: simple-icons:typescript, link: false }, { label: Go, icon: simple-icons:go, link: false } ]
+tags: [ { label: React, icon: simple-icons:react, link: false }, { label: TS, icon: simple-icons:typescript, link: false }, { label: Go, icon: simple-icons:go, link: false }, { label: .NET, icon: simple-icons:dotnet, link: false }, { label: Vue, icon: simple-icons:vuedotjs, link: false } ]
 groups:
   - title: Projects
     links:
