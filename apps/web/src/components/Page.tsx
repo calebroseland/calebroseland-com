@@ -60,6 +60,10 @@ export const Page = ({
           </Link>
         </div>
         <nav className={styles.nav} aria-label="Site">
+          <Link ref={underline} to="/$slug" params={{ slug: 'work' }} className={styles.navLink}>
+            Work
+            <span className={styles.underline} data-hover="underline" aria-hidden="true" />
+          </Link>
           <Link ref={underline} to="/posts" className={styles.navLink}>
             Posts
             <span className={styles.underline} data-hover="underline" aria-hidden="true" />
